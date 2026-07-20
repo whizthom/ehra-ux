@@ -1,0 +1,1156 @@
+.wrap {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding-bottom: 40px;
+}
+
+/* ── Report type tabs (Attendance vs Payroll) ── */
+.reportTypeTabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.reportTypeTab {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 10px 4px 12px;
+    margin-right: 18px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.reportTypeTab:hover {
+    color: var(--text-primary);
+}
+
+.reportTypeTabActive {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    font-weight: 600;
+}
+
+/* ── Payroll-specific ── */
+.moneyText {
+    font-variant-numeric: tabular-nums;
+}
+
+.noPeriodsBanner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+    font-size: 13.5px;
+    text-align: center;
+    background: var(--bg-soft-accent);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+}
+
+.header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+
+.heading {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.subheading {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 4px 0 0;
+}
+
+.exportBtns {
+    display: flex;
+    gap: 10px;
+}
+
+.exportBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 10px;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.exportBtn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.exportBtnPrimary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    border-radius: 10px;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.exportBtn:disabled,
+.exportBtnPrimary:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+/* ── Filter bar ── */
+.filterBar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.presetGroup {
+    display: flex;
+    background: var(--bg-soft-accent);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.presetGroup::-webkit-scrollbar {
+    display: none;
+}
+
+.presetBtn {
+    background: none;
+    border: none;
+    padding: 7px 13px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.presetActive {
+    background: var(--bg-surface);
+    color: var(--accent);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.deptDropdownSlot {
+    margin-left: auto;
+}
+
+.periodLine {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    margin: 0 0 16px;
+}
+
+/* ── Custom dropdown panel (replaces native <select>) ── */
+.reportDropdown {
+    position: relative;
+}
+
+.reportDropdownTrigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 12.5px;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    font-family: inherit;
+    cursor: pointer;
+    min-width: 180px;
+}
+
+.reportDropdownTrigger:hover {
+    border-color: var(--accent);
+}
+
+.reportDropdownTrigger i:first-child {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.reportDropdownLabel {
+    flex: 1;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.reportDropdownChevron {
+    color: var(--text-secondary);
+    font-size: 13px;
+    transition: transform 0.15s ease;
+}
+
+.reportDropdownChevronOpen {
+    transform: rotate(180deg);
+}
+
+.reportDropdownMenu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 100%;
+    z-index: 30;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px var(--shadow-color);
+    padding: 6px;
+    max-height: 260px;
+    overflow-y: auto;
+    animation: reportMenuIn 0.12s ease-out;
+}
+
+.reportDropdownMenuRight {
+    left: auto;
+    right: 0;
+}
+
+@keyframes reportMenuIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.reportDropdownOption {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    border: none;
+    background: none;
+    color: var(--text-primary);
+    font-size: 12.5px;
+    font-family: inherit;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.reportDropdownOption:hover {
+    background: var(--bg-soft-accent);
+}
+
+.reportDropdownOption span {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.reportDropdownOptionActive {
+    background: var(--bg-soft-accent);
+    color: var(--accent-hover);
+    font-weight: 600;
+}
+
+.reportDropdownCheck {
+    color: var(--accent-hover);
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+/* ── Custom date-range panel (replaces native <input type="date">) ── */
+.dateRangeWrap {
+    position: relative;
+}
+
+.dateRangeTrigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 12.5px;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.dateRangeTrigger:hover {
+    border-color: var(--accent);
+}
+
+.dateRangeTrigger i:first-child {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.dateRangeChevron {
+    color: var(--text-secondary);
+    font-size: 13px;
+    transition: transform 0.15s ease;
+}
+
+.dateRangeChevronOpen {
+    transform: rotate(180deg);
+}
+
+.dateRangePanel {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 30;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    box-shadow: 0 16px 40px var(--shadow-color);
+    padding: 14px;
+    width: 280px;
+    animation: reportMenuIn 0.12s ease-out;
+}
+
+.dateRangeHint {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--accent-hover);
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.calMonthNav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.calNavBtn {
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.calNavBtn:hover {
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+}
+
+.calMonthLabel {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.calWeekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 4px;
+}
+
+.calWeekdays span {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.calGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.calCellBlank {
+    aspect-ratio: 1;
+}
+
+.calCell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: none;
+    color: var(--text-primary);
+    font-size: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    position: relative;
+}
+
+.calCell:hover:not(:disabled) {
+    background: var(--bg-soft-accent);
+}
+
+.calCell:disabled {
+    color: var(--text-secondary);
+    opacity: 0.35;
+    cursor: default;
+}
+
+.calCellToday:not(.calCellStart):not(.calCellEnd) {
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.calCellInRange {
+    background: var(--bg-soft-accent);
+    border-radius: 0;
+}
+
+.calCellStart {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 8px 0 0 8px;
+}
+
+.calCellEnd {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 0 8px 8px 0;
+}
+
+.calCellStart.calCellEnd {
+    border-radius: 8px;
+}
+
+.dateRangeFooter {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+}
+
+.dateRangeCancelBtn {
+    border: 1px solid var(--border-color);
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 12.5px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.dateRangeCancelBtn:hover {
+    background: var(--bg-surface-alt);
+}
+
+.dateRangeApplyBtn {
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 8px;
+    padding: 7px 16px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.dateRangeApplyBtn:hover {
+    background: var(--accent-hover);
+}
+
+/* ── Two-column layout (Workforce: status / employment type) ── */
+.twoColGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+/* ── Summary cards ── */
+.cardsRow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.statCard {
+    background: var(--bg-soft-accent);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.statCardWarn {
+    background: var(--warning-bg);
+    border-color: var(--warning-border);
+}
+
+.statCardBad {
+    background: var(--danger-bg);
+    border-color: var(--danger-bg);
+}
+
+.statLabel {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.statValue {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.delta_up {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--accent-hover);
+}
+
+.delta_down {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--danger-text);
+}
+
+.delta_neutral {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+/* ── Trend chart ── */
+.chartCard {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+}
+
+.chartHeadRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.legend {
+    display: flex;
+    gap: 14px;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.dotGood,
+.dotMid,
+.dotBad {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.dotGood {
+    background: var(--accent);
+}
+
+.dotMid {
+    background: var(--warning);
+}
+
+.dotBad {
+    background: var(--danger-text);
+}
+
+.chartSvg {
+    width: 100%;
+    height: 160px;
+}
+
+.chartEmpty {
+    color: var(--text-secondary);
+    font-size: 13px;
+    text-align: center;
+    padding: 40px 0;
+}
+
+/* ── Section cards ── */
+.sectionCard {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+}
+
+.sectionTitle {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 14px;
+}
+
+.employeeHeadRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+}
+
+.employeeHeadRow .sectionTitle {
+    margin-bottom: 0;
+}
+
+.searchBox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-soft-accent);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 7px 12px;
+    min-width: 220px;
+}
+
+.searchBox i {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.searchBox input {
+    border: none;
+    outline: none;
+    background: none;
+    font-size: 12.5px;
+    font-family: inherit;
+    flex: 1;
+    color: var(--text-primary);
+}
+
+/* ── Tables ── */
+.tableWrap {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 14px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-align: left;
+    padding: 10px 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    background: var(--bg-soft-accent);
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+}
+
+.sortableTh {
+    cursor: pointer;
+    user-select: none;
+}
+
+.sortableTh:hover {
+    color: var(--accent);
+}
+
+.table td {
+    padding: 10px 12px;
+    border-top: 0.5px solid var(--bg-page);
+    font-size: 12.5px;
+    color: var(--text-primary);
+    vertical-align: middle;
+}
+
+.clickableRow {
+    cursor: pointer;
+}
+
+.clickableRow:hover {
+    background: var(--bg-soft-accent);
+}
+
+.empCell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bg-soft-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--accent-hover);
+    flex-shrink: 0;
+}
+
+.empName {
+    font-weight: 500;
+}
+
+.warnText {
+    color: var(--warning-text);
+    font-weight: 600;
+}
+
+.badText {
+    color: var(--danger-text);
+    font-weight: 600;
+}
+
+.rateBarWrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 120px;
+}
+
+.rateBarTrack {
+    flex: 1;
+    height: 6px;
+    background: var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.rateBarFill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+}
+
+.errorBanner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--danger-bg);
+    border: 1px solid var(--danger-bg);
+    color: var(--danger-text);
+    font-size: 12.5px;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+}
+
+.loadingWrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 0;
+}
+
+.spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--border-color);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 40px 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+/* ── Status pills (Leave report) ── */
+.statusPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.pillApproved {
+    background: var(--bg-soft-accent);
+    color: var(--accent-hover);
+}
+
+.pillPending {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.pillRejected {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.pillCancelled {
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+}
+
+/* ── Stacked bar trend chart (Leave report) ── */
+.stackedBarCol {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.stackedBarTrack {
+    width: 100%;
+    display: flex;
+    flex-direction: column-reverse;
+    border-radius: 4px 4px 0 0;
+    overflow: hidden;
+}
+
+.stackedBarLabel {
+    font-size: 10px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+/* ── Department Health ── */
+.attentionBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.attentionHigh {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.attentionMed {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.attentionLow {
+    background: var(--bg-soft-accent);
+    color: var(--accent-hover);
+}
+
+.onLeaveGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.onLeaveCard {
+    background: var(--bg-soft-accent);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--accent);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: var(--text-primary);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.onLeaveCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px var(--shadow-color);
+}
+
+[data-theme="dark"] .onLeaveCard {
+    background: var(--bg-surface-alt);
+}
+
+/* Departments-without-HOD reuses .onLeaveCard but is a "needs attention"
+   fact rather than routine info, so it gets the warning accent instead
+   of the default green one. */
+.vacancyCard {
+    border-left-color: var(--warning);
+}
+
+.onLeaveCardTop {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.onLeaveMeta {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+}
+
+.onLeaveDaysLeft {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Responsive — applies to every report view, since they all share this
+   one stylesheet (Attendance, Payroll, Leave, Department Health,
+   Workforce). Nothing here is view-specific.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Tablet: things that wrap awkwardly before they need to fully stack */
+@media (max-width: 900px) {
+    .reportTypeTabs {
+        overflow-x: auto;
+        scrollbar-width: none;
+        padding-bottom: 1px;
+    }
+
+    .reportTypeTabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .cardsRow {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+}
+
+/* Phone: full stacking + tables become cards */
+@media (max-width: 640px) {
+    .wrap {
+        padding-bottom: 28px;
+    }
+
+    .heading {
+        font-size: 17px;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .exportBtns {
+        width: 100%;
+    }
+
+    .exportBtn,
+    .exportBtnPrimary {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .filterBar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .reportDropdown,
+    .dateRangeWrap {
+        width: 100%;
+    }
+
+    .reportDropdownTrigger,
+    .dateRangeTrigger {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .deptDropdownSlot {
+        margin-left: 0;
+    }
+
+    .dateRangePanel {
+        width: 100%;
+        left: 0;
+        right: 0;
+    }
+
+    .employeeHeadRow {
+        align-items: stretch;
+    }
+
+    .searchBox {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .chartCard,
+    .sectionCard {
+        padding: 14px 16px;
+    }
+
+    .twoColGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .onLeaveGrid {
+        grid-template-columns: 1fr;
+    }
+
+    /* ── Table → cards ──
+       Every report table shares this markup, so one rule set handles
+       all of them: Attendance's two tables, Leave's, Payroll's two,
+       Department Health's, and Workforce's four. Each <td> that isn't
+       the row's natural "title" cell carries a data-label attribute
+       (see each view's JSX) which becomes its on-card caption. */
+    .tableWrap {
+        border: none;
+        border-radius: 0;
+        overflow: visible;
+    }
+
+    .table,
+    .table tbody,
+    .table tr {
+        display: block;
+        width: 100%;
+    }
+
+    .table thead {
+        display: none;
+    }
+
+    .table tr {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-bottom: 10px;
+    }
+
+    .table tr:last-child {
+        margin-bottom: 0;
+    }
+
+    .table td {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 6px 0;
+        border: none !important;
+        font-size: 12.5px;
+    }
+
+    /* The row's first cell (department/employee/month/status/type name)
+       stays the card's unlabeled header. */
+    .table td:first-child {
+        justify-content: flex-start;
+        padding-bottom: 8px;
+        margin-bottom: 6px;
+        border-bottom: 0.5px solid var(--border-color) !important;
+        font-weight: 600;
+    }
+
+    .table td[data-label]::before {
+        content: attr(data-label);
+        font-size: 10.5px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        color: var(--text-secondary);
+        flex-shrink: 0;
+        padding-right: 10px;
+    }
+
+    .rateBarWrap {
+        min-width: 0;
+        flex: 1;
+        justify-content: flex-end;
+    }
+
+    .clickableRow:hover {
+        background: var(--bg-surface);
+    }
+}

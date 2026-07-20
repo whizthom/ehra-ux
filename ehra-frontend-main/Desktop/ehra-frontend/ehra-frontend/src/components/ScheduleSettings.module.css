@@ -1,0 +1,470 @@
+.wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.loading {
+    padding: 40px 0;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.errorBanner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--danger-bg);
+    border: 0.5px solid var(--danger-border);
+    color: var(--danger-text);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 12.5px;
+    line-height: 1.5;
+}
+
+.errorBanner i {
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.retryBtn {
+    margin-left: auto;
+    flex-shrink: 0;
+    height: 28px;
+    padding: 0 12px;
+    background: none;
+    border: 0.5px solid var(--danger-text);
+    border-radius: 6px;
+    color: var(--danger-text);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.retryBtn:hover {
+    background: var(--danger-bg);
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sectionTitle {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.sectionDesc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+/* ── Weekly schedule rows ── */
+.dayList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.dayRow {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 14px;
+    background: var(--bg-surface-alt);
+    border: 0.5px solid var(--border-color);
+    border-radius: 10px;
+    box-sizing: border-box;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.dayToggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 130px;
+    flex-shrink: 0;
+}
+
+.dayLabel {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.dayLabelDisabled {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+/* Toggle switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: var(--border-color);
+    border-radius: 20px;
+    transition: 0.2s;
+}
+
+.slider::before {
+    content: "";
+    position: absolute;
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: var(--bg-surface);
+    border-radius: 50%;
+    transition: 0.2s;
+}
+
+.switch input:checked+.slider {
+    background-color: var(--accent);
+}
+
+.switch input:checked+.slider::before {
+    transform: translateX(16px);
+}
+
+.timeFields {
+    display: flex;
+    gap: 14px;
+    flex: 1 1 220px;
+    min-width: 0;
+    flex-wrap: wrap;
+}
+
+.timeField {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1 1 90px;
+    min-width: 90px;
+}
+
+.timeField label {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.timeField input {
+    height: 32px;
+    width: 100%;
+    padding: 0 10px;
+    border: 0.5px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: inherit;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    outline: none;
+    box-sizing: border-box;
+}
+
+.timeField input:disabled {
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+}
+
+.savingTag {
+    font-size: 11px;
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+/* ── Holidays ── */
+.holidayForm {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+/* Explicit "Date" / "Holiday name" captions above each input — these
+   were previously unlabeled (the date field especially had nothing
+   telling you what it was for beyond its own native chrome), which is
+   what made the form's two-step "pick a date, then name it" intent easy
+   to miss at a glance. */
+.holidayField,
+.holidayFieldGrow {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.holidayFieldGrow {
+    flex: 1;
+    min-width: 160px;
+}
+
+.holidayField label,
+.holidayFieldGrow label {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.holidayDateInput {
+    height: 36px;
+    padding: 0 10px;
+    border: 0.5px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 12px;
+    font-family: inherit;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    outline: none;
+    width: 160px;
+}
+
+.holidayLabelInput {
+    height: 36px;
+    padding: 0 10px;
+    border: 0.5px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 12px;
+    font-family: inherit;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    outline: none;
+    width: 100%;
+}
+
+.addHolidayBtn {
+    height: 36px;
+    padding: 0 16px;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.addHolidayBtn:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+
+.addHolidayBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.holidayList {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.noHolidays {
+    font-size: 12px;
+    color: var(--text-secondary);
+    padding: 10px 0;
+}
+
+.holidayItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--bg-surface-alt);
+    border: 0.5px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 12px;
+}
+
+.holidayDate {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.holidayLabel {
+    color: var(--text-secondary);
+}
+
+.removeHolidayBtn {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.removeHolidayBtn:hover {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+/* ── Tablet ── */
+@media (max-width: 768px) {
+    .wrap {
+        gap: 22px;
+    }
+
+    .dayRow {
+        gap: 12px;
+    }
+
+    .timeFields {
+        gap: 10px;
+    }
+
+    .holidayLabelInput {
+        min-width: 160px;
+    }
+}
+
+/* ── Phone ── */
+@media (max-width: 480px) {
+    .wrap {
+        /* Requested mobile gutter: 7px on each side. (No overflow here —
+           .tabBody, one level up, is the actual scroll container; this
+           had no bounded height so overflow-y:auto on it was inert, and
+           stacking another scroll container on top of that one risked
+           the exact scroll-chaining jitter that AttendanceSection.tabBody
+           is now explicitly guarded against.) */
+        padding: 0 7px;
+    }
+
+    .dayList {
+        gap: 8px;
+    }
+
+    /* Kept as ONE compact row rather than stacked — a toggle, a day
+       name, and two small time fields all comfortably fit side by side
+       even on a narrow phone. The previous full stack (toggle+label on
+       its own row, then each time field on its own row below) made
+       every day roughly 3x taller than it needed to be, which is what
+       made the whole panel feel oversized. */
+    .dayRow {
+        gap: 8px;
+        padding: 8px 10px;
+        flex-wrap: nowrap;
+    }
+
+    .dayToggle {
+        width: auto;
+        gap: 6px;
+    }
+
+    .dayLabel,
+    .dayLabelDisabled {
+        font-size: 12px;
+    }
+
+    .timeFields {
+        flex: 1 1 auto;
+        gap: 6px;
+        justify-content: flex-end;
+    }
+
+    .timeField {
+        flex: 1 1 92px;
+        min-width: 88px;
+    }
+
+    .timeField label {
+        font-size: 9px;
+    }
+
+    .timeField input {
+        height: 30px;
+        padding: 0 8px;
+        font-size: 12px;
+    }
+
+    .savingTag {
+        font-size: 10px;
+    }
+
+    .holidayForm {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .holidayDateInput {
+        width: 100%;
+    }
+
+    .holidayLabelInput {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .holidayItem {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+}
+
+/* ── Smallest phones — even the compact single-row day layout needs a
+   fallback once there's genuinely not enough width for a toggle, a day
+   name, and two time fields side by side without everything squeezing
+   unreadably small. This is the only width where it stacks again. ── */
+@media (max-width: 340px) {
+    .dayRow {
+        flex-direction: column;
+        align-items: stretch;
+        flex-wrap: wrap;
+    }
+
+    .dayToggle {
+        width: 100%;
+    }
+
+    .timeFields {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .timeField {
+        flex: 1 1 90px;
+    }
+}
+
+/* ── Small phone ── */
+@media (max-width: 360px) {
+
+    .dayLabel,
+    .dayLabelDisabled {
+        font-size: 12.5px;
+    }
+
+    .sectionTitle {
+        font-size: 13px;
+    }
+}

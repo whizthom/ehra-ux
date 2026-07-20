@@ -1,0 +1,402 @@
+.page {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* ── Left ── */
+.left {
+    width: 42%;
+    background: #0f6e56;
+    padding: 48px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.logoRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logoIcon {
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.logoText {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.leftBody {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    padding: 32px 0;
+}
+
+.tagline {
+    color: #9fe1cb;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.headline {
+    color: #fff;
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1.35;
+}
+
+.desc {
+    color: #5dcaa5;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-top: 4px;
+}
+
+.leftFooter {
+    color: #5dcaa5;
+    font-size: 12px;
+}
+
+/* ── Steps ── */
+.steps {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+.step {
+    display: flex;
+    gap: 14px;
+    position: relative;
+}
+
+.stepLine {
+    position: absolute;
+    left: 15px;
+    top: 32px;
+    width: 2px;
+    height: calc(100% - 8px);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.stepDot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 500;
+    flex-shrink: 0;
+    z-index: 1;
+    transition: all 0.2s;
+}
+
+.dotDone {
+    background: #1d9e75;
+    color: #fff;
+}
+
+.dotActive {
+    background: #fff;
+    color: #0f6e56;
+}
+
+.dotPending {
+    background: rgba(255, 255, 255, 0.12);
+    color: #9fe1cb;
+}
+
+.stepBody {
+    padding: 4px 0 20px;
+}
+
+.stepLabel {
+    font-size: 13px;
+    font-weight: 500;
+    color: #fff;
+}
+
+.stepSub {
+    font-size: 12px;
+    color: #5dcaa5;
+    margin-top: 2px;
+}
+
+/* ── Right ── */
+.right {
+    flex: 1;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.rightHeader {
+    padding: 28px 44px 18px;
+    border-bottom: 0.5px solid #e2e8f0;
+}
+
+.progressBar {
+    width: 100%;
+    height: 3px;
+    background: #e2e8f0;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 14px;
+}
+
+.progressFill {
+    height: 100%;
+    background: #0f6e56;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+}
+
+.headerRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.stepTitle {
+    font-size: 15px;
+    font-weight: 500;
+    color: #111;
+}
+
+.stepCount {
+    font-size: 13px;
+    color: #aaa;
+}
+
+.formBody {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 44px;
+}
+
+/* ── Error ── */
+.errorBox {
+    background: #fcebeb;
+    border: 0.5px solid #f09595;
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: #a32d2d;
+}
+
+/* ── Fields ── */
+.grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.grid1 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-top: 14px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.field label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #555;
+}
+
+.optional {
+    color: #aaa;
+    font-weight: 400;
+}
+
+.field input,
+.field select {
+    height: 38px;
+    padding: 0 12px;
+    border: 0.5px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    background: #fff;
+    color: #111;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.field input:focus,
+.field select:focus {
+    border-color: #1d9e75;
+    box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.1);
+}
+
+.field input::placeholder {
+    color: #bbb;
+}
+
+.pwWrap {
+    position: relative;
+}
+
+.pwWrap input {
+    width: 100%;
+    padding-right: 38px;
+}
+
+.pwToggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    opacity: 0.5;
+}
+
+.pwToggle:hover {
+    opacity: 1;
+}
+
+.stepNote {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+/* ── Password rules ── */
+.pwRules {
+    margin-top: 16px;
+    padding: 14px 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 0.5px solid #e2e8f0;
+}
+
+.pwRulesTitle {
+    font-size: 12px;
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.pwRule {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #aaa;
+    margin-bottom: 5px;
+    transition: color 0.15s;
+}
+
+.pwRuleOk {
+    color: #0f6e56;
+}
+
+/* ── Footer ── */
+.formFooter {
+    padding: 14px 44px 24px;
+    border-top: 0.5px solid #e2e8f0;
+    display: flex;
+    gap: 10px;
+}
+
+.btnBack {
+    height: 40px;
+    padding: 0 20px;
+    background: none;
+    border: 0.5px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    color: #555;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btnBack:hover {
+    background: #f8fafc;
+}
+
+.btnNext {
+    flex: 1;
+    height: 40px;
+    background: #0f6e56;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btnNext:hover:not(:disabled) {
+    background: #085041;
+}
+
+.btnNext:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .left {
+        display: none;
+    }
+
+    .formBody {
+        padding: 20px 24px;
+    }
+
+    .rightHeader {
+        padding: 20px 24px 14px;
+    }
+
+    .formFooter {
+        padding: 12px 24px 20px;
+    }
+}

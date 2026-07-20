@@ -1,0 +1,849 @@
+/* ProfileEditApprovalPanel.module.css */
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* ── Panel header ── */
+.panelHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.panelTitleRow {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.panelTitleRow i {
+    font-size: 18px;
+    color: var(--accent);
+}
+
+.panelTitle {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.pendingBadge {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--warning-border);
+}
+
+.panelSub {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+    max-width: 620px;
+}
+
+/* ── View toggle ── */
+.viewToggle {
+    display: flex;
+    gap: 6px;
+    /* Was var(--bg-soft-accent) — a translucent green tint that reads
+       fine as a barely-there wash in light mode, but turns into an
+       unmistakable green glow over dark surfaces. This is chrome, not a
+       "success" indicator, so it gets a neutral surface color instead;
+       the active button (.toggleBtnActive) is still solid accent green,
+       so the selected state is still perfectly clear. */
+    background: var(--bg-surface-alt);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 5px;
+    width: fit-content;
+}
+
+.toggleBtn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: none;
+    border: none;
+    border-radius: 7px;
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.12s, color 0.12s;
+}
+
+.toggleBtn:hover {
+    background: var(--border-color);
+    color: var(--text-primary);
+}
+
+.toggleBtnActive {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+}
+
+.toggleCount {
+    background: rgba(255, 255, 255, 0.25);
+    color: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 10px;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* ── Request card ── */
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.card {
+    border: 1.5px solid var(--border-color);
+    border-radius: 13px;
+    background: var(--bg-surface-alt);
+    overflow: hidden;
+    transition: border-color 0.12s;
+}
+
+.cardActionable {
+    border-color: var(--border-color);
+    box-shadow: 0 1px 6px var(--shadow-color);
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    gap: 12px;
+    flex-wrap: wrap;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--bg-surface-alt);
+}
+
+.empRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.avatarImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatarFallback {
+    width: 100%;
+    height: 100%;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 50%;
+}
+
+.empInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.empName {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.empMeta {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.headerRight {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+}
+
+.submittedAt {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.statusPill {
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+/* Theme-aware status colors — these used to be hardcoded hex values
+   passed via inline style, which meant the pill stayed light-mode-only
+   regardless of the active theme. Mapped onto the same semantic
+   variables the rest of the app already uses for pending/success/danger
+   states, so this reads consistently in both themes. */
+.statusPending {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.statusApproved {
+    background: var(--bg-soft-accent);
+    color: var(--accent-hover);
+}
+
+.statusRejected {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.statusCancelled {
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+}
+
+.expandBtn {
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: background 0.12s;
+}
+
+.expandBtn:hover {
+    background: var(--bg-surface-alt);
+}
+
+/* ── Card body ── */
+.cardBody {
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* ── Chain strip ── */
+.chainStrip {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    /* Neutral container — same reasoning as .viewToggle above. The
+       individual step dots (.chainDone/.chainPending/.chainRejected)
+       already carry the actual status color, so the strip itself
+       doesn't need to be green-tinted too. */
+    background: var(--bg-surface-alt);
+    border-radius: 9px;
+    padding: 10px 14px;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.chainStep {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.chainDot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+}
+
+.chainDone {
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+}
+
+.chainRejected {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.chainPending {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.chainLabel {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.chainLine {
+    width: 24px;
+    height: 1.5px;
+    background: var(--border-color);
+    margin: 0 4px;
+    border-radius: 2px;
+}
+
+.chainLineDone {
+    background: var(--accent);
+}
+
+/* ── Diff section ── */
+.diffSection {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.diffSectionLabel {
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.diffTable {
+    border: 1px solid var(--border-color);
+    border-radius: 9px;
+    overflow: hidden;
+    background: var(--bg-surface);
+}
+
+.diffHead {
+    display: grid;
+    grid-template-columns: 130px 1fr 20px 1fr;
+    gap: 0;
+    padding: 8px 14px;
+    /* This band repeats once per request card, so a green tint here
+       especially stacks up into an obvious wash down the whole list —
+       neutral surface color instead. */
+    background: var(--bg-surface-alt);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.diffColLabel {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+}
+
+.diffRow {
+    display: grid;
+    grid-template-columns: 130px 1fr 20px 1fr;
+    gap: 0;
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border-color);
+    align-items: center;
+    transition: background 0.1s;
+}
+
+.diffRow:last-child {
+    border-bottom: none;
+}
+
+.diffRow:hover {
+    background: var(--bg-surface-alt);
+}
+
+.diffFieldName {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Wraps old-value/arrow/new-value as one group. On desktop it's
+   `display: contents` so its children still land directly in the
+   parent grid's 3 remaining columns, exactly as if this wrapper
+   weren't there at all — purely a mobile reflow hook (see the
+   responsive block at the bottom of this file). */
+.diffValues {
+    display: contents;
+}
+
+.diffArrowIcon {
+    color: var(--border-color);
+}
+
+.diffOld {
+    font-size: 13px;
+    color: var(--danger-text);
+    text-decoration: line-through;
+    /* Tracks .diffOld's own (theme-aware) text color instead of a fixed
+       light-mode red, so the strikethrough doesn't clash with the
+       lighter danger-text used in dark mode. */
+    text-decoration-color: currentColor;
+}
+
+.diffNew {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+.diffAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid var(--border-color);
+}
+
+/* ── Prior HOD decision (shown to employer) ── */
+.priorDecision {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--text-primary);
+    /* Neutral — this box renders identically whether the HOD approved or
+       rejected, so a green background was misleading on a rejection.
+       The actual verdict already reads clearly via .priorApproved /
+       .priorRejected's own color below. */
+    background: var(--bg-surface-alt);
+    border-radius: 8px;
+    padding: 9px 12px;
+    flex-wrap: wrap;
+}
+
+.priorDecision i {
+    color: var(--text-secondary);
+}
+
+.priorApproved {
+    color: var(--accent);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.priorRejected {
+    color: var(--danger-text);
+    font-weight: 600;
+}
+
+.priorNote {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* ── Action area ── */
+.actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 4px;
+    border-top: 1px solid var(--border-color);
+}
+
+.noteFieldRow {
+    width: 100%;
+}
+
+.noteInput {
+    width: 100%;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--bg-surface);
+    box-sizing: border-box;
+    transition: border-color 0.12s;
+}
+
+.noteInput:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.actionBtns {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.approveBtn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    padding: 11px 20px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.13s;
+    min-width: 150px;
+}
+
+.approveBtn:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+
+.approveBtn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.rejectTriggerBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    background: var(--bg-surface);
+    color: var(--danger-text);
+    border: 1.5px solid var(--danger-border);
+    border-radius: 9px;
+    padding: 11px 20px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.13s;
+    min-width: 100px;
+}
+
+.rejectTriggerBtn:hover:not(:disabled) {
+    background: var(--danger-bg);
+}
+
+.rejectTriggerBtn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+/* ── Rejection confirm box ── */
+.rejectBox {
+    background: var(--danger-bg);
+    border: 1.5px solid var(--danger-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.rejectBoxLabel {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--danger-text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.rejectNote {
+    border: 1.5px solid var(--danger-border);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--bg-surface);
+    width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+.rejectNote:focus {
+    outline: none;
+    border-color: var(--danger-text);
+}
+
+.rejectBoxBtns {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.cancelSmall {
+    background: none;
+    border: 1.5px solid var(--border-color);
+    border-radius: 7px;
+    padding: 8px 16px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.12s;
+}
+
+.cancelSmall:hover {
+    background: var(--bg-surface-alt);
+}
+
+.rejectConfirmBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    /* Was var(--danger-text) — a variable meant for text/labels, which
+       in dark mode is a pale pink (#ffb4bd) and made this button look
+       washed-out with barely-there contrast against its white label.
+       var(--danger) is the solid fill meant for exactly this. */
+    background: var(--danger);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.13s;
+}
+
+.rejectConfirmBtn:hover:not(:disabled) {
+    background: var(--danger-hover);
+}
+
+.rejectConfirmBtn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+/* ── Empty / loading ── */
+.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 40px;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.loading i {
+    font-size: 28px;
+    color: var(--text-secondary);
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 48px 24px;
+    text-align: center;
+}
+
+.emptyIcon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--bg-soft-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.emptyIcon i {
+    font-size: 26px;
+    color: var(--accent);
+}
+
+.emptyTitle {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.emptySub {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0;
+    max-width: 340px;
+    line-height: 1.5;
+}
+
+/* ── Error ── */
+.errorBox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border: 1px solid var(--danger-border);
+    border-radius: 9px;
+    padding: 11px 14px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* ── Responsive (phones) ──────────────────────────────────────────────
+   Everything above is already fluid (flex-wrap, % widths, no fixed
+   viewport units), so this block only needs to handle the handful of
+   spots that assumed desktop-width space: the 4-column diff grid, the
+   side-by-side action buttons, and some padding/type scale. */
+@media (max-width: 640px) {
+    .panelTitle {
+        font-size: 15px;
+    }
+
+    .panelTitleRow i {
+        font-size: 16px;
+    }
+
+    .panelSub {
+        font-size: 12.5px;
+    }
+
+    /* Segmented control spans the full width and splits evenly, rather
+       than a small fit-content pill that's fiddly to tap accurately. */
+    .viewToggle {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .toggleBtn {
+        flex: 1;
+        justify-content: center;
+        padding: 8px 10px;
+    }
+
+    .cardHeader {
+        padding: 12px 14px;
+        gap: 10px;
+    }
+
+    .avatar {
+        width: 34px;
+        height: 34px;
+    }
+
+    .empName {
+        font-size: 13px;
+    }
+
+    .headerRight {
+        gap: 8px;
+    }
+
+    .submittedAt {
+        /* Least essential piece of the header row on a narrow screen —
+           the status pill already conveys what matters most; the exact
+           submit date is one tap (expand) away in the card body. */
+        display: none;
+    }
+
+    .cardBody {
+        padding: 14px;
+        gap: 12px;
+    }
+
+    .chainStrip {
+        padding: 9px 12px;
+    }
+
+    .chainLabel {
+        font-size: 11.5px;
+    }
+
+    /* ── Diff table: 4-column grid → stacked field/value rows ──
+       "Current" / "Proposed" column headers stop making sense once
+       there's no column to sit above, so the header row is hidden and
+       each row becomes its own compact block instead: field name on
+       top, old → new value group wrapping beneath it. */
+    .diffHead {
+        display: none;
+    }
+
+    .diffRow {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+        padding: 10px 12px;
+    }
+
+    .diffValues {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .diffOld,
+    .diffNew {
+        font-size: 12.5px;
+    }
+
+    /* ── Action buttons: full-width, stacked ── */
+    .actionBtns {
+        flex-direction: column;
+    }
+
+    .approveBtn,
+    .rejectTriggerBtn {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .rejectBoxBtns {
+        flex-direction: column-reverse;
+    }
+
+    .cancelSmall,
+    .rejectConfirmBtn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .emptyState {
+        padding: 36px 16px;
+    }
+
+    .emptySub {
+        max-width: none;
+    }
+}

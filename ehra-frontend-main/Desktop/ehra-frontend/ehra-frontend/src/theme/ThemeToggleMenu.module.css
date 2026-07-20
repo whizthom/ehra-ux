@@ -1,0 +1,206 @@
+.wrapper {
+    position: relative;
+}
+
+.iconBtn {
+    position: relative;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: var(--bg-surface-alt);
+    border: 0.5px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-primary);
+    font-family: inherit;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.iconBtn:hover {
+    background: var(--bg-soft-accent);
+}
+
+/* Kebab lights up in the brand accent while its panel is open, so the
+   trigger visibly "belongs" to the slide-in panel rather than just
+   toggling silently. */
+.iconBtnActive {
+    background: var(--bg-soft-accent);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.iconBtnActive i {
+    transform: rotate(90deg);
+}
+
+.iconBtn i {
+    transition: transform 0.18s ease;
+}
+
+/* Full-viewport scrim behind the panel — makes it read as a distinct
+   floating layer above the page (rather than a plain inline dropdown)
+   and gives a large, obvious tap target to dismiss it. Uses a plain
+   transition (not a mount-only animation) so it can fade both in and
+   out, in step with the panel's slide. */
+.scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.18);
+    z-index: 190;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease;
+}
+
+.scrimIn {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Docked flush against the right edge of the screen and flush against
+   the top — zero gap on either side — and slides in/out horizontally
+   from the right, like a compact flyout menu rather than a floating
+   corner dropdown. Kept deliberately short (not full viewport height)
+   so it still reads as a small settings panel, not a full navigation
+   drawer. */
+.panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: min(78vw, 300px);
+    max-width: 300px;
+    background: var(--bg-surface);
+    border: 0.5px solid var(--border-color);
+    border-right: none;
+    border-radius: 0 0 0 16px;
+    box-shadow: -10px 0 32px var(--shadow-color);
+    z-index: 200;
+    overflow: hidden;
+    transform: translateX(100%);
+    transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.panelOpen {
+    transform: translateX(0);
+}
+
+/* On desktop/tablet the trigger sits in a normal topbar, so the panel
+   reverts to a compact corner popover anchored to the icon — a full
+   edge-docked flyout only makes sense once the topbar itself becomes
+   the mobile app-bar. Still slides in/out from the right, just over a
+   much shorter distance, with a fade to match. */
+@media (min-width: 901px) {
+    .panel {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        left: auto;
+        width: 220px;
+        border: 0.5px solid var(--border-color);
+        border-radius: 14px;
+        box-shadow: 0 12px 36px var(--shadow-color);
+        opacity: 0;
+        transform: translateX(28px);
+        transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+            opacity 0.22s ease;
+    }
+
+    .panelOpen {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.panelHdr {
+    padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 12px;
+    border-bottom: 0.5px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.panelClose {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    border: none;
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.panelClose:hover {
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+}
+
+.panelTitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+}
+
+.rowLabelGroup {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.rowLabelGroup i {
+    font-size: 15px;
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+.rowLabel {
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.switch {
+    position: relative;
+    width: 40px;
+    height: 22px;
+    border-radius: 999px;
+    border: none;
+    background: var(--border-color);
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    transition: background 0.15s ease;
+}
+
+.switchOn {
+    background: var(--accent);
+}
+
+.knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    transition: transform 0.15s ease;
+}
+
+.switchOn .knob {
+    transform: translateX(18px);
+}

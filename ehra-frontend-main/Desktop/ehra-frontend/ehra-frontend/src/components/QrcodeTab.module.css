@@ -1,0 +1,131 @@
+/* ── Layout — fixed tab bar, independently scrolling body ──
+   Same pattern as AttendanceSection: switching between Live QR and
+   Settings never carries over scroll position from the other view. */
+.layout {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.tabBar {
+    display: flex;
+    flex-shrink: 0;
+    border-bottom: 0.5px solid var(--border-color);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.tabBar::-webkit-scrollbar {
+    display: none;
+}
+
+.tabBtn {
+    padding: 12px 18px;
+    background: none;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.tabBtn:hover {
+    color: var(--text-primary);
+}
+
+.tabActive {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+/* Bottom clearance on mobile comes from the page-level .contentFullNarrow
+   wrapper (same mechanism as Dashboard/Workforce/Attendance) — this fills
+   that wrapper's height exactly rather than overflowing it, so that
+   reserved space is already respected without adding more here. */
+.tabBody {
+    flex: 1;
+    min-height: 0;
+    padding: 16px 0 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    /* See AttendanceSection.module.css — same nested-scroll setup, same
+       fix: without this, momentum scroll chains into the outer page
+       scroll once this container hits its top/bottom, dragging the
+       fixed bottom nav along with it on mobile. */
+    overscroll-behavior: contain;
+}
+
+/* Live QR's content (title + description + QR code) is naturally much
+   shorter than the viewport on most phones. Left top-aligned inside a
+   flex:1 scroll container, that shortfall shows up as one large empty
+   run of space between the QR code and the bottom nav — centering it
+   distributes that space instead, so it reads as an intentional layout
+   rather than content that stopped short. Safe with overflow-y:auto:
+   if the viewport is ever too short for this to fit, it scrolls from
+   the top as normal rather than clipping. Settings (the other tab) is
+   a full form and stays top-aligned, so this only applies to Live QR. */
+.tabBodyCentered {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* ── Live QR view ── */
+.wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    padding-top: 8px;
+}
+
+.intro {
+    max-width: 440px;
+    text-align: center;
+}
+
+.title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.desc {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+.panelWrap {
+    width: 100%;
+    max-width: 320px;
+}
+
+.settingsLoading {
+    padding: 60px 20px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+@media (max-width: 480px) {
+    .wrap {
+        padding: 4px 4px 0;
+    }
+
+    .intro {
+        max-width: 100%;
+    }
+
+    .panelWrap {
+        max-width: 100%;
+    }
+}

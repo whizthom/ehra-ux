@@ -1,0 +1,1297 @@
+/* ── DepartmentsTab.module.css ─────────────────────────────────────────────
+   Brand: var(--accent) (primary), #5dcaa5 (accent), var(--bg-page) (bg)
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* ── Keyframes ── */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulseHighlight {
+    0% {
+        box-shadow: 0 0 0 0 rgba(15, 110, 86, 0.35);
+    }
+
+    50% {
+        box-shadow: 0 0 0 8px rgba(15, 110, 86, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(15, 110, 86, 0);
+    }
+}
+
+@keyframes backdropIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalIn {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes toastIn {
+    from {
+        opacity: 0;
+        transform: translateX(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ── Root wrap — SCROLLABLE ── */
+.wrap {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 24px 0 60px;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    /* Smooth momentum scroll on iOS */
+    -webkit-overflow-scrolling: touch;
+    /* Stops scroll momentum from chaining into the Dashboard's own page
+       scroll once this container hits its top/bottom — without it, that
+       chaining is what makes the fixed mobile bottom nav visibly shift
+       during a scroll instead of staying anchored to the viewport. */
+    overscroll-behavior: contain;
+}
+
+/* ── Toast stack ── */
+.toastStack {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    max-width: 320px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+    animation: toastIn 0.25s ease;
+}
+
+.toast i {
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.toast_success {
+    background: var(--accent);
+    color: #fff;
+}
+
+.toast_error {
+    background: var(--danger-text);
+    color: #fff;
+}
+
+/* ── Loading ── */
+.loadingWrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 80px 20px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* Small inline spinner for buttons */
+.hodSpinner,
+.btnSpinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.hodSpinner {
+    border-color: rgba(15, 110, 86, 0.2);
+    border-top-color: var(--accent);
+}
+
+/* ── Header ── */
+.header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+}
+
+.headerLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+}
+
+.headerMeta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.metaPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+.metaPill i {
+    font-size: 12px;
+}
+
+.metaPillWarn {
+    background: var(--warning-bg);
+    border-color: var(--warning-border);
+    color: var(--warning-text);
+}
+
+.headerRight {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.searchWrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.searchWrap>i:first-child {
+    position: absolute;
+    left: 11px;
+    color: var(--text-secondary);
+    font-size: 15px;
+    pointer-events: none;
+}
+
+.searchWrap input {
+    height: 38px;
+    padding: 0 34px 0 34px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--text-primary);
+    background: var(--bg-surface);
+    outline: none;
+    width: 220px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.searchWrap input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(15, 110, 86, 0.12);
+}
+
+.clearSearch {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+}
+
+.clearSearch:hover {
+    color: var(--text-secondary);
+}
+
+.addBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 38px;
+    padding: 0 16px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+}
+
+.addBtn:hover {
+    background: var(--accent-hover);
+}
+
+.addBtn:active {
+    transform: scale(0.97);
+}
+
+/* ── Empty state ── */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 12px;
+    padding: 64px 20px;
+}
+
+.emptyIcon {
+    width: 56px;
+    height: 56px;
+    background: var(--bg-surface-alt);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    color: var(--text-secondary);
+}
+
+.emptyState h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.emptyState p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+    max-width: 280px;
+}
+
+/* ── Groups container ── */
+.groups {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* ── Department group card ── */
+.deptGroup {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    overflow: visible;
+    animation: fadeSlideIn 0.25s ease;
+    transition: box-shadow 0.2s;
+}
+
+.deptGroup:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.deptGroupUnassigned {
+    border-color: var(--border-color);
+    background: var(--bg-surface-alt);
+}
+
+.pulse {
+    animation: pulseHighlight 0.8s ease-out;
+}
+
+/* ── Department header bar ── */
+.deptHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 16px;
+    border-left: 4px solid var(--accent);
+    border-radius: 14px 14px 0 0;
+}
+
+.deptHeaderUnassigned {
+    border-left-color: var(--text-secondary);
+}
+
+.deptHeaderLeft {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+    cursor: pointer;
+    user-select: none;
+}
+
+.deptColorDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.deptName {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.deptMeta {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.hodChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.hodChip i {
+    font-size: 11px;
+    color: var(--warning-text);
+}
+
+.deptActions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.deptAction {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    background: var(--bg-surface-alt);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+
+.deptAction i {
+    font-size: 13px;
+}
+
+.deptAction:hover {
+    background: var(--bg-surface-alt);
+    color: var(--text-primary);
+}
+
+.deptActionDanger:hover {
+    background: var(--danger-bg);
+    border-color: var(--danger-border);
+    color: var(--danger-text);
+}
+
+.collapseBtn {
+    padding: 5px 8px;
+}
+
+/* ── Department body ── */
+.deptBody {
+    padding: 0 16px 14px;
+    animation: fadeSlideIn 0.2s ease;
+}
+
+.deptEmpty {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px;
+    border: 1.5px dashed var(--border-color);
+    border-radius: 10px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    background: var(--bg-surface-alt);
+}
+
+/* ── Employee list ── */
+.empList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* ── Employee card ── */
+.empCard {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--bg-surface-alt);
+    border-radius: 10px;
+    background: var(--bg-surface-alt);
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.empCard:hover {
+    background: var(--bg-soft-accent);
+    border-color: var(--accent);
+}
+
+.empCardHod {
+    background: linear-gradient(135deg, var(--bg-soft-accent) 0%, var(--bg-soft-accent) 100%);
+    border-color: var(--accent);
+}
+
+.hodBadge {
+    position: absolute;
+    top: -9px;
+    left: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+    pointer-events: none;
+}
+
+.hodBadge i {
+    font-size: 10px;
+    color: var(--warning-text);
+}
+
+.empCardLeft {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.empAvatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.empAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.empInfo {
+    min-width: 0;
+}
+
+.empName {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.empRole {
+    margin: 2px 0 0;
+    font-size: 11px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.empCardActions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.actionBtn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.actionBtn:hover {
+    background: var(--bg-surface-alt);
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.actionBtnPrimary {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background 0.15s;
+}
+
+.actionBtnPrimary:hover {
+    background: var(--accent-hover);
+}
+
+/* ── Move-dept dropdown ── */
+.moveDeptWrap {
+    position: relative;
+}
+
+.moveDeptDropdown {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
+    padding: 6px;
+    min-width: 175px;
+    z-index: 200;
+    animation: fadeSlideIn 0.15s ease;
+}
+
+/* Flip upward when near bottom of viewport */
+.moveDeptDropdownUp {
+    top: auto;
+    bottom: calc(100% + 6px);
+    animation: fadeSlideUp 0.15s ease;
+}
+
+.moveDeptLabel {
+    margin: 0 0 4px;
+    padding: 4px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.moveDeptOption {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 9px 10px;
+    border: none;
+    background: none;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-primary);
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.12s;
+}
+
+.moveDeptOption:hover {
+    background: var(--bg-soft-accent);
+}
+
+.moveDeptDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* ── Collapsed summary ── */
+.collapsedSummary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px 12px;
+    cursor: pointer;
+    border-radius: 0 0 14px 14px;
+}
+
+.collapsedSummary:hover {
+    background: var(--bg-surface-alt);
+}
+
+.collapsedAvatars {
+    display: flex;
+    align-items: center;
+}
+
+.collapsedAvatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--bg-surface);
+    margin-left: -6px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.collapsedAvatar:first-child {
+    margin-left: 0;
+}
+
+.collapsedAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.collapsedAvatarMore {
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+    font-size: 9px;
+}
+
+.collapsedHint {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+/* ── Modals ── */
+.modalBackdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    padding: 16px;
+    animation: backdropIn 0.18s ease;
+}
+
+/* ── HOD picker modal ── */
+.hodModal {
+    background: var(--bg-surface);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 420px;
+    max-height: 82vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: modalIn 0.22s ease;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+}
+
+.hodModalHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--bg-surface-alt);
+    flex-shrink: 0;
+}
+
+.hodModalSub {
+    margin: 0 0 2px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.hodModalTitle {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.modalClose {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: none;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+
+.modalClose:hover {
+    background: var(--bg-surface-alt);
+}
+
+.hodSearch {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--bg-surface-alt);
+    flex-shrink: 0;
+}
+
+.hodSearch>i {
+    position: absolute;
+    left: 28px;
+    color: var(--text-secondary);
+    font-size: 15px;
+    pointer-events: none;
+}
+
+.hodSearch input {
+    width: 100%;
+    height: 36px;
+    padding: 0 12px 0 34px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 13px;
+    outline: none;
+    background: var(--bg-surface-alt);
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+}
+
+.hodSearch input:focus {
+    border-color: var(--accent);
+    background: var(--bg-surface);
+}
+
+.hodList {
+    overflow-y: auto;
+    flex: 1;
+    padding: 8px;
+}
+
+.hodEmpty {
+    padding: 20px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.hodOption {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: none;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.12s, border-color 0.12s;
+    margin-bottom: 2px;
+}
+
+.hodOption:hover {
+    background: var(--bg-soft-accent);
+    border-color: var(--accent);
+}
+
+.hodOption:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.hodOptionActive {
+    background: var(--bg-soft-accent);
+    border-color: var(--accent);
+}
+
+.hodAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.hodAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hodAvatarNone {
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+}
+
+.hodOptionInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.hodOptionName {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.hodOptionRole {
+    display: block;
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Delete confirm modal ── */
+.deleteModal {
+    background: var(--bg-surface);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 360px;
+    padding: 28px 24px;
+    text-align: center;
+    animation: modalIn 0.22s ease;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+}
+
+.deleteIcon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin: 0 auto 16px;
+}
+
+.deleteTitle {
+    margin: 0 0 8px;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.deleteSub {
+    margin: 0 0 24px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.deleteActions {
+    display: flex;
+    gap: 10px;
+}
+
+.deleteCancelBtn {
+    flex: 1;
+    height: 40px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.deleteCancelBtn:hover {
+    background: var(--bg-surface-alt);
+}
+
+.deleteConfirmBtn {
+    flex: 1;
+    height: 40px;
+    border: none;
+    border-radius: 10px;
+    background: var(--danger-text);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.deleteConfirmBtn:hover {
+    background: var(--danger-hover);
+}
+
+/* ── Add dept modal ── */
+.addDeptModal {
+    background: var(--bg-surface);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 420px;
+    animation: modalIn 0.22s ease;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+    overflow: hidden;
+}
+
+.addDeptForm {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.addDeptField {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.addDeptLabel {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.optional {
+    font-weight: 400;
+    text-transform: none;
+    color: var(--text-secondary);
+}
+
+.addDeptInput,
+.addDeptSelect {
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--text-primary);
+    background: var(--bg-surface-alt);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.addDeptInput:focus,
+.addDeptSelect:focus {
+    border-color: var(--accent);
+    background: var(--bg-surface);
+    box-shadow: 0 0 0 3px rgba(15, 110, 86, 0.1);
+}
+
+.addDeptError {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    padding: 10px 12px;
+    background: var(--danger-bg);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--danger-text);
+}
+
+.addDeptError i {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.addDeptActions {
+    display: flex;
+    gap: 10px;
+    padding-top: 4px;
+}
+
+.addDeptCancel {
+    flex: 1;
+    height: 40px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.addDeptCancel:hover {
+    background: var(--bg-surface-alt);
+}
+
+.addDeptSubmit {
+    flex: 1;
+    height: 40px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.addDeptSubmit:hover {
+    background: var(--accent-hover);
+}
+
+/* Disabled states */
+.addDeptSubmit:disabled,
+.addDeptCancel:disabled,
+.deleteConfirmBtn:disabled,
+.deleteCancelBtn:disabled,
+.hodOption:disabled,
+.actionBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 768px) {
+    .wrap {
+        padding: 16px 0 48px;
+    }
+
+    .header {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .headerRight {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .searchWrap input {
+        width: 100%;
+    }
+
+    .addBtn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .deptAction span {
+        display: none;
+    }
+
+    .deptAction {
+        padding: 5px 8px;
+    }
+
+    .toastStack {
+        bottom: 16px;
+        right: 16px;
+        left: 16px;
+    }
+
+    .toast {
+        max-width: 100%;
+    }
+
+    /* Comfortable touch targets for card-level actions on mobile */
+    .actionBtn,
+    .actionBtnPrimary {
+        width: 40px;
+        height: 40px;
+    }
+
+    .empCard {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .wrap {
+        padding: 12px 0 40px;
+    }
+
+    .title {
+        font-size: 19px;
+    }
+
+    .hodModal,
+    .addDeptModal {
+        border-radius: 14px;
+        max-height: 90vh;
+    }
+
+    .deptName {
+        font-size: 13px;
+    }
+
+    .empName {
+        font-size: 12px;
+    }
+
+    .empAvatar {
+        width: 34px;
+        height: 34px;
+        font-size: 11px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .spinner,
+    .hodSpinner,
+    .btnSpinner {
+        animation: none;
+    }
+
+    .deptGroup,
+    .deptBody,
+    .moveDeptDropdown {
+        animation: none;
+    }
+
+    .toast {
+        animation: none;
+    }
+}

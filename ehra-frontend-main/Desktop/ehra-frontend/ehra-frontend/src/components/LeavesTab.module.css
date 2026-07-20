@@ -1,0 +1,1735 @@
+/* ── Layout ──
+   No card chrome here on purpose — this sits directly on the page
+   background (same treatment as the Attendance tab), not inside a
+   bordered/shadowed panel. */
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: 0;
+    min-height: 0;
+}
+
+/* Two-pane list/detail layout used by the Requests section */
+.requestsLayout {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    position: relative; /* anchors the sliding detail overlay on mobile */
+}
+
+/* ── List panel ── */
+.listPanel {
+    width: 360px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border-color);
+    background: var(--bg-surface-alt);
+    min-height: 0;
+    overflow: hidden;
+}
+
+.listHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 16px 12px;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.listTitle {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+}
+
+.listTitle i {
+    color: var(--accent);
+    font-size: 17px;
+}
+
+.pendingCount {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+/* ── Status sub-tabs ── */
+.statusTabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.statusTab {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 10px 4px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    border-bottom: 2px solid transparent;
+    transition: all 0.12s;
+}
+
+.statusTab:hover {
+    color: var(--accent);
+    background: var(--bg-soft-accent);
+}
+
+.statusTabActive {
+    color: var(--accent);
+    font-weight: 600;
+    border-bottom-color: var(--accent);
+    background: var(--bg-soft-accent);
+}
+
+.tabCount {
+    background: var(--border-color);
+    color: var(--text-secondary);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 8px;
+    min-width: 18px;
+    text-align: center;
+}
+
+.statusTabActive .tabCount {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* ── List items ── */
+.list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+@media (max-width: 900px) {
+    .list {
+        padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    }
+}
+
+.listItem {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--bg-surface-alt);
+    cursor: pointer;
+    transition: background 0.12s;
+}
+
+.listItem:hover {
+    background: var(--bg-soft-accent);
+}
+
+.listItem.active {
+    background: var(--bg-soft-accent);
+    border-left: 3px solid var(--accent);
+}
+
+.empRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.empInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.empName {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.empDept {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.pill {
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+.leaveRange {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-primary);
+}
+
+.leaveRange i {
+    color: var(--accent);
+    font-size: 12px;
+}
+
+.daysBadge {
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 8px;
+}
+
+.listItemTime {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+/* ── Empty states ── */
+.empty {
+    padding: 20px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.emptyState {
+    padding: 40px 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+/* ── Detail panel ── */
+.detailPanel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    background: var(--bg-surface);
+}
+
+.placeholder {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    text-align: center;
+}
+
+.detailArea {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    padding: 18px 20px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    gap: 16px;
+}
+
+@media (max-width: 900px) {
+    .detailArea {
+        padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    }
+}
+
+.detailHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.detailEmpRow {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.detailAvatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.detailName {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 3px;
+}
+
+.detailEmail {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.detailDept {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 2px 0 0;
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    padding: 4px;
+    font-size: 16px;
+    border-radius: 6px;
+    transition: background 0.12s, color 0.12s;
+    flex-shrink: 0;
+}
+
+.closeBtn:hover {
+    background: var(--bg-surface-alt);
+    color: var(--text-primary);
+}
+
+/* Hidden on desktop — the detail pane sits right next to the list there,
+   so .closeBtn (which just deselects) is enough. Once the pane becomes a
+   full-screen overlay on mobile (see .requestsLayout.showDetail below),
+   this is the primary way back, alongside the swipe gesture. */
+.mobileBackBtn {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 4px 6px 4px 2px;
+    border-radius: 6px;
+    transition: background 0.12s, color 0.12s;
+}
+
+.mobileBackBtn:hover {
+    background: var(--bg-surface-alt);
+    color: var(--text-primary);
+}
+
+.mobileBackBtn i {
+    font-size: 15px;
+}
+
+.statusRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.statusBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.appliedAt {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.detailCard {
+    background: var(--bg-surface-alt);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.detailRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+}
+
+.detailLabel {
+    width: 80px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.detailValue {
+    color: var(--text-primary);
+}
+
+.reasonBox,
+.adminNoteBox {
+    background: var(--bg-surface-alt);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+
+.adminNoteBox {
+    background: var(--bg-soft-accent);
+    border-color: var(--border-color);
+}
+
+.reasonLabel {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 6px;
+}
+
+.reasonText {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+/* ── Actions ── */
+.actions {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 4px;
+    border-top: 1px solid var(--border-color);
+}
+
+.noteField {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.noteField label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.noteField input {
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--text-primary);
+    background: var(--bg-surface-alt);
+    outline: none;
+    transition: border-color 0.15s;
+    font-family: inherit;
+}
+
+.noteField input:focus {
+    border-color: var(--accent);
+    background: var(--bg-surface);
+}
+
+.actionBtns {
+    display: flex;
+    gap: 10px;
+}
+
+.approveBtn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.approveBtn:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+
+.approveBtn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.rejectBtn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--bg-surface);
+    color: var(--danger);
+    border: 1.5px solid var(--danger-border);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.rejectBtn:hover:not(:disabled) {
+    background: var(--danger-bg);
+}
+
+.rejectBtn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.rejectBox {
+    background: var(--danger-bg);
+    border: 1.5px solid var(--danger-border);
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.rejectBox label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--danger);
+}
+
+.rejectBox textarea {
+    border: 1.5px solid var(--danger-border);
+    border-radius: 7px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    resize: none;
+    outline: none;
+    color: var(--text-primary);
+    background: var(--bg-surface);
+}
+
+.rejectBox textarea:focus {
+    border-color: var(--danger);
+}
+
+.rejectConfirmBtns {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.cancelSmallBtn {
+    background: none;
+    border: 1.5px solid var(--border-color);
+    color: var(--text-secondary);
+    border-radius: 7px;
+    padding: 6px 14px;
+    font-size: 12.5px;
+    cursor: pointer;
+}
+
+.rejectConfirmBtn {
+    background: var(--danger);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 6px 14px;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.counts {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/* ── Employer top-level nav (Requests / Policies / Balances) ── */
+/* ──────────────────────────────────────────────────────────────────────── */
+
+.employerNav {
+    display: flex;
+    gap: 4px;
+    padding: 10px 0 0;
+    border-bottom: 0.5px solid var(--border-color);
+    flex-shrink: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+.employerNav::-webkit-scrollbar {
+    display: none;
+}
+
+/* Wraps the nav + its (mobile-only) scroll-position indicator. */
+.employerNavWrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+/* Thin scroll-linked progress cue underneath the nav — same idea as the
+   dashboard's bottom-nav indicator, only shown once the nav is a
+   horizontally-scrollable pill strip (mobile — see responsive section). */
+.employerNavScrollTrack {
+    display: none;
+}
+
+.employerNavScrollThumb {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    min-width: 24px;
+    border-radius: 999px;
+    background: var(--accent);
+    opacity: 0.5;
+    transition: left 0.18s cubic-bezier(0.4, 0, 0.2, 1), width 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.employerNavBtn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    height: 40px;
+    padding: 0 16px;
+    background: none;
+    border: none;
+    border-bottom: 2.5px solid transparent;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.employerNavBtn:hover {
+    color: var(--accent);
+}
+
+.employerNavBtn i {
+    font-size: 16px;
+}
+
+.employerNavBtnActive {
+    color: var(--accent);
+    font-weight: 600;
+    border-bottom-color: var(--accent);
+}
+
+.pendingCount {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 999px;
+    min-width: 18px;
+    text-align: center;
+}
+
+.employerNavBtnActive .pendingCount {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/* ── Generic section wrapper (Policies / Balances) ── */
+/* ──────────────────────────────────────────────────────────────────────── */
+
+.sectionWrap {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    padding: 16px 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* Belt-and-braces bottom clearance so the last card/row in whichever
+   section is open never sits behind the fixed mobile bottom nav — this
+   is its own nested scroll container, same as Attendance's tab body. */
+@media (max-width: 900px) {
+    .sectionWrap {
+        padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    }
+}
+
+.sectionHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sectionTitle {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.sectionTitle i {
+    color: var(--accent);
+    font-size: 19px;
+}
+
+.sectionSub {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+    max-width: 640px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/* ── Workflow timeline (detail panel) ── */
+/* ──────────────────────────────────────────────────────────────────────── */
+
+.timeline {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-surface-alt);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 16px;
+}
+
+.timelineStep {
+    display: flex;
+    position: relative;
+    padding-bottom: 18px;
+}
+
+.timelineStep:last-child {
+    padding-bottom: 0;
+}
+
+.timelineDot {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+    z-index: 1;
+}
+
+.timelineDotDone {
+    background: var(--accent);
+    color: #fff;
+}
+
+.timelineDotRejected {
+    background: var(--danger);
+    color: #fff;
+}
+
+.timelineDotPending {
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    border: 1.5px dashed var(--border-color);
+}
+
+.timelineLine {
+    position: absolute;
+    left: 12.5px;
+    top: 26px;
+    bottom: 0;
+    width: 2px;
+    background: var(--bg-soft-accent);
+}
+
+.timelineLineDone {
+    background: var(--accent);
+}
+
+.timelineContent {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-left: 12px;
+    padding-top: 3px;
+}
+
+.timelineLabel {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.timelineDetail {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.timelineNote {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-top: 1px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/* ── Detail panel additions: leave-type badge + stage description ── */
+/* ──────────────────────────────────────────────────────────────────────── */
+
+.leaveTypeBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--bg-soft-accent);
+    padding: 4px 11px;
+    border-radius: 999px;
+}
+
+.stageDesc {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--accent);
+    background: var(--bg-soft-accent);
+    border-radius: 8px;
+    padding: 9px 12px;
+    margin: 0;
+}
+
+.active {
+    background: var(--bg-soft-accent);
+    border-left: 3px solid var(--accent);
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/* ── Policy editor ── */
+/* ──────────────────────────────────────────────────────────────────────── */
+
+.policyList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.policyNote {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    background: var(--bg-soft-accent);
+    color: var(--accent-hover);
+    border-radius: 10px;
+    padding: 12px 15px;
+    font-size: 12.5px;
+    line-height: 1.6;
+}
+
+.policyNote i {
+    color: var(--accent);
+    font-size: 16px;
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+
+.policyRow {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px 18px;
+    transition: opacity 0.15s, background 0.15s;
+}
+
+.policyRowInactive {
+    background: var(--bg-surface-alt);
+    opacity: 0.7;
+}
+
+.policyTypeHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.policyTypeName {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.policyTypeKey {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    letter-spacing: 0.02em;
+}
+
+/* Toggle switch */
+.toggleLabel {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.toggleInput {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggleSlider {
+    position: relative;
+    width: 38px;
+    height: 22px;
+    background: var(--bg-soft-accent);
+    border-radius: 999px;
+    transition: background 0.18s;
+    flex-shrink: 0;
+}
+
+.toggleSlider::before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    background: var(--bg-surface);
+    border-radius: 50%;
+    transition: transform 0.18s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+
+.toggleInput:checked+.toggleSlider {
+    background: var(--accent);
+}
+
+.toggleInput:checked+.toggleSlider::before {
+    transform: translateX(16px);
+}
+
+.toggleInput:focus-visible+.toggleSlider {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.toggleText {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 50px;
+}
+
+.policyFields {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border-color);
+}
+
+.policyField {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.policyField label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.policyFieldHint {
+    font-size: 11.5px;
+    font-weight: 400;
+    color: var(--text-secondary);
+}
+
+.policyInput {
+    width: 100px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    padding: 8px 11px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--bg-surface-alt);
+}
+
+.policyInput:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--bg-surface);
+}
+
+.policyCheckField label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.policyCheckField input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.policySaveRow {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 14px;
+}
+
+.policySaveBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 16px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.policySaveBtn:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+
+.policySaveBtn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.policySavedMsg {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/* ── Balances matrix table ── */
+/* ──────────────────────────────────────────────────────────────────────── */
+
+.balancesTable {
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+}
+
+/* Phone-only alternative to the table above — see .balancesCards in the
+   responsive section for when each swaps in. A sideways-scrolling
+   spreadsheet is fine on a tablet but a bad first move on a phone, so
+   below that width each employee becomes a card and each leave type
+   becomes a small labeled chip instead of a table cell. */
+.balancesCards {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.balanceCard {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 13px;
+    overflow: hidden;
+}
+
+/* The whole header row is the tap target — avatar/name on the left,
+   a quick "how many days left in total" figure plus a chevron on the
+   right, so a collapsed card still tells you something before you open
+   it rather than just being a name with nothing underneath. */
+.balanceCardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    padding: 14px 16px;
+    transition: background 0.12s;
+}
+
+.balanceCardHeader:hover {
+    background: var(--bg-surface-alt);
+}
+
+.balanceCardSummary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.balanceCardTotal {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.balanceCardChevron {
+    font-size: 17px;
+    color: var(--text-secondary);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.balanceCardChevronOpen {
+    transform: rotate(180deg);
+    color: var(--accent);
+}
+
+.balanceChipGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    padding: 0 16px 14px;
+    animation: balanceChipGridIn 0.18s ease;
+}
+
+@keyframes balanceChipGridIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .balanceChipGrid {
+        animation: none;
+    }
+}
+
+.balanceChip {
+    background: var(--bg-surface-alt);
+    border: 1px solid var(--border-color);
+    border-radius: 9px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.balanceChipTop {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.balanceChipLabel {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.balanceChipVal {
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.empTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+}
+
+.empTable thead th {
+    text-align: left;
+    padding: 11px 14px;
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+}
+
+.empTable thead th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: var(--bg-surface-alt);
+}
+
+.empTable tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--bg-surface-alt);
+    vertical-align: middle;
+}
+
+.empTable tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.empTable tbody tr:hover td {
+    background: var(--bg-surface-alt);
+}
+
+.empTable tbody td:first-child {
+    position: sticky;
+    left: 0;
+    background: var(--bg-surface);
+    z-index: 1;
+}
+
+.empTable tbody tr:hover td:first-child {
+    background: var(--bg-surface-alt);
+}
+
+.empNameCell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 160px;
+}
+
+.empAv {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11.5px;
+    font-weight: 700;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.empAv img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.empName {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.empEmail {
+    font-size: 11px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.muted {
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.balanceCellWrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 56px;
+}
+
+.balanceCellVal {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.miniBar {
+    width: 100%;
+    height: 3px;
+    background: var(--border-color);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.miniBarFill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s;
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/* ── Responsive ── */
+/* ──────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 860px) {
+    /* ── Requests: list stays full-width in normal flow; detail becomes
+       a full-screen overlay that slides in from the right instead of
+       being squeezed into a second column or stacked below the list.
+       Both panes stay mounted the whole time (.showDetail just toggles
+       the transform) so there's always something real to animate
+       between, and it's what the swipe-to-go-back handlers in the
+       component grab onto. ── */
+    .listPanel {
+        width: 100%;
+        border-right: none;
+    }
+
+    .detailPanel {
+        position: absolute;
+        inset: 0;
+        transform: translateX(100%);
+        transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+        z-index: 2;
+        box-shadow: -6px 0 16px -8px var(--shadow-color);
+    }
+
+    .requestsLayout.showDetail .detailPanel {
+        transform: translateX(0);
+    }
+
+    .placeholder {
+        display: none; /* list is what's visible when nothing's selected */
+    }
+
+    .mobileBackBtn {
+        display: flex;
+    }
+
+    /* ── Employer nav becomes a scrollable strip of filled pills instead
+       of underlined tabs — reads as a native segmented control, and
+       the thin thumb underneath hints there's more to scroll to. ── */
+    .employerNav {
+        gap: 8px;
+        padding: 10px 2px;
+        border-bottom: none;
+    }
+
+    .employerNavBtn {
+        height: 34px;
+        padding: 0 14px;
+        border-radius: 999px;
+        border-bottom: none;
+        background: var(--bg-surface-alt);
+        border: 1px solid var(--border-color);
+    }
+
+    .employerNavBtn:hover {
+        background: var(--bg-soft-accent);
+    }
+
+    .employerNavBtnActive {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+    }
+
+    .employerNavBtnActive i {
+        color: #fff;
+    }
+
+    /* `.employerNavBtn:hover` above is a class+pseudo-class selector,
+       which beats `.employerNavBtnActive` alone on specificity — without
+       this rule, hovering the pill that's already active silently reverts
+       its text from white back to var(--accent), which is the exact same
+       green as the pill's own fill. Same specificity as the hover rule
+       above (also class+pseudo-class), so source order decides — this
+       comes after it, so it wins on the active pill specifically. */
+    .employerNavBtnActive:hover {
+        background: var(--accent-hover);
+        border-color: var(--accent-hover);
+        color: #fff;
+    }
+
+    .employerNavBtnActive:hover i {
+        color: #fff;
+    }
+
+    /* The On Leave badge had no "sitting on a solid green pill" variant —
+       its default pale-green-on-translucent-green look nearly disappears
+       once the pill behind it is a solid fill, active or hovered. */
+    .employerNavBtnActive .onLeaveNavBadge,
+    .employerNavBtnActive:hover .onLeaveNavBadge {
+        background: rgba(255, 255, 255, 0.25);
+        color: #fff;
+    }
+
+    .employerNavScrollTrack {
+        display: block;
+        position: relative;
+        height: 3px;
+        margin: 0 2px 8px;
+        border-radius: 999px;
+        background: var(--border-color);
+        overflow: hidden;
+    }
+
+    /* ── Status sub-tabs (Awaiting Me / In Progress / …) — equal-width
+       underline tabs get cramped with four labels + counts on a phone,
+       so below this width they become the same scrollable pill idiom
+       as the employer nav above, just smaller. ── */
+    .statusTabs {
+        overflow-x: auto;
+        scrollbar-width: none;
+        gap: 6px;
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .statusTabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .statusTab {
+        flex: none;
+        border-bottom: none;
+        border-radius: 999px;
+        padding: 7px 12px;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        white-space: nowrap;
+    }
+
+    .statusTabActive {
+        border-bottom: none;
+        background: var(--accent);
+        color: #fff;
+    }
+
+    .statusTabActive .tabCount {
+        background: rgba(255, 255, 255, 0.25);
+        color: #fff;
+    }
+
+    .sectionWrap {
+        padding: 14px 0 24px;
+    }
+
+    .policyFields {
+        gap: 14px;
+    }
+
+    /* Toggle's "Active"/"Inactive" text is redundant with the slider
+       itself once space is tight — the slider alone still reads fine. */
+    .toggleText {
+        display: none;
+    }
+
+    /* ── Balances: table gives way to the card list (see .balancesCards
+       above) — nothing to pan sideways to read on a phone. ── */
+    .balancesTable {
+        display: none;
+    }
+
+    .balancesCards {
+        display: flex;
+    }
+
+    .balanceChipGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 860px) and (prefers-reduced-motion: reduce) {
+    .detailPanel {
+        transition: none;
+    }
+}
+
+/* Smallest phones — balance chips read better as a single column once
+   two-across gets too narrow to show both the label and value. */
+@media (max-width: 380px) {
+    .balanceChipGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/* ── On Leave section (employer) ── */
+/* ──────────────────────────────────────────────────────────────────────── */
+
+.onLeaveNavBadge {
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 999px;
+    min-width: 18px;
+    text-align: center;
+}
+
+/* Empty state */
+.onLeaveEmpty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 48px 24px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.onLeaveEmptyTitle {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.onLeaveEmptySub {
+    font-size: 13px;
+    line-height: 1.6;
+    max-width: 300px;
+    margin: 0;
+}
+
+/* Card grid */
+.onLeaveGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+}
+
+.onLeaveCard {
+    border: 1px solid var(--border-color);
+    border-radius: 13px;
+    padding: 16px;
+    background: var(--bg-surface);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.onLeaveCard:hover {
+    border-color: var(--border-color);
+    box-shadow: 0 2px 8px rgba(15, 110, 86, 0.06);
+}
+
+.onLeaveCardTop {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.onLeaveAvatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.avatar img,
+.detailAvatar img,
+.onLeaveAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.onLeaveCardInfo {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.onLeaveCardName {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.onLeaveCardDept {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+}
+
+/* Shared with EmployeeDashboard.module.css — days left pill */
+.daysLeftPill {
+    margin-left: auto;
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+/* Leave type pill */
+.onLeaveTypePill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--bg-soft-accent);
+    padding: 4px 10px;
+    border-radius: 999px;
+    width: fit-content;
+}
+
+.onLeaveTypePill i {
+    font-size: 13px;
+}
+
+/* Date row */
+.onLeaveDateRow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.onLeaveDateRow i {
+    color: var(--accent);
+    font-size: 13px;
+}
+
+.onLeaveDaysBadge {
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 999px;
+    margin-left: 2px;
+}
+
+/* Cover person row */
+.onLeaveCoverRow {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12.5px;
+    color: var(--text-primary);
+}
+
+@media (max-width: 720px) {
+    .onLeaveGrid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,115 @@
+/* Shared by every phone-auth screen (Register, Login's 2FA step,
+   ForgotPassword) — same token system as Register.module.css /
+   Login.module.css: dark green #0b1f1a, mint accent #55e0ae, gold
+   #c6a15b, border #d7e2de. Kept in its own module rather than folded
+   into Register.module.css so Login.jsx and ForgotPassword.jsx can share
+   it without importing signup-specific layout classes. */
+
+.hint {
+    font-size: 12px;
+    color: #6b7a75;
+    margin-top: 2px;
+}
+
+/* ── react-phone-number-input override ──────────────────────────────────
+   The library ships unstyled-ish defaults; this reshapes it to match the
+   app's existing .inputWrap input look exactly — same height, radius,
+   border, and focus ring — so it doesn't read as a bolted-on widget. */
+.phoneInputWrap {
+    --PhoneInputCountryFlag-height: 14px;
+}
+
+.phoneInput {
+    display: flex;
+    align-items: center;
+    height: 42px;
+    padding: 0 12px;
+    border: 0.5px solid #d7e2de;
+    border-radius: 9px;
+    background: #fff;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.phoneInput:focus-within {
+    border-color: #55e0ae;
+    box-shadow: 0 0 0 3px rgba(85, 224, 174, 0.18);
+}
+
+.phoneInput :global(.PhoneInputInput) {
+    border: none;
+    outline: none;
+    font-size: 14px;
+    font-family: inherit;
+    color: #111;
+    background: transparent;
+    height: 100%;
+    padding: 0;
+}
+
+.phoneInput :global(.PhoneInputCountry) {
+    margin-right: 10px;
+}
+
+.phoneInput :global(.PhoneInputCountrySelect) {
+    font-size: 13px;
+}
+
+/* ── OTP step ── */
+.otpHeadline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 18px;
+    font-size: 13.5px;
+    color: #37423e;
+    flex-wrap: wrap;
+}
+
+.otpHeadline strong {
+    color: #0b1f1a;
+}
+
+.changeNumberBtn {
+    border: none;
+    background: none;
+    color: #1f8a63;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 0;
+    white-space: nowrap;
+}
+
+.changeNumberBtn:hover {
+    text-decoration: underline;
+}
+
+.otpInput {
+    letter-spacing: 10px;
+    font-weight: 700;
+    font-size: 20px !important;
+    text-align: center;
+    padding-left: 12px !important;
+}
+
+.resendBtn {
+    border: none;
+    background: none;
+    color: #1f8a63;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 6px 0;
+    margin-top: -6px;
+    margin-bottom: 12px;
+}
+
+.resendBtn:disabled {
+    color: #8fa39c;
+    cursor: default;
+}
+
+.resendBtn:not(:disabled):hover {
+    text-decoration: underline;
+}

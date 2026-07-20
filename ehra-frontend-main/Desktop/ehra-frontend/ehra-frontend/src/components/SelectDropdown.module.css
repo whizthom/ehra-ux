@@ -1,0 +1,197 @@
+.wrap {
+    position: relative;
+    width: 100%;
+}
+
+.wrapDisabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 13px;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+}
+
+.trigger:hover {
+    border-color: var(--accent);
+}
+
+.trigger:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--bg-soft-accent);
+}
+
+.triggerIcon {
+    color: var(--accent);
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.triggerLabel {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chevron {
+    color: var(--text-secondary);
+    font-size: 14px;
+    flex-shrink: 0;
+    transition: transform 0.15s ease;
+}
+
+.chevronOpen {
+    transform: rotate(180deg);
+}
+
+.menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 500;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px var(--shadow-color);
+    padding: 6px;
+    max-height: 260px;
+    overflow-y: auto;
+    animation: selectMenuIn 0.12s ease-out;
+}
+
+@keyframes selectMenuIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Used when there isn't enough room below the trigger to clear the fixed
+   mobile bottom nav — anchors the menu above the trigger instead, with a
+   matching upward slide-in so it still feels intentional either way. */
+.menuTop {
+    top: auto;
+    bottom: calc(100% + 6px);
+    animation-name: selectMenuInTop;
+}
+
+@keyframes selectMenuInTop {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    border: none;
+    background: none;
+    color: var(--text-primary);
+    font-size: 13px;
+    font-family: inherit;
+    padding: 9px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+}
+
+.option:hover,
+.optionHighlight {
+    background: var(--bg-soft-accent);
+}
+
+.optionIcon {
+    color: var(--accent);
+    font-size: 15px;
+    flex-shrink: 0;
+    width: 18px;
+    text-align: center;
+}
+
+.optionText {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.optionLabel {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.optionSublabel {
+    font-size: 11px;
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.optionActive {
+    background: var(--bg-soft-accent);
+    color: var(--accent-hover);
+    font-weight: 600;
+}
+
+.optionActive .optionSublabel {
+    color: var(--accent-hover);
+    opacity: 0.75;
+}
+
+.check {
+    color: var(--accent-hover);
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.emptyRow {
+    padding: 14px 10px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    flex-shrink: 0;
+    letter-spacing: 0.2px;
+}

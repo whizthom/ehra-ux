@@ -1,0 +1,2134 @@
+/* ── Layout ── */
+.dash {
+    display: flex;
+    height: 100vh;
+    /* dvh matches the browser's actual visible viewport on mobile, where
+       100vh can be taller than what's on-screen while the address bar is
+       showing — that mismatch is what let the whole app shell (topbar
+       included) scroll away. Browsers without dvh support just keep the
+       100vh value above. */
+    height: 100dvh;
+    width: 100vw;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg-page);
+}
+
+/* ── Sidebar ── */
+.sidebar {
+    width: 220px;
+    background: var(--bg-sidebar);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.sbLogo {
+    padding: 22px 20px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+}
+
+.sbLogoIcon {
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.sbLogoImg {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.sbLogoText {
+    color: var(--sidebar-text);
+    font-size: 16px;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sbNav {
+    flex: 1;
+    padding: 10px 0;
+    overflow-y: auto;
+}
+
+.sbSection {
+    padding: 10px 20px 4px;
+    font-size: 10px;
+    color: var(--sidebar-muted);
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.sbItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 20px;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 13px;
+    transition: background 0.15s, color 0.15s;
+}
+
+.sbItem i {
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.sbItem:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--sidebar-text);
+}
+
+.sbItem.active {
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--sidebar-text);
+    font-weight: 500;
+}
+
+/* Light mode's sidebar is the saturated brand green, where white text at
+   60% opacity still reads clearly. Dark mode's sidebar is near-black
+   (--bg-sidebar: #111b21), so that same 60% white reads as a dim,
+   low-contrast grey — bump it up so nav labels are actually legible. */
+[data-theme="dark"] .sbItem {
+    color: rgba(233, 237, 239, 0.75);
+}
+
+.sbBadge {
+    margin-left: auto;
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--bg-soft-accent);
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 10px;
+}
+
+.sbFooter {
+    padding: 14px 20px;
+    border-top: 0.5px solid rgba(255, 255, 255, 0.1);
+}
+
+.sbUser {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sbAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--sidebar-text);
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.sbAvatarImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.sbUserName {
+    font-size: 13px;
+    color: var(--sidebar-text);
+    font-weight: 500;
+}
+
+.sbUserRole {
+    font-size: 11px;
+    color: var(--sidebar-muted);
+}
+
+.sbUserRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.sbLogoutBtn {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--sidebar-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s;
+}
+
+.sbLogoutBtn:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: var(--sidebar-text);
+}
+
+/* ── Main ── */
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 8px 24px;
+    min-height: 56px;
+    background: var(--bg-surface);
+    border-bottom: 0.5px solid var(--border-color);
+    flex-shrink: 0;
+    /* Belt-and-braces: keeps the header pinned even if something makes
+       .main taller than the viewport and the page itself ends up
+       scrolling, instead of only relying on .content being the sole
+       scroll container. */
+    position: sticky;
+    top: 0;
+    z-index: 30;
+}
+
+.topbarTitle {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.topbarTitleShort {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    .topbarTitleFull {
+        display: none;
+    }
+
+    .topbarTitleShort {
+        display: inline;
+    }
+}
+
+/* Mobile-only business logo + name, standing in for the plain company-name
+   text on phones — the date/time underneath stays exactly where it's
+   always been (.topbarSub), just like the desktop title. */
+.topbarMobileBrand {
+    display: none;
+}
+
+@media (max-width: 640px) {
+    .topbarTitleShort {
+        display: none;
+    }
+
+    .topbarMobileBrand {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .topbarMobileLogo {
+        width: 26px;
+        height: 26px;
+        border-radius: 7px;
+        flex-shrink: 0;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-soft-accent);
+        border: 0.5px solid var(--border-color);
+    }
+
+    .topbarMobileLogoImg {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .topbarMobileLogo i {
+        font-size: 13px;
+        color: var(--accent);
+    }
+
+    .topbarMobileLogoText {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text-primary);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 60vw;
+    }
+}
+
+.topbarSub {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 1px;
+}
+
+.topbarGreeting {
+    /* superseded by .empGreeting below — kept only so nothing else in
+       this stylesheet that might still reference it breaks. */
+    display: none;
+}
+
+/* ── Employee/HOD dashboard topbar heading ───────────────────────────────
+   A single cohesive block, not three breakpoint-specific markups stitched
+   together: the greeting is always the hero text, the workspace name is
+   always a small secondary tag next to the date. Scales down by font-size
+   alone, so there's nothing to swap in/out at each breakpoint. */
+.empTopbarHeading {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.empGreeting {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+}
+
+.empGreetingIcon {
+    font-size: 18px;
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+.empGreetingSub {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+}
+
+.empGreetingDate {
+    white-space: nowrap;
+}
+
+.empGreetingDivider {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    opacity: 0.5;
+    flex-shrink: 0;
+}
+
+.empWorkspaceTag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 10px 2px 4px;
+    border-radius: 999px;
+    background: var(--bg-surface-alt);
+    border: 0.5px solid var(--border-color);
+    font-weight: 600;
+    color: var(--text-secondary);
+    max-width: 46vw;
+    overflow: hidden;
+}
+
+.empWorkspaceLogo {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-soft-accent);
+}
+
+.empWorkspaceLogo i {
+    font-size: 10px;
+    color: var(--accent);
+}
+
+.empWorkspaceLogoImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.empWorkspaceTag>*:last-child:not(.empWorkspaceLogo) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    .empGreeting {
+        font-size: 17px;
+    }
+
+    .empGreetingIcon {
+        font-size: 16px;
+    }
+
+    .empGreetingSub {
+        gap: 6px;
+    }
+
+    .empWorkspaceTag {
+        max-width: 50vw;
+        padding: 2px 8px 2px 3px;
+    }
+}
+
+@media (max-width: 420px) {
+
+    /* Tightest phones: date and workspace tag rarely both fit on one
+       line at 12.5px next to a 17px heading — let them wrap onto their
+       own line rather than truncating the date. */
+    .empGreetingSub {
+        row-gap: 2px;
+    }
+}
+
+.topbarRight {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.notifBtn {
+    position: relative;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: var(--bg-surface-alt);
+    border: 0.5px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-primary);
+}
+
+.notifDot {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--danger);
+    border: 1.5px solid var(--bg-surface);
+}
+
+.inviteBtn {
+    height: 34px;
+    padding: 0 14px;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: inherit;
+    transition: background 0.15s;
+}
+
+.inviteBtn:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+
+.inviteBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+    .inviteBtn {
+        display: none;
+    }
+}
+
+/* ── Content ── */
+.content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+}
+
+/* Full-height content area (for tabs like Messages, Workforce, Attendance).
+   overflow-y: auto (rather than hidden) so any tab whose content is taller
+   than the viewport scrolls instead of getting clipped; tabs that already
+   manage their own internal scroll region (e.g. Messages) are unaffected
+   since their inner panes are sized to fit exactly.
+   NOTE: this must stay ABOVE the responsive media query below — it's a
+   plain (non-media) rule, and CSS applies same-specificity rules in source
+   order regardless of media queries, so if this appeared after the mobile
+   override further down, its shorthand `padding` would silently reset
+   padding-bottom back to 20px on every screen size and re-hide content
+   behind the fixed mobile bottom nav. */
+.contentFull {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 24px;
+    min-height: 0;
+}
+
+/* Attendance opted out of the standard card/box treatment and wants to
+   show as much table width as possible — same vertical rhythm as
+   .contentFull, much less horizontal margin eaten up on the sides. */
+.contentFullNarrow {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 10px;
+    min-height: 0;
+    /* Belt-and-braces alongside the matching fix in AttendanceSection /
+       QrcodeTab / BusinessSettingsTab's own .tabBody — those already stop
+       scroll-chaining at their own boundary, this stops it here too so
+       nothing can bleed past this container either. */
+    overscroll-behavior: contain;
+}
+
+@media (max-width: 480px) {
+    .contentFullNarrow {
+        padding: 14px 6px;
+    }
+}
+
+/* ── Invite panel ── */
+.invitePanel {
+    position: relative;
+    background: var(--bg-soft-accent);
+    border: 0.5px solid var(--bg-soft-accent);
+    border-radius: 12px;
+    padding: 12px 40px 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: invitePanelIn 0.22s ease;
+}
+
+@keyframes invitePanelIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Plays while the card is being dismissed via the cancel button — the
+   card actually unmounts once this finishes (see dismissInviteLink),
+   so it reads as being cancelled off the screen rather than just
+   vanishing. */
+.invitePanelClosing {
+    animation: invitePanelOut 0.2s ease forwards;
+    pointer-events: none;
+}
+
+@keyframes invitePanelOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.97);
+    }
+}
+
+.invCancelBtn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 0.5px solid var(--border-color);
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.invCancelBtn:hover {
+    background: var(--bg-surface-alt);
+    color: var(--text-primary);
+}
+
+.inviteLinkInput {
+    flex: 1;
+    height: 34px;
+    padding: 0 12px;
+    border: 0.5px solid var(--bg-soft-accent);
+    border-radius: 8px;
+    font-size: 12px;
+    background: var(--bg-surface);
+    color: var(--accent-hover);
+    outline: none;
+    font-family: inherit;
+}
+
+.invActions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.invActionBtn {
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    border: none;
+    transition: background 0.15s;
+}
+
+.invCopy {
+    background: var(--accent);
+    color: #fff;
+}
+
+.invCopy:hover {
+    background: var(--accent-hover);
+}
+
+.invWa {
+    background: var(--bg-surface);
+    color: var(--accent-hover);
+    border: 0.5px solid var(--bg-soft-accent);
+}
+
+.invWa:hover {
+    background: var(--bg-soft-accent);
+}
+
+/* Desktop/tablet: invite-link card sits in its usual spot near the top
+   of the page. Hidden on phones, where a second copy renders right
+   under the Quick actions row instead (see .inviteLinkMobileSlot) —
+   `display: contents` so this wrapper adds no box of its own when the
+   card is showing. */
+.inviteLinkDesktopSlot {
+    display: contents;
+}
+
+@media (max-width: 640px) {
+    .inviteLinkDesktopSlot {
+        display: none;
+    }
+}
+
+/* Phones only: the same invite-link card, rendered directly under the
+   Quick actions pill row inside the same card, so the generated link
+   shows up exactly where "Invite employee" was tapped instead of only
+   appearing near the top of the page. */
+.inviteLinkMobileSlot {
+    display: none;
+}
+
+@media (max-width: 640px) {
+    .inviteLinkMobileSlot {
+        display: block;
+        margin: 12px 16px 4px;
+    }
+
+    /* Icon + input + actions no longer fit comfortably in one row at
+       phone widths, so this stacks into a compact vertical card instead
+       of squeezing everything horizontally. */
+    .inviteLinkMobileSlot .invitePanel {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .inviteLinkMobileSlot .invActions {
+        gap: 8px;
+    }
+
+    .inviteLinkMobileSlot .invActionBtn {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+/* ── Today's Pulse (mobile-only hero widget) ── */
+.todaysPulseMobile {
+    display: none;
+}
+
+/* ── Stats ── */
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.statCard {
+    background: var(--bg-surface);
+    border: 0.5px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.statIcon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+
+.teal {
+    background: var(--bg-soft-accent);
+}
+
+.teal i {
+    color: var(--accent);
+}
+
+.amber {
+    background: var(--warning-bg);
+}
+
+.amber i {
+    color: var(--warning-text);
+}
+
+.blue {
+    background: var(--info-bg);
+}
+
+.blue i {
+    color: var(--info-text);
+}
+
+.coral {
+    background: var(--danger-bg);
+}
+
+.coral i {
+    color: #993c1d;
+}
+
+/* This one icon color was left as a light-mode literal rather than a
+   variable when .teal/.amber/.blue were converted — harmless in light
+   mode, but it meant this specific icon ignored dark mode entirely.
+   Overridden here rather than switched to var() outright so light mode's
+   exact shade is untouched for now, per your "light mode later" note. */
+[data-theme="dark"] .coral i {
+    color: var(--danger-text);
+}
+
+.statNum {
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.statLabel {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.statTrend {
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+/* ── Row 2 ── */
+.row2 {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 16px;
+    min-width: 0;
+}
+
+.panel {
+    background: var(--bg-surface);
+    border: 0.5px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    min-width: 0;
+}
+
+.panelHdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+/* Recent activity's header doubles as a collapse/expand control on mobile
+   and desktop alike — starts closed so the dashboard opens shorter. */
+.panelHdrToggle {
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.panelHdrToggle .panelHdr {
+    margin-bottom: 0;
+}
+
+.panelHdrToggle .dirHdr {
+    margin-bottom: 0;
+}
+
+.dirBody {
+    margin-top: 14px;
+}
+
+.panelHdrRight {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.panelChevron {
+    font-size: 16px;
+    color: var(--text-secondary);
+    transition: transform 0.15s;
+}
+
+.actBody {
+    flex: 1;
+    min-width: 0;
+}
+
+.panelTitle {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.panelAction {
+    font-size: 12px;
+    color: var(--accent);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0;
+}
+
+.qaGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.qaBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--bg-surface-alt);
+    border: 0.5px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-family: inherit;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    text-align: left;
+}
+
+.qaBtn i {
+    font-size: 15px;
+    color: var(--text-secondary);
+    transition: color 0.15s;
+}
+
+.qaBtn:hover {
+    background: var(--bg-soft-accent);
+    border-color: var(--bg-soft-accent);
+    color: var(--accent-hover);
+}
+
+.qaBtn:hover i {
+    color: var(--accent);
+}
+
+/* Small colored icon chip inside each quick-action button — mirrors the
+   stat cards' teal/amber/blue/coral system so the two areas read as one
+   cohesive palette instead of introducing new colors. */
+.qaIconWrap {
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.qaIconWrap i {
+    font-size: 13px;
+}
+
+/* Only meaningful once the row becomes a horizontally scrolling pill
+   strip on phones — see the phone-layout media query below. */
+.qaScrollTrack {
+    display: none;
+}
+
+/* ── Activity ── */
+.activityList {
+    display: flex;
+    flex-direction: column;
+    margin-top: 14px;
+}
+
+.actItem {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 0.5px solid var(--border-color);
+}
+
+.actItem:last-child {
+    border-bottom: none;
+}
+
+.actDot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.dot_in {
+    background: var(--bg-soft-accent);
+}
+
+.dot_in i {
+    color: var(--accent);
+}
+
+.dot_out {
+    background: var(--danger-bg);
+}
+
+.dot_out i {
+    color: #993c1d;
+}
+
+[data-theme="dark"] .dot_out i {
+    color: var(--danger-text);
+}
+
+.dot_req {
+    background: var(--warning-bg);
+}
+
+.dot_req i {
+    color: var(--warning-text);
+}
+
+.dot_inv {
+    background: var(--info-bg);
+}
+
+.dot_inv i {
+    color: var(--info-text);
+}
+
+.actText {
+    font-size: 12px;
+    color: var(--text-primary);
+    line-height: 1.4;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.actTime {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+/* ── Empty / loading state text (pending approvals, pending leave
+   requests, latest attendance) — matched to Recent activity's type
+   scale rather than the browser's default paragraph size. ── */
+.emptyState {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    padding: 12px 0;
+}
+
+/* ── Directory ── */
+.dirPanel {
+    background: var(--bg-surface);
+    border: 0.5px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.dirHdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 12px;
+}
+
+.searchWrap {
+    position: relative;
+    max-width: 240px;
+    flex: 1;
+}
+
+.searchWrap i {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+.searchWrap input {
+    width: 100%;
+    height: 32px;
+    padding: 0 10px 0 32px;
+    border: 0.5px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 12px;
+    font-family: inherit;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    outline: none;
+}
+
+.searchWrap input:focus {
+    border-color: var(--accent);
+}
+
+.empTable {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+/* Lets the table scroll horizontally rather than clip/overflow at
+   tablet widths, where there's more room than a phone but still not
+   quite enough for 6 comfortable columns. Below 640px the table itself
+   switches to stacked cards instead (see .attendanceTable), so this
+   wrapper is effectively a no-op there. */
+.tableScrollWrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.empTable th {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-align: left;
+    padding: 0 10px 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.empTable td {
+    padding: 10px;
+    border-top: 0.5px solid var(--border-color);
+    font-size: 12px;
+    color: var(--text-primary);
+    vertical-align: middle;
+}
+
+.empNameCell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.attendanceTable {
+    min-width: 560px;
+}
+
+.empAv {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bg-soft-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--accent-hover);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.empAv img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.empName {
+    font-weight: 500;
+    font-size: 12px;
+}
+
+.empEmail {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.muted {
+    color: var(--text-secondary);
+}
+
+.statusPill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.pill_present {
+    background: var(--bg-soft-accent);
+    color: var(--accent-hover);
+}
+
+.pill_absent {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.pill_pending {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.pill_late {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.pill_early {
+    background: var(--info-bg);
+    color: var(--info-text);
+}
+
+.tblActions {
+    display: flex;
+    gap: 6px;
+}
+
+.tblBtn {
+    height: 26px;
+    padding: 0 10px;
+    border: 0.5px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    font-family: inherit;
+    transition: background 0.15s;
+}
+
+.tblBtn:hover {
+    background: var(--bg-surface-alt);
+}
+
+.tblBtn.danger:hover {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border-color: var(--danger-border);
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+    .sidebar {
+        display: none;
+    }
+
+    .statsGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .row2 {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .content {
+        padding: 16px;
+        padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .contentFull {
+        padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .contentFullNarrow {
+        padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .topbar {
+        padding: 6px 16px;
+        min-height: 52px;
+    }
+
+    .topbarTitle {
+        font-size: 14px;
+    }
+}
+
+/* ── Phone layout ──────────────────────────────────────────────────────
+   Stat cards collapse to one compact single-line row each (small icon,
+   label, number — no wasted vertical space), and Quick actions becomes a
+   horizontally scrollable pill strip, styled like WhatsApp's Unread /
+   Favourites / Groups filter row, so it reads as swipeable at a glance. */
+@media (max-width: 640px) {
+
+    /* Totals row (Total/Active/Pending/Unread) is dropped entirely on
+       phones — Today's Pulse + Quick actions + Recent activity carry
+       the dashboard instead. */
+    .statsGrid {
+        display: none;
+    }
+
+    .todaysPulseMobile {
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    /* Quick actions loses its card chrome and title on phones so the
+       pill row reads as a native top filter strip (WhatsApp-style
+       All / Unread / Favourites / Groups), not a titled panel. */
+    .qaPanel {
+        background: none;
+        border: none;
+        padding: 0;
+    }
+
+    .qaPanelHdr {
+        display: none;
+    }
+
+    /* qaScrollWrap's bleed margin existed to cancel the panel's own
+       16px padding; with that padding gone on mobile, bleed only to
+       the content edge instead of past it. */
+    .qaPanel .qaScrollWrap {
+        margin: 0;
+    }
+
+    .qaPanel .qaGrid {
+        padding: 2px 16px 4px;
+    }
+
+    /* Notification bell already surfaces this feed on phones. */
+    .recentActivityPanel {
+        display: none;
+    }
+
+    .statCard {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border-radius: 10px;
+    }
+
+    .statIcon {
+        order: 1;
+        width: 26px;
+        height: 26px;
+        border-radius: 7px;
+        margin-bottom: 0;
+        flex-shrink: 0;
+    }
+
+    .statIcon i {
+        font-size: 12px !important;
+    }
+
+    .statLabel {
+        order: 2;
+        flex: 1;
+        font-size: 12px;
+        color: var(--text-secondary);
+    }
+
+    .statNum {
+        order: 3;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    /* Trend detail dropped here — the single line is for label + number
+       only, keeping each row compact. */
+    .statTrend {
+        display: none;
+    }
+
+    /* ── Quick actions: scrollable pill strip ── */
+    .row2>.panel:first-child {
+        position: relative;
+        padding-bottom: 10px;
+    }
+
+    .qaScrollWrap {
+        position: relative;
+        margin: 0 -16px;
+        min-width: 0;
+    }
+
+    .qaGrid {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        scroll-snap-type: x proximity;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        min-width: 0;
+        /* Just a soft edge, not the main "you can scroll this" cue — that
+           job now belongs to the underline track below + the on-load
+           nudge. A wide fade was actually swallowing the third pill's
+           peek entirely, which is why it didn't read as scrollable. */
+        -webkit-mask-image: linear-gradient(to right,
+                #000 calc(100% - 16px),
+                transparent 100%);
+        mask-image: linear-gradient(to right,
+                #000 calc(100% - 16px),
+                transparent 100%);
+    }
+
+    .qaGrid::-webkit-scrollbar {
+        display: none;
+    }
+
+    .qaBtn {
+        flex: 0 0 auto;
+        scroll-snap-align: start;
+        flex-direction: row;
+        height: 42px;
+        padding: 0 16px;
+        border-radius: 999px;
+        white-space: nowrap;
+        box-shadow: 0 1px 2px rgba(15, 30, 25, 0.04);
+        /* Cut the last pill short so its neighbour visibly peeks in —
+           a stronger "there's more" cue than a full-width last item. */
+    }
+
+    .qaGrid>.qaBtn:last-child {
+        margin-right: 40px;
+    }
+
+    /* "Underneath line" scroll indicator — the thumb's width and position
+       genuinely reflect how much content there is and how far through
+       it you've scrolled (see useScrollThumb). Kept deliberately quiet —
+       thin, flat, muted — so it reads as a small "this scrolls" cue
+       rather than competing with the pills for attention. */
+    .qaScrollTrack {
+        display: block;
+        position: relative;
+        height: 2.5px;
+        margin: 8px 16px 0;
+        border-radius: 999px;
+        background: var(--border-color);
+        overflow: hidden;
+    }
+
+    .qaScrollThumb {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        min-width: 24px;
+        border-radius: 999px;
+        background: var(--accent);
+        opacity: 0.45;
+        transition: left 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+            width 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Pending approvals / pending leave requests / latest attendance —
+       a soft shadow instead of the flat hairline border reads as a real
+       elevated surface rather than a plain outlined box. */
+    .dirPanel {
+        border: none;
+        box-shadow: 0 1px 3px rgba(15, 30, 25, 0.06),
+            0 1px 2px rgba(15, 30, 25, 0.04);
+        border-radius: 14px;
+    }
+
+    /* ── Latest attendance: table → stacked cards ─────────────────────
+       A 6-column table has no room to breathe on a phone. Scoped to
+       .attendanceTable only (not the Pending approvals / leave-request
+       tables, which still scroll normally) — each row becomes its own
+       compact card: name up top, then Department/Clock in/Clock
+       out/Status as label:value rows, then actions along the bottom. */
+    .attendanceTable {
+        border: none;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+        margin-top: -10px;
+        min-width: 0;
+    }
+
+    .attendanceTable thead {
+        display: none;
+    }
+
+    .attendanceTable,
+    .attendanceTable tbody,
+    .attendanceTable tr {
+        display: block;
+        width: 100%;
+    }
+
+    .attendanceTable tr {
+        border: 0.5px solid var(--border-color);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .attendanceTable td {
+        display: block;
+        padding: 8px 12px;
+        border-top: 0.5px solid var(--border-color);
+    }
+
+    /* Name cell — no label prefix, sits at the top of the card as-is. */
+    .attendanceTable td:first-child {
+        border-top: none;
+        padding: 12px 12px 10px;
+    }
+
+    /* Department / Clock in / Clock out / Status — label:value rows,
+       the label coming from the cell's own data-label attribute so no
+       extra markup is needed beyond what's already there. */
+    .attendanceTable td[data-label] {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 12.5px;
+    }
+
+    .attendanceTable td[data-label]::before {
+        content: attr(data-label);
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        flex-shrink: 0;
+    }
+
+    /* Actions — full-width row along the bottom of the card. */
+    .attendanceTable td:last-child {
+        padding: 10px 12px 12px;
+    }
+
+    .attendanceTable .tblActions {
+        justify-content: flex-end;
+    }
+}
+
+/* ── Mobile bottom navigation ──────────────────────────────────────────
+   Hidden entirely on desktop/tablet (≥901px); replaces the sidebar as the
+   primary navigation surface below that, since the sidebar is hidden there.
+   Every item is present in one strip — scroll sideways to reach the rest. */
+.bottomNav {
+    display: none;
+}
+
+.bottomNavScrollTrack {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    .bottomNav {
+        display: block;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 40;
+        background: var(--bg-surface);
+        border-top: 0.5px solid var(--border-color);
+        box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.06);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    /* Same quiet indicator pattern as the quick-actions row — a real,
+       scroll-linked cue rather than a static hint, kept thin and muted
+       so it doesn't compete with the nav icons above it. */
+    .bottomNavScrollTrack {
+        display: block;
+        position: relative;
+        height: 2.5px;
+        margin: 2px 16px 8px;
+        border-radius: 999px;
+        background: var(--border-color);
+        overflow: hidden;
+    }
+
+    .bottomNavScrollThumb {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        min-width: 24px;
+        border-radius: 999px;
+        background: var(--accent);
+        opacity: 0.45;
+        transition: left 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+            width 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+}
+
+.bottomNavScroll {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.bottomNavScroll::-webkit-scrollbar {
+    display: none;
+}
+
+.bottomNavItem {
+    scroll-snap-align: start;
+    flex: 0 0 auto;
+    width: 72px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 10px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    min-height: 60px;
+    padding: 8px 4px 6px;
+    transition: color 0.15s;
+    white-space: nowrap;
+}
+
+.bottomNavIconWrap {
+    position: relative;
+    display: flex;
+    padding: 3px 10px;
+    border-radius: 999px;
+    transition: background 0.15s;
+}
+
+.bottomNavItem i {
+    font-size: 20px;
+}
+
+.bottomNavDot {
+    position: absolute;
+    top: 1px;
+    right: 4px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--danger);
+    border: 1.5px solid var(--bg-surface);
+}
+
+.bottomNavActive {
+    color: var(--accent);
+}
+
+.bottomNavActive .bottomNavIconWrap {
+    background: var(--bg-soft-accent);
+}
+
+/* ── Notification panel ──────────────────────────────────── */
+.notifWrapper {
+    position: relative;
+}
+
+.notifCount {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    min-width: 17px;
+    height: 17px;
+    background: var(--danger);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 10px;
+    border: 2px solid var(--bg-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3px;
+    line-height: 1;
+}
+
+.notifPanel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 360px;
+    background: var(--bg-surface);
+    border: 0.5px solid var(--border-color);
+    border-radius: 14px;
+    box-shadow: 0 8px 32px var(--shadow-color);
+    z-index: 200;
+    overflow: hidden;
+    animation: panelIn 0.15s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Small phones — a fixed 360px panel can overflow the viewport, so it
+   shrinks to fit with a small margin on each side instead. */
+@media (max-width: 420px) {
+    .notifPanel {
+        width: calc(100vw - 24px);
+        right: -12px;
+    }
+}
+
+@keyframes panelIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.notifPanelHdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 12px;
+    border-bottom: 0.5px solid var(--border-color);
+}
+
+.notifPanelTitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.notifMarkAll {
+    font-size: 11px;
+    color: var(--accent);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0;
+}
+
+.notifMarkAll:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.notifList {
+    max-height: 400px;
+    overflow-y: auto;
+    flex-shrink: 1;
+    min-height: 0;
+}
+
+.notifItem {
+    padding: 12px 16px;
+    border-bottom: 0.5px solid var(--border-color);
+    cursor: pointer;
+    transition: background 0.12s;
+}
+
+.notifItem:last-child {
+    border-bottom: none;
+}
+
+.notifItem:hover {
+    background: var(--bg-surface-alt);
+}
+
+.notifItem.unread {
+    background: var(--bg-soft-accent);
+}
+
+.notifItem.unread:hover {
+    background: var(--bg-soft-accent);
+}
+
+.notifItemTop {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.notifIcon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.notifIcon.reg {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.notifIcon.ok {
+    background: var(--bg-soft-accent);
+    color: var(--accent-hover);
+}
+
+.notifIcon.no {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.notifIcon.sys {
+    background: var(--info-bg);
+    color: var(--info-text);
+}
+
+.notifBody {
+    flex: 1;
+    min-width: 0;
+}
+
+.notifTitle {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+.notifMsg {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    line-height: 1.45;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.notifTime {
+    font-size: 10px;
+    color: var(--text-secondary);
+    margin-top: 3px;
+}
+
+.notifUnreadDot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    margin-top: 5px;
+}
+
+/* ── Per-item delete + its unread dot, stacked in a small right-hand rail ── */
+.notifItemRight {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.notifDeleteBtn {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 13px;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s;
+}
+
+.notifDeleteBtn:hover {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+/* ── Undo bar — appears whenever one or more deletes are pending. Two
+   positioning variants share the same look:
+   - .undoBarPanel:  contained inside the small bell-dropdown panel.
+   - .undoBarFixed:  pinned to the viewport itself (not the scrolling
+     notifications list) so it can never end up scrolled out of view or
+     buried under a long list — and it sits above the fixed mobile bottom
+     nav (z-index + bottom offset) instead of getting hidden behind it. ── */
+.undoBar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--bg-surface-alt);
+    box-shadow: 0 -8px 24px var(--shadow-color);
+    overflow: hidden;
+    animation: undoBarIn 0.18s ease;
+}
+
+.undoBarPanel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-top: 0.5px solid var(--border-color);
+    z-index: 5;
+}
+
+.undoBarFixed {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 20px;
+    width: calc(100% - 32px);
+    max-width: 420px;
+    border: 0.5px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px var(--shadow-color);
+    z-index: 210;
+    animation: undoBarInFixed 0.18s ease;
+}
+
+/* Clears the fixed mobile bottom nav (see .bottomNav below) instead of
+   rendering underneath it. */
+@media (max-width: 900px) {
+    .undoBarFixed {
+        bottom: calc(86px + env(safe-area-inset-bottom, 0px));
+    }
+}
+
+.undoBar i {
+    font-size: 14px;
+    color: var(--danger-text);
+    flex-shrink: 0;
+}
+
+@keyframes undoBarIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes undoBarInFixed {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+.undoBarProgress {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 2px;
+    background: var(--accent);
+    width: 100%;
+    animation: undoShrink 3s linear forwards;
+}
+
+@keyframes undoShrink {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
+}
+
+.undoBarText {
+    flex: 1;
+    font-size: 12px;
+    color: var(--text-primary);
+    min-width: 0;
+}
+
+.undoBarBtn {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 4px 6px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    transition: background 0.15s, color 0.15s;
+}
+
+.undoBarBtn:hover {
+    background: var(--bg-soft-accent);
+    color: var(--accent-hover);
+}
+
+.notifActions {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 0.5px solid var(--border-color);
+}
+
+.notifApproveBtn {
+    height: 26px;
+    padding: 0 12px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.notifApproveBtn:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+
+.notifApproveBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.notifRejectBtn {
+    height: 26px;
+    padding: 0 12px;
+    background: var(--bg-surface);
+    color: var(--danger-text);
+    border: 0.5px solid var(--danger-border);
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.notifRejectBtn:hover:not(:disabled) {
+    background: var(--danger-bg);
+}
+
+.notifRejectBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.notifEmpty {
+    padding: 32px 16px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.notifEmptyIcon {
+    font-size: 28px;
+    margin-bottom: 8px;
+    opacity: 0.4;
+}
+
+/* ── Small inline subtitle next to a panel title (e.g. today's date next
+   to "Latest attendance") ── */
+.panelSubtitle {
+    margin-left: 8px;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+/* Remove-employee confirmation dialog styling now lives in
+   RemoveEmployeeModal.module.css, shared with WorkforceTab.jsx, so
+   there's only one place to update it. */
+/* ── Messages tab — let it fill the remaining content height ── */
+.messagesContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0;
+    height: 100%;
+}
+
+/* ── Notifications — full page (sidebar "Notifications" tab) ──────────────
+   Distinct from the bell icon's dropdown panel above: this is a full page
+   using the same notification-row styling, just laid out to fill the
+   content area instead of floating in a fixed-width popover. */
+.notifPageWrap {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: transparent;
+}
+
+.notifPageHdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 4px 14px;
+    border-bottom: 0.5px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.notifPageTitle {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notifPageBadge {
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.notifPageList {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}

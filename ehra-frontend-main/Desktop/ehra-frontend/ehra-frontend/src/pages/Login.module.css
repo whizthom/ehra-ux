@@ -1,0 +1,537 @@
+/* ────────────────────────────────────────────────────────────────────────
+   Ehra — Sign in
+   Tokens:
+   ink      #0B1F1A  near-black forest — hero background
+   forest   #0F6E56  brand primary (shared with the rest of the app)
+   forest-d #085041  brand primary, pressed/hover
+   mint     #55E0AE  bright accent — glow, links, live-state dot
+   sage     #F3F8F6  right-panel canvas (green-tinted off-white, not cream)
+   brass    #C6A15B  single warm accent — used only for the signature rule
+   ink-soft #8FA8A0  muted text on dark
+   line     #E1E8E5  hairline borders on the light side
+   Display face: Fraunces (serif, set large, used with restraint)
+   Body/UI face: Inter
+   ──────────────────────────────────────────────────────────────────────── */
+
+.wrap {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* ── Left panel — brand thesis ─────────────────────────────────────────── */
+.left {
+    position: relative;
+    width: 56%;
+    background: #0b1f1a;
+    background-image: radial-gradient(circle at 12% 8%, rgba(85, 224, 174, 0.16), transparent 42%),
+        radial-gradient(circle at 92% 88%, rgba(198, 161, 91, 0.14), transparent 45%);
+    padding: 44px 52px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+}
+
+.dotGrid {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.075) 1px, transparent 1px);
+    background-size: 22px 22px;
+    mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 78%, transparent);
+    pointer-events: none;
+}
+
+.logoRow {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1;
+}
+
+.logoIcon {
+    width: 34px;
+    height: 34px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 0.5px solid rgba(255, 255, 255, 0.14);
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+}
+
+.logoText {
+    color: #fff;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+.leftBody {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 14px;
+    padding: 28px 0;
+    max-width: 460px;
+}
+
+.eyebrow {
+    color: #55e0ae;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+}
+
+.headline {
+    font-family: "Fraunces", Georgia, serif;
+    font-optical-sizing: auto;
+    font-weight: 550;
+    color: #fff;
+    font-size: 38px;
+    line-height: 1.16;
+    letter-spacing: -0.3px;
+    margin: 2px 0 0;
+}
+
+.desc {
+    color: #b8ccc5;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-top: 2px;
+}
+
+.tickerBlock {
+    margin-top: 22px;
+}
+
+.tickerCaption {
+    display: block;
+    color: #c6a15b;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    margin-bottom: 10px;
+}
+
+.ticker {
+    position: relative;
+    height: 168px;
+    overflow: hidden;
+    border-radius: 12px;
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent);
+}
+
+.tickerTrack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    animation: tickerScroll 16s linear infinite;
+}
+
+@keyframes tickerScroll {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-50%);
+    }
+}
+
+.tickerCard {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.055);
+    border: 0.5px solid rgba(255, 255, 255, 0.09);
+    border-radius: 10px;
+    padding: 10px 12px;
+    flex-shrink: 0;
+}
+
+.tickerIcon {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(85, 224, 174, 0.14);
+    color: #6be6bd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.tickerBody {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.tickerText {
+    color: #eef6f2;
+    font-size: 12.5px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tickerMeta {
+    color: #7f958d;
+    font-size: 11px;
+    margin-top: 1px;
+}
+
+.leftFooter {
+    position: relative;
+    z-index: 1;
+    color: #6f8b81;
+    font-size: 12px;
+}
+
+/* ── Right panel — the form ────────────────────────────────────────────── */
+.right {
+    flex: 1;
+    background: #f3f8f6;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+}
+
+.card {
+    width: 100%;
+    max-width: 380px;
+    background: #fff;
+    border: 0.5px solid #e1e8e5;
+    border-radius: 18px;
+    padding: 36px 34px;
+    box-shadow: 0 24px 60px -30px rgba(11, 31, 26, 0.28);
+}
+
+.mobileLogoRow {
+    display: none;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 22px;
+}
+
+.mobileLogoIcon {
+    width: 30px;
+    height: 30px;
+    background: #0f6e56;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+}
+
+.mobileLogoText {
+    font-size: 15px;
+    font-weight: 600;
+    color: #0b1f1a;
+}
+
+.rightHeader {
+    margin-bottom: 28px;
+}
+
+.h1 {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-size: 25px;
+    color: #0b1f1a;
+    margin-bottom: 8px;
+    display: inline-flex;
+    flex-direction: column;
+}
+
+.h1Accent {
+    width: 34px;
+    height: 3px;
+    margin-top: 8px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #c6a15b, #55e0ae);
+}
+
+.subtitle {
+    font-size: 13.5px;
+    color: #66766f;
+}
+
+/* ── Error ── */
+.errorBox {
+    background: #fcebeb;
+    border: 0.5px solid #f09595;
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+    font-size: 13px;
+    color: #a32d2d;
+}
+
+/* ── Fields ── */
+.field {
+    margin-bottom: 18px;
+}
+
+.labelRow {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #3d4a45;
+    margin-bottom: 7px;
+}
+
+.inputWrap {
+    position: relative;
+}
+
+.prefix {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 15px;
+    pointer-events: none;
+    color: #0b1f1a;
+    opacity: 0.32;
+}
+
+.input {
+    width: 100%;
+    height: 42px;
+    padding: 0 40px 0 38px;
+    border: 0.5px solid #d7e2de;
+    border-radius: 9px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fbfdfc;
+    color: #111;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.input::placeholder {
+    color: #a7b6b1;
+}
+
+.input:hover {
+    border-color: #c4d3ce;
+}
+
+.input:focus {
+    background: #fff;
+    border-color: #0f6e56;
+    box-shadow: 0 0 0 3px rgba(15, 110, 86, 0.12);
+}
+
+.eyeBtn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    color: #0b1f1a;
+    opacity: 0.45;
+    transition: opacity 0.15s;
+    border-radius: 6px;
+}
+
+.eyeBtn:hover {
+    opacity: 0.85;
+}
+
+.eyeBtn:focus-visible,
+.input:focus-visible {
+    outline: 2px solid #0f6e56;
+    outline-offset: 1px;
+}
+
+.forgot {
+    font-size: 12px;
+    color: #0f6e56;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.forgot:hover {
+    color: #085041;
+    text-decoration: underline;
+}
+
+/* ── Submit button ── */
+.submitBtn {
+    width: 100%;
+    height: 44px;
+    background: #0f6e56;
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.1px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 6px;
+    font-family: inherit;
+    transition: background 0.15s, transform 0.05s;
+}
+
+.submitBtn:hover:not(:disabled) {
+    background: #085041;
+}
+
+.submitBtn:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.submitBtn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.submitBtn:focus-visible {
+    outline: 2px solid #0f6e56;
+    outline-offset: 2px;
+}
+
+/* ── Spinner ── */
+.spinner {
+    width: 15px;
+    height: 15px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Divider ── */
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 22px 0;
+    color: #9aaba5;
+    font-size: 12px;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    flex: 1;
+    height: 0.5px;
+    background: #e1e8e5;
+}
+
+/* ── SSO button ── */
+.ssoBtn {
+    width: 100%;
+    height: 42px;
+    background: #fff;
+    border: 0.5px solid #d7e2de;
+    border-radius: 9px;
+    color: #333;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: inherit;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.ssoBtn:hover {
+    background: #f8fafc;
+    border-color: #c4d3ce;
+}
+
+/* ── Register link ── */
+.registerLink {
+    margin-top: 22px;
+    font-size: 13px;
+    color: #66766f;
+    text-align: center;
+}
+
+.registerLinkAnchor {
+    color: #0f6e56;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.registerLinkAnchor:hover {
+    color: #085041;
+    text-decoration: underline;
+}
+
+/* ── Motion & accessibility ── */
+@media (prefers-reduced-motion: reduce) {
+    .tickerTrack {
+        animation: none;
+    }
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+    .left {
+        display: none;
+    }
+
+    .mobileLogoRow {
+        display: flex;
+    }
+
+    .right {
+        padding: 32px 20px;
+    }
+}
+
+@media (max-width: 420px) {
+    .card {
+        padding: 28px 22px;
+        border-radius: 14px;
+    }
+}

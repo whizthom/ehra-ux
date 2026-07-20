@@ -1,0 +1,161 @@
+/* ── Scan card ──────────────────────────────────────────────────────────
+   The page shell (sidebar/topbar/bottom nav) now comes from
+   Dashboard.module.css so it looks and behaves exactly like the rest of
+   the app, including dark/light mode. Only the scanner card itself is
+   styled here, using the same theme variables (see src/theme/theme.css)
+   so it switches with the rest of the UI. */
+
+.scanCard {
+    width: 100%;
+    max-width: 380px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: var(--bg-surface);
+    border: 0.5px solid var(--border-color);
+    border-radius: 16px;
+    padding: 28px 20px 32px;
+    box-shadow: 0 2px 12px var(--shadow-color);
+}
+
+.title {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0 0 6px;
+}
+
+.subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0 0 24px;
+    max-width: 280px;
+}
+
+.scannerFrame {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    aspect-ratio: 1 / 1;
+    background: #000;
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.scanOverlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.scanBox {
+    width: 70%;
+    height: 70%;
+    border: 3px solid var(--accent);
+    border-radius: 16px;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35);
+    animation: pulseBox 1.8s ease-in-out infinite;
+}
+
+@keyframes pulseBox {
+
+    0%,
+    100% {
+        border-color: var(--accent);
+    }
+
+    50% {
+        border-color: var(--accent-hover);
+    }
+}
+
+.errorState,
+.resultState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 24px;
+    color: #fff;
+}
+
+.errorState i {
+    color: var(--danger);
+}
+
+.errorState p {
+    font-size: 13px;
+    line-height: 1.6;
+    max-width: 240px;
+}
+
+.retryBtn,
+.scanAgainBtn {
+    margin-top: 8px;
+    height: 38px;
+    padding: 0 18px;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+}
+
+.retryBtn:hover,
+.scanAgainBtn:hover {
+    background: var(--accent-hover);
+}
+
+.resultState {
+    background: #111;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+}
+
+.resultOk i {
+    color: var(--accent);
+}
+
+.resultFail i {
+    color: var(--danger);
+}
+
+.resultMessage {
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 260px;
+}
+
+.resultAction {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--accent);
+    font-weight: 500;
+}
+
+@media (max-width: 480px) {
+    .scanCard {
+        padding: 22px 16px 26px;
+        border-radius: 12px;
+    }
+}

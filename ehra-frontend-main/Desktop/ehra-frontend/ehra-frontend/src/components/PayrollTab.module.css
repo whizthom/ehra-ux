@@ -1,0 +1,416 @@
+.wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.empty {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 20px 0;
+}
+
+.errorBox {
+    background: var(--danger-bg);
+    border: 1px solid var(--danger-border);
+    color: var(--danger-text);
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+.errorBoxSmall {
+    color: var(--danger-text);
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+.card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 16px 18px;
+}
+
+.cardLabel {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+/* Salary */
+.salaryHeader {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.salaryValueRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.salaryValue {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.editLink {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.salaryEditRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.salaryInput {
+    width: 140px;
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 14px;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    font-family: inherit;
+    outline: none;
+}
+
+.salaryInput:focus {
+    border-color: var(--accent);
+}
+
+.saveBtn {
+    padding: 8px 16px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.saveBtn:hover {
+    background: var(--accent-hover);
+}
+
+.saveBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.cancelLink {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    cursor: pointer;
+}
+
+.netPay {
+    text-align: right;
+}
+
+.netPayValue {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+/* Current period */
+.periodHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.periodRange {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.periodBadge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+    flex-shrink: 0;
+    height: fit-content;
+}
+
+.finalized {
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+}
+
+.live {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.statGrid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+}
+
+@media (max-width: 900px) {
+    .statGrid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .statGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: center;
+    padding: 10px 6px;
+    background: var(--bg-surface-alt);
+    border-radius: 10px;
+}
+
+.statValue {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.statValueDanger {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--danger-text, #c0392b);
+}
+
+.statLabel {
+    font-size: 10.5px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+/* Events list */
+.panelTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 12px;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.eventRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    flex-wrap: wrap;
+}
+
+.eventMain {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.eventDate {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.eventStatus {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: capitalize;
+}
+
+.eventTimes {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.eventTags {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tagLeave,
+.tagPardoned,
+.tagDeducted {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 999px;
+}
+
+.tagLeave {
+    background: var(--info-bg);
+    color: var(--info-text);
+}
+
+.tagPardoned {
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+}
+
+.tagDeducted {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.pardonBtn,
+.unpardonBtn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+}
+
+.pardonBtn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.unpardonBtn:hover {
+    border-color: var(--danger-border);
+    color: var(--danger-text);
+}
+
+.pardonBtn:disabled,
+.unpardonBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Past periods */
+.periodRow {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+}
+
+.periodRowRange {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+    min-width: 160px;
+}
+
+.periodRowDeduction {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--danger-text, #c0392b);
+}
+
+.periodRowNet {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* Pardon modal */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal {
+    background: var(--bg-surface);
+    border-radius: 14px;
+    width: 100%;
+    max-width: 380px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.modalTitle {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.modalSubtitle {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.modalTextarea {
+    padding: 9px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    resize: vertical;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    outline: none;
+}
+
+.modalTextarea:focus {
+    border-color: var(--accent);
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 4px;
+}

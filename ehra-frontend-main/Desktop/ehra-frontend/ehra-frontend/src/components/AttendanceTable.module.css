@@ -1,0 +1,135 @@
+/* Horizontal-scroll container for phones — six columns of tabular data
+   can't reasonably reflow into a single narrow column without losing
+   scannability, so instead of cramming/wrapping cells this lets the table
+   scroll sideways (same swipe pattern already used elsewhere in the app),
+   with a soft edge fade as the "there's more" cue. */
+.tableScroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.tableScroll::-webkit-scrollbar {
+    display: none;
+}
+
+.table {
+    width: 100%;
+    min-width: 620px;
+    border-collapse: collapse;
+}
+
+.table th {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-align: left;
+    padding: 0 10px 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.table td {
+    padding: 10px;
+    border-top: 0.5px solid var(--border-color);
+    font-size: 12px;
+    color: var(--text-primary);
+    vertical-align: middle;
+}
+
+.empCell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bg-soft-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--accent-hover);
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.empName {
+    font-weight: 500;
+    font-size: 12px;
+    color: var(--text-primary);
+}
+
+.empEmail {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.muted {
+    color: var(--text-secondary);
+}
+
+.pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.pillPresent {
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+}
+
+.pillLate {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.pillEarly {
+    background: var(--info-bg);
+    color: var(--info-text);
+}
+
+.pillAbsent {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+/* Mobile-only: on the "My attendance" self-view, the Employee and
+   Department columns are redundant (every row is already the signed-in
+   person) so they're dropped, leaving Date/Clock in/Clock out/Status.
+   Desktop keeps all columns regardless — this only fires under 640px. */
+@media (max-width: 640px) {
+    .table.hideIdentityMobile {
+        min-width: 0;
+    }
+
+    .table.hideIdentityMobile .identityCol {
+        display: none;
+    }
+}
+
+.loading,
+.empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 40px 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+}

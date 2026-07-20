@@ -1,0 +1,194 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 22, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+}
+
+.modal {
+    width: 100%;
+    max-width: 380px;
+    background: var(--bg-surface);
+    border-radius: 18px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.closeBtn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: none;
+    background: var(--bg-page);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.closeBtn:hover {
+    background: var(--bg-surface-alt);
+}
+
+.subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 18px;
+    max-width: 280px;
+}
+
+.scannerFrame {
+    position: relative;
+    width: 100%;
+    max-width: 320px;
+    aspect-ratio: 1 / 1;
+    background: #000;
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.scanOverlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.scanBox {
+    width: 70%;
+    height: 70%;
+    border: 3px solid var(--accent);
+    border-radius: 16px;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35);
+    animation: pulseBox 1.8s ease-in-out infinite;
+}
+
+@keyframes pulseBox {
+
+    0%,
+    100% {
+        border-color: var(--accent);
+    }
+
+    50% {
+        border-color: var(--bg-soft-accent);
+    }
+}
+
+.errorState,
+.resultState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 24px;
+    color: #fff;
+}
+
+.errorState i {
+    color: var(--danger-border);
+}
+
+.errorState p {
+    font-size: 13px;
+    line-height: 1.6;
+    max-width: 240px;
+}
+
+.retryBtn,
+.scanAgainBtn,
+.doneBtn {
+    margin-top: 8px;
+    height: 38px;
+    padding: 0 18px;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.doneBtn {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.retryBtn:hover,
+.scanAgainBtn:hover {
+    background: var(--accent-hover);
+}
+
+.doneBtn:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.resultActions {
+    display: flex;
+    gap: 8px;
+}
+
+.resultState {
+    background: var(--text-primary);
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    border-radius: 16px;
+}
+
+.resultOk i {
+    color: var(--accent);
+}
+
+.resultFail i {
+    color: var(--danger-border);
+}
+
+.resultMessage {
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 260px;
+}
+
+.resultAction {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--bg-soft-accent);
+    font-weight: 500;
+}

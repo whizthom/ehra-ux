@@ -1,0 +1,825 @@
+/* ── Layout ──────────────────────────────────────────────────────────────
+   No card here on purpose — this sits directly on the page background,
+   the same way the Attendance tab's History view does. The only visual
+   separation between the list and the open message is a hairline border,
+   not a floating box. */
+.container {
+    display: flex;
+    height: 100%;
+    background: transparent;
+    min-height: 0;
+}
+
+/* ── List panel (left on desktop, full-width on phones) ── */
+.listPanel {
+    width: 320px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    border-right: 0.5px solid var(--border-color);
+    min-height: 0;
+}
+
+.listHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 4px 14px 12px 0;
+    border-bottom: 0.5px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.listTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+}
+
+.listTitle i {
+    color: var(--accent);
+    font-size: 16px;
+}
+
+.count {
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 10px;
+}
+
+.composeBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 7px 12px;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.composeBtn:hover {
+    background: var(--accent-hover);
+}
+
+.list {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+    overscroll-behavior: contain;
+}
+
+.listItem {
+    padding: 12px 14px 12px 0;
+    border-bottom: 0.5px solid var(--border-color);
+    cursor: pointer;
+    transition: background 0.12s;
+}
+
+.listItem:hover {
+    background: var(--bg-soft-accent);
+}
+
+.listItem.active {
+    background: var(--bg-soft-accent);
+    border-left: 3px solid var(--accent);
+    padding-left: 11px;
+}
+
+.listItemTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.listItemSubject {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+    line-height: 1.3;
+}
+
+.listItemTime {
+    font-size: 11px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.listItemPreview {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin-bottom: 8px;
+}
+
+.listItemMeta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tagBroadcast,
+.tagDirect {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10.5px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.tagBroadcast {
+    background: var(--info-bg);
+    color: var(--info-text);
+}
+
+.tagDirect {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.readBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10.5px;
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.readBadgeGreen {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10.5px;
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.deleteListBtn {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.12s, color 0.12s;
+}
+
+.deleteListBtn:hover {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+/* ── Detail/compose panel (right on desktop) ── */
+.detailPanel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    padding-left: 20px;
+}
+
+.placeholder {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    text-align: center;
+}
+
+.placeholderIcon {
+    font-size: 40px;
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+.placeholderTitle {
+    color: var(--text-secondary);
+    margin-top: 12px;
+    font-size: 13.5px;
+}
+
+.placeholderSub {
+    color: var(--text-secondary);
+    font-size: 12px;
+    margin-top: 2px;
+    opacity: 0.8;
+}
+
+.detailArea,
+.composeArea {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.detailHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.detailSubject {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    flex: 1;
+    line-height: 1.3;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Doubles as "close" on desktop (where the list is still visible right
+   next to it) and as the primary "go back" affordance on phones (where
+   the list isn't visible at all until you tap this). */
+.backBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    padding: 5px 8px 5px 4px;
+    font-size: 13px;
+    font-family: inherit;
+    border-radius: 6px;
+    transition: background 0.12s, color 0.12s;
+    flex-shrink: 0;
+}
+
+.backBtn:hover {
+    background: var(--bg-surface-alt);
+    color: var(--text-primary);
+}
+
+.backBtn i {
+    font-size: 16px;
+}
+
+.backBtnLabel {
+    display: none;
+}
+
+.deleteDetailBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 7px;
+    padding: 6px 10px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 12px;
+    font-family: inherit;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+    flex-shrink: 0;
+}
+
+.deleteDetailBtn:hover {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border-color: var(--danger-border);
+}
+
+.detailMeta {
+    background: var(--bg-surface-alt);
+    border: 0.5px solid var(--border-color);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.metaRow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--text-primary);
+}
+
+.metaLabel {
+    width: 92px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.liveTag {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--accent);
+    margin-left: 6px;
+}
+
+.readProgress {
+    height: 5px;
+    background: var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 18px;
+}
+
+.readProgressBar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #2aba8e);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+    min-width: 2px;
+}
+
+.detailBody {
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    background: var(--bg-surface-alt);
+    border: 0.5px solid var(--border-color);
+    border-radius: 10px;
+    padding: 16px 18px;
+    flex: 1;
+}
+
+/* ── Read-receipts detail list ── */
+.receiptsSection {
+    margin-top: 16px;
+}
+
+.receiptsHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.receiptsTitle {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.receiptsList {
+    border: 0.5px solid var(--border-color);
+    border-radius: 10px;
+    overflow: hidden;
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+.receiptRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    font-size: 13px;
+    border-bottom: 0.5px solid var(--border-color);
+    background: var(--bg-surface);
+}
+
+.receiptRow:last-child {
+    border-bottom: none;
+}
+
+.receiptRow.unreadRow {
+    background: var(--bg-surface-alt);
+}
+
+.receiptAvatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.receiptAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.unreadRow .receiptAvatar {
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+}
+
+.receiptInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.receiptName {
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.receiptEmail {
+    font-size: 11px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.receiptStatus {
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.receiptStatus.readStatus {
+    color: var(--accent);
+}
+
+.receiptStatus.unreadStatus {
+    color: var(--text-secondary);
+}
+
+.receiptsEmpty {
+    padding: 16px;
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+}
+
+/* ── Compose form ── */
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.field label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.field input,
+.field select,
+.field textarea {
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 13.5px;
+    color: var(--text-primary);
+    background: var(--bg-surface-alt);
+    outline: none;
+    transition: border-color 0.15s;
+    font-family: inherit;
+    resize: vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+    border-color: var(--accent);
+    background: var(--bg-surface);
+}
+
+.composeFooter {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: auto;
+    padding-top: 16px;
+}
+
+.cancelBtn {
+    border: 1.5px solid var(--border-color);
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    border-radius: 7px;
+    padding: 8px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.12s;
+    font-family: inherit;
+}
+
+.cancelBtn:hover {
+    background: var(--bg-surface-alt);
+}
+
+.sendBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: inherit;
+}
+
+.sendBtn:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+
+.sendBtn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.errorBox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--danger-bg);
+    border: 1px solid var(--danger-border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--danger-text);
+    margin-bottom: 14px;
+}
+
+.successBox {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.successIcon {
+    font-size: 36px;
+    color: var(--accent);
+}
+
+.successTitle {
+    font-weight: 600;
+    margin-top: 12px;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.successSub {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    max-width: 32ch;
+}
+
+.successBox .composeBtn {
+    margin-top: 16px;
+}
+
+.empty {
+    padding: 20px 0;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.emptyState {
+    padding: 36px 12px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.emptyIcon {
+    font-size: 30px;
+    color: var(--text-secondary);
+    opacity: 0.6;
+    margin-bottom: 4px;
+}
+
+.emptySub {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* ── Delete-confirmation dialog ──────────────────────────────────────────
+   Referenced in the JSX before but never actually styled — it would have
+   rendered as an unstyled, non-dimmed overlay. Built out properly here,
+   matching the pattern used elsewhere in the app (e.g. remove-employee /
+   department deletion dialogs). */
+.confirmOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.confirmBox {
+    background: var(--bg-surface);
+    border-radius: 14px;
+    padding: 24px 22px;
+    max-width: 360px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+
+.confirmIcon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    margin: 0 auto 14px;
+}
+
+.confirmTitle {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 8px;
+}
+
+.confirmText {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0 0 18px;
+}
+
+.confirmActions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.confirmDeleteBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--danger-text);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity 0.15s;
+}
+
+.confirmDeleteBtn:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.confirmDeleteBtn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────
+   Below the app's usual mobile breakpoint, the list and the open
+   message/compose form can't sit side by side, so only one shows at a
+   time. `.showDetail` (added whenever a message is selected or you're
+   composing) swaps which one is visible; the back button in the detail
+   header is what gets you back to the list. */
+@media (max-width: 900px) {
+    .listPanel {
+        width: 100%;
+        border-right: none;
+    }
+
+    .detailPanel {
+        display: none;
+        padding-left: 0;
+    }
+
+    .container.showDetail .listPanel {
+        display: none;
+    }
+
+    .container.showDetail .detailPanel {
+        display: flex;
+        width: 100%;
+    }
+
+    .backBtnLabel {
+        display: inline;
+    }
+
+    .composeBtnLabel {
+        display: none;
+    }
+
+    .composeBtn {
+        padding: 8px 10px;
+    }
+
+    .deleteDetailLabel {
+        display: none;
+    }
+
+    .deleteDetailBtn {
+        padding: 7px 9px;
+    }
+}
+
+/* ── Phone ── */
+@media (max-width: 480px) {
+    .listHeader {
+        padding-bottom: 10px;
+    }
+
+    .listItem {
+        padding: 11px 4px 11px 0;
+    }
+
+    .metaLabel {
+        width: 76px;
+    }
+
+    .detailMeta {
+        padding: 11px 12px;
+    }
+
+    .detailBody {
+        padding: 14px;
+    }
+}

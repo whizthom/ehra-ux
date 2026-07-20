@@ -1,0 +1,460 @@
+/* Shares the same token system as Login.module.css — see that file for the
+   full palette rationale. Kept consistent so the whole auth journey
+   (sign up -> complete profile -> sign in) feels like one product. */
+
+.page {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* ── Left ── */
+.left {
+    position: relative;
+    width: 45%;
+    background: #0b1f1a;
+    background-image: radial-gradient(circle at 12% 8%, rgba(85, 224, 174, 0.16), transparent 42%),
+        radial-gradient(circle at 92% 88%, rgba(198, 161, 91, 0.14), transparent 45%);
+    padding: 48px 44px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.dotGrid {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.075) 1px, transparent 1px);
+    background-size: 22px 22px;
+    mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent);
+    pointer-events: none;
+}
+
+.logoRow {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logoIcon {
+    width: 34px;
+    height: 34px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 0.5px solid rgba(255, 255, 255, 0.14);
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+}
+
+.logoText {
+    color: #fff;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+.leftBody {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+    padding: 32px 0;
+}
+
+.eyebrow {
+    color: #55e0ae;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+}
+
+.headline {
+    font-family: "Fraunces", Georgia, serif;
+    font-optical-sizing: auto;
+    font-weight: 550;
+    color: #fff;
+    font-size: 28px;
+    line-height: 1.28;
+    letter-spacing: -0.2px;
+    margin: 2px 0 0;
+}
+
+.desc {
+    color: #b8ccc5;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-top: 4px;
+}
+
+.leftFooter {
+    position: relative;
+    z-index: 1;
+    color: #6f8b81;
+    font-size: 12px;
+}
+
+/* ── Steps ── */
+.steps {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    margin-top: 22px;
+}
+
+.step {
+    display: flex;
+    gap: 14px;
+    position: relative;
+}
+
+.stepLine {
+    position: absolute;
+    left: 15px;
+    top: 32px;
+    width: 1px;
+    height: calc(100% - 8px);
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.stepDot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+    z-index: 1;
+}
+
+.dotActive {
+    background: #fff;
+    color: #0b1f1a;
+}
+
+.dotPending {
+    background: rgba(255, 255, 255, 0.1);
+    border: 0.5px solid rgba(255, 255, 255, 0.14);
+    color: #7f958d;
+}
+
+.dotDone {
+    background: #55e0ae;
+    color: #0b1f1a;
+    font-size: 14px;
+}
+
+.stepBody {
+    padding: 4px 0 24px;
+}
+
+.stepLabel {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.stepSub {
+    font-size: 12px;
+    color: #8fa8a0;
+    margin-top: 2px;
+}
+
+/* ── Right ── */
+.right {
+    flex: 1;
+    background: #fbfdfc;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.rightHeader {
+    padding: 28px 48px 20px;
+    border-bottom: 0.5px solid #e1e8e5;
+}
+
+.progressBar {
+    width: 100%;
+    height: 3px;
+    background: #e1e8e5;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 14px;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #0f6e56, #55e0ae);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+}
+
+.headerRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.stepTitle {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-size: 17px;
+    color: #0b1f1a;
+}
+
+.stepCount {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #8a9791;
+}
+
+/* ── Back link (step 2 only, harmless if unused elsewhere) ── */
+.backLink {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #0f6e56;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.backLink:hover {
+    color: #085041;
+    text-decoration: underline;
+}
+
+.formBody {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 48px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 18px;
+}
+
+.field label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #3d4a45;
+}
+
+.inputWrap {
+    position: relative;
+}
+
+.prefix {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 15px;
+    pointer-events: none;
+    color: #0b1f1a;
+    opacity: 0.32;
+}
+
+.inputWrap input,
+.inputWrap select {
+    width: 100%;
+    height: 42px;
+    padding: 0 40px 0 38px;
+    border: 0.5px solid #d7e2de;
+    border-radius: 9px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #fff;
+    color: #111;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.inputWrap input:hover,
+.inputWrap select:hover {
+    border-color: #c4d3ce;
+}
+
+.inputWrap input:focus,
+.inputWrap select:focus {
+    border-color: #0f6e56;
+    box-shadow: 0 0 0 3px rgba(15, 110, 86, 0.12);
+}
+
+.inputWrap input::placeholder {
+    color: #a7b6b1;
+}
+
+.pwToggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    color: #0b1f1a;
+    opacity: 0.45;
+    border-radius: 6px;
+    transition: opacity 0.15s;
+}
+
+.pwToggle:hover {
+    opacity: 0.85;
+}
+
+.matchOk,
+.matchBad {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.matchOk {
+    color: #0f6e56;
+}
+
+.matchBad {
+    color: #a32d2d;
+}
+
+.infoBox {
+    background: #eaf6f1;
+    border: 0.5px solid #bfe4d5;
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.infoBox i {
+    font-size: 16px;
+    color: #0f6e56;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.infoBox p {
+    font-size: 12.5px;
+    color: #085041;
+    line-height: 1.55;
+}
+
+.errorBox {
+    background: #fcebeb;
+    border: 0.5px solid #f09595;
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #a32d2d;
+}
+
+.formFooter {
+    padding: 16px 48px 28px;
+    border-top: 0.5px solid #e1e8e5;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.submitBtn {
+    width: 100%;
+    height: 44px;
+    background: #0f6e56;
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: inherit;
+    transition: background 0.15s, transform 0.05s;
+}
+
+.submitBtn:hover:not(:disabled) {
+    background: #085041;
+}
+
+.submitBtn:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.submitBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.footerNote {
+    text-align: center;
+    font-size: 13px;
+    color: #66766f;
+}
+
+.footerNote a {
+    color: #0f6e56;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.footerNote a:hover {
+    color: #085041;
+    text-decoration: underline;
+}
+
+@media (max-width: 900px) {
+    .left {
+        display: none;
+    }
+
+    .formBody {
+        padding: 24px;
+    }
+
+    .rightHeader {
+        padding: 20px 24px 16px;
+    }
+
+    .formFooter {
+        padding: 14px 24px 24px;
+    }
+}

@@ -1,0 +1,146 @@
+.layout {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    /* No overflow here — the tab bar below stays put and only .tabBody
+       (whichever tab is active) scrolls, so switching tabs never leaves
+       you scrolled halfway down a different section. */
+}
+
+.tabBar {
+    display: flex;
+    flex-shrink: 0;
+    border-bottom: 0.5px solid var(--border-color);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.tabBar::-webkit-scrollbar {
+    display: none;
+}
+
+.tabBtn {
+    padding: 12px 18px;
+    background: none;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.tabBtn:hover {
+    color: var(--text-primary);
+}
+
+.tabActive {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+/* No side padding — this sits directly on the plain page background now
+   (no card/box around it), so it can use the full width the page already
+   gives it instead of adding its own extra margin on top.
+   This is the actual scroll container: flex:1 + min-height:0 lets it fill
+   whatever space is left below the fixed .tabBar, and overflow-y:auto
+   means Today / History / Schedule settings each scroll independently
+   within that space rather than sharing one long page-level scroll. */
+.tabBody {
+    flex: 1;
+    min-height: 0;
+    padding: 16px 0 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    /* Without this, scrolling this inner container to its top/bottom
+       edge lets the remaining scroll momentum "chain" into the outer
+       page scroll (Dashboard's .contentFullNarrow) on mobile — which is
+       what was making the fixed bottom nav visibly shift/jump during a
+       scroll instead of staying anchored to the viewport. */
+    overscroll-behavior: contain;
+}
+
+.historyFilters {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.dateField {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dateField label {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.dateField input {
+    height: 32px;
+    padding: 0 10px;
+    border: 0.5px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: inherit;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    outline: none;
+    /* Date inputs render their own light-chrome calendar-picker icon that
+       otherwise vanishes on a dark background. */
+    color-scheme: light dark;
+}
+
+.applyBtn {
+    height: 32px;
+    padding: 0 14px;
+    background: var(--accent);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.applyBtn:hover {
+    background: var(--accent-hover);
+}
+
+/* ── Phone ── */
+@media (max-width: 480px) {
+    .tabBtn {
+        padding: 11px 14px;
+        font-size: 12.5px;
+    }
+
+    .tabBody {
+        padding-top: 12px;
+    }
+
+    /* Date range + Apply button stack to full width instead of wrapping
+       awkwardly mid-row on narrow screens. */
+    .historyFilters {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .dateField input {
+        width: 100%;
+    }
+
+    .applyBtn {
+        width: 100%;
+    }
+}

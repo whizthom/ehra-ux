@@ -1,0 +1,739 @@
+/* ProfileTab.module.css — consistent with Ehra design system
+   Brand green: var(--accent) | Dark text: var(--text-primary) | Muted: var(--text-secondary) */
+
+.wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: var(--bg-surface);
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+/* ── Header ── */
+.header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 24px 28px;
+    background: linear-gradient(135deg, var(--bg-soft-accent) 0%, var(--bg-soft-accent) 100%);
+    border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap;
+}
+
+.avatarWrap {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    cursor: pointer;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.avatarImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.avatarFallback {
+    width: 100%;
+    height: 100%;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 700;
+    border-radius: 50%;
+}
+
+.avatarOverlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.avatarWrap:hover .avatarOverlay {
+    opacity: 1;
+}
+
+.avatarOverlay i {
+    font-size: 18px;
+}
+
+.headerInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.headerName {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+}
+
+.headerRole {
+    font-size: 13.5px;
+    color: var(--text-primary);
+    margin: 0 0 6px;
+    font-weight: 500;
+}
+
+.headerMeta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.sep {
+    color: var(--text-secondary);
+}
+
+.pendingBadge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--warning-bg);
+    color: var(--warning-text);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--warning-border);
+    flex-shrink: 0;
+}
+
+/* ── Tabs ── */
+.tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--bg-surface-alt);
+    padding: 0 20px;
+}
+
+.tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    border-bottom: 2.5px solid transparent;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    transition: color 0.12s;
+    white-space: nowrap;
+    margin-bottom: -1px;
+}
+
+.tab:hover {
+    color: var(--accent);
+}
+
+.tabActive {
+    color: var(--accent);
+    font-weight: 600;
+    border-bottom-color: var(--accent);
+}
+
+/* ── Body ── */
+.body {
+    padding: 24px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+/* ── Section (view tab) ── */
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sectionHead {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sectionHead i {
+    color: var(--accent);
+    font-size: 16px;
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+
+.sectionTitle {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.sectionSub {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 3px 0 0;
+    line-height: 1.5;
+}
+
+.fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px 20px;
+}
+
+.fieldView {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.fieldSpan {
+    grid-column: 1 / -1;
+}
+
+.fieldLabel {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.fieldValue {
+    font-size: 13.5px;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* ── Edit tab ── */
+.sectionWrap {
+    background: var(--bg-surface-alt);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 16px;
+}
+
+@media (max-width: 600px) {
+    .grid2 {
+        grid-template-columns: 1fr;
+    }
+
+    .body {
+        padding: 18px 16px;
+    }
+
+    .header {
+        padding: 18px 16px;
+    }
+}
+
+.formField {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.formField label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.formField input,
+.formField select {
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--bg-surface);
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.12s;
+    appearance: none;
+}
+
+.formField input:focus,
+.formField select:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.formFieldDisabled input,
+.formFieldDisabled select {
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+    cursor: not-allowed;
+}
+
+/* Upload row */
+.uploadRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-top: 4px;
+}
+
+.uploadLabel {
+    font-size: 12.5px;
+    color: var(--text-primary);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.viewLink {
+    font-size: 12px;
+    color: var(--accent);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.viewLink:hover {
+    text-decoration: underline;
+}
+
+.uploadBtn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--accent);
+    border: 1.5px solid var(--border-color);
+    border-radius: 7px;
+    padding: 6px 12px;
+    cursor: pointer;
+    background: var(--bg-soft-accent);
+    font-family: inherit;
+    transition: background 0.12s;
+}
+
+.uploadBtn:hover {
+    background: var(--bg-soft-accent);
+}
+
+.uploadRow.formFieldDisabled {
+    opacity: 0.55;
+}
+
+.uploadBtn.formFieldDisabled {
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.uploadPendingNote {
+    font-size: 11.5px;
+    color: var(--warning-text);
+    width: 100%;
+}
+
+/* Locked note */
+.lockedNote {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--warning-text);
+    background: var(--warning-bg);
+    border-radius: 7px;
+    padding: 8px 12px;
+    flex-wrap: wrap;
+}
+
+.linkBtn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+    text-decoration: underline;
+}
+
+/* Save row */
+.saveRow {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.saveBtn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    padding: 11px 22px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.13s;
+}
+
+.saveBtn:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+
+.saveBtn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.saveMeta {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* CTA at bottom of view tab */
+.editCta {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 6px;
+}
+
+.ctaBtn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.13s;
+}
+
+.ctaBtn:hover {
+    background: var(--accent-hover);
+}
+
+/* ── Alerts ── */
+.errorBox {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border: 1px solid var(--danger-border);
+    border-radius: 9px;
+    padding: 11px 14px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.successBox {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+    border: 1px solid var(--border-color);
+    border-radius: 9px;
+    padding: 11px 14px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.infoBox {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--info-bg);
+    color: var(--info-text);
+    border: 1px solid var(--info-border);
+    border-radius: 9px;
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.infoBox p {
+    margin: 4px 0 0;
+    font-weight: 400;
+    color: var(--info-text);
+}
+
+/* ── History tab ── */
+.historyList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.historyCard {
+    border: 1.5px solid var(--border-color);
+    border-radius: 11px;
+    overflow: hidden;
+    background: var(--bg-surface-alt);
+}
+
+.historyCard.historyCardOpen {
+    border-color: var(--border-color);
+}
+
+.historyCardHead {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 16px;
+    background: none;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    flex-wrap: wrap;
+}
+
+.historyDate {
+    font-size: 12px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    min-width: 90px;
+}
+
+.historyChangeSummary {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    flex: 1;
+}
+
+.historySpacer {
+    flex: 1;
+}
+
+.historyStatus {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    flex-shrink: 0;
+}
+
+.historyChevron {
+    font-size: 14px;
+    color: var(--text-secondary);
+    transition: transform 0.15s;
+    flex-shrink: 0;
+}
+
+.historyCardOpen .historyChevron {
+    transform: rotate(180deg);
+}
+
+.historyCardBody {
+    padding: 14px 16px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Diff block */
+.diffBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px 14px;
+}
+
+.diffRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    flex-wrap: wrap;
+}
+
+.diffLabel {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+    min-width: 110px;
+}
+
+.diffOld {
+    color: var(--danger-text);
+    text-decoration: line-through;
+    font-size: 13px;
+}
+
+.diffNew {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.diffRow i {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+/* Approval steps */
+.approvalStep {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12.5px;
+}
+
+.stepLabel {
+    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 130px;
+}
+
+.stepGreen {
+    color: var(--accent);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.stepRed {
+    color: var(--danger-text);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.stepPending {
+    color: var(--warning-text);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.cancelBtn {
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: 1.5px solid var(--border-color);
+    border-radius: 7px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.12s, color 0.12s;
+}
+
+.cancelBtn:hover {
+    border-color: var(--danger-text);
+    color: var(--danger-text);
+}
+
+/* Empty / loading */
+.loading {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 24px;
+    font-size: 13px;
+}
+
+.emptyState {
+    text-align: center;
+    padding: 32px 20px;
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.emptyState i {
+    font-size: 36px;
+    color: var(--text-secondary);
+}
+
+.emptyState p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.emptySmall {
+    font-size: 12.5px !important;
+    color: var(--text-secondary) !important;
+    font-weight: 400 !important;
+    max-width: 300px;
+}
+
+.hiddenInput {
+    display: none;
+}

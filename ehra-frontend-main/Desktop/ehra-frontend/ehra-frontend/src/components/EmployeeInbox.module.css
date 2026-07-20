@@ -1,0 +1,508 @@
+/* ── Layout ── */
+.container {
+    display: flex;
+    height: 100%;
+    gap: 0;
+    background: var(--bg-surface);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px var(--shadow-color);
+    border: 1px solid var(--border-color);
+    position: relative;
+    /* anchors the sliding detail panel on phones */
+}
+
+/* ── List panel (left) ── */
+.listPanel {
+    width: 320px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border-color);
+    background: var(--bg-surface-alt);
+    min-height: 0;
+}
+
+.listHeader {
+    padding: 18px 16px 14px;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.listTitle {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+}
+
+.listTitle i {
+    color: var(--accent);
+    font-size: 17px;
+}
+
+.unreadBadge {
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    animation: badgePulse 2.4s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(15, 110, 86, 0.35);
+    }
+
+    50% {
+        box-shadow: 0 0 0 5px rgba(15, 110, 86, 0);
+    }
+}
+
+.list {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.listItem {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background 0.12s;
+    position: relative;
+    animation: itemIn 0.32s ease backwards;
+    animation-delay: calc(var(--stagger, 0) * 35ms);
+}
+
+/* A quick, subtle rise-and-fade as the list first populates — makes a
+   freshly loaded inbox feel like it just arrived rather than snapping
+   into place all at once. Respects users who'd rather not see motion. */
+@keyframes itemIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .listItem {
+        animation: none;
+    }
+}
+
+.listItem:hover {
+    background: var(--bg-soft-accent);
+}
+
+.listItem:active {
+    background: var(--bg-soft-accent);
+}
+
+.listItem.active {
+    background: var(--bg-soft-accent);
+    border-left: 3px solid var(--accent);
+}
+
+.listItem.unread {
+    background: var(--bg-soft-accent);
+}
+
+.listItem.unread:hover {
+    background: var(--bg-soft-accent);
+}
+
+.listItemTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.listItemSubject {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+    line-height: 1.3;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.unreadDot {
+    width: 7px;
+    height: 7px;
+    background: var(--accent);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.listItemTime {
+    font-size: 11px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.listItemFrom {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 4px;
+}
+
+.listItemFrom i {
+    font-size: 12px;
+}
+
+.listItemPreview {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.broadcastTag {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    background: var(--info-bg);
+    color: var(--info-text);
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+/* ── Skeleton loading state ──────────────────────────────────────────── */
+.skeletonList {
+    display: flex;
+    flex-direction: column;
+}
+
+.skeletonItem {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.skeletonLine {
+    height: 9px;
+    border-radius: 5px;
+    background: linear-gradient(90deg,
+            var(--bg-soft-accent) 25%,
+            var(--border-color) 37%,
+            var(--bg-soft-accent) 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0 50%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .skeletonLine {
+        animation: none;
+    }
+}
+
+/* ── Detail panel (right on desktop, sliding overlay on phones) ── */
+.detailPanel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    background: var(--bg-surface);
+}
+
+.placeholder {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    text-align: center;
+}
+
+.placeholderIcon {
+    font-size: 48px;
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+.placeholderTitle {
+    color: var(--text-secondary);
+    margin-top: 12px;
+    font-size: 13.5px;
+}
+
+.placeholderSub {
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 6px;
+}
+
+.detailArea {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 24px 28px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.detailHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.detailSubject {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.3;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Doubles as "close" on desktop (the list is still visible right next to
+   it) and as the primary "go back" affordance on phones, where the list
+   isn't visible at all until this is tapped — or swiped, see the touch
+   handlers on .detailPanel. */
+.backBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    padding: 5px 8px 5px 4px;
+    font-size: 13px;
+    font-family: inherit;
+    border-radius: 6px;
+    transition: background 0.12s, color 0.12s;
+    flex-shrink: 0;
+}
+
+.backBtn:hover {
+    background: var(--bg-surface-alt);
+    color: var(--text-primary);
+}
+
+.backBtn i {
+    font-size: 16px;
+}
+
+.backBtnLabel {
+    display: none;
+}
+
+.markingSpinner {
+    display: flex;
+    align-items: center;
+    color: var(--accent);
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.markingSpinner i {
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.detailMeta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+}
+
+.detailMeta span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.readTag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.detailBody {
+    font-size: 14.5px;
+    line-height: 1.75;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    background: var(--bg-surface-alt);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 20px 22px;
+    flex: 1;
+}
+
+/* ── Empty states ── */
+.emptyState {
+    padding: 40px 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.emptyIcon {
+    font-size: 32px;
+    color: var(--text-secondary);
+}
+
+.emptySub {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────
+   Below the app's tablet breakpoint, list and detail can't sit side by
+   side. Rather than an instant display:none swap, the detail panel is
+   made an absolutely-positioned overlay that slides in from the right —
+   `.showDetail` drives that, and the same transform is what the swipe
+   handlers in the component grab onto for a drag-to-dismiss gesture.
+   Both panels stay mounted the whole time, so the transition always has
+   something real to animate between. */
+@media (max-width: 900px) {
+    .container {
+        border-radius: 10px;
+    }
+
+    .listPanel {
+        width: 100%;
+        border-right: none;
+    }
+
+    .detailPanel {
+        position: absolute;
+        inset: 0;
+        transform: translateX(100%);
+        transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+        z-index: 2;
+        box-shadow: -6px 0 16px -8px var(--shadow-color);
+    }
+
+    .container.showDetail .detailPanel {
+        transform: translateX(0);
+    }
+
+    .backBtnLabel {
+        display: inline;
+    }
+
+    .detailArea {
+        padding: 18px 18px calc(18px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .placeholder {
+        display: none;
+        /* list is what's visible on phones when nothing's open */
+    }
+}
+
+@media (max-width: 900px) and (prefers-reduced-motion: reduce) {
+    .detailPanel {
+        transition: none;
+    }
+}
+
+/* ── Phone ── */
+@media (max-width: 480px) {
+    .listHeader {
+        padding: 14px 14px 12px;
+    }
+
+    .listItem {
+        padding: 12px 14px;
+    }
+
+    .listItemPreview {
+        -webkit-line-clamp: 1;
+    }
+
+    .detailSubject {
+        font-size: 16px;
+    }
+
+    .detailMeta {
+        gap: 8px 12px;
+    }
+
+    .detailBody {
+        padding: 16px;
+        font-size: 14px;
+    }
+}
+
+/* Very small phones in landscape, or split-screen — shrink the swipe
+   affordance's shadow so it doesn't dominate a cramped viewport. */
+@media (max-width: 360px) {
+    .detailPanel {
+        box-shadow: none;
+    }
+}

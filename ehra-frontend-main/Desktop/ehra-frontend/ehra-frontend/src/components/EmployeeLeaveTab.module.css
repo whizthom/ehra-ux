@@ -1,0 +1,900 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.newBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.newBtn:hover {
+  background: var(--accent-hover);
+}
+
+/* ── Section tabs (Request / Processing / History) ─────────────────────
+   Same sticky-bar pattern used by AttendanceSection: a slim underline
+   tab strip that doesn't scroll away, with each tab's content scrolling
+   independently underneath it. */
+.tabBar {
+  display: flex;
+  flex-shrink: 0;
+  border-bottom: 0.5px solid var(--border-color);
+  overflow-x: auto;
+  scrollbar-width: none;
+  gap: 2px;
+}
+
+.tabBar::-webkit-scrollbar {
+  display: none;
+}
+
+.tabBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.tabBtn i {
+  font-size: 15px;
+}
+
+.tabBtn:hover {
+  color: var(--text-primary);
+}
+
+.tabActive {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.tabCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.tabActive .tabCount {
+  background: var(--accent);
+  color: #fff;
+}
+
+.tabBody {
+  padding-top: 4px;
+}
+
+.sectionStack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.successBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-soft-accent);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.formCard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.field input,
+.field select,
+.field textarea {
+  padding: 9px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 13px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: inherit;
+  outline: none;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--accent);
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.cancelBtn {
+  padding: 9px 16px;
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.submitBtn {
+  padding: 9px 18px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.errorBox {
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  color: var(--danger-text);
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 12.5px;
+}
+
+.balanceRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.balanceChip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  background: var(--bg-soft-accent);
+  border-radius: 10px;
+  min-width: 110px;
+}
+
+.balanceType {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+.balanceDays {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* ── Balance rings (Request tab) ─────────────────────────────────────── */
+.ringRow {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 2px 2px 6px;
+  scrollbar-width: none;
+}
+
+.ringRow::-webkit-scrollbar {
+  display: none;
+}
+
+.ringChip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 10px;
+  min-width: 96px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  flex-shrink: 0;
+}
+
+.ringChipSvgWrap {
+  position: relative;
+  width: 56px;
+  height: 56px;
+}
+
+.ringChipSvg {
+  width: 56px;
+  height: 56px;
+  transform: rotate(-90deg);
+}
+
+.ringChipTrack {
+  fill: none;
+  stroke: var(--bg-soft-accent);
+}
+
+.ringChipProgress {
+  fill: none;
+  stroke: var(--accent);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.4s ease;
+}
+
+.ringChipInfinite {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--bg-soft-accent);
+  color: var(--accent);
+  font-size: 20px;
+}
+
+.ringChipCenter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.ringChipLabel {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.ringChipSub {
+  font-size: 10px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* ── Stage tracker (Processing tab) ─────────────────────────────────── */
+.processGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.processCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.processTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.processTopLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.processDesc {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.processFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.stageTrack {
+  display: flex;
+  align-items: flex-start;
+  padding: 4px 2px;
+}
+
+.stageStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.stageNode {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.stageDot {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+  border: 2px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+}
+
+.dot_done {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.dot_current {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.dot_declined {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+
+.dot_pending {
+  color: var(--text-secondary);
+}
+
+.stagePulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: stagePulse 1.4s ease-out infinite;
+}
+
+@keyframes stagePulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(15, 110, 86, 0.45);
+  }
+
+  70% {
+    box-shadow: 0 0 0 8px rgba(15, 110, 86, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(15, 110, 86, 0);
+  }
+}
+
+.stageLine {
+  flex: 1;
+  height: 2px;
+  background: var(--border-color);
+  margin: 0 2px;
+}
+
+.stageLineDone {
+  background: var(--accent);
+}
+
+.stageLabel {
+  margin-top: 6px;
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.stageLabelCurrent {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* ── Empty state (Processing tab, nothing in flight) ───────────────────── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  padding: 36px 20px;
+  background: var(--bg-surface);
+  border: 1px dashed var(--border-color);
+  border-radius: 14px;
+}
+
+.emptyIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--bg-soft-accent);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.emptyTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.emptyText {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+  max-width: 280px;
+}
+
+.emptyCta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.emptyCta:hover {
+  background: var(--accent-hover);
+}
+
+/* ── History filter chips ──────────────────────────────────────────── */
+.filterChips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filterChip {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filterChipActive {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+
+.panelTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 12px;
+}
+
+.panelBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.empty {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+  text-align: center;
+  padding: 12px 0;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+
+.rowMain {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.rowTopLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.rowType {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.rowDates {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.rowStage {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.rowCover {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--accent);
+  width: fit-content;
+}
+
+.rowReason {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.rowNote {
+  font-size: 12px;
+  color: var(--danger-text);
+}
+
+/* ── Department outcomes (HOD tab) ─────────────────────────────────── */
+.outcomeDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.outcomeLine {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.outcomeLine i {
+  font-size: 13px;
+}
+
+.outcomeNote {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-style: italic;
+  padding-left: 19px;
+}
+
+.dismissBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.dismissBtn:hover {
+  border-color: var(--danger-border);
+  color: var(--danger-text);
+}
+
+.deptOutcomesHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.deptOutcomesHeader .subtitle {
+  flex: 1;
+  min-width: 220px;
+}
+
+.deptOutcomesToggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.linkBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.rowStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.cancelLink {
+  background: none;
+  border: none;
+  color: var(--danger-text, #c0392b);
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.decideActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.approveBtn,
+.rejectBtn {
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  white-space: nowrap;
+}
+
+.approveBtn {
+  background: var(--accent);
+  color: #fff;
+}
+
+.approveBtn:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.rejectBtn {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  border: 1px solid var(--danger-border);
+}
+
+.approveBtn:disabled,
+.rejectBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.inlineRejectBox {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 10px;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  border-radius: 10px;
+  width: 100%;
+}
+
+.inlineRejectBox label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--danger-text);
+}
+
+.inlineRejectBox textarea {
+  padding: 8px 10px;
+  border: 1px solid var(--danger-border);
+  border-radius: 8px;
+  font-size: 13px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: inherit;
+  outline: none;
+  resize: vertical;
+}
+
+.req {
+  color: var(--danger);
+}
+
+.errorText {
+  font-size: 12px;
+  color: var(--danger-text);
+  font-weight: 600;
+}
+
+.inlineRejectBtns {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.rejectConfirmBtn {
+  padding: 7px 14px;
+  background: var(--danger);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.rejectConfirmBtn:hover:not(:disabled) {
+  background: var(--danger-hover);
+}
+
+.rejectConfirmBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .decideActions {
+    width: 100%;
+  }
+
+  .approveBtn,
+  .rejectBtn {
+    flex: 1;
+  }
+}

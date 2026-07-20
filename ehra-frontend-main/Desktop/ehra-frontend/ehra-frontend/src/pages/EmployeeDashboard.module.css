@@ -1,0 +1,2111 @@
+/* ── Layout ── */
+.dash {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg-page);
+}
+
+/* ── Sidebar ── */
+.sidebar {
+    width: 220px;
+    background: var(--bg-sidebar);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.sbLogo {
+    padding: 22px 20px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+}
+
+.sbLogoIcon {
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.sbLogoImg {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.sbLogoText {
+    color: var(--sidebar-text);
+    font-size: 16px;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sbNav {
+    flex: 1;
+    padding: 14px 0;
+    overflow-y: auto;
+}
+
+.sbItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 13px;
+    cursor: pointer;
+    position: relative;
+}
+
+.sbItem i {
+    font-size: 16px;
+    width: 18px;
+}
+
+.sbItem:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--sidebar-text);
+}
+
+.sbItem.active {
+    background: rgba(255, 255, 255, 0.14);
+    color: var(--sidebar-text);
+    font-weight: 500;
+}
+
+.active {
+    background: rgba(255, 255, 255, 0.14);
+    color: var(--sidebar-text);
+    font-weight: 500;
+}
+
+.sbBadge {
+    margin-left: auto;
+    background: var(--warning);
+    color: var(--warning-text);
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 1px 7px;
+    min-width: 18px;
+    text-align: center;
+}
+
+.sbFooter {
+    padding: 14px 20px 18px;
+    border-top: 0.5px solid rgba(255, 255, 255, 0.1);
+}
+
+.logoutBtn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 8px;
+    color: var(--sidebar-text);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.logoutBtn:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+/* ── Main ── */
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 28px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.pageTitle {
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.pageSub {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 2px 0 0;
+}
+
+.topbarRight {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.scanBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 38px;
+    padding: 0 16px;
+    background: var(--accent);
+    border: none;
+    border-radius: 9px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.scanBtn:hover {
+    background: var(--accent-hover);
+}
+
+.userChip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.userAvatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    overflow: hidden;
+}
+
+.userAvatarImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.userName {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.userRole {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.content {
+    padding: 24px 28px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.contentFull {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* ── Greeting card ── */
+.greetingCard {
+    background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+    border-radius: 16px;
+    padding: 22px 26px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #fff;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.greetingHi {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 4px;
+}
+
+.greetingSub {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0;
+}
+
+.qaBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 42px;
+    padding: 0 18px;
+    background: var(--bg-surface);
+    border: none;
+    border-radius: 10px;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.qaBtn:hover {
+    background: var(--bg-soft-accent);
+}
+
+/* ── Grid / panels ── */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 18px;
+}
+
+.panel {
+    position: relative;
+    background: var(--bg-surface);
+    border-radius: 14px;
+    padding: 20px 22px;
+    box-shadow: 0 1px 2px rgba(15, 23, 22, 0.04);
+}
+
+.panelHdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.panelTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.panelAction {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.panelAction:hover {
+    text-decoration: underline;
+}
+
+.emptyState {
+    font-size: 13px;
+    color: var(--text-secondary);
+    padding: 18px 0;
+    text-align: center;
+}
+
+/* ── Today's attendance card ── */
+.todayStats {
+    display: flex;
+    gap: 18px;
+}
+
+.todayStat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: var(--bg-soft-accent);
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+
+.todayStatLabel {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.todayStatValue {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ── HOD card ── */
+.hodCard {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.hodRow {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.hodLabel {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.hodValue {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.hodPerson {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hodAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.hodAvatarImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hodEmail {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* ── Leave form ── */
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.field label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.field input,
+.field textarea {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text-primary);
+    resize: vertical;
+}
+
+.field input:focus,
+.field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.formRow {
+    display: flex;
+    gap: 14px;
+}
+
+.formRow .field {
+    flex: 1;
+}
+
+.submitBtn {
+    width: 100%;
+    height: 42px;
+    background: var(--accent);
+    border: none;
+    border-radius: 9px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.submitBtn:hover {
+    background: var(--accent-hover);
+}
+
+.submitBtn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.errorBox {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    margin-bottom: 14px;
+}
+
+/* ── Leave list ── */
+.leaveList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 420px;
+    overflow-y: auto;
+}
+
+.leaveItem {
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+
+.leaveItemTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.leaveDates {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.leaveDays {
+    font-weight: 400;
+    color: var(--text-secondary);
+}
+
+.leaveReason {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.leaveNote {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 6px 0 0;
+    line-height: 1.5;
+}
+
+/* ── Pills ── */
+.pill {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.pillPending {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.pillApproved {
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+}
+
+.pillRejected {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+/* ── Notifications ── */
+.sbBadgeInline {
+    background: var(--warning);
+    color: var(--warning-text);
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 1px 7px;
+}
+
+.notifList {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.notifItem {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.notifItem:hover {
+    background: var(--bg-soft-accent);
+}
+
+.notifUnread {
+    background: var(--bg-soft-accent);
+}
+
+.notifIcon {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.notifBody {
+    flex: 1;
+    min-width: 0;
+}
+
+.notifTitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.notifMessage {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    line-height: 1.5;
+}
+
+.notifTime {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.unreadDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    margin-top: 6px;
+}
+
+/* ── Per-item delete + its unread dot, stacked in a small right-hand rail ── */
+.notifItemRight {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-top: 4px;
+}
+
+.notifDeleteBtn {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 13px;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s;
+}
+
+.notifDeleteBtn:hover {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+/* ── Undo bar — floats above the bottom of the list whenever one or more
+   deletes are pending, so it always "pops" into view instead of being
+   pushed below the fold by a long notification list. ── */
+.undoBar {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--bg-surface-alt);
+    border: 0.5px solid var(--border-color);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px var(--shadow-color);
+    z-index: 5;
+    overflow: hidden;
+    animation: undoBarIn 0.18s ease;
+}
+
+.undoBar i {
+    font-size: 14px;
+    color: var(--danger-text);
+    flex-shrink: 0;
+}
+
+@keyframes undoBarIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.undoBarProgress {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 2px;
+    background: var(--accent);
+    width: 100%;
+    animation: undoShrink 3s linear forwards;
+}
+
+@keyframes undoShrink {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
+}
+
+.undoBarText {
+    flex: 1;
+    font-size: 12px;
+    color: var(--text-primary);
+    min-width: 0;
+}
+
+.undoBarBtn {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 4px 6px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    transition: background 0.15s, color 0.15s;
+}
+
+.undoBarBtn:hover {
+    background: var(--bg-soft-accent);
+    color: var(--accent-hover);
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/* ── Leave tab design tokens ── */
+/* ──────────────────────────────────────────────────────────────────────── */
+
+.leavePageWrap {
+    --leave-brand: var(--accent);
+    --leave-brand-bg: var(--bg-soft-accent);
+    --leave-brand-border: var(--border-color);
+    --leave-warning: var(--warning-text);
+    --leave-warning-bg: var(--warning-bg);
+    --leave-danger: var(--danger-text);
+    --leave-danger-bg: var(--danger-bg);
+    --leave-danger-border: var(--danger-border);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* ── Leave sub-tabs ── */
+.leaveTabs {
+    display: flex;
+    gap: 6px;
+    background: var(--bg-surface);
+    padding: 6px;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(15, 23, 22, 0.04);
+    width: fit-content;
+}
+
+.leaveTab {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    height: 38px;
+    padding: 0 16px;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+
+.leaveTab:hover {
+    background: var(--bg-soft-accent);
+    color: var(--text-primary);
+}
+
+.leaveTabActive {
+    background: var(--leave-brand-bg);
+    color: var(--leave-brand);
+}
+
+.leaveTab i {
+    font-size: 15px;
+}
+
+.leaveTabBadge {
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 999px;
+    min-width: 18px;
+    text-align: center;
+}
+
+.leaveTabActive .leaveTabBadge {
+    background: var(--leave-brand);
+    color: #fff;
+}
+
+.leaveTabBadgeAlert {
+    background: var(--warning);
+    color: var(--warning-text);
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 999px;
+    min-width: 18px;
+    text-align: center;
+}
+
+/* ── Step bar (request wizard) ── */
+.stepBar {
+    display: flex;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.stepItem {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.stepDot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bg-page);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: background 0.2s, color 0.2s;
+}
+
+.stepDotActive {
+    background: var(--leave-brand);
+    color: #fff;
+}
+
+.stepDotDone {
+    background: var(--leave-brand-bg);
+    color: var(--leave-brand);
+    border: 1.5px solid var(--leave-brand);
+}
+
+.stepLabel {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    margin-left: 9px;
+    white-space: nowrap;
+}
+
+.stepLabelActive {
+    font-size: 12.5px;
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-left: 9px;
+    white-space: nowrap;
+}
+
+.stepLine {
+    flex: 1;
+    height: 2px;
+    background: var(--bg-surface-alt);
+    margin: 0 14px;
+    border-radius: 2px;
+}
+
+.stepLineDone {
+    background: var(--leave-brand);
+}
+
+.stepPane {
+    display: flex;
+    flex-direction: column;
+}
+
+.stepIntro {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 18px;
+}
+
+.stepIntro i {
+    color: var(--leave-brand);
+    font-size: 17px;
+}
+
+.changeTypeBtn {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: var(--leave-brand);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.changeTypeBtn:hover {
+    text-decoration: underline;
+}
+
+.stepNav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border-color);
+}
+
+.stepNav .submitBtn,
+.stepNav .secondaryBtn {
+    width: auto;
+    min-width: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.secondaryBtn {
+    height: 42px;
+    padding: 0 18px;
+    background: var(--bg-surface);
+    border: 1.5px solid var(--border-color);
+    border-radius: 9px;
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.secondaryBtn:hover {
+    background: var(--bg-soft-accent);
+    border-color: var(--border-color);
+}
+
+/* ── Leave type grid ── */
+.typeGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+}
+
+.typeCard {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    background: var(--bg-surface-alt);
+    border: 1.5px solid var(--border-color);
+    border-radius: 12px;
+    padding: 14px;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+}
+
+.typeCard:hover:not(:disabled) {
+    border-color: var(--border-color);
+    background: var(--bg-surface);
+    transform: translateY(-1px);
+}
+
+.typeCardActive {
+    border-color: var(--leave-brand);
+    background: var(--leave-brand-bg);
+}
+
+.typeCardExhausted {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.typeCardTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 19px;
+    color: var(--leave-brand);
+}
+
+.typeCardTop i:last-child {
+    font-size: 16px;
+    color: var(--leave-brand);
+}
+
+.typeCardName {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.3;
+}
+
+.typeCardDays {
+    font-size: 11.5px;
+    font-weight: 600;
+}
+
+.typeCardBar {
+    width: 100%;
+    height: 4px;
+    background: var(--bg-surface-alt);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.typeCardBarFill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s;
+}
+
+/* ── Balance hint ── */
+.balanceHint {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid;
+    border-radius: 9px;
+    padding: 10px 13px;
+    font-size: 12.5px;
+    font-weight: 500;
+    margin: -4px 0 16px;
+}
+
+/* ── Field hints / select ── */
+.fieldHint {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: -2px 0 8px;
+    line-height: 1.5;
+}
+
+.fieldRequired {
+    color: var(--leave-danger);
+}
+
+.selectField {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--bg-surface);
+    cursor: pointer;
+}
+
+.selectField:focus {
+    outline: none;
+    border-color: var(--leave-brand);
+}
+
+.coverWarning {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: var(--leave-warning-bg);
+    color: var(--leave-warning);
+    border-radius: 9px;
+    padding: 11px 13px;
+    font-size: 12.5px;
+    line-height: 1.5;
+}
+
+.coverWarning i {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+/* ── Review card ── */
+.reviewCard {
+    background: var(--bg-surface-alt);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 6px;
+}
+
+.reviewCardLabel {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+.reviewRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 13px;
+}
+
+.reviewKey {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.reviewKey i {
+    color: var(--leave-brand);
+    font-size: 14px;
+}
+
+.reviewVal {
+    color: var(--text-primary);
+    font-weight: 600;
+    text-align: right;
+}
+
+.reviewReasonBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--border-color);
+}
+
+.reviewReasonText {
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.6;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+/* ── Success state ── */
+.successState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 36px 20px 20px;
+    gap: 6px;
+}
+
+.successIcon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--leave-brand-bg);
+    color: var(--leave-brand);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.successTitle {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.successBody {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 360px;
+    margin: 0 0 12px;
+}
+
+.successActions {
+    display: flex;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.successActions .submitBtn,
+.successActions .secondaryBtn {
+    width: auto;
+}
+
+/* ── Empty / invitation states ── */
+.invitationEmpty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 40px 24px;
+    gap: 6px;
+    color: var(--text-secondary);
+}
+
+.invitationEmpty i {
+    font-size: 34px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.invitationEmptyTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.invitationEmptyBody {
+    font-size: 12.5px;
+    line-height: 1.6;
+    max-width: 320px;
+    margin: 0 0 14px;
+}
+
+/* ── Leave history list ── */
+.leaveHistoryList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.historyCard {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+}
+
+.historyCardOpen {
+    border-color: var(--border-color);
+}
+
+.historyCardHead {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 16px;
+    background: var(--bg-surface);
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+}
+
+.historyCardHead:hover {
+    background: var(--bg-surface-alt);
+}
+
+.historyCardIcon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--leave-brand-bg);
+    color: var(--leave-brand);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+}
+
+.historyCardMain {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.historyCardTopRow {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.historyCardType {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.historyCardPill {
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.historyCardSubRow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.historyCardDot {
+    color: var(--text-secondary);
+}
+
+.historyCardChevron {
+    color: var(--text-secondary);
+    font-size: 15px;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+}
+
+.historyCardOpen .historyCardChevron {
+    transform: rotate(180deg);
+}
+
+.historyCardBody {
+    padding: 0 16px 16px 68px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-top: 1px solid var(--border-color);
+    margin-top: -1px;
+    padding-top: 12px;
+}
+
+.leaveHistoryStage {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--leave-brand);
+    background: var(--leave-brand-bg);
+    border-radius: 8px;
+    padding: 8px 11px;
+    margin: 0;
+}
+
+.leaveReason {
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.6;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.leaveMetaRow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+}
+
+.leaveMetaRow i {
+    color: var(--leave-brand);
+    font-size: 14px;
+}
+
+.metaPillGreen {
+    background: var(--leave-brand-bg);
+    color: var(--leave-brand);
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 1px 8px;
+    border-radius: 999px;
+}
+
+.metaPillRed {
+    background: var(--leave-danger-bg);
+    color: var(--leave-danger);
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 1px 8px;
+    border-radius: 999px;
+}
+
+.metaNote {
+    font-style: italic;
+    color: var(--text-secondary);
+}
+
+.leaveNoteBox {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    background: var(--bg-soft-accent);
+    border: 1px solid var(--border-color);
+    border-radius: 9px;
+    padding: 10px 12px;
+    font-size: 12.5px;
+    color: var(--text-primary);
+    line-height: 1.55;
+}
+
+.leaveNoteBox i {
+    color: var(--leave-brand);
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+
+.historyCardFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.leaveHistoryFooter {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+}
+
+.cancelLeaveBtn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: 1.5px solid var(--danger-border);
+    color: var(--leave-danger);
+    border-radius: 7px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.cancelLeaveBtn:hover:not(:disabled) {
+    background: var(--leave-danger-bg);
+}
+
+.cancelLeaveBtn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+/* ── Progress dots (history rows) ── */
+.progressDots {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.progressDotWrap {
+    display: flex;
+    align-items: center;
+}
+
+.progressDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--bg-surface-alt);
+    flex-shrink: 0;
+}
+
+.progressDot_done {
+    background: var(--leave-brand);
+}
+
+.progressDot_current {
+    background: var(--warning);
+    box-shadow: 0 0 0 3px rgba(240, 169, 58, 0.25);
+}
+
+.progressDot_pending {
+    background: var(--bg-surface-alt);
+}
+
+.progressDot_rejected {
+    background: var(--leave-danger);
+}
+
+.progressLine {
+    width: 16px;
+    height: 2px;
+    background: var(--bg-surface-alt);
+    margin: 0 2px;
+}
+
+.progressLineDone {
+    background: var(--leave-brand);
+}
+
+/* ── Cover requests ── */
+.coverCountBadge {
+    background: var(--warning-bg);
+    color: var(--leave-warning);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 999px;
+    margin-left: 8px;
+}
+
+.coverList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.coverSectionLabel {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 4px 0 2px;
+}
+
+.coverItem {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.coverItemPast {
+    background: var(--bg-surface-alt);
+}
+
+.coverItemHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.coverAvatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--leave-brand);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.coverAvatarImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.coverItemInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.coverRequesterName {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.coverLeaveType {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.coverLeaveType i {
+    color: var(--leave-brand);
+    font-size: 13px;
+}
+
+.coverDates {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.coverDaysBadge {
+    background: var(--leave-brand-bg);
+    color: var(--leave-brand);
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 999px;
+}
+
+.coverPastPill {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    flex-shrink: 0;
+}
+
+.coverReason {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    font-size: 12.5px;
+    color: var(--text-primary);
+    line-height: 1.55;
+    margin: 0;
+    background: var(--bg-surface-alt);
+    border-radius: 8px;
+    padding: 9px 11px;
+}
+
+.coverReason i {
+    color: var(--text-secondary);
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.coverActions {
+    display: flex;
+    gap: 10px;
+}
+
+.coverAcceptBtn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--leave-brand);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.coverAcceptBtn:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+
+.coverAcceptBtn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.coverDeclineBtn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--bg-surface);
+    color: var(--leave-danger);
+    border: 1.5px solid var(--danger-border);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.coverDeclineBtn:hover:not(:disabled) {
+    background: var(--leave-danger-bg);
+}
+
+.coverDeclineBtn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+/* ── HOD approvals ── */
+.hodList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.hodItem {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.hodItemHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.hodCoverLine {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    background: var(--leave-brand-bg);
+    border-radius: 8px;
+    padding: 8px 11px;
+}
+
+.hodCoverLine i {
+    color: var(--leave-brand);
+    font-size: 14px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 720px) {
+    .typeGrid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+
+    .stepLabel,
+    .stepLabelActive {
+        display: none;
+    }
+
+    .historyCardBody {
+        padding-left: 16px;
+    }
+
+    .leaveTabs {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .coverActions,
+    .stepNav {
+        flex-direction: column;
+    }
+
+    .coverItemHeader,
+    .hodItemHeader {
+        flex-wrap: wrap;
+    }
+
+    .coverDates {
+        white-space: normal;
+        margin-left: 48px;
+        /* aligns under name, past the avatar */
+    }
+
+    .stepNav .submitBtn,
+    .stepNav .secondaryBtn,
+    .successActions .submitBtn,
+    .successActions .secondaryBtn {
+        width: 100%;
+    }
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/* ── HOD Section: inner tabs (Pending / On Leave) ── */
+/* ──────────────────────────────────────────────────────────────────────── */
+
+.hodInnerTabs {
+    display: flex;
+    gap: 4px;
+    padding: 0 0 14px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 14px;
+}
+
+.hodInnerTab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 14px;
+    background: none;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.hodInnerTab:hover {
+    background: var(--bg-soft-accent);
+    color: var(--text-primary);
+}
+
+.hodInnerTab i {
+    font-size: 14px;
+}
+
+.hodInnerTabActive {
+    background: var(--bg-soft-accent);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.hodInnerBadge {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 999px;
+    min-width: 18px;
+    text-align: center;
+}
+
+/* ── HOD empty state ── */
+.hodEmptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 32px 16px;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+/* ── HOD On-Leave list ── */
+.hodOnLeaveList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.hodOnLeaveCard {
+    border: 1px solid var(--border-color);
+    border-radius: 11px;
+    padding: 13px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    background: var(--bg-surface);
+}
+
+.hodOnLeaveCardTop {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.hodOnLeaveDates {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-left: 47px;
+    /* aligns under the name, past the avatar */
+}
+
+.hodOnLeaveDates i {
+    color: var(--accent);
+    font-size: 13px;
+}
+
+/* ── Days-left pill (shared between HOD and employer On Leave views) ── */
+.daysLeftPill {
+    margin-left: auto;
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+/* ── HOD Section: Approved leave list ── */
+/* ──────────────────────────────────────────────────────────────────────── */
+
+.hodApprovedList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.hodApprovedCard {
+    border: 1px solid var(--border-color);
+    border-radius: 11px;
+    padding: 13px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    background: var(--bg-surface);
+}
+
+.hodApprovedTop {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.hodApprovedStatus {
+    margin-left: auto;
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.hodApprovedNotes {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: var(--bg-soft-accent);
+    border-radius: 8px;
+    padding: 8px 11px;
+    font-size: 12px;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+.hodApprovedNotes i {
+    color: var(--accent);
+    margin-right: 4px;
+}
+
+/* ── Cover person availability picker ──────────────────────────────────── */
+
+.coverPickerList {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 260px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 2px;
+}
+
+.coverPickerHint {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 12px;
+    background: var(--info-bg);
+    border: 1px solid var(--info-border);
+    border-radius: 9px;
+    font-size: 12px;
+    color: var(--info-text);
+    margin-bottom: 4px;
+}
+
+.coverPickerHint i {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.coverPickerItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-surface-alt);
+    cursor: pointer;
+    transition: background 0.14s, border-color 0.14s;
+}
+
+.coverPickerItem:hover:not(.coverPickerItemUnavailable) {
+    background: var(--bg-soft-accent);
+    border-color: var(--accent);
+}
+
+.coverPickerItemSelected {
+    background: var(--bg-soft-accent) !important;
+    border-color: var(--accent) !important;
+}
+
+.coverPickerItemUnavailable {
+    opacity: 0.55;
+    cursor: not-allowed;
+    background: var(--bg-surface-alt);
+}
+
+.coverPickerAvatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    overflow: hidden;
+}
+
+.coverPickerAvatarImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.coverPickerItemUnavailable .coverPickerAvatar {
+    background: var(--text-secondary);
+}
+
+.coverPickerInfo {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.coverPickerName {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.coverPickerWhy {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--warning-text);
+    line-height: 1.35;
+}
+
+.coverPickerWhy i {
+    font-size: 12px;
+    flex-shrink: 0;
+}

@@ -1,0 +1,95 @@
+/* ── Confirmation modal — copied verbatim from WorkforceTab.module.css ──
+   so both call sites stay visually identical. If you need to change the
+   look of this dialog, this is the only file to touch. ── */
+
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal {
+    background: var(--bg-surface);
+    border-radius: 16px;
+    padding: 28px;
+    max-width: 420px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.modalIcon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--warning-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modalTitle {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.modalBody {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.65;
+}
+
+.modalActions {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+.cancelBtn {
+    flex: 1;
+    height: 40px;
+    background: var(--bg-surface);
+    border: 0.5px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text-secondary);
+}
+
+.cancelBtn:hover {
+    background: var(--bg-surface-alt);
+}
+
+.confirmDeleteBtn {
+    flex: 1;
+    height: 40px;
+    background: var(--danger-text);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+}
+
+.confirmDeleteBtn:hover:not(:disabled) {
+    background: var(--danger-hover);
+}
+
+.confirmDeleteBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
