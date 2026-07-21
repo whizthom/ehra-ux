@@ -608,6 +608,13 @@ export default function Dashboard() {
   // greeting, sidebar footer identity).
   const myFirst = myProfile?.firstName ?? "";
   const myLast = myProfile?.lastName ?? "";
+  // The backend seeds firstName="Owner" as a placeholder for identities
+  // that registered via the phone-only flow (business name + password,
+  // no personal name collected — see PhoneAuthServiceImpl). It's a real,
+  // non-null value in the DB, but it isn't an actual first name, so it
+  // shouldn't be shown here as if the person had set one.
+  const hasRealFirstName = Boolean(myFirst) && myFirst.trim() !== "Owner";
+  const myFirstDisplay = hasRealFirstName ? myFirst : "";
   const companyName =
     myProfile?.businessName ?? summary?.companyName ?? "Your Company";
   const unreadCount = (notifs || []).filter((n) => !n?.isRead).length;
@@ -727,7 +734,7 @@ export default function Dashboard() {
             <div className={styles.sbUserRow}>
               <div>
                 <div className={styles.sbUserName}>
-                  {loadingMyProfile ? "Loading…" : myFirst}
+                  {loadingMyProfile ? "Loading…" : myFirstDisplay}
                 </div>
                 <div className={styles.sbUserRole}>
                   {myProfile?.isHod ? "Employee · HOD" : "Employee"}
@@ -759,7 +766,7 @@ export default function Dashboard() {
               />
               <span>
                 {greeting.text}
-                {!loadingMyProfile && myFirst && `, ${myFirst}`}
+                {!loadingMyProfile && hasRealFirstName && `, ${myFirstDisplay}`}
               </span>
             </h1>
             <p className={styles.empGreetingSub}>
