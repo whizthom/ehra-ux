@@ -509,29 +509,21 @@
         flex-direction: column;
         gap: 4px;
         flex-shrink: 0;
-        padding: 18px 24px 15px;
-        background: #0b1f1a;
-        background-image: radial-gradient(circle at 14% 12%, rgba(85, 224, 174, 0.2), transparent 46%),
-            radial-gradient(circle at 90% 85%, rgba(198, 161, 91, 0.16), transparent 50%);
-        border-radius: 0 0 22px 22px;
-        box-shadow: 0 14px 28px -18px rgba(11, 31, 26, 0.5);
+        padding: 22px 22px 14px;
+        background: transparent;
         overflow: hidden;
         animation: heroSlide 0.5s cubic-bezier(0.16, 0.8, 0.24, 1) both;
     }
 
     .mobileDotGrid {
-        position: absolute;
-        inset: 0;
-        background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-        background-size: 18px 18px;
-        mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 85%, transparent);
-        pointer-events: none;
+        display: none;
     }
 
     .mobileLogoRow {
         position: relative;
         z-index: 1;
         display: flex;
+        justify-content: flex-start;
         align-items: center;
         gap: 9px;
         margin-bottom: 10px;
@@ -540,8 +532,8 @@
     .mobileLogoIcon {
         width: 28px;
         height: 28px;
-        background: rgba(255, 255, 255, 0.12);
-        border: 0.5px solid rgba(255, 255, 255, 0.18);
+        background: #0f6e56;
+        border: none;
         border-radius: 8px;
         display: flex;
         align-items: center;
@@ -551,7 +543,7 @@
     }
 
     .mobileLogoText {
-        color: #fff;
+        color: #0b1f1a;
         font-size: 14px;
         font-weight: 600;
     }
@@ -559,7 +551,7 @@
     .mobileEyebrow {
         position: relative;
         z-index: 1;
-        color: #55e0ae;
+        color: #0f6e56;
         font-size: 10px;
         font-weight: 600;
         letter-spacing: 1.2px;
@@ -572,7 +564,7 @@
         font-family: "Fraunces", Georgia, serif;
         font-weight: 550;
         font-size: 17px;
-        color: #fff;
+        color: #0b1f1a;
         line-height: 1.25;
         margin-top: 1px;
     }
