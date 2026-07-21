@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 import { useAuth } from "../context/AuthContext";
 import { sendPhoneOtp, confirmPhoneOtp, resetRecaptcha } from "../firebase";
 import { verifyTwoFactorLogin } from "../api/phoneAuthApi";
@@ -59,10 +61,11 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // "identifier" accepts EITHER an email or a phone number — Identity
-  // supports dual-identifier login (see LoginRequestDTO).
+  // Phone is the login identifier now (same as the create-business flow) —
+  // the backend's dual-identifier support still accepts email underneath,
+  // but the UI only ever collects a phone number here.
   const [form, setForm] = useState({
-    identifier: location.state?.phone || "",
+    phone: location.state?.phone || "",
     password: "",
   });
   const [error, setError] = useState("");
@@ -91,6 +94,9 @@ export default function Login() {
   const handleChange = (e) =>
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
 
+  const handlePhoneChange = (value) =>
+    setForm((p) => ({ ...p, phone: value || "" }));
+
   const routeAfterLogin = (data) => {
     // Someone else may have sent an invite link while this person was
     // logged out — InvitationLanding stashes the token here before
@@ -117,13 +123,13 @@ export default function Login() {
   const handleSubmit = async () => {
     setError("");
     setNotice("");
-    if (!form.identifier || !form.password) {
-      setError("Please enter your email/phone and password.");
+    if (!form.phone || !form.password) {
+      setError("Please enter your phone number and password.");
       return;
     }
     setLoading(true);
     try {
-      const data = await login(form.identifier, form.password);
+      const data = await login(form.phone, form.password);
 
       if (data.requiresTwoFactor) {
         // Kick off the OTP challenge immediately so the person doesn't
@@ -143,7 +149,7 @@ export default function Login() {
       const msg =
         err?.response?.data?.message ||
         err?.response?.data ||
-        "Invalid email/phone or password. Please try again.";
+        "Invalid phone number or password. Please try again.";
       setError(typeof msg === "string" ? msg : "Login failed");
     } finally {
       setLoading(false);
@@ -252,24 +258,23 @@ export default function Login() {
               )}
 
               <div className={styles.field}>
-                <label className={styles.label} htmlFor="identifier">
-                  Email or phone number
+                <label className={styles.label} htmlFor="phone">
+                  Phone number
                 </label>
-                <div className={styles.inputWrap}>
-                  <i className={`ti ti-mail ${styles.prefix}`} />
-                  <input
-                    id="identifier"
-                    name="identifier"
-                    type="text"
-                    placeholder="you@company.com or +234 800 000 0000"
-                    value={form.identifier}
-                    onChange={handleChange}
+                <div className={phoneStyles.phoneInputWrap}>
+                  <PhoneInput
+                    id="phone"
+                    international
+                    defaultCountry="NG"
+                    countryCallingCodeEditable={false}
+                    placeholder="Enter your phone number"
+                    value={form.phone}
+                    onChange={handlePhoneChange}
                     onKeyDown={(e) =>
                       e.key === "Enter" &&
                       document.getElementById("password").focus()
                     }
-                    className={styles.input}
-                    autoComplete="username"
+                    className={`${phoneStyles.phoneInput} ${styles.phoneOverride}`}
                   />
                 </div>
               </div>
