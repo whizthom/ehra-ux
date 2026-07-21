@@ -221,7 +221,7 @@ export default function Login() {
           </div>
         </div>
 
-        <p className={styles.leftFooter}>© 2025 Ehra. All rights reserved.</p>
+        <p className={styles.leftFooter}>© 2026 Ehra. All rights reserved.</p>
       </div>
 
       {/* ── Right panel — sign in ── */}

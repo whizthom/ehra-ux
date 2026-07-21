@@ -144,7 +144,7 @@ export default function ForgotPassword() {
             Verify your phone number and set a new password — no email required.
           </p>
         </div>
-        <p className={styles.leftFooter}>© 2025 Ehra. All rights reserved.</p>
+        <p className={styles.leftFooter}>© 2026 Ehra. All rights reserved.</p>
       </div>
 
       <div className={styles.right}>
