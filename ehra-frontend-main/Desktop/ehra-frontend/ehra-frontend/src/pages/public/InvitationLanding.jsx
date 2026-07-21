@@ -29,15 +29,26 @@ export default function InvitationLanding() {
   useEffect(() => {
     validateInvitation(token)
       .then((data) => {
-        setValid(data.valid);
-        setBusinessName(data.businessName);
+        // Defensive: a token that matches no invitation at all (typo'd,
+        // stale, or already deleted) makes the backend throw before it
+        // ever builds an InvitationValidationDTO — GlobalExceptionHandler
+        // then responds 500 with an unrelated {status, message, errors}
+        // shape instead of {valid, businessName}. Coercing both fields
+        // here means a malformed/unexpected response body renders as
+        // "invitation unavailable" instead of crashing the whole page
+        // (see the unguarded `initials` bug this replaced).
+        setValid(Boolean(data?.valid));
+        setBusinessName(
+          typeof data?.businessName === "string" ? data.businessName : "",
+        );
       })
       .catch(() => setValid(false))
       .finally(() => setLoading(false));
   }, [token]);
 
-  const initials = businessName
+  const initials = (businessName || "")
     .split(" ")
+    .filter(Boolean)
     .map((w) => w[0])
     .join("")
     .slice(0, 2)

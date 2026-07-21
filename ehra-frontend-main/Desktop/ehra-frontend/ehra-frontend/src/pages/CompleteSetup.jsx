@@ -26,7 +26,7 @@ function clearSignupDrafts() {
 
 function initials(name) {
   return (
-    name
+    (name || "")
       .split(" ")
       .map((w) => w[0] || "")
       .join("")
@@ -78,7 +78,9 @@ export default function CompleteProfile() {
         phone: form.phone.trim(),
       });
       clearSignupDrafts();
-      navigate(data.contextType === "EMPLOYEE" ? "/my-dashboard" : "/dashboard");
+      navigate(
+        data.contextType === "EMPLOYEE" ? "/my-dashboard" : "/dashboard",
+      );
     } catch (err) {
       const data = err.response?.data;
       setError(
