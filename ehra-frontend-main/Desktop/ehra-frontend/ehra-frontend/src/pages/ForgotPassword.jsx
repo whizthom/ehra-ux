@@ -148,12 +148,11 @@ export default function ForgotPassword() {
       </div>
 
       <div className={styles.right}>
+        <div className={styles.mobileLogoRow}>
+          <div className={styles.mobileLogoIcon}>💼</div>
+          <span className={styles.mobileLogoText}>Ehra</span>
+        </div>
         <div className={styles.card}>
-          <div className={styles.mobileLogoRow}>
-            <div className={styles.mobileLogoIcon}>💼</div>
-            <span className={styles.mobileLogoText}>Ehra</span>
-          </div>
-
           <div className={styles.rightHeader}>
             <h2 className={styles.h1}>
               {step === "phone" && "Forgot password"}

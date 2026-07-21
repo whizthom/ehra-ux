@@ -664,7 +664,7 @@
         flex: 1;
         min-height: 0;
         padding: 0 20px 18px;
-        justify-content: center;
+        justify-content: flex-start;
         overflow: hidden;
     }
 
@@ -676,7 +676,7 @@
         gap: 10px;
         flex-shrink: 0;
         margin: 0 -20px 22px;
-        padding: 20px 20px 16px;
+        padding: 18px 20px 15px;
         background: #0b1f1a;
         background-image: radial-gradient(circle at 16% 18%, rgba(85, 224, 174, 0.2), transparent 46%),
             radial-gradient(circle at 88% 82%, rgba(198, 161, 91, 0.16), transparent 50%);
@@ -701,7 +701,7 @@
 
     .card {
         max-width: 420px;
-        margin: 0 auto;
+        margin: auto;
         width: 100%;
     }
 

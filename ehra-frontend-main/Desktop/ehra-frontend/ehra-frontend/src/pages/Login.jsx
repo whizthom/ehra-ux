@@ -226,12 +226,11 @@ export default function Login() {
 
       {/* ── Right panel — sign in ── */}
       <div className={styles.right}>
+        <div className={styles.mobileLogoRow}>
+          <div className={styles.mobileLogoIcon}>💼</div>
+          <span className={styles.mobileLogoText}>Ehra</span>
+        </div>
         <div className={styles.card}>
-          <div className={styles.mobileLogoRow}>
-            <div className={styles.mobileLogoIcon}>💼</div>
-            <span className={styles.mobileLogoText}>Ehra</span>
-          </div>
-
           {!twoFactor ? (
             <>
               <div className={styles.rightHeader}>
