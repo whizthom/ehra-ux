@@ -441,9 +441,96 @@
     text-decoration: underline;
 }
 
+/* ── Mobile hero — replaces the left brand panel below 900px ──────────── */
+.mobileHero {
+    display: none;
+}
+
 @media (max-width: 900px) {
     .left {
         display: none;
+    }
+
+    .page {
+        display: block;
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+    }
+
+    .right {
+        overflow: visible;
+    }
+
+    .mobileHero {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 28px 24px 26px;
+        background: #0b1f1a;
+        background-image: radial-gradient(circle at 14% 12%, rgba(85, 224, 174, 0.2), transparent 46%),
+            radial-gradient(circle at 90% 85%, rgba(198, 161, 91, 0.16), transparent 50%);
+        border-radius: 0 0 28px 28px;
+        box-shadow: 0 20px 40px -22px rgba(11, 31, 26, 0.5);
+        overflow: hidden;
+    }
+
+    .mobileDotGrid {
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+        background-size: 18px 18px;
+        mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 85%, transparent);
+        pointer-events: none;
+    }
+
+    .mobileLogoRow {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-bottom: 16px;
+    }
+
+    .mobileLogoIcon {
+        width: 30px;
+        height: 30px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 0.5px solid rgba(255, 255, 255, 0.18);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+    }
+
+    .mobileLogoText {
+        color: #fff;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .mobileEyebrow {
+        position: relative;
+        z-index: 1;
+        color: #55e0ae;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+    }
+
+    .mobileHeadline {
+        position: relative;
+        z-index: 1;
+        font-family: "Fraunces", Georgia, serif;
+        font-weight: 550;
+        font-size: 20px;
+        color: #fff;
+        line-height: 1.3;
+        margin-top: 2px;
     }
 
     .formBody {

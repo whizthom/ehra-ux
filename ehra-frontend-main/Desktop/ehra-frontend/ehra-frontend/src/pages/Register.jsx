@@ -250,6 +250,16 @@ export default function Register() {
 
       {/* ── Right ── */}
       <div className={styles.right}>
+        <div className={styles.mobileHero}>
+          <div className={styles.mobileDotGrid} aria-hidden="true" />
+          <div className={styles.mobileLogoRow}>
+            <div className={styles.mobileLogoIcon}>💼</div>
+            <span className={styles.mobileLogoText}>Ehra</span>
+          </div>
+          <p className={styles.mobileEyebrow}>Get started</p>
+          <h1 className={styles.mobileHeadline}>Set up your workspace</h1>
+        </div>
+
         <div className={styles.rightHeader}>
           <div className={styles.progressBar}>
             <div

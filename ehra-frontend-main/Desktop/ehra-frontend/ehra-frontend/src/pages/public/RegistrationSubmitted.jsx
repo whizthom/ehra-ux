@@ -6,7 +6,6 @@ export default function RegistrationSubmitted() {
 
   return (
     <div className={styles.page}>
-
       {/* ── Left panel ── */}
       <div className={styles.left}>
         <div className={styles.logoRow}>
@@ -27,7 +26,9 @@ export default function RegistrationSubmitted() {
               <div className={`${styles.stepDot} ${styles.stepDone}`}>✓</div>
               <div className={styles.stepBody}>
                 <p className={styles.stepLabel}>Invitation accepted</p>
-                <p className={styles.stepSub}>You accepted the company invite</p>
+                <p className={styles.stepSub}>
+                  You accepted the company invite
+                </p>
               </div>
             </div>
             <div className={styles.step}>
@@ -43,7 +44,9 @@ export default function RegistrationSubmitted() {
               <div className={`${styles.stepDot} ${styles.stepActive}`}>3</div>
               <div className={styles.stepBody}>
                 <p className={styles.stepLabel}>Awaiting approval</p>
-                <p className={styles.stepSub}>Your employer is reviewing your profile</p>
+                <p className={styles.stepSub}>
+                  Your employer is reviewing your profile
+                </p>
               </div>
             </div>
             <div className={styles.step}>
@@ -61,8 +64,14 @@ export default function RegistrationSubmitted() {
 
       {/* ── Right panel ── */}
       <div className={styles.right}>
+        <div className={styles.mobileHero}>
+          <div className={styles.mobileDotGrid} aria-hidden="true" />
+          <div className={styles.mobileLogoRow}>
+            <div className={styles.mobileLogoIcon}>💼</div>
+            <span className={styles.mobileLogoText}>Ehra</span>
+          </div>
+        </div>
         <div className={styles.state}>
-
           <div className={styles.successRing}>
             <span className={styles.checkIcon}>✅</span>
           </div>

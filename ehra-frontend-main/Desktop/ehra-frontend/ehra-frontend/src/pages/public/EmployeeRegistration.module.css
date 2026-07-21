@@ -8,39 +8,49 @@
 
 /* ── Left ── */
 .left {
+    position: relative;
     width: 42%;
-    background: #0f6e56;
+    background: #0b1f1a;
+    background-image: radial-gradient(circle at 12% 8%, rgba(85, 224, 174, 0.16), transparent 42%),
+        radial-gradient(circle at 92% 88%, rgba(198, 161, 91, 0.14), transparent 45%);
     padding: 48px 40px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     flex-shrink: 0;
+    overflow: hidden;
 }
 
 .logoRow {
+    position: relative;
+    z-index: 1;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
 .logoIcon {
-    width: 36px;
-    height: 36px;
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
+    width: 34px;
+    height: 34px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 0.5px solid rgba(255, 255, 255, 0.14);
+    border-radius: 9px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 17px;
 }
 
 .logoText {
     color: #fff;
-    font-size: 18px;
-    font-weight: 500;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
 }
 
 .leftBody {
+    position: relative;
+    z-index: 1;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -50,29 +60,35 @@
 }
 
 .tagline {
-    color: #9fe1cb;
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.5px;
+    color: #55e0ae;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.4px;
     text-transform: uppercase;
 }
 
 .headline {
+    font-family: "Fraunces", Georgia, serif;
+    font-optical-sizing: auto;
+    font-weight: 550;
     color: #fff;
-    font-size: 22px;
-    font-weight: 500;
-    line-height: 1.35;
+    font-size: 28px;
+    line-height: 1.28;
+    letter-spacing: -0.2px;
+    margin: 2px 0 0;
 }
 
 .desc {
-    color: #5dcaa5;
-    font-size: 13px;
+    color: #b8ccc5;
+    font-size: 13.5px;
     line-height: 1.6;
     margin-top: 4px;
 }
 
 .leftFooter {
-    color: #5dcaa5;
+    position: relative;
+    z-index: 1;
+    color: #6f8b81;
     font-size: 12px;
 }
 
@@ -113,18 +129,19 @@
 }
 
 .dotDone {
-    background: #1d9e75;
-    color: #fff;
+    background: #55e0ae;
+    color: #0b1f1a;
 }
 
 .dotActive {
     background: #fff;
-    color: #0f6e56;
+    color: #0b1f1a;
 }
 
 .dotPending {
-    background: rgba(255, 255, 255, 0.12);
-    color: #9fe1cb;
+    background: rgba(255, 255, 255, 0.1);
+    border: 0.5px solid rgba(255, 255, 255, 0.14);
+    color: #7f958d;
 }
 
 .stepBody {
@@ -133,13 +150,13 @@
 
 .stepLabel {
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
     color: #fff;
 }
 
 .stepSub {
     font-size: 12px;
-    color: #5dcaa5;
+    color: #8fa8a0;
     margin-top: 2px;
 }
 
@@ -168,7 +185,7 @@
 
 .progressFill {
     height: 100%;
-    background: #0f6e56;
+    background: linear-gradient(90deg, #0f6e56, #55e0ae);
     border-radius: 2px;
     transition: width 0.4s ease;
 }
@@ -180,14 +197,16 @@
 }
 
 .stepTitle {
-    font-size: 15px;
-    font-weight: 500;
-    color: #111;
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-size: 16px;
+    color: #0b1f1a;
 }
 
 .stepCount {
-    font-size: 13px;
-    color: #aaa;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #8a9791;
 }
 
 .formBody {
@@ -257,8 +276,8 @@
 
 .field input:focus,
 .field select:focus {
-    border-color: #1d9e75;
-    box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.1);
+    border-color: #0f6e56;
+    box-shadow: 0 0 0 3px rgba(15, 110, 86, 0.12);
 }
 
 .field input::placeholder {
@@ -382,10 +401,121 @@
     cursor: not-allowed;
 }
 
+/* ── Mobile hero — replaces the left timeline sidebar below 768px ──────── */
+.mobileHero {
+    display: none;
+}
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
+    .page {
+        display: block;
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+    }
+
     .left {
         display: none;
+    }
+
+    .right {
+        overflow: visible;
+    }
+
+    .mobileHero {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 26px 24px 22px;
+        background: #0b1f1a;
+        background-image: radial-gradient(circle at 14% 12%, rgba(85, 224, 174, 0.2), transparent 46%),
+            radial-gradient(circle at 90% 85%, rgba(198, 161, 91, 0.16), transparent 50%);
+        border-radius: 0 0 28px 28px;
+        box-shadow: 0 20px 40px -22px rgba(11, 31, 26, 0.5);
+        overflow: hidden;
+    }
+
+    .mobileDotGrid {
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+        background-size: 18px 18px;
+        mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 85%, transparent);
+        pointer-events: none;
+    }
+
+    .mobileLogoRow {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-bottom: 14px;
+    }
+
+    .mobileLogoIcon {
+        width: 30px;
+        height: 30px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 0.5px solid rgba(255, 255, 255, 0.18);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+    }
+
+    .mobileLogoText {
+        color: #fff;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .mobileEyebrow {
+        position: relative;
+        z-index: 1;
+        color: #55e0ae;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+    }
+
+    .mobileHeadline {
+        position: relative;
+        z-index: 1;
+        font-family: "Fraunces", Georgia, serif;
+        font-weight: 550;
+        font-size: 19px;
+        color: #fff;
+        line-height: 1.3;
+        margin-top: 2px;
+    }
+
+    .mobileSteps {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        gap: 6px;
+        margin-top: 18px;
+    }
+
+    .mobileStepDot {
+        flex: 1;
+        height: 4px;
+        border-radius: 2px;
+        background: rgba(255, 255, 255, 0.14);
+        transition: background 0.2s;
+    }
+
+    .mobileStepDone {
+        background: #55e0ae;
+    }
+
+    .mobileStepActive {
+        background: linear-gradient(90deg, #55e0ae, rgba(85, 224, 174, 0.35));
     }
 
     .formBody {
@@ -398,5 +528,15 @@
 
     .formFooter {
         padding: 12px 24px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .grid2 {
+        grid-template-columns: 1fr;
+    }
+
+    .mobileHeadline {
+        font-size: 18px;
     }
 }

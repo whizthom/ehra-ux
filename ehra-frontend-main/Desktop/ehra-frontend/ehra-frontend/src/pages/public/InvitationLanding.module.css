@@ -4,43 +4,53 @@
     height: 100vh;
     width: 100vw;
     overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* ── Left panel ── */
 .left {
+    position: relative;
     width: 45%;
-    background: #0f6e56;
+    background: #0b1f1a;
+    background-image: radial-gradient(circle at 12% 8%, rgba(85, 224, 174, 0.16), transparent 42%),
+        radial-gradient(circle at 92% 88%, rgba(198, 161, 91, 0.14), transparent 45%);
     padding: 48px 40px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    overflow: hidden;
 }
 
 .logoRow {
+    position: relative;
+    z-index: 1;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
 .logoIcon {
-    width: 36px;
-    height: 36px;
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
+    width: 34px;
+    height: 34px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 0.5px solid rgba(255, 255, 255, 0.14);
+    border-radius: 9px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 17px;
 }
 
 .logoText {
     color: #fff;
-    font-size: 18px;
-    font-weight: 500;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
 }
 
 .leftBody {
+    position: relative;
+    z-index: 1;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -50,22 +60,25 @@
 }
 
 .tagline {
-    color: #9fe1cb;
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.5px;
+    color: #55e0ae;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.4px;
     text-transform: uppercase;
 }
 
 .headline {
+    font-family: "Fraunces", Georgia, serif;
+    font-optical-sizing: auto;
+    font-weight: 550;
     color: #fff;
-    font-size: 24px;
-    font-weight: 500;
-    line-height: 1.35;
+    font-size: 30px;
+    line-height: 1.28;
+    letter-spacing: -0.2px;
 }
 
 .desc {
-    color: #5dcaa5;
+    color: #b8ccc5;
     font-size: 14px;
     line-height: 1.6;
     margin-top: 4px;
@@ -82,16 +95,24 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 0.5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 9px;
     padding: 10px 14px;
-    color: #e1f5ee;
+    color: #eef6f2;
     font-size: 13px;
 }
 
 .leftFooter {
-    color: #5dcaa5;
+    position: relative;
+    z-index: 1;
+    color: #6f8b81;
     font-size: 12px;
+}
+
+/* ── Mobile hero — hidden on desktop, replaces the left panel below 768px ── */
+.mobileHero {
+    display: none;
 }
 
 /* ── Right panel ── */
@@ -117,15 +138,16 @@
 }
 
 .stateTitle {
-    font-size: 18px;
-    font-weight: 500;
-    color: #111;
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-size: 20px;
+    color: #0b1f1a;
     margin-bottom: 8px;
 }
 
 .stateSub {
     font-size: 14px;
-    color: #666;
+    color: #66766f;
     line-height: 1.6;
 }
 
@@ -180,8 +202,8 @@
 /* ── Org card ── */
 .orgCard {
     width: 100%;
-    background: #f8fafc;
-    border: 0.5px solid #e2e8f0;
+    background: #f3f8f6;
+    border: 0.5px solid #e1e8e5;
     border-radius: 12px;
     padding: 16px 18px;
     display: flex;
@@ -200,7 +222,7 @@
     align-items: center;
     justify-content: center;
     font-size: 15px;
-    font-weight: 500;
+    font-weight: 600;
     color: #fff;
     flex-shrink: 0;
     letter-spacing: -0.5px;
@@ -208,22 +230,22 @@
 
 .orgName {
     font-size: 15px;
-    font-weight: 500;
-    color: #111;
+    font-weight: 600;
+    color: #0b1f1a;
 }
 
 .orgLabel {
     font-size: 12px;
-    color: #888;
+    color: #8a9791;
     margin-top: 2px;
 }
 
 /* ── Notice ── */
 .notice {
     width: 100%;
-    background: #e1f5ee;
-    border: 0.5px solid #5dcaa5;
-    border-radius: 8px;
+    background: #eaf6f1;
+    border: 0.5px solid #bfe4d5;
+    border-radius: 10px;
     padding: 12px 14px;
     display: flex;
     align-items: flex-start;
@@ -250,21 +272,23 @@
     height: 44px;
     background: #0f6e56;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     color: #fff;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     font-family: inherit;
-    transition: background 0.15s;
+    box-shadow: 0 14px 28px -14px rgba(15, 110, 86, 0.5);
+    transition: background 0.15s, box-shadow 0.15s;
 }
 
 .acceptBtn:hover {
     background: #085041;
+    box-shadow: 0 16px 32px -12px rgba(15, 110, 86, 0.55);
 }
 
 /* ── Decline link ── */
@@ -283,11 +307,72 @@
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
+    .page {
+        display: block;
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+    }
+
     .left {
         display: none;
     }
 
     .right {
-        padding: 40px 28px;
+        overflow: visible;
+        padding: 0 24px 40px;
+    }
+
+    .mobileHero {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        margin: 0 -24px 32px;
+        padding: 28px 24px 24px;
+        background: #0b1f1a;
+        background-image: radial-gradient(circle at 16% 18%, rgba(85, 224, 174, 0.2), transparent 46%),
+            radial-gradient(circle at 88% 82%, rgba(198, 161, 91, 0.16), transparent 50%);
+        border-radius: 0 0 28px 28px;
+        box-shadow: 0 20px 40px -22px rgba(11, 31, 26, 0.5);
+        overflow: hidden;
+    }
+
+    .mobileDotGrid {
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+        background-size: 18px 18px;
+        mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 85%, transparent);
+        pointer-events: none;
+    }
+
+    .mobileLogoRow {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+    }
+
+    .mobileLogoIcon {
+        width: 32px;
+        height: 32px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 0.5px solid rgba(255, 255, 255, 0.18);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+    }
+
+    .mobileLogoText {
+        color: #fff;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .state {
+        max-width: 420px;
     }
 }

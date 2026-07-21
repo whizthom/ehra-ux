@@ -181,6 +181,31 @@ export default function EmployeeRegistration() {
 
       {/* ── Right panel ── */}
       <div className={styles.right}>
+        <div className={styles.mobileHero}>
+          <div className={styles.mobileDotGrid} aria-hidden="true" />
+          <div className={styles.mobileLogoRow}>
+            <div className={styles.mobileLogoIcon}>💼</div>
+            <span className={styles.mobileLogoText}>Ehra</span>
+          </div>
+          <p className={styles.mobileEyebrow}>Employee registration</p>
+          <h1 className={styles.mobileHeadline}>{STEPS[step - 1].title}</h1>
+
+          <div className={styles.mobileSteps}>
+            {STEPS.map((s, i) => {
+              const n = i + 1;
+              const done = n < step;
+              const active = n === step;
+              return (
+                <span
+                  key={n}
+                  className={`${styles.mobileStepDot} ${done ? styles.mobileStepDone : ""} ${active ? styles.mobileStepActive : ""}`}
+                  aria-label={s.title}
+                />
+              );
+            })}
+          </div>
+        </div>
+
         {/* Header */}
         <div className={styles.rightHeader}>
           <div className={styles.progressBar}>

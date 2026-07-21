@@ -57,7 +57,9 @@ export default function InvitationLanding() {
       const data = err?.response?.data;
       const msg = data?.message || data;
       setAcceptError(
-        typeof msg === "string" ? msg : "Couldn't accept this invitation. Please try again."
+        typeof msg === "string"
+          ? msg
+          : "Couldn't accept this invitation. Please try again.",
       );
     } finally {
       setAccepting(false);
@@ -74,7 +76,6 @@ export default function InvitationLanding() {
 
   return (
     <div className={styles.page}>
-
       {/* ── Left panel ── */}
       <div className={styles.left}>
         <div className={styles.logoRow}>
@@ -101,6 +102,13 @@ export default function InvitationLanding() {
 
       {/* ── Right panel ── */}
       <div className={styles.right}>
+        <div className={styles.mobileHero}>
+          <div className={styles.mobileDotGrid} aria-hidden="true" />
+          <div className={styles.mobileLogoRow}>
+            <div className={styles.mobileLogoIcon}>💼</div>
+            <span className={styles.mobileLogoText}>Ehra</span>
+          </div>
+        </div>
 
         {/* Loading */}
         {loading && (
@@ -118,9 +126,7 @@ export default function InvitationLanding() {
         {/* Invalid */}
         {!loading && !valid && (
           <div className={styles.state}>
-            <div className={`${styles.iconWrap} ${styles.iconDanger}`}>
-              🔗
-            </div>
+            <div className={`${styles.iconWrap} ${styles.iconDanger}`}>🔗</div>
             <p className={styles.stateTitle}>Invitation unavailable</p>
             <p className={styles.stateSub}>
               This invitation link is invalid or has expired. Please contact
@@ -132,19 +138,21 @@ export default function InvitationLanding() {
         {/* Accepted (authenticated flow) */}
         {!loading && valid && isAuthenticated && accepted && (
           <div className={styles.state}>
-            <div className={`${styles.iconWrap} ${styles.iconSuccess}`}>
-              ✅
-            </div>
+            <div className={`${styles.iconWrap} ${styles.iconSuccess}`}>✅</div>
             <p className={styles.stateTitle}>Invitation accepted</p>
             <p className={styles.stateSub}>
               {businessName} still needs to approve your membership. Once
-              approved, this workspace will appear under My Accounts and
-              you can switch into it any time.
+              approved, this workspace will appear under My Accounts and you can
+              switch into it any time.
             </p>
             <button
               className={styles.acceptBtn}
               onClick={() =>
-                navigate(user?.contextType === "EMPLOYEE" ? "/my-dashboard" : "/dashboard")
+                navigate(
+                  user?.contextType === "EMPLOYEE"
+                    ? "/my-dashboard"
+                    : "/dashboard",
+                )
               }
             >
               Go to my accounts →
@@ -156,14 +164,12 @@ export default function InvitationLanding() {
             existing Identity rather than the anonymous sign-up form. */}
         {!loading && valid && isAuthenticated && !accepted && (
           <div className={styles.state}>
-            <div className={`${styles.iconWrap} ${styles.iconSuccess}`}>
-              ✉️
-            </div>
+            <div className={`${styles.iconWrap} ${styles.iconSuccess}`}>✉️</div>
             <p className={styles.stateTitle}>You've been invited</p>
             <p className={styles.stateSub}>
               {businessName} has invited you to join as an employee. You're
-              already signed in to Ehra — accept below to add this
-              workspace to your account.
+              already signed in to Ehra — accept below to add this workspace to
+              your account.
             </p>
 
             <div className={styles.orgCard}>
@@ -184,8 +190,8 @@ export default function InvitationLanding() {
             <div className={styles.notice}>
               <span>ℹ️</span>
               <p>
-                This adds a new workspace to your existing account — your
-                other businesses stay exactly as they are.
+                This adds a new workspace to your existing account — your other
+                businesses stay exactly as they are.
               </p>
             </div>
 
@@ -202,13 +208,11 @@ export default function InvitationLanding() {
         {/* Valid, anonymous */}
         {!loading && valid && !isAuthenticated && (
           <div className={styles.state}>
-            <div className={`${styles.iconWrap} ${styles.iconSuccess}`}>
-              ✉️
-            </div>
+            <div className={`${styles.iconWrap} ${styles.iconSuccess}`}>✉️</div>
             <p className={styles.stateTitle}>You've been invited</p>
             <p className={styles.stateSub}>
-              An organisation has invited you to join their Ehra workspace as
-              an employee.
+              An organisation has invited you to join their Ehra workspace as an
+              employee.
             </p>
 
             <div className={styles.orgCard}>
@@ -240,7 +244,6 @@ export default function InvitationLanding() {
             </span>
           </div>
         )}
-
       </div>
     </div>
   );
