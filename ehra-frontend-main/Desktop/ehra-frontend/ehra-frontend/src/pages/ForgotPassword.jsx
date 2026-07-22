@@ -120,10 +120,16 @@ export default function ForgotPassword() {
       await confirmPasswordReset(resetToken, newPassword);
       setStep("done");
     } catch (err) {
-      setError(
-        err?.response?.data?.message ||
-          "This reset link has expired. Please start over.",
-      );
+      if (!err.response) {
+        setError(
+          "We couldn't reach the server — it may be waking up after being idle. Please wait a few seconds and try again.",
+        );
+      } else {
+        setError(
+          err.response.data?.message ||
+            "This reset link has expired. Please start over.",
+        );
+      }
     } finally {
       setLoading(false);
     }

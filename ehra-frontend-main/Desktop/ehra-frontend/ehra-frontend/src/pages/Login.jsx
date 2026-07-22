@@ -146,11 +146,26 @@ export default function Login() {
 
       routeAfterLogin(data);
     } catch (err) {
-      const msg =
-        err?.response?.data?.message ||
-        err?.response?.data ||
-        "Invalid phone number or password. Please try again.";
-      setError(typeof msg === "string" ? msg : "Login failed");
+      // FIX: err.response is only ever set when the server actually
+      // answered. A timeout or dropped connection — most commonly the
+      // Render free-tier backend still waking up from being asleep —
+      // leaves it undefined, and the old code fell back to "Invalid
+      // phone number or password" for that case too. That's why login
+      // could look like it was rejecting correct credentials: the first
+      // attempt woke the server up but timed out before getting an
+      // answer, then the retry (hitting an now-awake server) succeeded
+      // — nothing was ever wrong with the password.
+      if (!err.response) {
+        setError(
+          "We couldn't reach the server — it may be waking up after being idle. Please wait a few seconds and try again.",
+        );
+      } else {
+        const msg =
+          err.response.data?.message ||
+          err.response.data ||
+          "Invalid phone number or password. Please try again.";
+        setError(typeof msg === "string" ? msg : "Login failed");
+      }
     } finally {
       setLoading(false);
     }

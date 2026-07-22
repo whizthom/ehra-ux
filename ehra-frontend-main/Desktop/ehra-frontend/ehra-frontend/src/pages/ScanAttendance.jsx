@@ -120,6 +120,8 @@ export default function ScanAttendance() {
   const bottomNavScrollRef = useRef(null);
 
   const [cameraError, setCameraError] = useState("");
+  // Camera is never started automatically — see startCamera() below.
+  const [cameraState, setCameraState] = useState("idle");
   const [result, setResult] = useState(null); // { ok, message, action, status }
   const [scanning, setScanning] = useState(true);
   const [profile, setProfile] = useState(null);
@@ -240,29 +242,72 @@ export default function ScanAttendance() {
     rafRef.current = requestAnimationFrame(tick);
   }, [handleDecoded]);
 
+  const requestCamera = useCallback(async (constraints) => {
+    return Promise.race([
+      navigator.mediaDevices.getUserMedia(constraints),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("camera-timeout")), 8000),
+      ),
+    ]);
+  }, []);
+
   const startCamera = useCallback(async () => {
     setCameraError("");
+    setCameraState("starting");
+
+    if (!window.isSecureContext) {
+      setCameraError(
+        "Camera access requires a secure (https) connection. Please reload this page over https and try again.",
+      );
+      setCameraState("idle");
+      return;
+    }
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setCameraError(
+        "This browser doesn't support camera access. Please try a different or updated browser.",
+      );
+      setCameraState("idle");
+      return;
+    }
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-      });
+      let stream;
+      try {
+        stream = await requestCamera({
+          video: { facingMode: { ideal: "environment" } },
+        });
+      } catch (err) {
+        if (err?.name === "NotAllowedError") throw err;
+        // No rear camera matched the constraint (common on
+        // laptops/desktops) — fall back to whatever camera is available.
+        stream = await requestCamera({ video: true });
+      }
+
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
       }
+      setCameraState("running");
       rafRef.current = requestAnimationFrame(tick);
     } catch (err) {
-      setCameraError(
-        "Couldn't access your camera. Please allow camera permission and try again.",
-      );
+      const message =
+        err?.name === "NotAllowedError"
+          ? "Camera permission was denied. Please allow camera access for this site in your browser settings, then try again."
+          : err?.name === "NotFoundError"
+            ? "No camera was found on this device."
+            : "Couldn't access your camera. Please allow camera permission and try again.";
+      setCameraError(message);
+      setCameraState("idle");
     }
-  }, [tick]);
+  }, [tick, requestCamera]);
 
+  // No auto-start — see QrScanModal.jsx for why. getUserMedia only ever
+  // runs from a direct tap ("Enable camera" / "Try again" below).
   useEffect(() => {
-    startCamera();
     return () => stopCamera();
-  }, [startCamera, stopCamera]);
+  }, [stopCamera]);
 
   const handleScanAgain = () => {
     scanLockRef.current = false;
@@ -394,7 +439,27 @@ export default function ScanAttendance() {
             </p>
 
             <div className={styles.scannerFrame}>
-              {scanning && !cameraError && (
+              {cameraState === "idle" && !cameraError && scanning && (
+                <div className={styles.errorState}>
+                  <i
+                    className="ti ti-camera"
+                    style={{ fontSize: 32 }}
+                    aria-hidden="true"
+                  />
+                  <p>Tap below to enable your camera and scan.</p>
+                  <button className={styles.retryBtn} onClick={startCamera}>
+                    Enable camera
+                  </button>
+                </div>
+              )}
+
+              {cameraState === "starting" && !cameraError && (
+                <div className={styles.errorState}>
+                  <p>Requesting camera access…</p>
+                </div>
+              )}
+
+              {scanning && cameraState === "running" && !cameraError && (
                 <>
                   <video
                     ref={videoRef}

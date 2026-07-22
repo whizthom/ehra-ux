@@ -19,6 +19,9 @@ export default function QrScanModal({ onClose, onSuccess }) {
   const [cameraError, setCameraError] = useState("");
   const [result, setResult] = useState(null);
   const [scanning, setScanning] = useState(true);
+  // Camera is never started automatically — see startCamera() for why.
+  // "idle" = not requested yet, "starting" = request in flight.
+  const [cameraState, setCameraState] = useState("idle");
 
   const stopCamera = useCallback(() => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -101,29 +104,87 @@ export default function QrScanModal({ onClose, onSuccess }) {
     rafRef.current = requestAnimationFrame(tick);
   }, [handleDecoded]);
 
+  const requestCamera = useCallback(async (constraints) => {
+    return Promise.race([
+      navigator.mediaDevices.getUserMedia(constraints),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("camera-timeout")), 8000),
+      ),
+    ]);
+  }, []);
+
   const startCamera = useCallback(async () => {
     setCameraError("");
+    setCameraState("starting");
+
+    if (!window.isSecureContext) {
+      // getUserMedia is unavailable outside a secure context (HTTPS, or
+      // localhost) on every browser — this isn't a permission problem,
+      // no prompt will ever appear, so say so plainly rather than
+      // showing the generic "allow camera permission" message.
+      setCameraError(
+        "Camera access requires a secure (https) connection. Please reload this page over https and try again.",
+      );
+      setCameraState("idle");
+      return;
+    }
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setCameraError(
+        "This browser doesn't support camera access. Please try a different or updated browser.",
+      );
+      setCameraState("idle");
+      return;
+    }
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-      });
+      let stream;
+      try {
+        // Preferred: rear camera.
+        stream = await requestCamera({
+          video: { facingMode: { ideal: "environment" } },
+        });
+      } catch (err) {
+        // Rear-camera constraint couldn't be satisfied (no matching
+        // camera — common on laptops/desktops with only a front camera,
+        // or a device whose camera enumeration doesn't cleanly resolve
+        // "environment"). Fall back to whatever camera is available
+        // rather than failing outright. A genuine permission denial
+        // (NotAllowedError) will fail this the same way it failed the
+        // first attempt, so we still end up in the error state below.
+        if (err?.name === "NotAllowedError") throw err;
+        stream = await requestCamera({ video: true });
+      }
+
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
       }
+      setCameraState("running");
       rafRef.current = requestAnimationFrame(tick);
-    } catch {
-      setCameraError(
-        "Couldn't access your camera. Please allow camera permission and try again.",
-      );
+    } catch (err) {
+      const message =
+        err?.name === "NotAllowedError"
+          ? "Camera permission was denied. Please allow camera access for this site in your browser settings, then try again."
+          : err?.name === "NotFoundError"
+            ? "No camera was found on this device."
+            : "Couldn't access your camera. Please allow camera permission and try again.";
+      setCameraError(message);
+      setCameraState("idle");
     }
-  }, [tick]);
+  }, [tick, requestCamera]);
 
+  // No auto-start: getUserMedia is only ever called directly from a tap
+  // (the "Enable camera" button below, or "Try again" on error). Every
+  // browser — Chrome, Safari, Firefox, Samsung Internet — is most
+  // permissive right when the request is tied to a real, direct user
+  // gesture; deferring it to an effect on mount is exactly what made
+  // some browsers (notably Samsung Internet) silently do nothing at all
+  // instead of showing a permission prompt.
   useEffect(() => {
-    startCamera();
     return () => stopCamera();
-  }, [startCamera, stopCamera]);
+  }, [stopCamera]);
 
   const handleScanAgain = () => {
     scanLockRef.current = false;
@@ -156,7 +217,27 @@ export default function QrScanModal({ onClose, onSuccess }) {
         </p>
 
         <div className={styles.scannerFrame}>
-          {scanning && !cameraError && (
+          {cameraState === "idle" && !cameraError && scanning && (
+            <div className={styles.errorState}>
+              <i
+                className="ti ti-camera"
+                style={{ fontSize: 32 }}
+                aria-hidden="true"
+              />
+              <p>Tap below to enable your camera and scan.</p>
+              <button className={styles.retryBtn} onClick={startCamera}>
+                Enable camera
+              </button>
+            </div>
+          )}
+
+          {cameraState === "starting" && !cameraError && (
+            <div className={styles.errorState}>
+              <p>Requesting camera access…</p>
+            </div>
+          )}
+
+          {scanning && cameraState === "running" && !cameraError && (
             <>
               <video
                 ref={videoRef}
