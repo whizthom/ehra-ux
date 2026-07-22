@@ -255,8 +255,25 @@ API.interceptors.response.use(
         // instead of spinning forever.
         processQueue(err, null);
 
-        clearTokens();
-        window.location.href = "/login";
+        // FIX: only treat this as "the session is really over" when the
+        // server actually said so (a real HTTP response — e.g. 401 from
+        // GlobalExceptionHandler when the refresh token is genuinely
+        // invalid/expired/reused). err.response is undefined for a
+        // network-level failure: request timeout, connection dropped,
+        // DNS hiccup, or — the common real-world case on a Render free
+        // tier — the backend was asleep and didn't finish waking up
+        // within the 15s axios timeout. That kind of failure says
+        // nothing about whether the refresh token is still valid, so it
+        // must not wipe a perfectly good session and force a fresh
+        // login; the user just needs the next attempt to reach an awake
+        // server. Previously this cleared tokens unconditionally,
+        // which is why closing the browser (long enough for the free
+        // tier to spin down) and coming back reliably logged everyone
+        // out even though their refresh token still had days left.
+        if (err.response) {
+          clearTokens();
+          window.location.href = "/login";
+        }
 
         return Promise.reject(err);
       } finally {
