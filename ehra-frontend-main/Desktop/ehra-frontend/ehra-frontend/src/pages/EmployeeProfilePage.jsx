@@ -419,19 +419,21 @@ export default function EmployeeProfilePage() {
           <nav
             aria-label="Employee profile sections"
             style={{
+              position: "relative",
+              zIndex: 2,
               display: "flex",
               flexWrap: "nowrap",
               gap: 8,
               overflowX: "auto",
               overflowY: "hidden",
-              WebkitOverflowScrolling: "touch",
-              scrollSnapType: "x proximity",
               width: "100%",
               maxWidth: "100%",
               minWidth: 0,
+              flexShrink: 0,
               boxSizing: "border-box",
               padding: "2px 2px 10px",
               marginBottom: 16,
+              background: "var(--bg-page)",
               borderBottom: "0.5px solid var(--border-color)",
             }}
           >
@@ -453,7 +455,6 @@ export default function EmployeeProfilePage() {
                   onClick={() => setTab(t.key)}
                   style={{
                     flex: "0 0 auto",
-                    scrollSnapAlign: "start",
                     whiteSpace: "nowrap",
                     padding: "9px 16px",
                     borderRadius: 999,
@@ -475,7 +476,10 @@ export default function EmployeeProfilePage() {
           </nav>
 
           {/* ── Tab content ── */}
-          <div className={styles.tabContent} style={{ minWidth: 0 }}>
+          <div
+            className={styles.tabContent}
+            style={{ minWidth: 0, position: "relative", zIndex: 1 }}
+          >
             {/* Overview */}
             {tab === "overview" && (
               <div className={styles.overviewGrid}>
