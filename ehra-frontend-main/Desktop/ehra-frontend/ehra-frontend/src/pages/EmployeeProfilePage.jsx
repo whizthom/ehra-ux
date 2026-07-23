@@ -322,7 +322,10 @@ export default function EmployeeProfilePage() {
           </div>
         </div>
 
-        <div className={shellStyles.contentFull}>
+        <div
+          className={shellStyles.contentFull}
+          style={{ overflowX: "hidden", minWidth: 0 }}
+        >
           {/* ── Hero section ── */}
           <div className={styles.hero}>
             <div className={styles.heroLeft}>
@@ -406,8 +409,29 @@ export default function EmployeeProfilePage() {
             </div>
           </div>
 
-          {/* ── Tabs ── */}
-          <div className={styles.tabs} ref={tabsScrollRef}>
+          {/* ── Tabs ──
+              Inline styles here are deliberate, not decorative — they're a
+              guaranteed fallback for the exact scroll-collapse bug this row
+              already had once (a flex child's default min-width: auto
+              refusing to shrink below six un-wrapped buttons' width, so on
+              phones the row rendered full-width and everything past the
+              first tab or two got silently clipped by the parent's
+              overflow-x: hidden, with nothing left visible to even tap).
+              The matching CSS module rule handles this too, but inline
+              styles ship in the same JS bundle as the button labels
+              themselves, so they can't end up out of sync with a
+              separately-hashed CSS chunk the way an external stylesheet
+              rule could. Belt and suspenders. */}
+          <div
+            className={styles.tabs}
+            ref={tabsScrollRef}
+            style={{
+              display: "flex",
+              overflowX: "auto",
+              minWidth: 0,
+              WebkitOverflowScrolling: "touch",
+            }}
+          >
             {[
               { key: "overview", label: "Overview" },
               { key: "attendance", label: "Attendance" },
@@ -422,6 +446,7 @@ export default function EmployeeProfilePage() {
                 key={t.key}
                 className={`${styles.tab} ${tab === t.key ? styles.tabActive : ""}`}
                 onClick={() => setTab(t.key)}
+                style={{ flexShrink: 0, whiteSpace: "nowrap" }}
               >
                 {t.label}
               </button>
@@ -445,7 +470,7 @@ export default function EmployeeProfilePage() {
           </div>
 
           {/* ── Tab content ── */}
-          <div className={styles.tabContent}>
+          <div className={styles.tabContent} style={{ minWidth: 0 }}>
             {/* Overview */}
             {tab === "overview" && (
               <div className={styles.overviewGrid}>
