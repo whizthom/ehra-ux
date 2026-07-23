@@ -157,7 +157,7 @@
 }
 
 .dotAbsent {
-    background: var(--text-secondary);
+    background: var(--warning);
 }
 
 .footer {

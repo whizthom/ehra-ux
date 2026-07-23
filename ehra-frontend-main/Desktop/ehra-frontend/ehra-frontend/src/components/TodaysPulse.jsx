@@ -15,8 +15,14 @@ export default function TodaysPulse({
   percent,
   lastClockInLabel,
 }) {
-  const R = 74;
-  const STROKE = 14;
+  // Sits close to the outer tick ring (r=92) rather than R=74's old gap —
+  // grows the circumference (so the arc reads more precisely) and, just
+  // as important, pushes the stroke itself outward, which is what
+  // actually gives clockedIn/totalStaff room to grow into double or
+  // triple digits without the text pressing against the ring. The 200x200
+  // viewBox/.ringWrap size is untouched, so the panel's footprint doesn't change.
+  const R = 84;
+  const STROKE = 10;
   const circumference = 2 * Math.PI * R;
   const clampedPercent = Math.min(Math.max(percent, 0), 100);
   const offset = circumference * (1 - clampedPercent / 100);
