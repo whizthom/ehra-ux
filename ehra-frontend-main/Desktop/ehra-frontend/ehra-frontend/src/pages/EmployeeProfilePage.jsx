@@ -164,8 +164,6 @@ export default function EmployeeProfilePage() {
 
   const bottomNavScrollRef = useRef(null);
   const bottomNavThumb = useScrollThumb(bottomNavScrollRef);
-  const tabsScrollRef = useRef(null);
-  const tabsThumb = useScrollThumb(tabsScrollRef);
 
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -409,27 +407,32 @@ export default function EmployeeProfilePage() {
             </div>
           </div>
 
-          {/* ── Tabs ──
-              Inline styles here are deliberate, not decorative — they're a
-              guaranteed fallback for the exact scroll-collapse bug this row
-              already had once (a flex child's default min-width: auto
-              refusing to shrink below six un-wrapped buttons' width, so on
-              phones the row rendered full-width and everything past the
-              first tab or two got silently clipped by the parent's
-              overflow-x: hidden, with nothing left visible to even tap).
-              The matching CSS module rule handles this too, but inline
-              styles ship in the same JS bundle as the button labels
-              themselves, so they can't end up out of sync with a
-              separately-hashed CSS chunk the way an external stylesheet
-              rule could. Belt and suspenders. */}
-          <div
-            className={styles.tabs}
-            ref={tabsScrollRef}
+          {/* ── Tabs ──────────────────────────────────────────────────
+              Rebuilt from scratch as a horizontally-scrolling pill row.
+              Deliberately styled almost entirely with inline styles
+              instead of the CSS module: inline styles ship inside this
+              component's own JS chunk, so there is no possibility of them
+              being missing, stale, or overridden by a separately-cached
+              CSS file. Solid pill buttons (not a thin underline) so it's
+              visually unmistakable whether this row is rendering at all —
+              easy to confirm with a glance or a screenshot. */}
+          <nav
+            aria-label="Employee profile sections"
             style={{
               display: "flex",
+              flexWrap: "nowrap",
+              gap: 8,
               overflowX: "auto",
-              minWidth: 0,
+              overflowY: "hidden",
               WebkitOverflowScrolling: "touch",
+              scrollSnapType: "x proximity",
+              width: "100%",
+              maxWidth: "100%",
+              minWidth: 0,
+              boxSizing: "border-box",
+              padding: "2px 2px 10px",
+              marginBottom: 16,
+              borderBottom: "0.5px solid var(--border-color)",
             }}
           >
             {[
@@ -441,33 +444,35 @@ export default function EmployeeProfilePage() {
               ...(!hodView
                 ? [{ key: "announcements", label: "Messages" }]
                 : []),
-            ].map((t) => (
-              <button
-                key={t.key}
-                className={`${styles.tab} ${tab === t.key ? styles.tabActive : ""}`}
-                onClick={() => setTab(t.key)}
-                style={{ flexShrink: 0, whiteSpace: "nowrap" }}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-
-          {/* On phones, six tabs don't all fit — this row scrolls, but a
-              plain overflow-x: auto row gives no visual hint that there's
-              more to swipe to, so Attendance/Leave/Employment/Payroll/
-              Messages could sit just out of view with nothing suggesting
-              they exist. Same scroll-position indicator already used for
-              the bottom nav below, just applied to this row. */}
-          <div className={styles.tabsScrollTrack} aria-hidden="true">
-            <div
-              className={styles.tabsScrollThumb}
-              style={{
-                width: `${tabsThumb.width}%`,
-                left: `${tabsThumb.left}%`,
-              }}
-            />
-          </div>
+            ].map((t) => {
+              const active = tab === t.key;
+              return (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => setTab(t.key)}
+                  style={{
+                    flex: "0 0 auto",
+                    scrollSnapAlign: "start",
+                    whiteSpace: "nowrap",
+                    padding: "9px 16px",
+                    borderRadius: 999,
+                    border: active
+                      ? "1px solid var(--accent)"
+                      : "1px solid var(--border-color)",
+                    background: active ? "var(--accent)" : "var(--bg-surface)",
+                    color: active ? "#fff" : "var(--text-secondary)",
+                    fontSize: 13,
+                    fontWeight: 500,
+                    fontFamily: "inherit",
+                    cursor: "pointer",
+                  }}
+                >
+                  {t.label}
+                </button>
+              );
+            })}
+          </nav>
 
           {/* ── Tab content ── */}
           <div className={styles.tabContent} style={{ minWidth: 0 }}>
