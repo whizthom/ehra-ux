@@ -150,7 +150,10 @@ export default function InvitationLanding() {
         {!loading && valid && isAuthenticated && accepted && (
           <div className={styles.state}>
             <div className={`${styles.iconWrap} ${styles.iconSuccess}`}>✅</div>
-            <p className={styles.stateTitle}>Invitation accepted</p>
+            <p className={styles.stateTitle}>
+              Invitation accepted
+              <span className={styles.stateTitleAccent} aria-hidden="true" />
+            </p>
             <p className={styles.stateSub}>
               {businessName} still needs to approve your membership. Once
               approved, this workspace will appear under My Accounts and you can
@@ -176,7 +179,10 @@ export default function InvitationLanding() {
         {!loading && valid && isAuthenticated && !accepted && (
           <div className={styles.state}>
             <div className={`${styles.iconWrap} ${styles.iconSuccess}`}>✉️</div>
-            <p className={styles.stateTitle}>You've been invited</p>
+            <p className={styles.stateTitle}>
+              You've been invited
+              <span className={styles.stateTitleAccent} aria-hidden="true" />
+            </p>
             <p className={styles.stateSub}>
               {businessName} has invited you to join as an employee. You're
               already signed in to Ehra — accept below to add this workspace to
@@ -220,7 +226,10 @@ export default function InvitationLanding() {
         {!loading && valid && !isAuthenticated && (
           <div className={styles.state}>
             <div className={`${styles.iconWrap} ${styles.iconSuccess}`}>✉️</div>
-            <p className={styles.stateTitle}>You've been invited</p>
+            <p className={styles.stateTitle}>
+              You've been invited
+              <span className={styles.stateTitleAccent} aria-hidden="true" />
+            </p>
             <p className={styles.stateSub}>
               An organisation has invited you to join their Ehra workspace as an
               employee.
@@ -250,9 +259,14 @@ export default function InvitationLanding() {
               Accept & continue →
             </button>
 
-            <span className={styles.declineLink} onClick={handleLoginInstead}>
+            <div className={styles.orDivider}>or</div>
+
+            <button
+              className={styles.secondaryBtn}
+              onClick={handleLoginInstead}
+            >
               Already have an Ehra account? Log in instead
-            </span>
+            </button>
           </div>
         )}
       </div>

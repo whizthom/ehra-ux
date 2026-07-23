@@ -651,6 +651,14 @@ export default function EmployeeRegistration() {
           </button>
         </div>
       </div>
+
+      {/* Invisible reCAPTCHA host — Firebase only renders a visible
+          challenge into this if it decides the traffic looks risky, per
+          sendPhoneOtp()'s "invisible" verifier config. Without this
+          element present, RecaptchaVerifier's constructor throws
+          Firebase: Error (auth/argument-error) the moment sendPhoneOtp
+          is called. */}
+      <div id="recaptcha-container" />
     </div>
   );
 }

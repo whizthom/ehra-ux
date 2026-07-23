@@ -1710,74 +1710,80 @@ export default function Dashboard() {
                         No pending registrations right now.
                       </p>
                     ) : (
-                      <table className={styles.empTable}>
-                        <thead>
-                          <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
-                            <th>Submitted</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {pending.map((emp) => {
-                            const name = [emp.firstName, emp.lastName]
-                              .filter(Boolean)
-                              .join(" ");
-                            return (
-                              <tr key={emp.id}>
-                                <td>
-                                  <div className={styles.empNameCell}>
-                                    <div className={styles.empAv}>
-                                      {emp.profilePictureUrl ? (
-                                        <img
-                                          src={emp.profilePictureUrl}
-                                          alt=""
-                                        />
-                                      ) : (
-                                        initials(emp.firstName, emp.lastName)
-                                      )}
+                      <div className={styles.tableScrollWrap}>
+                        <table
+                          className={`${styles.empTable} ${styles.attendanceTable}`}
+                        >
+                          <thead>
+                            <tr>
+                              <th>Name</th>
+                              <th>Email</th>
+                              <th>Phone</th>
+                              <th>Submitted</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {pending.map((emp) => {
+                              const name = [emp.firstName, emp.lastName]
+                                .filter(Boolean)
+                                .join(" ");
+                              return (
+                                <tr key={emp.id}>
+                                  <td>
+                                    <div className={styles.empNameCell}>
+                                      <div className={styles.empAv}>
+                                        {emp.profilePictureUrl ? (
+                                          <img
+                                            src={emp.profilePictureUrl}
+                                            alt=""
+                                          />
+                                        ) : (
+                                          initials(emp.firstName, emp.lastName)
+                                        )}
+                                      </div>
+                                      <div className={styles.empName}>
+                                        {name || "—"}
+                                      </div>
                                     </div>
-                                    <div className={styles.empName}>
-                                      {name || "—"}
+                                  </td>
+                                  <td className={styles.muted}>{emp.email}</td>
+                                  <td className={styles.muted}>
+                                    {emp.phone ?? "—"}
+                                  </td>
+                                  <td className={styles.muted}>
+                                    {emp.createdAt
+                                      ? new Date(
+                                          emp.createdAt,
+                                        ).toLocaleDateString()
+                                      : "—"}
+                                  </td>
+                                  <td>
+                                    <div className={styles.tblActions}>
+                                      <button
+                                        className={styles.tblBtn}
+                                        disabled={actioningId === emp.id}
+                                        onClick={() => approveEmployee(emp.id)}
+                                      >
+                                        {actioningId === emp.id
+                                          ? "…"
+                                          : "Approve"}
+                                      </button>
+                                      <button
+                                        className={`${styles.tblBtn} ${styles.danger}`}
+                                        disabled={actioningId === emp.id}
+                                        onClick={() => rejectEmployee(emp.id)}
+                                      >
+                                        Reject
+                                      </button>
                                     </div>
-                                  </div>
-                                </td>
-                                <td className={styles.muted}>{emp.email}</td>
-                                <td className={styles.muted}>
-                                  {emp.phone ?? "—"}
-                                </td>
-                                <td className={styles.muted}>
-                                  {emp.createdAt
-                                    ? new Date(
-                                        emp.createdAt,
-                                      ).toLocaleDateString()
-                                    : "—"}
-                                </td>
-                                <td>
-                                  <div className={styles.tblActions}>
-                                    <button
-                                      className={styles.tblBtn}
-                                      disabled={actioningId === emp.id}
-                                      onClick={() => approveEmployee(emp.id)}
-                                    >
-                                      {actioningId === emp.id ? "…" : "Approve"}
-                                    </button>
-                                    <button
-                                      className={`${styles.tblBtn} ${styles.danger}`}
-                                      disabled={actioningId === emp.id}
-                                      onClick={() => rejectEmployee(emp.id)}
-                                    >
-                                      Reject
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
                     )}
                   </div>
                 )}
@@ -1825,91 +1831,99 @@ export default function Dashboard() {
                         No pending leave requests right now.
                       </p>
                     ) : (
-                      <table className={styles.empTable}>
-                        <thead>
-                          <tr>
-                            <th>Employee</th>
-                            <th>Dates</th>
-                            <th>Reason</th>
-                            <th>Requested</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {pendingLeaves.map((lv) => {
-                            const name = fullName(
-                              lv.employeeFirstName,
-                              lv.employeeLastName,
-                            );
-                            return (
-                              <tr key={lv.id}>
-                                <td>
-                                  <div className={styles.empNameCell}>
-                                    <div className={styles.empAv}>
-                                      {lv.employeeProfilePictureUrl ? (
-                                        <img
-                                          src={lv.employeeProfilePictureUrl}
-                                          alt=""
-                                        />
-                                      ) : (
-                                        initials(
-                                          lv.employeeFirstName,
-                                          lv.employeeLastName,
-                                        )
-                                      )}
-                                    </div>
-                                    <div>
-                                      <div className={styles.empName}>
-                                        {name || "—"}
+                      <div className={styles.tableScrollWrap}>
+                        <table
+                          className={`${styles.empTable} ${styles.attendanceTable}`}
+                        >
+                          <thead>
+                            <tr>
+                              <th>Employee</th>
+                              <th>Dates</th>
+                              <th>Reason</th>
+                              <th>Requested</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {pendingLeaves.map((lv) => {
+                              const name = fullName(
+                                lv.employeeFirstName,
+                                lv.employeeLastName,
+                              );
+                              return (
+                                <tr key={lv.id}>
+                                  <td>
+                                    <div className={styles.empNameCell}>
+                                      <div className={styles.empAv}>
+                                        {lv.employeeProfilePictureUrl ? (
+                                          <img
+                                            src={lv.employeeProfilePictureUrl}
+                                            alt=""
+                                          />
+                                        ) : (
+                                          initials(
+                                            lv.employeeFirstName,
+                                            lv.employeeLastName,
+                                          )
+                                        )}
                                       </div>
-                                      <div className={styles.empEmail}>
-                                        {lv.employeeEmail}
+                                      <div>
+                                        <div className={styles.empName}>
+                                          {name || "—"}
+                                        </div>
+                                        <div className={styles.empEmail}>
+                                          {lv.employeeEmail}
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
-                                </td>
-                                <td className={styles.muted}>
-                                  {lv.startDate} → {lv.endDate} ({lv.days} day
-                                  {lv.days > 1 ? "s" : ""})
-                                </td>
-                                <td
-                                  className={styles.muted}
-                                  style={{ maxWidth: 240 }}
-                                >
-                                  {lv.reason}
-                                </td>
-                                <td className={styles.muted}>
-                                  {lv.createdAt
-                                    ? new Date(
-                                        lv.createdAt,
-                                      ).toLocaleDateString()
-                                    : "—"}
-                                </td>
-                                <td>
-                                  <div className={styles.tblActions}>
-                                    <button
-                                      className={styles.tblBtn}
-                                      disabled={actioningLeaveId === lv.id}
-                                      onClick={() => approveLeaveRequest(lv.id)}
-                                    >
-                                      {actioningLeaveId === lv.id
-                                        ? "…"
-                                        : "Approve"}
-                                    </button>
-                                    <button
-                                      className={`${styles.tblBtn} ${styles.danger}`}
-                                      disabled={actioningLeaveId === lv.id}
-                                      onClick={() => rejectLeaveRequest(lv.id)}
-                                    >
-                                      Reject
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
+                                  </td>
+                                  <td className={styles.muted}>
+                                    {lv.startDate} → {lv.endDate} ({lv.days} day
+                                    {lv.days > 1 ? "s" : ""})
+                                  </td>
+                                  <td
+                                    className={styles.muted}
+                                    style={{ maxWidth: 240 }}
+                                  >
+                                    {lv.reason}
+                                  </td>
+                                  <td className={styles.muted}>
+                                    {lv.createdAt
+                                      ? new Date(
+                                          lv.createdAt,
+                                        ).toLocaleDateString()
+                                      : "—"}
+                                  </td>
+                                  <td>
+                                    <div className={styles.tblActions}>
+                                      <button
+                                        className={styles.tblBtn}
+                                        disabled={actioningLeaveId === lv.id}
+                                        onClick={() =>
+                                          approveLeaveRequest(lv.id)
+                                        }
+                                      >
+                                        {actioningLeaveId === lv.id
+                                          ? "…"
+                                          : "Approve"}
+                                      </button>
+                                      <button
+                                        className={`${styles.tblBtn} ${styles.danger}`}
+                                        disabled={actioningLeaveId === lv.id}
+                                        onClick={() =>
+                                          rejectLeaveRequest(lv.id)
+                                        }
+                                      >
+                                        Reject
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
                     )}
                   </div>
                 )}

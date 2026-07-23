@@ -164,6 +164,8 @@ export default function EmployeeProfilePage() {
 
   const bottomNavScrollRef = useRef(null);
   const bottomNavThumb = useScrollThumb(bottomNavScrollRef);
+  const tabsScrollRef = useRef(null);
+  const tabsThumb = useScrollThumb(tabsScrollRef);
 
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -405,7 +407,7 @@ export default function EmployeeProfilePage() {
           </div>
 
           {/* ── Tabs ── */}
-          <div className={styles.tabs}>
+          <div className={styles.tabs} ref={tabsScrollRef}>
             {[
               { key: "overview", label: "Overview" },
               { key: "attendance", label: "Attendance" },
@@ -424,6 +426,22 @@ export default function EmployeeProfilePage() {
                 {t.label}
               </button>
             ))}
+          </div>
+
+          {/* On phones, six tabs don't all fit — this row scrolls, but a
+              plain overflow-x: auto row gives no visual hint that there's
+              more to swipe to, so Attendance/Leave/Employment/Payroll/
+              Messages could sit just out of view with nothing suggesting
+              they exist. Same scroll-position indicator already used for
+              the bottom nav below, just applied to this row. */}
+          <div className={styles.tabsScrollTrack} aria-hidden="true">
+            <div
+              className={styles.tabsScrollThumb}
+              style={{
+                width: `${tabsThumb.width}%`,
+                left: `${tabsThumb.left}%`,
+              }}
+            />
           </div>
 
           {/* ── Tab content ── */}

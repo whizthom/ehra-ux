@@ -1095,11 +1095,12 @@
     table-layout: fixed;
 }
 
-/* Lets the table scroll horizontally rather than clip/overflow at
-   tablet widths, where there's more room than a phone but still not
-   quite enough for 6 comfortable columns. Below 640px the table itself
-   switches to stacked cards instead (see .attendanceTable), so this
-   wrapper is effectively a no-op there. */
+/* Lets a table scroll horizontally instead of squeezing its columns
+   until text wraps and overlaps — the actual working mobile pattern
+   for every data table on this page (Pending approvals, Pending leave
+   requests, Latest attendance). Pair with .attendanceTable's min-width
+   so columns keep a sane, readable width; the user scrolls sideways on
+   a phone rather than the table trying to compress to fit. */
 .tableScrollWrap {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
