@@ -53,7 +53,9 @@ export default function RegistrationSubmitted() {
               <div className={`${styles.stepDot} ${styles.stepPending}`}>4</div>
               <div className={styles.stepBody}>
                 <p className={styles.stepLabel}>Access granted</p>
-                <p className={styles.stepSub}>You'll be notified by email</p>
+                <p className={styles.stepSub}>
+                  You'll get a notification on your dashboard
+                </p>
               </div>
             </div>
           </div>
@@ -78,20 +80,21 @@ export default function RegistrationSubmitted() {
 
           <p className={styles.title}>Registration submitted!</p>
           <p className={styles.subtitle}>
-            Your profile has been sent to your employer for review. You'll
-            receive an email once your account is approved and ready.
+            Your profile has been sent to your employer for review. You'll see a
+            notification on your dashboard once your account is approved and
+            ready.
           </p>
 
           <div className={styles.infoCards}>
             <div className={styles.infoCard}>
               <div className={`${styles.infoCardIcon} ${styles.iconTeal}`}>
-                ✉️
+                🔔
               </div>
               <div className={styles.infoCardText}>
-                <p>Check your inbox</p>
+                <p>Watch your dashboard</p>
                 <span>
-                  We'll send an approval notification to your registered email
-                  address.
+                  You'll get a notification right on your dashboard as soon as
+                  you're approved — no email needed.
                 </span>
               </div>
             </div>

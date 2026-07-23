@@ -1,11 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
+import "react-phone-number-input/style.css";
+import { sendPhoneOtp, confirmPhoneOtp, resetRecaptcha } from "../../firebase";
+import { checkPhone } from "../../api/phoneAuthApi";
 import { registerInvitedEmployee } from "../../api/invitationApi";
 import styles from "./EmployeeRegistration.module.css";
+import phoneStyles from "../PhoneAuth.module.css";
+
+// Same key InvitationLanding.jsx uses to hand off an invite token across a
+// trip to /login — reused here so "this phone already has an account"
+// lands the person right back at accepting THIS invite once they're
+// signed in, instead of a dead end.
+const PENDING_INVITE_KEY = "ehra_pending_invite";
+
+const RESEND_COOLDOWN_SECONDS = 30;
 
 const STEPS = [
+  { title: "Verify your phone number", sub: "Confirm you own this number" },
+  { title: "Enter verification code", sub: "We texted you a 6-digit code" },
   { title: "Personal information", sub: "Your name & date of birth" },
-  { title: "Contact details", sub: "Email, phone & address" },
+  { title: "Contact details", sub: "Email & home address" },
   { title: "Emergency contact", sub: "Who to reach in an emergency" },
   { title: "Account security", sub: "Set your password" },
 ];
@@ -17,7 +32,6 @@ const BLANK_FORM = {
   dateOfBirth: "",
   gender: "",
   email: "",
-  phone: "",
   address: "",
   emergencyContactName: "",
   emergencyContactPhone: "",
@@ -33,6 +47,9 @@ export default function EmployeeRegistration() {
   // (or a colleague opening theirs on the same browser) never mixes drafts.
   // Password fields are deliberately left out of what gets saved — those
   // stay in memory only, and are re-typed if the tab is actually closed.
+  // The verified Firebase idToken is NEVER persisted here either — it's
+  // short-lived and tied to this browser session; a reload always starts
+  // the phone-verification step over rather than trusting a stale one.
   const draftKey = `ehra_employee_reg_${token}`;
 
   const loadDraft = () => {
@@ -44,7 +61,18 @@ export default function EmployeeRegistration() {
     }
   };
 
-  const [step, setStep] = useState(() => loadDraft()?.step || 1);
+  // A restored step past the phone/OTP stage is only trustworthy if we
+  // also still have a live idToken in memory — which a page reload never
+  // does, since it's deliberately not persisted. So any reload always
+  // resumes at step 1 (phone) rather than landing on a form step it has
+  // no verified phone to actually submit with.
+  const [step, setStep] = useState(1);
+  const [phone, setPhone] = useState(() => loadDraft()?.phone || "");
+  const [otp, setOtp] = useState("");
+  const [confirmationResult, setConfirmationResult] = useState(null);
+  const [idToken, setIdToken] = useState("");
+  const [resendIn, setResendIn] = useState(0);
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
@@ -54,43 +82,139 @@ export default function EmployeeRegistration() {
     ...(loadDraft()?.form || {}),
   }));
 
-  // Going "Back" between steps already preserves everything since `form`
-  // lives in this single component — this just also survives a reload or
-  // an accidental tab close midway through the invite link.
+  const otpInputRef = useRef(null);
+
+  useEffect(() => {
+    if (step === 2) otpInputRef.current?.focus();
+  }, [step]);
+
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const t = setInterval(() => setResendIn((s) => Math.max(0, s - 1)), 1000);
+    return () => clearInterval(t);
+  }, [resendIn]);
+
+  // Going "Back" between the form steps (3-6) already preserves
+  // everything since `form` lives in this single component — this just
+  // also survives a reload or an accidental tab close midway through the
+  // invite link. Only reachable once step >= 3 anyway, since step is
+  // never restored past 1 on mount.
   useEffect(() => {
     try {
       const { password, confirmPassword, ...safeForm } = form;
       sessionStorage.setItem(
         draftKey,
-        JSON.stringify({ step, form: safeForm }),
+        JSON.stringify({ form: safeForm, phone }),
       );
     } catch {
       // sessionStorage unavailable — the in-page Back button still works fine.
     }
-  }, [form, step, draftKey]);
+  }, [form, phone, draftKey]);
 
   const handle = (e) =>
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
 
+  // ── STEP 1 -> 2: send the OTP ──────────────────────────────────────────
+  const handleSendOtp = async () => {
+    setError("");
+    if (!phone || !isValidPhoneNumber(phone)) {
+      setError("Enter a valid phone number, including country code.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await sendPhoneOtp(phone);
+      setConfirmationResult(result);
+      setStep(2);
+      setResendIn(RESEND_COOLDOWN_SECONDS);
+    } catch (err) {
+      resetRecaptcha();
+      setError(friendlyFirebaseError(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (resendIn > 0) return;
+    setError("");
+    setLoading(true);
+    try {
+      resetRecaptcha();
+      const result = await sendPhoneOtp(phone);
+      setConfirmationResult(result);
+      setOtp("");
+      setResendIn(RESEND_COOLDOWN_SECONDS);
+    } catch (err) {
+      setError(friendlyFirebaseError(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── STEP 2 -> 3: verify the OTP, then check if this phone already has
+  //    an account — if so, this invite gets finished from the login flow
+  //    instead of creating a duplicate Identity ─────────────────────────
+  const handleVerifyOtp = async () => {
+    setError("");
+    if (otp.trim().length < 6) {
+      setError("Enter the 6-digit code we sent you.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const verifiedToken = await confirmPhoneOtp(
+        confirmationResult,
+        otp.trim(),
+      );
+
+      const check = await checkPhone(verifiedToken);
+      if (check.exists) {
+        sessionStorage.setItem(PENDING_INVITE_KEY, token);
+        try {
+          sessionStorage.removeItem(draftKey);
+        } catch {
+          // ignore
+        }
+        navigate("/login", {
+          state: {
+            message:
+              "This phone number already has an Ehra account. Please log in to accept this invitation.",
+            phone,
+          },
+        });
+        return;
+      }
+
+      setIdToken(verifiedToken);
+      setStep(3);
+    } catch (err) {
+      setError(friendlyFirebaseError(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const validate = () => {
-    if (step === 1) {
+    if (step === 3) {
       if (!form.firstName.trim()) return "First name is required.";
       if (!form.lastName.trim()) return "Last name is required.";
       if (!form.dateOfBirth) return "Date of birth is required.";
       if (!form.gender) return "Please select a gender.";
     }
-    if (step === 2) {
+    if (step === 4) {
       if (!form.email.trim()) return "Email address is required.";
-      if (!form.phone.trim()) return "Phone number is required.";
       if (!form.address.trim()) return "Address is required.";
     }
-    if (step === 3) {
+    if (step === 5) {
       if (!form.emergencyContactName.trim())
         return "Emergency contact name is required.";
       if (!form.emergencyContactPhone.trim())
         return "Emergency contact phone is required.";
     }
-    if (step === 4) {
+    if (step === 6) {
       if (form.password.length < 8)
         return "Password must be at least 8 characters.";
       if (form.password !== form.confirmPassword)
@@ -106,20 +230,35 @@ export default function EmployeeRegistration() {
       return;
     }
     setError("");
-    if (step < 4) {
+    if (step < 6) {
       setStep((s) => s + 1);
       return;
     }
+
     setLoading(true);
     try {
       const { confirmPassword, ...payload } = form;
-      await registerInvitedEmployee({ token, ...payload });
+      // No separate login step: registerInvitedEmployee logs the new
+      // employee straight in (same as every other registration path —
+      // see authApi.js/phoneAuthApi.js) and this navigates directly to
+      // their dashboard. Their employer still has to approve the new
+      // membership, but that happens from the employer's own dashboard —
+      // it's not a gate on the new employee seeing theirs. No email is
+      // sent either way; the approval itself shows up as a notification
+      // on this employee's own dashboard once it happens.
+      const data = await registerInvitedEmployee({
+        token,
+        idToken,
+        ...payload,
+      });
       try {
         sessionStorage.removeItem(draftKey);
       } catch {
         // ignore
       }
-      navigate("/registration-submitted");
+      navigate(
+        data.contextType === "EMPLOYEE" ? "/my-dashboard" : "/dashboard",
+      );
     } catch (err) {
       const msg =
         err?.response?.data?.message || "Submission failed. Please try again.";
@@ -135,7 +274,7 @@ export default function EmployeeRegistration() {
     { label: "One number", ok: /[0-9]/.test(form.password) },
   ];
 
-  const progress = `${(step / 4) * 100}%`;
+  const progress = `${(step / 6) * 100}%`;
 
   return (
     <div className={styles.page}>
@@ -150,7 +289,8 @@ export default function EmployeeRegistration() {
           <span className={styles.tagline}>Employee registration</span>
           <h2 className={styles.headline}>Let's get you set up</h2>
           <p className={styles.desc}>
-            Fill in your details to complete your profile and join your team.
+            Verify your phone number, then fill in your details to complete your
+            profile and join your team.
           </p>
 
           <div className={styles.steps}>
@@ -160,7 +300,7 @@ export default function EmployeeRegistration() {
               const active = n === step;
               return (
                 <div key={n} className={styles.step}>
-                  {n < 4 && <div className={styles.stepLine} />}
+                  {n < STEPS.length && <div className={styles.stepLine} />}
                   <div
                     className={`${styles.stepDot} ${done ? styles.dotDone : active ? styles.dotActive : styles.dotPending}`}
                   >
@@ -176,7 +316,7 @@ export default function EmployeeRegistration() {
           </div>
         </div>
 
-        <p className={styles.leftFooter}>© 2025 Ehra. All rights reserved.</p>
+        <p className={styles.leftFooter}>© 2026 Ehra. All rights reserved.</p>
       </div>
 
       {/* ── Right panel ── */}
@@ -213,7 +353,9 @@ export default function EmployeeRegistration() {
           </div>
           <div className={styles.headerRow}>
             <span className={styles.stepTitle}>{STEPS[step - 1].title}</span>
-            <span className={styles.stepCount}>Step {step} of 4</span>
+            <span className={styles.stepCount}>
+              Step {step} of {STEPS.length}
+            </span>
           </div>
         </div>
 
@@ -226,8 +368,85 @@ export default function EmployeeRegistration() {
             </div>
           )}
 
-          {/* Step 1 */}
+          {/* Step 1: phone */}
           {step === 1 && (
+            <>
+              <div className={styles.field}>
+                <label>Phone number *</label>
+                <div className={phoneStyles.phoneInputWrap}>
+                  <PhoneInput
+                    international
+                    defaultCountry="NG"
+                    countryCallingCodeEditable={false}
+                    placeholder="Enter your phone number"
+                    value={phone}
+                    onChange={setPhone}
+                    onKeyDown={(e) => e.key === "Enter" && handleSendOtp()}
+                    className={phoneStyles.phoneInput}
+                  />
+                </div>
+                <span className={phoneStyles.hint}>
+                  This becomes your permanent Ehra login identity.
+                </span>
+              </div>
+              <p className={styles.stepNote}>
+                We'll send a one-time code via SMS to verify this number.
+                Standard messaging rates may apply.
+              </p>
+            </>
+          )}
+
+          {/* Step 2: OTP */}
+          {step === 2 && (
+            <>
+              <div className={phoneStyles.otpHeadline}>
+                <p>
+                  We sent a 6-digit code to <strong>{phone}</strong>
+                </p>
+                <button
+                  type="button"
+                  className={phoneStyles.changeNumberBtn}
+                  onClick={() => {
+                    setStep(1);
+                    setOtp("");
+                    setError("");
+                  }}
+                >
+                  Change number
+                </button>
+              </div>
+
+              <div className={styles.field}>
+                <label>Verification code *</label>
+                <input
+                  ref={otpInputRef}
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  placeholder="000000"
+                  value={otp}
+                  onChange={(e) =>
+                    setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                  }
+                  onKeyDown={(e) => e.key === "Enter" && handleVerifyOtp()}
+                  className={phoneStyles.otpInput}
+                />
+              </div>
+
+              <button
+                type="button"
+                className={phoneStyles.resendBtn}
+                onClick={handleResendOtp}
+                disabled={resendIn > 0 || loading}
+              >
+                {resendIn > 0 ? `Resend code in ${resendIn}s` : "Resend code"}
+              </button>
+            </>
+          )}
+
+          {/* Step 3: personal info */}
+          {step === 3 && (
             <>
               <div className={styles.grid2}>
                 <div className={styles.field}>
@@ -285,8 +504,8 @@ export default function EmployeeRegistration() {
             </>
           )}
 
-          {/* Step 2 */}
-          {step === 2 && (
+          {/* Step 4: contact details (phone already verified — no phone field here) */}
+          {step === 4 && (
             <div className={styles.grid1}>
               <div className={styles.field}>
                 <label>Email address *</label>
@@ -296,16 +515,6 @@ export default function EmployeeRegistration() {
                   value={form.email}
                   onChange={handle}
                   placeholder="ada@company.com"
-                />
-              </div>
-              <div className={styles.field}>
-                <label>Phone number *</label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={form.phone}
-                  onChange={handle}
-                  placeholder="+234 800 000 0000"
                 />
               </div>
               <div className={styles.field}>
@@ -320,8 +529,8 @@ export default function EmployeeRegistration() {
             </div>
           )}
 
-          {/* Step 3 */}
-          {step === 3 && (
+          {/* Step 5: emergency contact */}
+          {step === 5 && (
             <>
               <p className={styles.stepNote}>
                 Provide details of someone we can contact on your behalf in case
@@ -351,8 +560,8 @@ export default function EmployeeRegistration() {
             </>
           )}
 
-          {/* Step 4 */}
-          {step === 4 && (
+          {/* Step 6: password */}
+          {step === 6 && (
             <>
               <p className={styles.stepNote}>
                 Choose a strong password to secure your Ehra account.
@@ -425,17 +634,43 @@ export default function EmployeeRegistration() {
           <button
             type="button"
             className={styles.btnNext}
-            onClick={next}
+            onClick={
+              step === 1 ? handleSendOtp : step === 2 ? handleVerifyOtp : next
+            }
             disabled={loading}
           >
             {loading
-              ? "Submitting…"
-              : step === 4
-                ? "Submit registration"
-                : "Continue →"}
+              ? "Please wait…"
+              : step === 1
+                ? "Send code →"
+                : step === 2
+                  ? "Verify code →"
+                  : step === 6
+                    ? "Submit registration"
+                    : "Continue →"}
           </button>
         </div>
       </div>
     </div>
   );
+}
+
+function friendlyFirebaseError(err) {
+  const code = err?.code || "";
+  if (code.includes("invalid-phone-number")) {
+    return "That phone number doesn't look valid. Please check it and try again.";
+  }
+  if (code.includes("too-many-requests")) {
+    return "Too many attempts. Please wait a moment before trying again.";
+  }
+  if (
+    code.includes("invalid-verification-code") ||
+    code.includes("code-expired")
+  ) {
+    return "That code is incorrect or has expired. Please try again.";
+  }
+  if (code.includes("network-request-failed")) {
+    return "Network error — please check your connection and try again.";
+  }
+  return err?.message || "Something went wrong. Please try again.";
 }

@@ -1,4 +1,4 @@
-import API from "./authApi";
+import API, { saveSession } from "./authApi";
 
 // All routed through the shared `API` instance (relative "/api" + Vite
 // proxy) instead of a hardcoded "http://localhost:8080" — this is what
@@ -16,10 +16,18 @@ export const generateInvitation = () =>
   API.post("/invitations/generate").then((r) => r.data);
 
 // POST /api/invitations/register — public sign-up form for someone with
-// NO existing Ehra account. Creates a brand-new Identity + a
-// PENDING_APPROVAL EmployeeMembership at the inviting business.
-export const registerInvitedEmployee = (payload) =>
-  API.post("/invitations/register", payload).then((r) => r.data);
+// NO existing Ehra account. idToken is a Firebase phone verification
+// (see EmployeeRegistration.jsx's phone/OTP steps), re-verified
+// server-side — never a plain client-supplied phone field. Creates a
+// brand-new Identity + a PENDING_APPROVAL EmployeeMembership at the
+// inviting business, and logs the person straight in (same
+// AuthResponseDTO shape as login()/registerWithPhone()) — no separate
+// login step, and no email is sent about any of this.
+export const registerInvitedEmployee = async (payload) => {
+  const { data } = await API.post("/invitations/register", payload);
+  saveSession(data);
+  return data;
+};
 
 // POST /api/invitations/{token}/accept — the "already logged in" path,
 // for an Identity that already has an Ehra account (an existing employer
