@@ -96,20 +96,42 @@
 }
 
 .legend {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px 12px;
+    width: 100%;
     margin-top: 16px;
-    flex-wrap: wrap;
 }
 
 .legendItem {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
+    min-width: 0;
     font-size: 12px;
     color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+/* Very narrow phones (real data can push On time / Late / Absent into
+   double or triple digits) — dropping the labels below their number
+   keeps each column readable instead of the row squeezing or wrapping
+   mid-item. */
+@media (max-width: 360px) {
+    .legendItem {
+        flex-direction: column;
+        gap: 2px;
+        font-size: 10.5px;
+    }
+
+    .legendItem .dot {
+        display: none;
+    }
+
+    .legendItem b {
+        font-size: 15px;
+    }
 }
 
 .legendItem b {

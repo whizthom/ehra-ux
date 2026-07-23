@@ -1126,6 +1126,12 @@
     font-size: 12px;
     color: var(--text-primary);
     vertical-align: middle;
+    /* table-layout: fixed gives every column a set width, but a long
+       unbroken string (an email address, for example) has no natural
+       break point — without this it silently overflows the cell and
+       bleeds into the next column instead of wrapping. */
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .empNameCell {
