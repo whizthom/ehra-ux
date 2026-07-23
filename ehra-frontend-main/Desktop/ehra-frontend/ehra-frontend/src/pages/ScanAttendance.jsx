@@ -439,6 +439,28 @@ export default function ScanAttendance() {
             </p>
 
             <div className={styles.scannerFrame}>
+              {/* Always mounted — see startCamera() above for why: it
+                  assigns the stream to videoRef.current before cameraState
+                  becomes "running", so this element must already exist in
+                  the DOM at that point or the assignment silently no-ops
+                  and the video that mounts afterwards has no stream. */}
+              <video
+                ref={videoRef}
+                className={`${styles.video} ${
+                  scanning && cameraState === "running" && !cameraError
+                    ? ""
+                    : styles.videoHidden
+                }`}
+                playsInline
+                muted
+              />
+
+              {scanning && cameraState === "running" && !cameraError && (
+                <div className={styles.scanOverlay}>
+                  <div className={styles.scanBox} />
+                </div>
+              )}
+
               {cameraState === "idle" && !cameraError && scanning && (
                 <div className={styles.errorState}>
                   <i
@@ -457,20 +479,6 @@ export default function ScanAttendance() {
                 <div className={styles.errorState}>
                   <p>Requesting camera access…</p>
                 </div>
-              )}
-
-              {scanning && cameraState === "running" && !cameraError && (
-                <>
-                  <video
-                    ref={videoRef}
-                    className={styles.video}
-                    playsInline
-                    muted
-                  />
-                  <div className={styles.scanOverlay}>
-                    <div className={styles.scanBox} />
-                  </div>
-                </>
               )}
 
               {cameraError && (

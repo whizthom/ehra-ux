@@ -217,6 +217,33 @@ export default function QrScanModal({ onClose, onSuccess }) {
         </p>
 
         <div className={styles.scannerFrame}>
+          {/* Always mounted — never conditionally rendered on cameraState.
+              startCamera() assigns the stream to videoRef.current as soon
+              as getUserMedia resolves, *before* cameraState flips to
+              "running". If this element only existed once cameraState
+              was already "running", videoRef.current would still be null
+              at assignment time, the srcObject/play() call would silently
+              no-op, and the <video> that finally mounted afterwards would
+              have no stream attached — exactly the dark, blank
+              .scannerFrame (background: #000) that was being reported.
+              Visibility is handled with a CSS class instead. */}
+          <video
+            ref={videoRef}
+            className={`${styles.video} ${
+              scanning && cameraState === "running" && !cameraError
+                ? ""
+                : styles.videoHidden
+            }`}
+            playsInline
+            muted
+          />
+
+          {scanning && cameraState === "running" && !cameraError && (
+            <div className={styles.scanOverlay}>
+              <div className={styles.scanBox} />
+            </div>
+          )}
+
           {cameraState === "idle" && !cameraError && scanning && (
             <div className={styles.errorState}>
               <i
@@ -235,20 +262,6 @@ export default function QrScanModal({ onClose, onSuccess }) {
             <div className={styles.errorState}>
               <p>Requesting camera access…</p>
             </div>
-          )}
-
-          {scanning && cameraState === "running" && !cameraError && (
-            <>
-              <video
-                ref={videoRef}
-                className={styles.video}
-                playsInline
-                muted
-              />
-              <div className={styles.scanOverlay}>
-                <div className={styles.scanBox} />
-              </div>
-            </>
           )}
 
           {cameraError && (

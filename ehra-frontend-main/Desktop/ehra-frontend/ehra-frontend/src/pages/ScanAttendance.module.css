@@ -53,6 +53,10 @@
     object-fit: cover;
 }
 
+.videoHidden {
+    display: none;
+}
+
 .scanOverlay {
     position: absolute;
     inset: 0;
