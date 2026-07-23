@@ -276,6 +276,16 @@
     margin-bottom: 20px;
     overflow-x: auto;
     scrollbar-width: none;
+    /* Without this, .tabs (a flex item of .contentFull, itself a flex
+       column) defaults to min-width: auto — it refuses to shrink below
+       its own content's natural width (six nowrap tab buttons, ~700px+).
+       On phones that's wider than the viewport, so instead of this row's
+       own overflow-x: auto ever engaging, .tabs simply renders at full
+       width and everything past the first tab or two gets silently
+       clipped by .contentFull's overflow-x: hidden — with no scrollbar,
+       no hint, nothing. This is what made Leave/Employment/Payroll/
+       Messages disappear entirely on mobile instead of being swipeable. */
+    min-width: 0;
 }
 
 .tabs::-webkit-scrollbar {
@@ -337,6 +347,17 @@
 .tabActive {
     color: var(--accent);
     border-bottom-color: var(--accent);
+}
+
+/* ── Tab content ──────────────────────────────────────────────────────
+   Was referenced in the JSX (styles.tabContent) but never actually
+   defined here — className ended up undefined, so this wrapper had no
+   width constraint of its own at all. Also a flex item of .contentFull,
+   so it needs the same min-width: 0 as .tabs above, otherwise a wide
+   child further down (e.g. .tableWrap/.table) can push it past the
+   viewport the same way. */
+.tabContent {
+    min-width: 0;
 }
 
 /* ── Overview grid ── */
@@ -425,6 +446,7 @@
     border: 0.5px solid var(--border-color);
     border-radius: 12px;
     overflow-x: auto;
+    min-width: 0;
 }
 
 .table {

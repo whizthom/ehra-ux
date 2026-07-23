@@ -197,6 +197,7 @@
     flex-direction: column;
     overflow: hidden;
     min-height: 0;
+    min-width: 0;
 }
 
 .topbar {
@@ -517,6 +518,7 @@
     flex-direction: column;
     padding: 20px 24px;
     min-height: 0;
+    min-width: 0;
 }
 
 /* Attendance opted out of the standard card/box treatment and wants to
@@ -530,6 +532,7 @@
     flex-direction: column;
     padding: 20px 10px;
     min-height: 0;
+    min-width: 0;
     /* Belt-and-braces alongside the matching fix in AttendanceSection /
        QrcodeTab / BusinessSettingsTab's own .tabBody — those already stop
        scroll-chaining at their own boundary, this stops it here too so
@@ -1104,6 +1107,7 @@
 .tableScrollWrap {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    min-width: 0;
 }
 
 .empTable th {
@@ -1578,6 +1582,7 @@
     scroll-snap-type: x proximity;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    min-width: 0;
 }
 
 .bottomNavScroll::-webkit-scrollbar {
