@@ -115,18 +115,20 @@
 }
 
 /* Very narrow phones (real data can push On time / Late / Absent into
-   double or triple digits) — dropping the labels below their number
-   keeps each column readable instead of the row squeezing or wrapping
-   mid-item. */
+   double or triple digits) — dropping the label below its number and
+   dot keeps each column readable instead of the row squeezing or
+   wrapping mid-item, while still keeping the colored dot visible so
+   the three states stay easy to tell apart at a glance. */
 @media (max-width: 360px) {
     .legendItem {
         flex-direction: column;
-        gap: 2px;
+        gap: 3px;
         font-size: 10.5px;
     }
 
     .legendItem .dot {
-        display: none;
+        width: 6px;
+        height: 6px;
     }
 
     .legendItem b {
