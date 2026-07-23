@@ -55,6 +55,78 @@
     color: var(--sidebar-muted);
 }
 
+/* ── Back button ──────────────────────────────────────────────────────
+   Replaces the old static "Employee profile" title. Label text ("Back to
+   Workforce" / "Back to Departments" / etc.) reflects wherever the user
+   actually came from — see the BACK_TARGETS map in the component. */
+.backBtn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    padding: 7px 10px 7px 8px;
+    margin-left: -8px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 1;
+    min-width: 0;
+    max-width: 60vw;
+}
+
+.backBtn:hover {
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+}
+
+.backBtn:active {
+    transform: scale(0.98);
+}
+
+.backBtn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.backBtn i {
+    font-size: 17px;
+    flex-shrink: 0;
+}
+
+.backBtnFull {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.backBtnShort {
+    display: none;
+}
+
+/* Below ~380px (small phones), "Back to Departments" etc. starts
+   crowding out the message/bell/theme icons on the right — drop to just
+   "Back", the arrow icon still carries the "go back" meaning, and the
+   full destination stays available via the button's title/aria-label. */
+@media (max-width: 380px) {
+    .backBtnFull {
+        display: none;
+    }
+
+    .backBtnShort {
+        display: inline;
+    }
+
+    .backBtn {
+        max-width: none;
+        padding-right: 8px;
+    }
+}
+
 /* ── Hero ── */
 .hero {
     background: var(--bg-surface);

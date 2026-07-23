@@ -149,6 +149,22 @@ export default function EmployeeProfilePage() {
     navigate(dashboardPath, { state: { activeNav: n.label } });
   };
 
+  // ── "Back to X" ──────────────────────────────────────────────────────
+  // Every place that links into this page passes state.from with a label
+  // matching the nav item it came from (see WorkforceTab, Hodworkforcetab,
+  // DepartmentsTab, ReportsTab's report views, PenaltyTab). Falls back to
+  // "Dashboard" for the one caller that doesn't set it yet and for anyone
+  // who lands here directly (e.g. a refreshed/bookmarked URL).
+  const BACK_TARGETS = {
+    Workforce: "Workforce",
+    Departments: "Departments",
+    Reports: "Reports",
+    Penalty: "Penalty",
+    Dashboard: "Dashboard",
+  };
+  const backNavLabel = BACK_TARGETS[location.state?.from] || "Dashboard";
+  const goBack = () => goToNav({ label: backNavLabel });
+
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const handleLogout = async () => {
@@ -278,7 +294,17 @@ export default function EmployeeProfilePage() {
       {/* ── Main ── */}
       <div className={shellStyles.main}>
         <div className={shellStyles.topbar}>
-          <span className={shellStyles.topbarTitle}>Employee profile</span>
+          <button
+            type="button"
+            className={styles.backBtn}
+            onClick={goBack}
+            aria-label={`Back to ${backNavLabel}`}
+            title={`Back to ${backNavLabel}`}
+          >
+            <i className="ti ti-arrow-left" aria-hidden="true" />
+            <span className={styles.backBtnFull}>Back to {backNavLabel}</span>
+            <span className={styles.backBtnShort}>Back</span>
+          </button>
           <div className={shellStyles.topbarRight}>
             {/* ── Message shortcut — same jump-to-Messages affordance the
                 dashboards' topbar has, just via a route instead of local

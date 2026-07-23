@@ -828,7 +828,7 @@ export default function Dashboard() {
   // ── Latest attendance panel actions ────────────────────────────────────
 
   const handleViewEmployee = (employeeId) => {
-    navigate(`/employees/${employeeId}`);
+    navigate(`/employees/${employeeId}`, { state: { from: "Dashboard" } });
   };
 
   const handleRequestRemove = (row) => {
