@@ -6,12 +6,19 @@ function money(v) {
   if (v === null || v === undefined) return "—";
   const n = Number(v);
   if (Number.isNaN(n)) return "—";
-  return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return n.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 function fmt(d) {
   if (!d) return "—";
-  return new Date(d).toLocaleDateString([], { day: "numeric", month: "short", year: "numeric" });
+  return new Date(d).toLocaleDateString([], {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 // Replaces the admin `<PenaltyTab>` (business-wide settings, payroll
@@ -25,7 +32,10 @@ export default function EmployeePenaltyTab() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [s, h] = await Promise.all([getMyPenaltySummary(), getMyPenaltyHistory()]);
+      const [s, h] = await Promise.all([
+        getMyPenaltySummary(),
+        getMyPenaltyHistory(),
+      ]);
       setSummary(s.data);
       setHistory(h.data);
     } catch (err) {
@@ -43,7 +53,9 @@ export default function EmployeePenaltyTab() {
     <div className={styles.wrap}>
       <div className={styles.header}>
         <h2 className={styles.title}>My deductions</h2>
-        <p className={styles.subtitle}>Attendance-related penalties for the current period.</p>
+        <p className={styles.subtitle}>
+          Attendance-related penalties for the current period.
+        </p>
       </div>
 
       {loading ? (
@@ -53,29 +65,64 @@ export default function EmployeePenaltyTab() {
           <div className={styles.summaryGrid}>
             <div className={styles.summaryCard}>
               <span className={styles.summaryLabel}>Late count</span>
-              <span className={styles.summaryValue}>{summary?.lateCount ?? 0}</span>
+              <span className={styles.summaryValue}>
+                {summary?.lateCount ?? 0}
+              </span>
             </div>
             <div className={styles.summaryCard}>
               <span className={styles.summaryLabel}>Absence count</span>
-              <span className={styles.summaryValue}>{summary?.absentCount ?? 0}</span>
+              <span className={styles.summaryValue}>
+                {summary?.absentCount ?? 0}
+              </span>
             </div>
             <div className={styles.summaryCard}>
               <span className={styles.summaryLabel}>Total deducted</span>
-              <span className={styles.summaryValue}>{money(summary?.totalDeduction)}</span>
+              <span className={styles.summaryValue}>
+                {money(summary?.totalDeduction)}
+              </span>
             </div>
           </div>
 
           <div className={styles.panel}>
             <h3 className={styles.panelTitle}>History</h3>
             {history.length === 0 ? (
-              <p className={styles.empty}>No deductions on record.</p>
+              <p className={styles.empty}>No finalized pay periods yet.</p>
             ) : (
               <div className={styles.list}>
                 {history.map((h, i) => (
-                  <div key={h.id ?? i} className={styles.row}>
-                    <span className={styles.rowReason}>{h.reason || h.type || "Deduction"}</span>
-                    <span className={styles.rowDate}>{fmt(h.date || h.createdAt)}</span>
-                    <span className={styles.rowAmount}>-{money(h.amount)}</span>
+                  <div
+                    key={`${h.periodStart}-${h.periodEnd}-${i}`}
+                    className={styles.row}
+                  >
+                    <div className={styles.rowMain}>
+                      <span className={styles.rowPeriod}>
+                        {fmt(h.periodStart)} – {fmt(h.periodEnd)}
+                      </span>
+                      <span className={styles.rowBreakdown}>
+                        Late <b>{h.lateCount ?? 0}</b> · Absent{" "}
+                        <b>{h.absentCount ?? 0}</b>
+                        {h.earlyLeaveCount ? (
+                          <>
+                            {" "}
+                            · Early leave <b>{h.earlyLeaveCount}</b>
+                          </>
+                        ) : null}
+                        {h.pardonedCount ? (
+                          <>
+                            {" "}
+                            · Pardoned <b>{h.pardonedCount}</b>
+                          </>
+                        ) : null}
+                      </span>
+                      {h.absentCount > 0 && (
+                        <span className={styles.rowAbsentNote}>
+                          Absence deductions: -{money(h.absentDeductionTotal)}
+                        </span>
+                      )}
+                    </div>
+                    <span className={styles.rowAmount}>
+                      -{money(h.totalDeduction)}
+                    </span>
                   </div>
                 ))}
               </div>
