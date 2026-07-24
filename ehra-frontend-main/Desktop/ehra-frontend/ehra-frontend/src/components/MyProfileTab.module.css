@@ -1,5 +1,92 @@
+/* ── Layout ──
+   Note: unlike the employer dashboard's .contentFullNarrow (which
+   scrolls the whole page itself), the employee dashboard's .contentFull
+   wrapper is overflow:hidden — the outer .main handles the app chrome's
+   scroll instead. So .tabBody below is the actual scroll owner for this
+   page, not a duplicate of an ancestor's scroll. */
+.layout {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.tabBar {
+    display: flex;
+    flex-shrink: 0;
+    border-bottom: 0.5px solid var(--border-color);
+    overflow-x: auto;
+    scrollbar-width: none;
+    min-width: 0;
+}
+
+.tabBar::-webkit-scrollbar {
+    display: none;
+}
+
+.tabBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 18px;
+    background: none;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.tabBtn:hover {
+    color: var(--text-primary);
+}
+
+.tabActive {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+.tabBody {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding-top: 16px;
+}
+
+/* ── Profile tab ── */
 .wrap {
     display: flex;
     flex-direction: column;
     gap: 24px;
+}
+
+/* ── Security tab ──
+   SecuritySettingsSection's own .wrap only reserves vertical padding
+   (24px 0) since it's designed to sit inside an already-padded parent
+   on the employer side — giving it the same breathing room here. */
+.securityPad {
+    padding: 0 16px 32px;
+}
+
+@media (max-width: 480px) {
+    .tabBtn {
+        padding: 11px 14px;
+        font-size: 12.5px;
+    }
+
+    .tabBody {
+        padding-top: 12px;
+    }
+
+    .securityPad {
+        padding: 0 8px 24px;
+    }
 }

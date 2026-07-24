@@ -67,6 +67,14 @@
     padding: 24px 0;
 }
 
+/* Business profile's content (unlike the other sub-tabs, which each
+   bring their own padded component) rendered straight into .tabBody,
+   which only reserves top space — nothing on the sides or bottom. This
+   gives it the same breathing room the other tabs already have. */
+.businessPad {
+    padding: 4px 16px 32px;
+}
+
 /* ── Header ── */
 .header {
     display: flex;

@@ -356,7 +356,7 @@ export default function BusinessSettingsTab({
           (loadingBusiness ? (
             <p className={styles.loading}>Loading business profile…</p>
           ) : (
-            <>
+            <div className={styles.businessPad}>
               <div className={styles.header}>
                 <LogoUpload
                   logo={business?.logo}
@@ -442,7 +442,7 @@ export default function BusinessSettingsTab({
                   here updates how you sign in too.
                 </p>
               </div>
-            </>
+            </div>
           ))}
 
         {/* ══ My profile (admin's own employee profile) ══ */}
