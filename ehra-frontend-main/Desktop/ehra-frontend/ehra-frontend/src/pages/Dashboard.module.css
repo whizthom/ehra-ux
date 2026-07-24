@@ -2101,10 +2101,8 @@
    content area instead of floating in a fixed-width popover. */
 .notifPageWrap {
     position: relative;
-    flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 0;
     background: transparent;
 }
 
@@ -2136,7 +2134,6 @@
 }
 
 .notifPageList {
-    flex: 1;
-    overflow-y: auto;
-    min-height: 0;
+    display: flex;
+    flex-direction: column;
 }

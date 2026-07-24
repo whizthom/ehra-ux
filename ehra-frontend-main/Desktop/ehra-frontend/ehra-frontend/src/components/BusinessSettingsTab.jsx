@@ -256,6 +256,23 @@ export default function BusinessSettingsTab({
   onToggleAttendanceProfile,
 }) {
   const [tab, setTab] = useState("business");
+  const rootRef = useRef(null);
+
+  // Content now scrolls as one unit through the page-level
+  // .contentFullNarrow wrapper rather than its own nested region, so
+  // switching sub-tabs no longer resets scroll position automatically —
+  // do it explicitly on whichever ancestor is actually scrollable.
+  useEffect(() => {
+    let node = rootRef.current?.parentElement;
+    while (node) {
+      if (getComputedStyle(node).overflowY === "auto") {
+        node.scrollTo({ top: 0, behavior: "instant" });
+        break;
+      }
+      node = node.parentElement;
+    }
+  }, [tab]);
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -301,7 +318,7 @@ export default function BusinessSettingsTab({
   };
 
   return (
-    <div className={styles.wrap}>
+    <div className={styles.wrap} ref={rootRef}>
       {/* Sub-tabs */}
       <div className={styles.tabs}>
         <button

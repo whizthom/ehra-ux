@@ -81,23 +81,14 @@
     }
 }
 
-/* ── Root wrap — SCROLLABLE ── */
+/* ── Root wrap — content flows through the page-level scroll,
+   same as Dashboard/Penalty/QR Code ── */
 .wrap {
     display: flex;
     flex-direction: column;
-    height: 100%;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 24px 0 60px;
+    padding: 24px 0 0;
     box-sizing: border-box;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    /* Smooth momentum scroll on iOS */
-    -webkit-overflow-scrolling: touch;
-    /* Stops scroll momentum from chaining into the Dashboard's own page
-       scroll once this container hits its top/bottom — without it, that
-       chaining is what makes the fixed mobile bottom nav visibly shift
-       during a scroll instead of staying anchored to the viewport. */
-    overscroll-behavior: contain;
 }
 
 /* ── Toast stack ── */
@@ -1194,7 +1185,7 @@
 
 @media (max-width: 768px) {
     .wrap {
-        padding: 16px 0 48px;
+        padding: 16px 0 0;
     }
 
     .header {
@@ -1249,7 +1240,7 @@
 
 @media (max-width: 480px) {
     .wrap {
-        padding: 12px 0 40px;
+        padding: 12px 0 0;
     }
 
     .title {

@@ -16,7 +16,8 @@
     flex: 1;
     min-height: 0;
     overflow: hidden;
-    position: relative; /* anchors the sliding detail overlay on mobile */
+    position: relative;
+    /* anchors the sliding detail overlay on mobile */
 }
 
 /* ── List panel ── */
@@ -711,24 +712,10 @@
 /* ──────────────────────────────────────────────────────────────────────── */
 
 .sectionWrap {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    overscroll-behavior: contain;
     padding: 16px 0 24px;
     display: flex;
     flex-direction: column;
     gap: 18px;
-}
-
-/* Belt-and-braces bottom clearance so the last card/row in whichever
-   section is open never sits behind the fixed mobile bottom nav — this
-   is its own nested scroll container, same as Attendance's tab body. */
-@media (max-width: 900px) {
-    .sectionWrap {
-        padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
-    }
 }
 
 .sectionHeader {
@@ -1200,6 +1187,7 @@
         opacity: 0;
         transform: translateY(-4px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1371,6 +1359,7 @@
 /* ──────────────────────────────────────────────────────────────────────── */
 
 @media (max-width: 860px) {
+
     /* ── Requests: list stays full-width in normal flow; detail becomes
        a full-screen overlay that slides in from the right instead of
        being squeezed into a second column or stacked below the list.
@@ -1397,7 +1386,8 @@
     }
 
     .placeholder {
-        display: none; /* list is what's visible when nothing's selected */
+        display: none;
+        /* list is what's visible when nothing's selected */
     }
 
     .mobileBackBtn {

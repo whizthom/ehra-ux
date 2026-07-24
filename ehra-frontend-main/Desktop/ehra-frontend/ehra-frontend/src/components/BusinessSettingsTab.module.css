@@ -4,10 +4,6 @@
 .wrap {
     display: flex;
     flex-direction: column;
-    flex: 1;
-    min-height: 0;
-    /* No overflow here — .tabs stays put and only .tabBody (whichever
-       sub-tab is active) scrolls, same pattern as the Attendance tab. */
 }
 
 /* ── Sub-tabs ── */
@@ -56,23 +52,13 @@
     box-shadow: 0 1px 3px var(--shadow-color);
 }
 
-/* No card/box — this sits directly on the plain page background. It's the
-   actual scroll container: flex:1 + min-height:0 fills whatever space is
-   left below the fixed .tabs row, and overflow-y:auto means Business
-   profile / My profile / Personal attendance each scroll independently
-   within that space instead of one shared page-level scroll. */
+/* No card/box — this sits directly on the plain page background.
+   Content flows normally here; scrolling and bottom-nav clearance are
+   handled once, by the page-level .contentFullNarrow wrapper (same as
+   Dashboard/Penalty/QR Code), instead of duplicating it in a nested
+   scroll region here. */
 .tabBody {
-    flex: 1;
-    min-height: 0;
     padding: 16px 0 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    /* See AttendanceSection.module.css — same nested-scroll setup, same
-       fix: without this, momentum scroll chains into the outer page
-       scroll once this container hits its top/bottom, dragging the
-       fixed bottom nav along with it on mobile. */
-    overscroll-behavior: contain;
 }
 
 .loading {

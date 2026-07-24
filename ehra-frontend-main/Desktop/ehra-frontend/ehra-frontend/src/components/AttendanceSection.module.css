@@ -1,11 +1,6 @@
 .layout {
-    flex: 1;
-    min-height: 0;
     display: flex;
     flex-direction: column;
-    /* No overflow here — the tab bar below stays put and only .tabBody
-       (whichever tab is active) scrolls, so switching tabs never leaves
-       you scrolled halfway down a different section. */
 }
 
 .tabBar {
@@ -48,23 +43,11 @@
 /* No side padding — this sits directly on the plain page background now
    (no card/box around it), so it can use the full width the page already
    gives it instead of adding its own extra margin on top.
-   This is the actual scroll container: flex:1 + min-height:0 lets it fill
-   whatever space is left below the fixed .tabBar, and overflow-y:auto
-   means Today / History / Schedule settings each scroll independently
-   within that space rather than sharing one long page-level scroll. */
+   Content flows normally here; scrolling and bottom-nav clearance are
+   handled once, by the page-level .contentFullNarrow wrapper, instead of
+   duplicating it in a nested scroll region here. */
 .tabBody {
-    flex: 1;
-    min-height: 0;
     padding: 16px 0 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    /* Without this, scrolling this inner container to its top/bottom
-       edge lets the remaining scroll momentum "chain" into the outer
-       page scroll (Dashboard's .contentFullNarrow) on mobile — which is
-       what was making the fixed bottom nav visibly shift/jump during a
-       scroll instead of staying anchored to the viewport. */
-    overscroll-behavior: contain;
 }
 
 .historyFilters {

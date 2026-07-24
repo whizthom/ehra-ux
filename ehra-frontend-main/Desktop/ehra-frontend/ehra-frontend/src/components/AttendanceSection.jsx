@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import AttendanceTable from "./AttendanceTable";
 import ScheduleSettings from "./ScheduleSettings";
 import { getTodayAttendance, getAttendanceHistory } from "../api/attendanceApi";
@@ -16,6 +16,7 @@ function toISODate(d) {
 
 export default function AttendanceSection() {
   const [tab, setTab] = useState("today");
+  const rootRef = useRef(null);
 
   const [todayRecords, setTodayRecords] = useState([]);
   const [loadingToday, setLoadingToday] = useState(true);
@@ -64,8 +65,23 @@ export default function AttendanceSection() {
     if (tab === "history") fetchHistory();
   }, [tab, fetchHistory]);
 
+  // Content now scrolls as one unit through the page-level
+  // .contentFullNarrow wrapper rather than its own nested region, so
+  // switching tabs no longer resets scroll position automatically — do
+  // it explicitly on whichever ancestor is actually scrollable.
+  useEffect(() => {
+    let node = rootRef.current?.parentElement;
+    while (node) {
+      if (getComputedStyle(node).overflowY === "auto") {
+        node.scrollTo({ top: 0, behavior: "instant" });
+        break;
+      }
+      node = node.parentElement;
+    }
+  }, [tab]);
+
   return (
-    <div className={styles.layout}>
+    <div className={styles.layout} ref={rootRef}>
       <div className={styles.tabBar}>
         {TABS.map((t) => (
           <button
