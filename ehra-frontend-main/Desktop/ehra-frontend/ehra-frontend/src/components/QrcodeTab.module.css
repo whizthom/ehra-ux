@@ -64,25 +64,27 @@
 }
 
 /* Live QR's content (title + description + QR code) is naturally much
-   shorter than the viewport on most phones. Left top-aligned inside a
-   flex:1 scroll container, that shortfall shows up as one large empty
-   run of space between the QR code and the bottom nav — centering it
-   distributes that space instead, so it reads as an intentional layout
-   rather than content that stopped short. Safe with overflow-y:auto:
-   if the viewport is ever too short for this to fit, it scrolls from
-   the top as normal rather than clipping. Settings (the other tab) is
-   a full form and stays top-aligned, so this only applies to Live QR. */
+   shorter than the viewport on most phones. justify-content: space-between
+   (not center) pins the intro to the top and pushes the QR panel all the
+   way down to the bottom of the available space — flush against the
+   .contentFullNarrow bottom-nav clearance, i.e. right up to the nav's
+   top edge, with no leftover dead gap above OR below. Safe with
+   overflow-y:auto: if the viewport is ever too short for this to fit,
+   it scrolls from the top as normal rather than clipping. Settings (the
+   other tab) is a full form and stays top-aligned, so this only applies
+   to Live QR. */
 .tabBodyCentered {
     display: flex;
     flex-direction: column;
-    justify-content: center;
 }
 
 /* ── Live QR view ── */
 .wrap {
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: space-between;
     gap: 24px;
     padding-top: 8px;
 }
@@ -118,18 +120,6 @@
 }
 
 @media (max-width: 480px) {
-
-    /* On mobile the Live QR content (intro + panel) is tall enough to
-       slightly overflow the scroll container. Centered + overflowing
-       means the extra height gets split above AND below the content
-       instead of staying at the top — that's the stray gap that shows
-       up above the QR code and nudges everything down toward the
-       bottom nav. Top-aligning here avoids it; desktop keeps the
-       centering above since it isn't overflowing there. */
-    .tabBodyCentered {
-        justify-content: flex-start;
-    }
-
     .wrap {
         padding: 4px 4px 0;
     }
