@@ -57,15 +57,26 @@ export default function QrAttendancePanel() {
       </div>
 
       <div className={styles.qrWrap}>
-        {loading ? (
-          <div className={styles.placeholder}>Loading…</div>
-        ) : error ? (
+        {error ? (
           <div className={styles.placeholderError}>
             <i className="ti ti-alert-circle" aria-hidden="true" />
             Couldn't load QR code
           </div>
         ) : (
-          <canvas ref={canvasRef} className={styles.canvas} />
+          <>
+            {/* Canvas stays mounted even while loading — QRCode.toCanvas
+                needs a real element to draw onto during the very first
+                fetch. Rendering it only after `loading` flips false meant
+                canvasRef.current was still null when that first fetch
+                resolved, so nothing ever got drawn until the next 5s
+                interval tried again (and by then the canvas existed). */}
+            <canvas
+              ref={canvasRef}
+              className={styles.canvas}
+              style={{ display: loading ? "none" : "block" }}
+            />
+            {loading && <div className={styles.placeholder}>Loading…</div>}
+          </>
         )}
       </div>
 
