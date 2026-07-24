@@ -118,6 +118,18 @@
 }
 
 @media (max-width: 480px) {
+
+    /* On mobile the Live QR content (intro + panel) is tall enough to
+       slightly overflow the scroll container. Centered + overflowing
+       means the extra height gets split above AND below the content
+       instead of staying at the top — that's the stray gap that shows
+       up above the QR code and nudges everything down toward the
+       bottom nav. Top-aligning here avoids it; desktop keeps the
+       centering above since it isn't overflowing there. */
+    .tabBodyCentered {
+        justify-content: flex-start;
+    }
+
     .wrap {
         padding: 4px 4px 0;
     }
