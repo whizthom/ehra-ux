@@ -1,9 +1,11 @@
-/* ── Layout — fixed tab bar, independently scrolling body ──
-   Same pattern as AttendanceSection: switching between Live QR and
-   Settings never carries over scroll position from the other view. */
+/* ── Layout ──
+   Content flows and scrolls as a single unit through the page-level
+   .contentFullNarrow wrapper — the same pattern Dashboard and Penalty
+   use. QR Code used to run its own independently-scrolling .tabBody
+   nested inside that wrapper (two overlapping scroll regions); on
+   mobile that's what made the content feel disconnected from the
+   bottom nav instead of flowing straight into it. */
 .layout {
-    flex: 1;
-    min-height: 0;
     display: flex;
     flex-direction: column;
 }
@@ -45,46 +47,18 @@
     border-bottom-color: var(--accent);
 }
 
-/* Bottom clearance on mobile comes from the page-level .contentFullNarrow
-   wrapper (same mechanism as Dashboard/Workforce/Attendance) — this fills
-   that wrapper's height exactly rather than overflowing it, so that
-   reserved space is already respected without adding more here. */
+/* Bottom clearance comes from the page-level .contentFullNarrow wrapper
+   (same mechanism as Dashboard/Workforce/Attendance) — content just
+   flows normally here and the page scrolls as a whole. */
 .tabBody {
-    flex: 1;
-    min-height: 0;
     padding: 16px 0 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    /* See AttendanceSection.module.css — same nested-scroll setup, same
-       fix: without this, momentum scroll chains into the outer page
-       scroll once this container hits its top/bottom, dragging the
-       fixed bottom nav along with it on mobile. */
-    overscroll-behavior: contain;
-}
-
-/* Live QR's content (title + description + QR code) is naturally much
-   shorter than the viewport on most phones. justify-content: space-between
-   (not center) pins the intro to the top and pushes the QR panel all the
-   way down to the bottom of the available space — flush against the
-   .contentFullNarrow bottom-nav clearance, i.e. right up to the nav's
-   top edge, with no leftover dead gap above OR below. Safe with
-   overflow-y:auto: if the viewport is ever too short for this to fit,
-   it scrolls from the top as normal rather than clipping. Settings (the
-   other tab) is a full form and stays top-aligned, so this only applies
-   to Live QR. */
-.tabBodyCentered {
-    display: flex;
-    flex-direction: column;
 }
 
 /* ── Live QR view ── */
 .wrap {
-    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
     gap: 24px;
     padding-top: 8px;
 }

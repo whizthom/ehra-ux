@@ -1,4 +1,4 @@
-import { Suspense, lazy, useState } from "react";
+import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import QrAttendancePanel from "./QrAttendancePanel";
 import styles from "./QrcodeTab.module.css";
 
@@ -22,9 +22,26 @@ const TABS = [
  */
 export default function QrCodeTab() {
   const [tab, setTab] = useState("live");
+  const rootRef = useRef(null);
+
+  // Content scrolls as one unit through the page-level .contentFullNarrow
+  // wrapper (same as every other nav tab) rather than its own nested
+  // scroll region, so switching tabs no longer resets scroll position on
+  // its own — do it explicitly here instead, on whichever ancestor is
+  // actually the scrollable one.
+  useEffect(() => {
+    let node = rootRef.current?.parentElement;
+    while (node) {
+      if (getComputedStyle(node).overflowY === "auto") {
+        node.scrollTo({ top: 0, behavior: "instant" });
+        break;
+      }
+      node = node.parentElement;
+    }
+  }, [tab]);
 
   return (
-    <div className={styles.layout}>
+    <div className={styles.layout} ref={rootRef}>
       <div className={styles.tabBar}>
         {TABS.map((t) => (
           <button
@@ -37,9 +54,7 @@ export default function QrCodeTab() {
         ))}
       </div>
 
-      <div
-        className={`${styles.tabBody} ${tab === "live" ? styles.tabBodyCentered : ""}`}
-      >
+      <div className={styles.tabBody}>
         {tab === "live" ? (
           <div className={styles.wrap}>
             <div className={styles.intro}>
