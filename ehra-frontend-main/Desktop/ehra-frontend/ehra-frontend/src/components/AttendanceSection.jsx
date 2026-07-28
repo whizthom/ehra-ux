@@ -10,10 +10,6 @@ const TABS = [
   { key: "settings", label: "Schedule settings" },
 ];
 
-function toISODate(d) {
-  return d.toISOString().split("T")[0];
-}
-
 export default function AttendanceSection() {
   const [tab, setTab] = useState("today");
   const rootRef = useRef(null);
@@ -23,12 +19,13 @@ export default function AttendanceSection() {
 
   const [historyRecords, setHistoryRecords] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
-  const [fromDate, setFromDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() - 7);
-    return toISODate(d);
-  });
-  const [toDate, setToDate] = useState(() => toISODate(new Date()));
+  // Empty by default so History loads every attendance record for every
+  // employee, past to present — same "show everything unless narrowed"
+  // behavior as the employee's own attendance tab (GET /attendance/me).
+  // Only once the admin picks both a From and To date does the view
+  // narrow to that range.
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   const fetchToday = useCallback(async () => {
     try {
@@ -45,7 +42,13 @@ export default function AttendanceSection() {
   const fetchHistory = useCallback(async () => {
     try {
       setLoadingHistory(true);
-      const { data } = await getAttendanceHistory(fromDate, toDate);
+      // Only pass a date range once both ends are set; otherwise fetch
+      // the business's full, unbounded history (past to present) for
+      // every employee.
+      const { data } = await getAttendanceHistory(
+        fromDate || undefined,
+        toDate || undefined,
+      );
       setHistoryRecords(data);
     } catch (err) {
       console.error("Failed to load attendance history:", err);
@@ -53,6 +56,11 @@ export default function AttendanceSection() {
       setLoadingHistory(false);
     }
   }, [fromDate, toDate]);
+
+  const clearHistoryFilter = () => {
+    setFromDate("");
+    setToDate("");
+  };
 
   useEffect(() => {
     fetchToday();
@@ -121,6 +129,14 @@ export default function AttendanceSection() {
               <button className={styles.applyBtn} onClick={fetchHistory}>
                 Apply
               </button>
+              {(fromDate || toDate) && (
+                <button
+                  className={styles.applyBtn}
+                  onClick={clearHistoryFilter}
+                >
+                  Show all
+                </button>
+              )}
             </div>
             <AttendanceTable
               records={historyRecords}

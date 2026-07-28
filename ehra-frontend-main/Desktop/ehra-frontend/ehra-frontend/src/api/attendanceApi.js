@@ -13,8 +13,11 @@ export const submitScan = (token, coords) =>
 
 // ── Attendance views ─────────────────────────────────────────────────────────
 export const getTodayAttendance = () => API.get("/attendance/today");
+// from/to are optional — omit both (or pass undefined) to get the
+// business's complete attendance history, past to present, for every
+// employee. Pass both to narrow to a date range.
 export const getAttendanceHistory = (from, to) =>
-  API.get("/attendance/history", { params: { from, to } });
+  API.get("/attendance/history", { params: from && to ? { from, to } : {} });
 export const getMyAttendance = () => API.get("/attendance/me");
 
 // ── Schedule (admin) ─────────────────────────────────────────────────────────
