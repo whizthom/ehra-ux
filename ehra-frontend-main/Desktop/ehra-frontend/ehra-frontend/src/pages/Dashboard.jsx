@@ -978,19 +978,30 @@ export default function Dashboard() {
   // = active employees (the people expected to clock in); "clocked in" =
   // anyone with a record in today's attendance feed at all.
   // "Clocked in" must only count people who actually clocked in — the
-  // backend now also creates an explicit ABSENT record (no clockIn
-  // timestamp) once an employee's scheduled clock-out time passes without
-  // them showing up, so `latestAttendance` can contain rows for people who
-  // were never actually present. Filtering on `clockIn` keeps those two
-  // groups from being conflated (previously `latestAttendance.length`
+  // backend now also creates explicit ABSENT/LATE entries (no clockIn
+  // timestamp) once an employee's scheduled clock-in/clock-out time passes
+  // without them showing up, so `latestAttendance` can contain rows for
+  // people who were never actually present. Filtering on `clockIn` keeps
+  // those groups from being conflated (previously `latestAttendance.length`
   // counted absentees as "clocked in" too).
   const pulseTotalStaff = safeSummary.activeEmployees;
   const pulseClockedIn = latestAttendance.filter((r) => !!r.clockIn).length;
+  // "Late" includes both people who actually clocked in late AND people who
+  // simply haven't clocked in yet once their clock-in time has passed (a
+  // live, not-yet-persisted status the backend computes on the fly) — those
+  // graduate into Absent once their clock-out time passes too, so nobody is
+  // ever counted in both buckets at once.
   const pulseLate = latestAttendance.filter((r) => r.status === "LATE").length;
-  const pulseOnTime = Math.max(pulseClockedIn - pulseLate, 0);
-  // Only employees explicitly marked ABSENT count as absent — anyone who
-  // simply hasn't clocked in yet but whose shift also hasn't ended isn't
-  // "absent" yet, just not yet accounted for.
+  // On Time can no longer be derived as clockedIn - late: since Late now
+  // also includes people with no clockIn at all, that subtraction would
+  // double-count them out of On Time. Filter directly instead — clocked in,
+  // and not flagged late.
+  const pulseOnTime = latestAttendance.filter(
+    (r) => !!r.clockIn && r.status !== "LATE",
+  ).length;
+  // Only employees explicitly (or live-)marked ABSENT count as absent —
+  // anyone who simply hasn't clocked in yet but whose shift also hasn't
+  // ended isn't "absent" yet, just not yet accounted for.
   const pulseAbsent = latestAttendance.filter(
     (r) => r.status === "ABSENT",
   ).length;
