@@ -315,7 +315,9 @@
 .trashHeader {
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
     font-size: 13px;
     color: var(--danger-text);
     font-weight: 500;
@@ -323,6 +325,53 @@
     border: 0.5px solid var(--danger-border);
     border-radius: 8px;
     padding: 10px 14px;
+}
+
+.trashHeaderInfo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Mirrors the app's standard "Back to X" pattern (see
+   EmployeeProfilePage's .backBtn) so leaving the trash view feels the
+   same as every other back-navigation in the app — just recolored to
+   sit legibly on the danger banner instead of a plain surface. */
+.backToWorkforceBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 30px;
+    padding: 0 12px;
+    background: var(--bg-surface);
+    border: 0.5px solid var(--danger-border);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: inherit;
+    color: var(--danger-text);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.backToWorkforceBtn i {
+    font-size: 14px;
+}
+
+.backToWorkforceBtn:hover {
+    background: var(--danger-text);
+    border-color: var(--danger-text);
+    color: #fff;
+}
+
+.backToWorkforceBtn:active {
+    transform: scale(0.98);
+}
+
+.backToWorkforceBtn:focus-visible {
+    outline: 2px solid var(--danger-text);
+    outline-offset: 2px;
 }
 
 .trashList {
@@ -378,10 +427,40 @@
    shared with Dashboard.jsx, so there's only one place to update it. */
 
 .empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
     text-align: center;
     padding: 48px 0;
     font-size: 13px;
     color: var(--text-secondary);
+}
+
+.emptyBackBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 16px;
+    background: var(--bg-soft-accent);
+    border: 0.5px solid var(--bg-soft-accent);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: inherit;
+    color: var(--accent-hover);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.emptyBackBtn i {
+    font-size: 14px;
+}
+
+.emptyBackBtn:hover {
+    background: var(--bg-soft-accent-strong, var(--bg-soft-accent));
+    opacity: 0.85;
 }
 
 /* ── Mobile-only additions ──────────────────────────────────────────────
@@ -449,5 +528,22 @@
         width: 100%;
         justify-content: center;
         margin-top: 4px;
+    }
+
+    .trashHeader {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .backToWorkforceBtn {
+        height: 40px;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .emptyBackBtn {
+        height: 44px;
+        width: 100%;
+        justify-content: center;
     }
 }

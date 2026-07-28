@@ -303,11 +303,31 @@ export default function WorkforceTab({ departments }) {
       {showTrash && (
         <div className={styles.trashSection}>
           <div className={styles.trashHeader}>
-            <i className="ti ti-trash" aria-hidden="true" />
-            <span>Employees in trash — permanently deleted after 7 days</span>
+            <div className={styles.trashHeaderInfo}>
+              <i className="ti ti-trash" aria-hidden="true" />
+              <span>Employees in trash — permanently deleted after 7 days</span>
+            </div>
+            <button
+              type="button"
+              className={styles.backToWorkforceBtn}
+              onClick={() => setShowTrash(false)}
+            >
+              <i className="ti ti-arrow-left" aria-hidden="true" />
+              <span>Back to Workforce</span>
+            </button>
           </div>
           {trashed.length === 0 ? (
-            <div className={styles.empty}>Trash is empty.</div>
+            <div className={styles.empty}>
+              Trash is empty.
+              <button
+                type="button"
+                className={styles.emptyBackBtn}
+                onClick={() => setShowTrash(false)}
+              >
+                <i className="ti ti-arrow-left" aria-hidden="true" />
+                Back to Workforce
+              </button>
+            </div>
           ) : (
             <div className={styles.trashList}>
               {trashed.map((emp) => {
