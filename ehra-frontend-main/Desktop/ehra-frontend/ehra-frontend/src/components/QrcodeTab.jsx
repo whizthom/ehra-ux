@@ -61,7 +61,7 @@ export default function QrCodeTab() {
               <h2 className={styles.title}>Attendance QR code</h2>
               <p className={styles.desc}>
                 Employees scan this with their phone camera to clock in or out.
-                It rotates automatically every 5 seconds, so a screenshot or
+                It rotates automatically every 10 seconds, so a screenshot or
                 photo of it stops working almost immediately — display it
                 somewhere visible at your entrance or front desk.
               </p>

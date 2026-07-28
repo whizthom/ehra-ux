@@ -265,7 +265,7 @@ export default function AttendanceSettingsPanel() {
                 <span className={styles.recommendedTag}>Recommended</span>
               </span>
               <span className={styles.methodDesc}>
-                A code that refreshes every 5 seconds. Best for a laptop,
+                A code that refreshes every 10 seconds. Best for a laptop,
                 tablet, TV, or reception monitor at your entrance.
               </span>
             </div>
