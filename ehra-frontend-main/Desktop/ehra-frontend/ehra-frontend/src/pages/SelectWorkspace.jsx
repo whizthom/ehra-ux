@@ -16,6 +16,31 @@ function initials(name) {
   );
 }
 
+// Membership-type → display label. Explicit map instead of a binary
+// ternary so a type nobody's handled yet (CUSTOMER, or whatever comes
+// after it) shows something honest rather than silently being mislabeled
+// as "Employee" or "Owner · Admin". Kept in sync with the same map in
+// MyAccountsPanel.jsx, which renders this identical list elsewhere.
+const ROLE_LABEL = {
+  EMPLOYER: "Owner · Admin",
+  EMPLOYEE: "Employee",
+  CUSTOMER: "Customer",
+};
+function roleLabel(type) {
+  return ROLE_LABEL[type] || type;
+}
+
+// Membership-type → post-switch destination. TODO: point CUSTOMER at a
+// real customer-facing dashboard once that surface exists — routing it
+// to "/dashboard" (the owner's view) for now is a deliberate placeholder,
+// not a real destination, since nothing creates CustomerMembership rows
+// yet and there's nowhere else to send it.
+function destinationFor(contextType) {
+  if (contextType === "EMPLOYEE") return "/my-dashboard";
+  if (contextType === "CUSTOMER") return "/dashboard"; // TODO: /customer-dashboard once it exists
+  return "/dashboard";
+}
+
 // Shown right after login when the authenticated Identity holds more than
 // one membership and the session hasn't picked an active workspace yet
 // (AuthResponseDTO.needsContextSelection === true). Also reachable any
@@ -43,9 +68,7 @@ export default function SelectWorkspace() {
     setError("");
     try {
       const data = await switchContext(acc.type, acc.membershipId);
-      navigate(
-        data.contextType === "EMPLOYEE" ? "/my-dashboard" : "/dashboard",
-      );
+      navigate(destinationFor(data.contextType));
     } catch (err) {
       const msg =
         err?.response?.data?.message || "Couldn't switch to that workspace.";
@@ -108,7 +131,7 @@ export default function SelectWorkspace() {
                 <div className={styles.itemBody}>
                   <span className={styles.itemName}>{acc.businessName}</span>
                   <span className={styles.itemMeta}>
-                    {acc.type === "EMPLOYER" ? "Owner · Admin" : "Employee"}
+                    {roleLabel(acc.type)}
                     {acc.status && acc.status !== "ACTIVE"
                       ? ` · ${acc.status.replace("_", " ").toLowerCase()}`
                       : ""}

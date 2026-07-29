@@ -124,6 +124,26 @@ function initials(name) {
 
 const BLANK_BUSINESS = { name: "", email: "", phone: "", address: "" };
 
+// Membership-type → display label / post-switch destination. Same map
+// used in MyAccountsPanel.jsx and SelectWorkspace.jsx, which render the
+// same underlying list elsewhere — kept in sync across all three.
+const ROLE_LABEL = {
+  EMPLOYER: "Owner · Admin",
+  EMPLOYEE: "Employee",
+  CUSTOMER: "Customer",
+};
+function roleLabel(type) {
+  return ROLE_LABEL[type] || type;
+}
+// TODO: point CUSTOMER at a real customer-facing dashboard once that
+// surface exists — "/dashboard" is a placeholder for now, since nothing
+// creates CustomerMembership rows yet and there's nowhere else to send it.
+function destinationFor(contextType) {
+  if (contextType === "EMPLOYEE") return "/my-dashboard";
+  if (contextType === "CUSTOMER") return "/dashboard";
+  return "/dashboard";
+}
+
 const TABS = [
   {
     key: "EMPLOYER",
@@ -137,17 +157,24 @@ const TABS = [
     icon: "ti-id-badge-2",
     blurb: "Businesses you work for as a member of staff.",
   },
+  {
+    key: "CUSTOMER",
+    label: "Customer",
+    icon: "ti-shopping-bag",
+    blurb: "Businesses you're a customer of.",
+  },
 ];
 
 // The "My Accounts" nav destination — every workspace (business) the
-// logged-in Identity currently holds a membership at, either as owner
-// (EMPLOYER) or as staff (EMPLOYEE). Split into two sections/tabs so each
-// role's accounts are easy to scan on their own. Lets the person switch
-// between them without logging out, and start a brand-new business under
-// the same Identity from the Employer section (an employee going into
-// business for themselves, or an owner adding a second business).
-// Reachable as a full page (not a popover) from both Dashboard and
-// EmployeeDashboard via the "My Accounts" nav item.
+// logged-in Identity currently holds a membership at: as owner (EMPLOYER),
+// as staff (EMPLOYEE), or as a customer (CUSTOMER — tab stays hidden until
+// someone actually has one; see CustomerMembership's backend class doc).
+// Split into sections/tabs so each role's accounts are easy to scan on
+// their own. Lets the person switch between them without logging out, and
+// start a brand-new business under the same Identity from the Employer
+// section (an employee going into business for themselves, or an owner
+// adding a second business). Reachable as a full page (not a popover) from
+// both Dashboard and EmployeeDashboard via the "My Accounts" nav item.
 export default function MyAccountsPage() {
   const { user, logout, switchContext, addBusiness } = useAuth();
   const navigate = useNavigate();
@@ -219,12 +246,22 @@ export default function MyAccountsPage() {
   }, []);
 
   const grouped = useMemo(() => {
-    const byType = { EMPLOYER: [], EMPLOYEE: [] };
+    const byType = { EMPLOYER: [], EMPLOYEE: [], CUSTOMER: [] };
     accounts.forEach((acc) => {
       if (byType[acc.type]) byType[acc.type].push(acc);
     });
     return byType;
   }, [accounts]);
+
+  // Nothing creates CustomerMembership rows yet (groundwork only — see
+  // CustomerMembership's backend class doc), so hide the tab entirely
+  // until someone actually has at least one, rather than showing a
+  // permanently-empty "Customer" tab to every user today.
+  const visibleTabs = useMemo(
+    () =>
+      TABS.filter((t) => t.key !== "CUSTOMER" || grouped.CUSTOMER.length > 0),
+    [grouped],
+  );
 
   const pick = async (acc) => {
     if (acc.active) return;
@@ -232,9 +269,7 @@ export default function MyAccountsPage() {
     setError("");
     try {
       const data = await switchContext(acc.type, acc.membershipId);
-      navigate(
-        data.contextType === "EMPLOYEE" ? "/my-dashboard" : "/dashboard",
-      );
+      navigate(destinationFor(data.contextType));
     } catch (err) {
       const msg =
         err?.response?.data?.message || "Couldn't switch to that workspace.";
@@ -264,9 +299,7 @@ export default function MyAccountsPage() {
       });
       setForm(BLANK_BUSINESS);
       setShowCreate(false);
-      navigate(
-        data.contextType === "EMPLOYEE" ? "/my-dashboard" : "/dashboard",
-      );
+      navigate(destinationFor(data.contextType));
     } catch (err) {
       const data = err?.response?.data;
       const msg = data?.errors
@@ -395,7 +428,7 @@ export default function MyAccountsPage() {
 
             {/* ── Section tabs: Employer / Employee ── */}
             <div className={styles.tabs} role="tablist">
-              {TABS.map((t) => (
+              {visibleTabs.map((t) => (
                 <button
                   key={t.key}
                   type="button"
@@ -451,9 +484,7 @@ export default function MyAccountsPage() {
                               {acc.businessName}
                             </span>
                             <span className={styles.itemMeta}>
-                              {acc.type === "EMPLOYER"
-                                ? "Owner · Admin"
-                                : "Employee"}
+                              {roleLabel(acc.type)}
                               {acc.status && acc.status !== "ACTIVE"
                                 ? ` · ${acc.status.replace("_", " ").toLowerCase()}`
                                 : ""}
@@ -475,7 +506,9 @@ export default function MyAccountsPage() {
                         <p className={styles.empty}>
                           {activeTab === "EMPLOYER"
                             ? "You don't own or administer any businesses yet."
-                            : "You aren't listed as an employee on any business yet."}
+                            : activeTab === "CUSTOMER"
+                              ? "You aren't a customer of any business yet."
+                              : "You aren't listed as an employee on any business yet."}
                         </p>
                       )}
                     </div>

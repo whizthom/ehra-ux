@@ -17,14 +17,40 @@ function initials(name) {
 
 const BLANK_BUSINESS = { name: "", email: "", phone: "", address: "" };
 
+// Membership-type → display label. Explicit map instead of a binary
+// ternary so a type nobody's handled yet (CUSTOMER, or whatever comes
+// after it) shows something honest rather than silently being mislabeled
+// as "Employee" or "Owner · Admin".
+const ROLE_LABEL = {
+  EMPLOYER: "Owner · Admin",
+  EMPLOYEE: "Employee",
+  CUSTOMER: "Customer",
+};
+function roleLabel(type) {
+  return ROLE_LABEL[type] || type;
+}
+
+// Membership-type → post-switch destination. TODO: point CUSTOMER at a
+// real customer-facing dashboard once that surface exists — routing it
+// to "/dashboard" (the owner's view) for now is a deliberate placeholder,
+// not a real destination, since nothing creates CustomerMembership rows
+// yet and there's nowhere else to send it.
+function destinationFor(contextType) {
+  if (contextType === "EMPLOYEE") return "/my-dashboard";
+  if (contextType === "CUSTOMER") return "/dashboard"; // TODO: /customer-dashboard once it exists
+  return "/dashboard";
+}
+
 // The "My Accounts" nav feature — every workspace (business) the logged-in
-// Identity currently holds a membership at, either as owner (EMPLOYER) or
-// as staff (EMPLOYEE). Lets the person switch between them without
-// logging out, and start a brand-new business under the same Identity
-// (an employee going into business for themselves, or an owner adding a
-// second business). Rendered as a modal from both Dashboard and
-// EmployeeDashboard so it's reachable from whichever workspace the
-// person is currently in.
+// Identity currently holds a membership at: as owner (EMPLOYER), as staff
+// (EMPLOYEE), or as a customer (CUSTOMER — groundwork only; nothing creates
+// these yet, but the label/routing below already handle it so this file
+// doesn't need a second pass once that role ships). Lets the person switch
+// between them without logging out, and start a brand-new business under
+// the same Identity (an employee going into business for themselves, or
+// an owner adding a second business). Rendered as a modal from both
+// Dashboard and EmployeeDashboard so it's reachable from whichever
+// workspace the person is currently in.
 export default function MyAccountsPanel({ open, onClose }) {
   const { switchContext, addBusiness } = useAuth();
   const navigate = useNavigate();
@@ -61,9 +87,10 @@ export default function MyAccountsPanel({ open, onClose }) {
     try {
       const data = await switchContext(acc.type, acc.membershipId);
       onClose();
-      navigate(data.contextType === "EMPLOYEE" ? "/my-dashboard" : "/dashboard");
+      navigate(destinationFor(data.contextType));
     } catch (err) {
-      const msg = err?.response?.data?.message || "Couldn't switch to that workspace.";
+      const msg =
+        err?.response?.data?.message || "Couldn't switch to that workspace.";
       setError(typeof msg === "string" ? msg : "Something went wrong.");
     } finally {
       setSwitchingId(null);
@@ -91,11 +118,15 @@ export default function MyAccountsPanel({ open, onClose }) {
       setForm(BLANK_BUSINESS);
       setShowCreate(false);
       onClose();
-      navigate(data.contextType === "EMPLOYEE" ? "/my-dashboard" : "/dashboard");
+      navigate(destinationFor(data.contextType));
     } catch (err) {
       const data = err?.response?.data;
-      const msg = data?.errors ? Object.values(data.errors)[0] : data?.message || data;
-      setCreateError(typeof msg === "string" ? msg : "Failed to create business.");
+      const msg = data?.errors
+        ? Object.values(data.errors)[0]
+        : data?.message || data;
+      setCreateError(
+        typeof msg === "string" ? msg : "Failed to create business.",
+      );
     } finally {
       setCreating(false);
     }
@@ -106,7 +137,11 @@ export default function MyAccountsPanel({ open, onClose }) {
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h3>My accounts</h3>
-          <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
+          <button
+            className={styles.closeBtn}
+            onClick={onClose}
+            aria-label="Close"
+          >
             <i className="ti ti-x" aria-hidden="true" />
           </button>
         </div>
@@ -115,8 +150,8 @@ export default function MyAccountsPanel({ open, onClose }) {
           {!showCreate && (
             <>
               <p className={styles.hint}>
-                Switch between every business you own or work for — all
-                under this one login.
+                Switch between every business you own or work for — all under
+                this one login.
               </p>
 
               {error && (
@@ -149,9 +184,11 @@ export default function MyAccountsPanel({ open, onClose }) {
                         )}
                       </div>
                       <div className={styles.itemBody}>
-                        <span className={styles.itemName}>{acc.businessName}</span>
+                        <span className={styles.itemName}>
+                          {acc.businessName}
+                        </span>
                         <span className={styles.itemMeta}>
-                          {acc.type === "EMPLOYER" ? "Owner · Admin" : "Employee"}
+                          {roleLabel(acc.type)}
                           {acc.status && acc.status !== "ACTIVE"
                             ? ` · ${acc.status.replace("_", " ").toLowerCase()}`
                             : ""}
@@ -162,7 +199,9 @@ export default function MyAccountsPanel({ open, onClose }) {
                       ) : switchingId === acc.membershipId ? (
                         <span className={styles.spinner} />
                       ) : (
-                        <i className={`ti ti-chevron-right ${styles.itemChevron}`} />
+                        <i
+                          className={`ti ti-chevron-right ${styles.itemChevron}`}
+                        />
                       )}
                     </button>
                   ))}
@@ -198,9 +237,9 @@ export default function MyAccountsPanel({ open, onClose }) {
               </button>
 
               <p className={styles.hint}>
-                This creates a new, separate business — you'll be its
-                owner, and it stays fully independent from any other
-                business you're connected to.
+                This creates a new, separate business — you'll be its owner, and
+                it stays fully independent from any other business you're
+                connected to.
               </p>
 
               {createError && (
@@ -214,7 +253,9 @@ export default function MyAccountsPanel({ open, onClose }) {
                 <label>Business name</label>
                 <input
                   value={form.name}
-                  onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((p) => ({ ...p, name: e.target.value }))
+                  }
                   placeholder="Acme Corporation"
                 />
               </div>
@@ -223,7 +264,9 @@ export default function MyAccountsPanel({ open, onClose }) {
                 <input
                   type="email"
                   value={form.email}
-                  onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((p) => ({ ...p, email: e.target.value }))
+                  }
                   placeholder="hello@acme.com"
                 />
               </div>
@@ -233,7 +276,9 @@ export default function MyAccountsPanel({ open, onClose }) {
                 </label>
                 <input
                   value={form.phone}
-                  onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((p) => ({ ...p, phone: e.target.value }))
+                  }
                   placeholder="+234 800 000 0000"
                 />
               </div>
@@ -243,7 +288,9 @@ export default function MyAccountsPanel({ open, onClose }) {
                 </label>
                 <input
                   value={form.address}
-                  onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((p) => ({ ...p, address: e.target.value }))
+                  }
                   placeholder="123 Main St, Lagos"
                 />
               </div>
