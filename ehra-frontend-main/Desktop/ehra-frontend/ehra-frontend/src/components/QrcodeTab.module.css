@@ -86,6 +86,14 @@
     max-width: 320px;
 }
 
+/* The QR canvas itself is a fixed small square, but "Share Live QR" has a
+   full URL + Copy button on one row plus wrapping action buttons — 320px
+   clips that awkwardly. Wider cap, same centered layout. */
+.panelWrapWide {
+    width: 100%;
+    max-width: 480px;
+}
+
 .settingsLoading {
     padding: 60px 20px;
     text-align: center;
@@ -103,6 +111,10 @@
     }
 
     .panelWrap {
+        max-width: 100%;
+    }
+
+    .panelWrapWide {
         max-width: 100%;
     }
 }

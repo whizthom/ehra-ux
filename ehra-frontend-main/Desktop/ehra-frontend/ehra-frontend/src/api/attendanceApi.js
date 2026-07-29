@@ -1,7 +1,27 @@
 import API from "./authApi";
+import axios from "axios";
+import { API_BASE_URL } from "./authApi";
 
 // ── QR (admin) ──────────────────────────────────────────────────────────────
 export const getCurrentQrToken = () => API.get("/attendance/qr/current");
+
+// ── QR public display link (admin controls) ─────────────────────────────────
+// Lets an employer share a link (e.g. to a reception tablet) that shows the
+// live rotating QR without needing to log into the dashboard. Admin-only —
+// generating/revoking requires the normal authenticated `API` instance.
+export const getQrDisplayLink = () => API.get("/attendance/qr/display-link");
+export const generateQrDisplayLink = () => API.post("/attendance/qr/display-link");
+export const revokeQrDisplayLink = () => API.delete("/attendance/qr/display-link");
+
+// ── QR public display link (the shared link itself) ─────────────────────────
+// Called from the PUBLIC display page (see pages/QrDisplayPage.jsx) — no
+// login, so this deliberately uses a bare axios call instead of the shared
+// `API` instance: `API`'s interceptors assume an authenticated session (auto
+// token-refresh on 401, Bearer header injection) which doesn't apply here and
+// could otherwise trigger a pointless refresh attempt for someone who was
+// never logged in on this device at all.
+export const getCurrentQrTokenPublic = (linkToken) =>
+  axios.get(`${API_BASE_URL}/attendance/qr/display/${linkToken}`);
 
 // ── Scan (employee) ─────────────────────────────────────────────────────────
 export const submitScan = (token, coords) =>

@@ -14,6 +14,7 @@ import SelectWorkspace from "./pages/SelectWorkspace";
 import InvitationLanding from "./pages/public/InvitationLanding";
 import EmployeeRegistration from "./pages/public/EmployeeRegistration";
 import RegistrationSubmitted from "./pages/public/RegistrationSubmitted";
+import QrDisplayPage from "./pages/public/QrDisplayPage";
 
 import ScanAttendance from "./pages/ScanAttendance";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
@@ -68,6 +69,13 @@ function App() {
             path="/registration-submitted"
             element={<RegistrationSubmitted />}
           />
+
+          {/* PUBLIC QR DISPLAY — the "share a link instead of admin access"
+              feature. Reachable at /qr-display/:token with no login at
+              all; the token is the QrDisplayLink's opaque share token
+              (see AttendanceController's public /qr/display/{token}
+              endpoint), not a JWT or any kind of session credential. */}
+          <Route path="/qr-display/:token" element={<QrDisplayPage />} />
 
           {/* EMPLOYER DASHBOARD */}
 

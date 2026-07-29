@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import QrAttendancePanel from "./QrAttendancePanel";
+import QrDisplayLinkPanel from "./QrDisplayLinkPanel";
 import styles from "./QrcodeTab.module.css";
 
 // Lazy-loaded so that if anything in the Settings panel's dependency tree
@@ -69,6 +70,13 @@ export default function QrCodeTab() {
 
             <div className={styles.panelWrap}>
               <QrAttendancePanel />
+            </div>
+
+            {/* "Share Live QR" — only on this tab, per the requirement
+                that this link is scoped to the live rotating code and
+                nothing else in Settings. */}
+            <div className={styles.panelWrapWide}>
+              <QrDisplayLinkPanel />
             </div>
           </div>
         ) : (
