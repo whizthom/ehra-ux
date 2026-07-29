@@ -1005,6 +1005,17 @@ export default function Dashboard() {
   const pulseAbsent = latestAttendance.filter(
     (r) => r.status === "ABSENT",
   ).length;
+  // Desktop stat-card figures (see statsGrid below) — distinct from
+  // pulseOnTime above, which deliberately lumps PRESENT + EARLY_LEAVE
+  // together for the mobile widget's "on time" figure. These two need to
+  // stay separate buckets instead, since the desktop cards show early-leave
+  // and present as their own distinct counts.
+  const pulseEarly = latestAttendance.filter(
+    (r) => r.status === "EARLY_LEAVE",
+  ).length;
+  const pulsePresent = latestAttendance.filter(
+    (r) => r.status === "PRESENT",
+  ).length;
   const pulsePercent =
     pulseTotalStaff > 0
       ? Math.round((pulseClockedIn / pulseTotalStaff) * 100)
@@ -1483,25 +1494,19 @@ export default function Dashboard() {
                     trendColor: "var(--accent-hover)",
                   },
                   {
-                    icon: "ti-calendar-check",
+                    icon: "ti-user-x",
                     color: "amber",
-                    num: loadingSummary ? "—" : safeSummary.activeEmployees,
-                    label: "Active employees",
-                    trend: loadingSummary
-                      ? "Loading…"
-                      : `${safeSummary.totalEmployees - safeSummary.activeEmployees} not yet active`,
+                    num: pulseAbsent,
+                    label: "Absent today",
+                    trend: `${pulseLate} late`,
                     trendColor: "var(--warning-text)",
                   },
                   {
                     icon: "ti-clock",
                     color: "blue",
-                    num: loadingSummary ? "—" : safeSummary.pendingApprovals,
-                    label: "Pending approvals",
-                    trend: loadingSummary
-                      ? "Loading…"
-                      : safeSummary.pendingApprovals === 0
-                        ? "All caught up"
-                        : "Needs your review",
+                    num: pulseEarly,
+                    label: "Left early today",
+                    trend: `${pulsePresent} present`,
                     trendColor: "var(--info-text)",
                   },
                   {
