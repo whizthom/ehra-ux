@@ -1144,7 +1144,7 @@ export default function Dashboard() {
               <div className={styles.row2}>
                 <div className={styles.panel}>
                   <div className={styles.panelHdr}>
-                    <span className={styles.panelTitle}>My attendance</span>
+                    <span className={styles.panelTitleLg}>My attendance</span>
                     <span
                       className={styles.panelAction}
                       onClick={() => setActiveNav("Attendance")}
@@ -1216,7 +1216,7 @@ export default function Dashboard() {
 
                 <div className={styles.panel}>
                   <div className={styles.panelHdr}>
-                    <span className={styles.panelTitle}>My payroll</span>
+                    <span className={styles.panelTitleLg}>My payroll</span>
                     <span
                       className={styles.panelAction}
                       onClick={() => setActiveNav("Penalty")}

@@ -881,6 +881,20 @@
     color: var(--text-primary);
 }
 
+/* Primary section headers on the employee dashboard home — "My attendance"
+   and "My payroll" — sized up from the shared .panelTitle (13px/500) so
+   they visually outrank secondary panels like "Quick actions" and "Recent
+   activity" on the same page. Deliberately a separate class rather than
+   changing .panelTitle itself, since that class is shared by panel
+   headers across both this dashboard and the employer's Dashboard.jsx —
+   changing it directly would have resized every panel title app-wide
+   instead of creating hierarchy on just this page. */
+.panelTitleLg {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
 .panelAction {
     font-size: 12px;
     color: var(--accent);
