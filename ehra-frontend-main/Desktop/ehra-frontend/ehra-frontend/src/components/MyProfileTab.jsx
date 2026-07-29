@@ -46,11 +46,9 @@ export default function MyProfileTab({ profile, isHod }) {
         ))}
       </div>
 
-      {/* This is the scroll owner — the employee dashboard's shared
-          .contentFull wrapper deliberately doesn't scroll itself (the
-          outer .main handles the app chrome), so each full-page nav
-          destination scrolls its own body rather than relying on an
-          ancestor that won't provide one. */}
+      {/* Plain flowing content — this tab renders inside the dashboard's
+          .content wrapper, so the outer .main owns the scroll, same as
+          the other simple tabs. No internal scroll region here. */}
       <div className={styles.tabBody}>
         {tab === "profile" ? (
           <div className={styles.wrap}>

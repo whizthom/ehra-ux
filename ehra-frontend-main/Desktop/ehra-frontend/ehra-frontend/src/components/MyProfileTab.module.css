@@ -1,12 +1,9 @@
 /* ── Layout ──
-   Note: unlike the employer dashboard's .contentFullNarrow (which
-   scrolls the whole page itself), the employee dashboard's .contentFull
-   wrapper is overflow:hidden — the outer .main handles the app chrome's
-   scroll instead. So .tabBody below is the actual scroll owner for this
-   page, not a duplicate of an ancestor's scroll. */
+   This tab renders inside the employee dashboard's plain .content wrapper
+   (not .contentFull), so it flows on the page background and scrolls with
+   the outer .main like the other simple tabs — it doesn't own its own
+   scroll region. */
 .layout {
-    flex: 1;
-    min-height: 0;
     display: flex;
     flex-direction: column;
 }
@@ -52,12 +49,6 @@
 }
 
 .tabBody {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
     padding-top: 16px;
 }
 
