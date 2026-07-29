@@ -114,11 +114,49 @@ export default function EmployeePenaltyTab() {
                           </>
                         ) : null}
                       </span>
-                      {h.absentCount > 0 && (
-                        <span className={styles.rowAbsentNote}>
-                          Absence deductions: -{money(h.absentDeductionTotal)}
+
+                      {/* Every deduction type that actually applied this
+                          period, not just absences — late and early-leave
+                          deductions were previously invisible here even
+                          though they're included in the total. */}
+                      {(h.lateDeductionTotal > 0 ||
+                        h.earlyLeaveDeductionTotal > 0 ||
+                        h.absentDeductionTotal > 0) && (
+                        <span className={styles.rowDeductionNote}>
+                          {h.lateDeductionTotal > 0 && (
+                            <>Late: -{money(h.lateDeductionTotal)} </>
+                          )}
+                          {h.earlyLeaveDeductionTotal > 0 && (
+                            <>
+                              Early leave: -
+                              {money(h.earlyLeaveDeductionTotal)}{" "}
+                            </>
+                          )}
+                          {h.absentDeductionTotal > 0 && (
+                            <>Absence: -{money(h.absentDeductionTotal)}</>
+                          )}
                         </span>
                       )}
+
+                      {/* Net pay = base salary − total deductions, exactly
+                          as the backend computes and stores it on the
+                          finalized PayrollRecord (PenaltyServiceImpl —
+                          netPay field). Only shown when this viewer is
+                          allowed to see pay figures at all (always true for
+                          an employee's own history) and a salary was
+                          actually on file for that period. */}
+                      {h.canViewPay &&
+                        (h.salarySet ? (
+                          <span className={styles.rowNetPayNote}>
+                            Base salary {money(h.baseSalary)} − deductions{" "}
+                            {money(h.totalDeduction)} ={" "}
+                            <b>Net pay {money(h.netPay)}</b>
+                          </span>
+                        ) : (
+                          <span className={styles.rowNoSalaryNote}>
+                            No salary was on file for this period.
+                          </span>
+                        ))}
                     </div>
                     <span className={styles.rowAmount}>
                       -{money(h.totalDeduction)}
