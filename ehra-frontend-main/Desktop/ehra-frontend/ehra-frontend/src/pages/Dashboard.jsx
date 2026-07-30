@@ -2122,7 +2122,7 @@ export default function Dashboard() {
               spot for every tab since it sits after the tab-switch above
               but still inside this scrolling wrapper. */}
           <div className={styles.dashboardFooter}>
-            <Logo variant="horizontal" size={26} />
+            <Logo variant="horizontal" size={48} />
           </div>
         </div>
       </div>
