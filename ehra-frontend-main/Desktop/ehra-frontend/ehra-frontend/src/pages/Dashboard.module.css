@@ -1604,7 +1604,6 @@
 .bottomNavScroll {
     display: flex;
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     min-width: 0;
 }
