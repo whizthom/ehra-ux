@@ -27,6 +27,7 @@ import EmployeeLeaveTab from "../components/EmployeeLeaveTab";
 import EmployeeAttendanceTab from "../components/EmployeeAttendanceTab";
 import EmployeePenaltyTab from "../components/EmployeePenaltyTab";
 import MyProfileTab from "../components/MyProfileTab";
+import Logo from "../components/Logo";
 import LogoutConfirmModal from "../components/LogoutConfirmModal";
 import CoverRequestsTab from "../components/CoverRequestsTab";
 import { getMyProfile } from "../api/employeeApi";
@@ -1447,6 +1448,13 @@ export default function Dashboard() {
               </div>
             </>
           )}
+
+          {/* Brand footer — last thing in the scrollable content, same
+              spot for every tab. Matches Dashboard.jsx's employer-side
+              footer. */}
+          <div className={styles.dashboardFooter}>
+            <Logo variant="horizontal" size={48} />
+          </div>
         </div>
       </div>
 
