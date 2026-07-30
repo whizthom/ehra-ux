@@ -267,7 +267,28 @@ export default function Dashboard() {
   const qaThumb = useScrollThumb(qaScrollRef);
   const bottomNavThumb = useScrollThumb(bottomNavScrollRef);
 
-  // Employee directory (raw data — still needed by AddDepartmentModal;
+  // The "My Accounts" bottom-nav item is the one item that does a real
+  // route navigation (navigate("/my-accounts", ...)) instead of just
+  // swapping activeNav — so going there and back fully unmounts and
+  // remounts this whole component, giving bottomNavScrollRef a brand new
+  // DOM node that always starts at scrollLeft 0. Persisting the scroll
+  // offset across that remount keeps the strip exactly where the user
+  // left it instead of visibly snapping back to the start.
+  useEffect(() => {
+    const el = bottomNavScrollRef.current;
+    if (!el) return undefined;
+    const saved = sessionStorage.getItem("dashboardBottomNavScrollLeft");
+    if (saved !== null) el.scrollLeft = Number(saved) || 0;
+    const onScroll = () => {
+      sessionStorage.setItem(
+        "dashboardBottomNavScrollLeft",
+        String(el.scrollLeft),
+      );
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
   // the table itself now lives in the Workforce tab, not the dashboard)
   const [employees, setEmployees] = useState([]);
   const [loadingDir, setLoadingDir] = useState(true);
