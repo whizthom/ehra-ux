@@ -189,6 +189,28 @@ export default function MyAccountsPage() {
   const NAV = isAdmin ? ADMIN_NAV : EMPLOYEE_NAV;
   const bottomNavThumb = useScrollThumb(bottomNavScrollRef);
 
+  // Matches the save/restore effect in Dashboard.jsx / EmployeeDashboard.jsx.
+  // This page has its own separate copy of the bottom nav strip (own DOM
+  // node, own ref), so without this it always mounts at scrollLeft 0 —
+  // which then gets read back by the dashboard's own restore effect,
+  // making the sync look reversed. Keyed by dashboard type so an
+  // employer's scroll position never leaks into an employee's strip (or
+  // vice versa) for identities holding both.
+  useEffect(() => {
+    const el = bottomNavScrollRef.current;
+    if (!el) return undefined;
+    const key = isAdmin
+      ? "employerBottomNavScrollLeft"
+      : "employeeBottomNavScrollLeft";
+    const saved = sessionStorage.getItem(key);
+    if (saved !== null) el.scrollLeft = Number(saved) || 0;
+    const onScroll = () => {
+      sessionStorage.setItem(key, String(el.scrollLeft));
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [isAdmin]);
+
   // Best-effort profile fetch, purely to dress the shared shell (business
   // logo/name, avatar, HOD-gated nav items) the same way the dashboards
   // do. Never blocks the accounts list if it fails or is slow.

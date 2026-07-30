@@ -274,14 +274,19 @@ export default function Dashboard() {
   // DOM node that always starts at scrollLeft 0. Persisting the scroll
   // offset across that remount keeps the strip exactly where the user
   // left it instead of visibly snapping back to the start.
+  // MyAccountsPage.jsx and EmployeeDashboard.jsx each render their own
+  // separate copy of this strip and read/write the same key (scoped by
+  // dashboard type) so the position stays in sync in both directions —
+  // this effect alone only covers the Dashboard -> My Accounts -> back
+  // hop, not My Accounts' own strip.
   useEffect(() => {
     const el = bottomNavScrollRef.current;
     if (!el) return undefined;
-    const saved = sessionStorage.getItem("dashboardBottomNavScrollLeft");
+    const saved = sessionStorage.getItem("employerBottomNavScrollLeft");
     if (saved !== null) el.scrollLeft = Number(saved) || 0;
     const onScroll = () => {
       sessionStorage.setItem(
-        "dashboardBottomNavScrollLeft",
+        "employerBottomNavScrollLeft",
         String(el.scrollLeft),
       );
     };

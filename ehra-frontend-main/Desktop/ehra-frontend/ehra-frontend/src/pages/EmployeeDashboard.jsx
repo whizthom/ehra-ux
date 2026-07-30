@@ -226,6 +226,27 @@ export default function Dashboard() {
   const qaThumb = useScrollThumb(qaScrollRef);
   const bottomNavThumb = useScrollThumb(bottomNavScrollRef);
 
+  // Same fix as Dashboard.jsx: "My Accounts" does a real route navigation
+  // (unlike the other bottom-nav items, which just swap the active tab),
+  // so returning from it fully remounts this component and gives
+  // bottomNavScrollRef a brand new DOM node starting at scrollLeft 0.
+  // MyAccountsPage.jsx reads/writes this same key so the strip's position
+  // stays in sync in both directions.
+  useEffect(() => {
+    const el = bottomNavScrollRef.current;
+    if (!el) return undefined;
+    const saved = sessionStorage.getItem("employeeBottomNavScrollLeft");
+    if (saved !== null) el.scrollLeft = Number(saved) || 0;
+    const onScroll = () => {
+      sessionStorage.setItem(
+        "employeeBottomNavScrollLeft",
+        String(el.scrollLeft),
+      );
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
   const [recentActivityOpen, setRecentActivityOpen] = useState(false);
 
   // My attendance + payroll — the employee-facing dashboard home content
@@ -982,7 +1003,6 @@ export default function Dashboard() {
             activeNav === "Leave" ||
             activeNav === "Cover Requests" ||
             activeNav === "Departments" ||
-            activeNav === "My Profile" ||
             activeNav === "Notifications"
               ? styles.contentFull
               : styles.content
