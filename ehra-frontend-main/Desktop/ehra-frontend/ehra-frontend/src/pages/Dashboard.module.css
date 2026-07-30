@@ -538,8 +538,6 @@
     display: flex;
     flex-direction: column;
     padding: 20px 10px;
-    /* Extra breathing room at the end of scroll, see note above. */
-    padding-bottom: 35vh;
     min-height: 0;
     min-width: 0;
     /* Belt-and-braces alongside the matching fix in AttendanceSection /
@@ -1287,7 +1285,7 @@
     }
 
     .contentFullNarrow {
-        padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px) + 35vh);
+        padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px));
     }
 
     .topbar {

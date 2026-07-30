@@ -879,6 +879,12 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    /* Breathing room at the end of scroll for this flowing section —
+       applied here rather than on the shared .contentFullNarrow ancestor,
+       since that ancestor also hosts the bounded Requests split-pane,
+       whose height:100% panel would shrink by this same amount under
+       border-box sizing if the padding lived there instead. */
+    padding-bottom: 35vh;
 }
 
 .policyNote {
