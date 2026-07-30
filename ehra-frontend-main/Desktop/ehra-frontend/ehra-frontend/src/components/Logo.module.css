@@ -1,0 +1,29 @@
+/* Purely layout — all color lives in Logo.jsx via CSS variables so it
+   tracks [data-theme] automatically. Background is always transparent;
+   this never paints its own surface. */
+
+.wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+}
+
+.stacked {
+    flex-direction: column;
+    gap: 8px;
+}
+
+.horizontal {
+    flex-direction: row;
+    gap: 14px;
+}
+
+.mark {
+    display: block;
+    flex-shrink: 0;
+}
+
+.wordmark {
+    display: block;
+}
