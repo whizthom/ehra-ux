@@ -29,6 +29,7 @@ import BusinessSettingsTab from "../components/BusinessSettingsTab";
 import PenaltyTab from "../components/PenaltyTab";
 import ReportsTab from "../components/ReportsTab";
 import TodaysPulse from "../components/TodaysPulse";
+import Logo from "../components/Logo";
 import {
   getAllProfileEdits,
   getPendingProfileEdits,
@@ -2116,6 +2117,13 @@ export default function Dashboard() {
               </div>
             </>
           )}
+
+          {/* Brand footer — last thing in the scrollable content, same
+              spot for every tab since it sits after the tab-switch above
+              but still inside this scrolling wrapper. */}
+          <div className={styles.dashboardFooter}>
+            <Logo variant="horizontal" size={26} />
+          </div>
         </div>
       </div>
 
