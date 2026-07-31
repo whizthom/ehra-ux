@@ -300,7 +300,11 @@ export default function Dashboard() {
   const fetchNotifs = useCallback(async () => {
     try {
       setLoadingNotifs(true);
-      const { data } = await API.get("/notifications");
+      // Employee/HOD-scoped feed — NOT the business-wide admin endpoint.
+      // The admin endpoint returns every notification ever raised for the
+      // whole business, so using it here was letting employees (including
+      // brand-new hires) see notifications from long before they joined.
+      const { data } = await API.get("/notifications/me");
       // ADMIN_MESSAGE is handled exclusively in the Messages tab
       setNotifs(data.filter((n) => n.type !== "ADMIN_MESSAGE"));
     } catch (err) {
@@ -509,7 +513,7 @@ export default function Dashboard() {
 
   const markAllRead = async () => {
     try {
-      await API.put("/notifications/read-all");
+      await API.put("/notifications/me/read-all");
       setNotifs((prev) => prev.map((n) => ({ ...n, isRead: true })));
       fetchSummary();
     } catch {
