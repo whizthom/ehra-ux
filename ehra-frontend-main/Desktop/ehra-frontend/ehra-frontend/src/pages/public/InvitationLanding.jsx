@@ -91,7 +91,7 @@ export default function InvitationLanding() {
       {/* ── Left panel ── */}
       <div className={styles.left}>
         <div className={styles.logoRow} style={{ "--text-primary": "#ffffff" }}>
-          <Logo variant="horizontal" size={40} />
+          <Logo variant="horizontal" size={80} />
         </div>
         <div className={styles.leftBody}>
           <span className={styles.tagline}>HR Management</span>
@@ -119,7 +119,7 @@ export default function InvitationLanding() {
             className={styles.mobileLogoRow}
             style={{ "--text-primary": "#ffffff" }}
           >
-            <Logo variant="horizontal" size={32} />
+            <Logo variant="horizontal" size={64} />
           </div>
         </div>
 

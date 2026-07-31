@@ -101,7 +101,7 @@ export default function CompleteProfile() {
         <div className={styles.dotGrid} aria-hidden="true" />
 
         <div className={styles.logoRow} style={{ "--text-primary": "#ffffff" }}>
-          <Logo variant="horizontal" size={40} />
+          <Logo variant="horizontal" size={80} />
         </div>
         <div className={styles.leftBody}>
           <span className={styles.eyebrow}>Almost there</span>

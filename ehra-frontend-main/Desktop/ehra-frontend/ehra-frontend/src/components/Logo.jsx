@@ -1,3 +1,4 @@
+import { useId } from "react";
 import styles from "./Logo.module.css";
 
 /**
@@ -90,7 +91,8 @@ export default function Logo({
   className = "",
   title = "Ehra",
 }) {
-  const gradientId = "ehraLogoMarkGradient";
+  const reactId = useId();
+  const gradientId = `ehraLogoMarkGradient-${reactId.replace(/:/g, "")}`;
 
   if (variant === "icon") {
     return (

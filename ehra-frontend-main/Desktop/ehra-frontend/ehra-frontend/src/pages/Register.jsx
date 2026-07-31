@@ -207,7 +207,7 @@ export default function Register() {
         <div className={styles.dotGrid} aria-hidden="true" />
 
         <div className={styles.logoRow} style={{ "--text-primary": "#ffffff" }}>
-          <Logo variant="horizontal" size={40} />
+          <Logo variant="horizontal" size={80} />
         </div>
 
         <div className={styles.leftBody}>
@@ -256,7 +256,7 @@ export default function Register() {
             className={styles.mobileLogoRow}
             style={{ "--text-primary": "#0b1f1a" }}
           >
-            <Logo variant="horizontal" size={28} />
+            <Logo variant="horizontal" size={56} />
           </div>
           <p className={styles.mobileEyebrow}>Get started</p>
           <h1 className={styles.mobileHeadline}>Set up your workspace</h1>

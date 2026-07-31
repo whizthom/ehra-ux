@@ -282,7 +282,7 @@ export default function EmployeeRegistration() {
       {/* ── Left panel ── */}
       <div className={styles.left}>
         <div className={styles.logoRow} style={{ "--text-primary": "#ffffff" }}>
-          <Logo variant="horizontal" size={40} />
+          <Logo variant="horizontal" size={80} />
         </div>
 
         <div className={styles.leftBody}>
@@ -327,7 +327,7 @@ export default function EmployeeRegistration() {
             className={styles.mobileLogoRow}
             style={{ "--text-primary": "#ffffff" }}
           >
-            <Logo variant="horizontal" size={32} />
+            <Logo variant="horizontal" size={64} />
           </div>
           <p className={styles.mobileEyebrow}>Employee registration</p>
           <h1 className={styles.mobileHeadline}>{STEPS[step - 1].title}</h1>

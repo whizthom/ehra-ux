@@ -141,7 +141,7 @@ export default function ForgotPassword() {
       <div className={styles.left}>
         <div className={styles.dotGrid} aria-hidden="true" />
         <div className={styles.logoRow} style={{ "--text-primary": "#ffffff" }}>
-          <Logo variant="horizontal" size={40} />
+          <Logo variant="horizontal" size={80} />
         </div>
         <div className={styles.leftBody}>
           <span className={styles.eyebrow}>Account recovery</span>
@@ -158,7 +158,7 @@ export default function ForgotPassword() {
           className={styles.mobileLogoRow}
           style={{ "--text-primary": "#0b1f1a" }}
         >
-          <Logo variant="horizontal" size={28} />
+          <Logo variant="horizontal" size={56} />
         </div>
         <div className={styles.card}>
           <div className={styles.rightHeader}>

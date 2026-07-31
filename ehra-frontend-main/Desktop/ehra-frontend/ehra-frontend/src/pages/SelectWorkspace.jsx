@@ -90,7 +90,7 @@ export default function SelectWorkspace() {
     <div className={styles.wrap}>
       <div className={styles.card}>
         <div className={styles.logoRow}>
-          <Logo variant="horizontal" size={32} />
+          <Logo variant="horizontal" size={64} />
         </div>
 
         <h1 className={styles.title}>Choose a workspace</h1>
