@@ -156,7 +156,7 @@ export default function ForgotPassword() {
       <div className={styles.right}>
         <div
           className={styles.mobileLogoRow}
-          style={{ "--text-primary": "#0b1f1a" }}
+          style={{ "--text-primary": "#ffffff" }}
         >
           <Logo variant="horizontal" size={56} />
         </div>
