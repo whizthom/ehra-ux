@@ -254,7 +254,7 @@ export default function Register() {
           <div className={styles.mobileDotGrid} aria-hidden="true" />
           <div
             className={styles.mobileLogoRow}
-            style={{ "--text-primary": "#ffffff" }}
+            style={{ "--text-primary": "#0b1f1a" }}
           >
             <Logo variant="horizontal" size={56} />
           </div>

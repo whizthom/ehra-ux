@@ -138,12 +138,6 @@ export default function CompleteProfile() {
 
       {/* ── Right ── */}
       <div className={styles.right}>
-        <div
-          className={styles.mobileHero}
-          style={{ "--text-primary": "#ffffff" }}
-        >
-          <Logo variant="horizontal" size={56} />
-        </div>
         <div className={styles.rightHeader}>
           <button
             type="button"

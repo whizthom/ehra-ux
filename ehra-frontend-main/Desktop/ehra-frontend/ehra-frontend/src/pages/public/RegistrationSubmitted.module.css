@@ -13,8 +13,8 @@
     background: #0b1f1a;
     background-image: radial-gradient(circle at 12% 8%, rgba(85, 224, 174, 0.16), transparent 42%),
         radial-gradient(circle at 92% 88%, rgba(198, 161, 91, 0.14), transparent 45%);
-    background-size: 220% 220%;
-    animation: ehraBgDrift 12s ease-in-out infinite;
+    background-size: 160% 160%;
+    animation: ehraBgDrift 22s ease-in-out infinite;
     padding: 48px 40px;
     display: flex;
     flex-direction: column;
@@ -30,7 +30,7 @@
     }
 
     50% {
-        background-position: 55% 45%;
+        background-position: 30% 22%;
     }
 }
 
@@ -380,8 +380,8 @@
         background: #0b1f1a;
         background-image: radial-gradient(circle at 16% 18%, rgba(85, 224, 174, 0.2), transparent 46%),
             radial-gradient(circle at 88% 82%, rgba(198, 161, 91, 0.16), transparent 50%);
-        background-size: 220% 220%;
-        animation: ehraBgDrift 12s ease-in-out infinite;
+        background-size: 160% 160%;
+        animation: ehraBgDrift 22s ease-in-out infinite;
         border-radius: 0 0 28px 28px;
         box-shadow: 0 20px 40px -22px rgba(11, 31, 26, 0.5);
         overflow: hidden;
