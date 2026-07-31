@@ -7,6 +7,7 @@ import { sendPhoneOtp, confirmPhoneOtp, resetRecaptcha } from "../firebase";
 import { verifyTwoFactorLogin } from "../api/phoneAuthApi";
 import styles from "./Login.module.css";
 import phoneStyles from "./PhoneAuth.module.css";
+import Logo from "../components/Logo";
 
 // A believable, static glimpse of what's happening inside a live workspace —
 // the same kind of event this app already surfaces as real notifications.
@@ -213,9 +214,8 @@ export default function Login() {
       <div className={styles.left}>
         <div className={styles.dotGrid} aria-hidden="true" />
 
-        <div className={styles.logoRow}>
-          <div className={styles.logoIcon}>💼</div>
-          <span className={styles.logoText}>Ehra</span>
+        <div className={styles.logoRow} style={{ "--text-primary": "#ffffff" }}>
+          <Logo variant="horizontal" size={40} />
         </div>
 
         <div className={styles.leftBody}>
@@ -241,9 +241,11 @@ export default function Login() {
 
       {/* ── Right panel — sign in ── */}
       <div className={styles.right}>
-        <div className={styles.mobileLogoRow}>
-          <div className={styles.mobileLogoIcon}>💼</div>
-          <span className={styles.mobileLogoText}>Ehra</span>
+        <div
+          className={styles.mobileLogoRow}
+          style={{ "--text-primary": "#0b1f1a" }}
+        >
+          <Logo variant="horizontal" size={28} />
         </div>
         <div className={styles.card}>
           {!twoFactor ? (

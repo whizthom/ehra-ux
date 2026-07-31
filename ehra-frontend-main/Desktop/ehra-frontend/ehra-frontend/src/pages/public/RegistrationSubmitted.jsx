@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import styles from "./RegistrationSubmitted.module.css";
+import Logo from "../../components/Logo";
 
 export default function RegistrationSubmitted() {
   const navigate = useNavigate();
@@ -8,9 +9,8 @@ export default function RegistrationSubmitted() {
     <div className={styles.page}>
       {/* ── Left panel ── */}
       <div className={styles.left}>
-        <div className={styles.logoRow}>
-          <div className={styles.logoIcon}>💼</div>
-          <span className={styles.logoText}>Ehra</span>
+        <div className={styles.logoRow} style={{ "--text-primary": "#ffffff" }}>
+          <Logo variant="horizontal" size={40} />
         </div>
 
         <div className={styles.leftBody}>
@@ -68,9 +68,11 @@ export default function RegistrationSubmitted() {
       <div className={styles.right}>
         <div className={styles.mobileHero}>
           <div className={styles.mobileDotGrid} aria-hidden="true" />
-          <div className={styles.mobileLogoRow}>
-            <div className={styles.mobileLogoIcon}>💼</div>
-            <span className={styles.mobileLogoText}>Ehra</span>
+          <div
+            className={styles.mobileLogoRow}
+            style={{ "--text-primary": "#ffffff" }}
+          >
+            <Logo variant="horizontal" size={32} />
           </div>
         </div>
         <div className={styles.state}>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import styles from "./CompleteProfile.module.css";
+import Logo from "../components/Logo";
 
 const STEP1_DRAFT_KEY = "ehra_signup_step1_draft";
 const STEP2_DRAFT_KEY = "ehra_signup_step2_draft";
@@ -99,9 +100,8 @@ export default function CompleteProfile() {
       <div className={styles.left}>
         <div className={styles.dotGrid} aria-hidden="true" />
 
-        <div className={styles.logoRow}>
-          <div className={styles.logoIcon}>💼</div>
-          <span className={styles.logoText}>Ehra</span>
+        <div className={styles.logoRow} style={{ "--text-primary": "#ffffff" }}>
+          <Logo variant="horizontal" size={40} />
         </div>
         <div className={styles.leftBody}>
           <span className={styles.eyebrow}>Almost there</span>

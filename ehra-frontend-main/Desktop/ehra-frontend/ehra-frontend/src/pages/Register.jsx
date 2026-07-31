@@ -6,6 +6,7 @@ import { sendPhoneOtp, confirmPhoneOtp, resetRecaptcha } from "../firebase";
 import { checkPhone, registerWithPhone } from "../api/phoneAuthApi";
 import styles from "./Register.module.css";
 import phoneStyles from "./PhoneAuth.module.css";
+import Logo from "../components/Logo";
 
 // Draft is kept in sessionStorage (not localStorage) so it survives a trip
 // between steps or an accidental refresh, but doesn't linger forever on a
@@ -205,9 +206,8 @@ export default function Register() {
       <div className={styles.left}>
         <div className={styles.dotGrid} aria-hidden="true" />
 
-        <div className={styles.logoRow}>
-          <div className={styles.logoIcon}>💼</div>
-          <span className={styles.logoText}>Ehra</span>
+        <div className={styles.logoRow} style={{ "--text-primary": "#ffffff" }}>
+          <Logo variant="horizontal" size={40} />
         </div>
 
         <div className={styles.leftBody}>
@@ -252,9 +252,11 @@ export default function Register() {
       <div className={styles.right}>
         <div className={styles.mobileHero}>
           <div className={styles.mobileDotGrid} aria-hidden="true" />
-          <div className={styles.mobileLogoRow}>
-            <div className={styles.mobileLogoIcon}>💼</div>
-            <span className={styles.mobileLogoText}>Ehra</span>
+          <div
+            className={styles.mobileLogoRow}
+            style={{ "--text-primary": "#0b1f1a" }}
+          >
+            <Logo variant="horizontal" size={28} />
           </div>
           <p className={styles.mobileEyebrow}>Get started</p>
           <h1 className={styles.mobileHeadline}>Set up your workspace</h1>

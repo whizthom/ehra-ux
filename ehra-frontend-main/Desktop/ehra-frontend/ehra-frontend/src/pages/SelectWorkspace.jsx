@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { getMyAccounts } from "../api/authApi";
 import { logout as apiLogout } from "../api/authApi";
 import styles from "./SelectWorkspace.module.css";
+import Logo from "../components/Logo";
 
 function initials(name) {
   return (
@@ -89,8 +90,7 @@ export default function SelectWorkspace() {
     <div className={styles.wrap}>
       <div className={styles.card}>
         <div className={styles.logoRow}>
-          <div className={styles.logoIcon}>💼</div>
-          <span className={styles.logoText}>Ehra</span>
+          <Logo variant="horizontal" size={32} />
         </div>
 
         <h1 className={styles.title}>Choose a workspace</h1>

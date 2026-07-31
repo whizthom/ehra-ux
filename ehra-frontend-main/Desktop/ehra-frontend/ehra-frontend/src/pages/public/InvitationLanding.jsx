@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { validateInvitation, acceptInvitation } from "../../api/invitationApi";
 import styles from "./InvitationLanding.module.css";
+import Logo from "../../components/Logo";
 
 // Key used to remember an invite token across a trip to /login, so
 // someone who gets an invite link while logged out lands right back here
@@ -89,9 +90,8 @@ export default function InvitationLanding() {
     <div className={styles.page}>
       {/* ── Left panel ── */}
       <div className={styles.left}>
-        <div className={styles.logoRow}>
-          <div className={styles.logoIcon}>💼</div>
-          <span className={styles.logoText}>Ehra</span>
+        <div className={styles.logoRow} style={{ "--text-primary": "#ffffff" }}>
+          <Logo variant="horizontal" size={40} />
         </div>
         <div className={styles.leftBody}>
           <span className={styles.tagline}>HR Management</span>
@@ -115,9 +115,11 @@ export default function InvitationLanding() {
       <div className={styles.right}>
         <div className={styles.mobileHero}>
           <div className={styles.mobileDotGrid} aria-hidden="true" />
-          <div className={styles.mobileLogoRow}>
-            <div className={styles.mobileLogoIcon}>💼</div>
-            <span className={styles.mobileLogoText}>Ehra</span>
+          <div
+            className={styles.mobileLogoRow}
+            style={{ "--text-primary": "#ffffff" }}
+          >
+            <Logo variant="horizontal" size={32} />
           </div>
         </div>
 
