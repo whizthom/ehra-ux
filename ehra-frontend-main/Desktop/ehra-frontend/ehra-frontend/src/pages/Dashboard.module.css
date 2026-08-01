@@ -553,6 +553,21 @@
     }
 }
 
+/* Messages tab only. It renders its own WhatsApp-style two-pane layout
+   (ChatPanel/MessagesHub) which needs to reach the true edges of the
+   screen on a phone — unlike Attendance/Departments/etc, which still want
+   a narrow gutter around a table and stay on .contentFullNarrow above. */
+.contentMessages {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 10px;
+    min-height: 0;
+    min-width: 0;
+}
+
 /* ── Brand footer — sits at the very end of the scrollable content,
    same spot regardless of which tab is active. margin-top pushes it below
    whatever content precedes it without fighting the .content/.contentFull*
@@ -1308,6 +1323,11 @@
     }
 
     .contentFullNarrow {
+        padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .contentMessages {
+        padding: 0;
         padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px));
     }
 

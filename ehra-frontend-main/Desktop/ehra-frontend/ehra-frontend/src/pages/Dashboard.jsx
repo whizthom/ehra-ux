@@ -1390,14 +1390,15 @@ export default function Dashboard() {
             activeNav === "Attendance" ||
             activeNav === "Departments" ||
             activeNav === "Leave" ||
-            activeNav === "Messages" ||
             activeNav === "My profile" ||
             activeNav === "QR Code" ||
             activeNav === "Notifications"
               ? styles.contentFullNarrow
-              : activeNav === "Workforce" || activeNav === "Profile Edits"
-                ? styles.contentFull
-                : styles.content
+              : activeNav === "Messages"
+                ? styles.contentMessages
+                : activeNav === "Workforce" || activeNav === "Profile Edits"
+                  ? styles.contentFull
+                  : styles.content
           }
         >
           {activeNav === "Notifications" ? (

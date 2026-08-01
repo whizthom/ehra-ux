@@ -4,9 +4,12 @@
 
 .container {
     display: flex;
+    flex: 1 1 auto;
+    width: 100%;
     height: 100%;
     background: transparent;
     min-height: 0;
+    min-width: 0;
 }
 
 /* ── Contact list ── */
@@ -362,15 +365,26 @@
     margin: 0;
 }
 
-/* ── Mobile: list and thread can't share the screen ── */
-@media (max-width: 860px) {
+/* ── Mobile: list and thread can't share the screen ──
+   900px matches the breakpoint the rest of the dashboard switches its
+   sidebar to a bottom nav at, so Chats doesn't sit in an inconsistent
+   in-between state where the sidebar is already gone but this is still
+   rendering as a two-pane desktop layout. */
+@media (max-width: 900px) {
+    .container {
+        width: 100%;
+    }
+
     .listPanel {
         width: 100%;
+        flex: 1 1 100%;
         border-right: none;
     }
 
     .threadPanel {
         display: none;
+        width: 100%;
+        flex: 1 1 100%;
     }
 
     .container.showDetail .listPanel {

@@ -13,6 +13,12 @@
     flex-shrink: 0;
 }
 
+@media (max-width: 900px) {
+    .switcher {
+        padding: 10px 12px 12px;
+    }
+}
+
 .switchBtn {
     display: flex;
     align-items: center;
@@ -69,5 +75,6 @@
 .body {
     flex: 1;
     min-height: 0;
+    min-width: 0;
     display: flex;
 }
