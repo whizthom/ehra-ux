@@ -39,7 +39,7 @@ function initials(name) {
     .join("");
 }
 
-export default function MessagesTab({ employees = [] }) {
+export default function MessagesTab({ employees = [], onDetailOpenChange }) {
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
@@ -58,6 +58,12 @@ export default function MessagesTab({ employees = [] }) {
   // screen, so we show one at a time. This flag drives that via a single
   // CSS class rather than duplicating markup for two layouts.
   const showingDetail = Boolean(selected || composing);
+
+  useEffect(() => {
+    onDetailOpenChange?.(showingDetail);
+    return () => onDetailOpenChange?.(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showingDetail]);
 
   const fetchAll = useCallback(async () => {
     try {

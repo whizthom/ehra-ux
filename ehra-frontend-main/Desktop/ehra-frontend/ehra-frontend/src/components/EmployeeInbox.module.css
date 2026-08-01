@@ -1,15 +1,13 @@
-/* ── Layout ── */
+/* ── Layout ──────────────────────────────────────────────────────────────
+   No card here — sits directly on the page background, same as
+   ChatPanel/MessagesTab. position:relative is still needed: it anchors
+   the sliding detail panel overlay on phones (see the 900px block below). */
 .container {
     display: flex;
     height: 100%;
     gap: 0;
-    background: var(--bg-surface);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 1px 4px var(--shadow-color);
-    border: 1px solid var(--border-color);
+    background: transparent;
     position: relative;
-    /* anchors the sliding detail panel on phones */
 }
 
 /* ── List panel (left) ── */
@@ -18,14 +16,13 @@
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid var(--border-color);
-    background: var(--bg-surface-alt);
+    border-right: 0.5px solid var(--border-color);
     min-height: 0;
+    padding: 10px 8px 10px 12px;
 }
 
 .listHeader {
-    padding: 18px 16px 14px;
-    border-bottom: 1px solid var(--border-color);
+    padding: 8px 6px 14px 2px;
     flex-shrink: 0;
 }
 
@@ -70,11 +67,14 @@
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .listItem {
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--border-color);
+    padding: 12px 10px;
+    border-radius: 12px;
     cursor: pointer;
     transition: background 0.12s;
     position: relative;
@@ -114,6 +114,9 @@
 .listItem.active {
     background: var(--bg-soft-accent);
     border-left: 3px solid var(--accent);
+    padding-left: 7px;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
 }
 
 .listItem.unread {
@@ -203,8 +206,8 @@
 }
 
 .skeletonItem {
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--border-color);
+    padding: 12px 10px;
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -429,10 +432,6 @@
    Both panels stay mounted the whole time, so the transition always has
    something real to animate between. */
 @media (max-width: 900px) {
-    .container {
-        border-radius: 10px;
-    }
-
     .listPanel {
         width: 100%;
         border-right: none;
@@ -474,11 +473,11 @@
 /* ── Phone ── */
 @media (max-width: 480px) {
     .listHeader {
-        padding: 14px 14px 12px;
+        padding: 6px 4px 12px 2px;
     }
 
     .listItem {
-        padding: 12px 14px;
+        padding: 11px 8px;
     }
 
     .listItemPreview {

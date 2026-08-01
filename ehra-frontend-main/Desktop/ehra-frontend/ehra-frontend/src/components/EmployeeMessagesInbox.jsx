@@ -49,7 +49,10 @@ function SkeletonRows() {
 // "go back" rather than "changed your mind" and should snap shut again.
 const SWIPE_DISMISS_THRESHOLD = 90;
 
-export default function EmployeeInbox({ onUnreadCountChange }) {
+export default function EmployeeInbox({
+  onUnreadCountChange,
+  onDetailOpenChange,
+}) {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
@@ -58,6 +61,12 @@ export default function EmployeeInbox({ onUnreadCountChange }) {
   // Drives the mobile layout: below the breakpoint, list and detail can't
   // sit side by side, so the detail panel slides over the list instead.
   const showingDetail = Boolean(selected);
+
+  useEffect(() => {
+    onDetailOpenChange?.(showingDetail);
+    return () => onDetailOpenChange?.(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showingDetail]);
 
   // ── Swipe-to-go-back (touch only — mirrors the native "swipe from the
   // left edge" gesture people already know from Mail/Messages apps) ──────

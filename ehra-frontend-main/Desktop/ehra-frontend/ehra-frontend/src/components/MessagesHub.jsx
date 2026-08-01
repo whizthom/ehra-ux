@@ -83,9 +83,15 @@ export default function MessagesHub({
         {section === "chats" ? (
           <ChatPanel viewer={viewer} onThreadOpenChange={onThreadOpenChange} />
         ) : viewer === "admin" ? (
-          <MessagesTab employees={employees} />
+          <MessagesTab
+            employees={employees}
+            onDetailOpenChange={onThreadOpenChange}
+          />
         ) : (
-          <EmployeeInbox onUnreadCountChange={setAnnouncementUnread} />
+          <EmployeeInbox
+            onUnreadCountChange={setAnnouncementUnread}
+            onDetailOpenChange={onThreadOpenChange}
+          />
         )}
       </div>
     </div>
