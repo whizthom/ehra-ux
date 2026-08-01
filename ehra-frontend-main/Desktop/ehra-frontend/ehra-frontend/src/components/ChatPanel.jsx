@@ -85,7 +85,7 @@ function groupByDay(messages) {
   return groups;
 }
 
-export default function ChatPanel({ viewer = "employee" }) {
+export default function ChatPanel({ viewer = "employee", onThreadOpenChange }) {
   const [contacts, setContacts] = useState([]);
   const [loadingContacts, setLoadingContacts] = useState(true);
   const [selected, setSelected] = useState(null); // the contact row object
@@ -153,6 +153,16 @@ export default function ChatPanel({ viewer = "employee" }) {
     if (scrollRef.current)
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
+
+  // Tell the parent page whenever a thread is opened/closed — it decides
+  // what to do with that on mobile (hide its topbar/logo/bottom nav so the
+  // thread reads as a genuine full-screen view, same as most chat apps).
+  useEffect(() => {
+    onThreadOpenChange?.(showingDetail);
+    // Leaving the page mid-thread shouldn't leave chrome permanently hidden.
+    return () => onThreadOpenChange?.(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showingDetail]);
 
   const handleSend = async () => {
     const body = draft.trim();

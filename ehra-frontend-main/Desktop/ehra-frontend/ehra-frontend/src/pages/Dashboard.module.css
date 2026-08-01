@@ -568,6 +568,21 @@
     min-width: 0;
 }
 
+/* Applied to .topbar / .dashboardFooter / .bottomNav while a chat thread
+   is open, so opening a chat on mobile takes over the whole screen —
+   same as any normal chat app — instead of sitting in a panel wedged
+   between a header and a bottom nav. No-op on desktop, where a thread
+   just occupies its usual pane inside the two-column chat layout. */
+.hiddenOnMobileChat {
+    /* intentionally empty above 900px */
+}
+
+@media (max-width: 900px) {
+    .hiddenOnMobileChat {
+        display: none !important;
+    }
+}
+
 /* ── Brand footer — sits at the very end of the scrollable content,
    same spot regardless of which tab is active. margin-top pushes it below
    whatever content precedes it without fighting the .content/.contentFull*
@@ -1329,6 +1344,10 @@
     .contentMessages {
         padding: 0;
         padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .contentMessages.chatFullscreenActive {
+        padding-bottom: env(safe-area-inset-bottom, 0px);
     }
 
     .topbar {

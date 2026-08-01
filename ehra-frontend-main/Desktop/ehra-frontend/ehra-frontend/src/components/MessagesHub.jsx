@@ -15,10 +15,19 @@ import styles from "./MessagesHub.module.css";
  * @param {"admin"|"employee"} viewer
  * @param {array} employees - only used by the admin's Announcements composer
  */
-export default function MessagesHub({ viewer = "employee", employees = [] }) {
+export default function MessagesHub({
+  viewer = "employee",
+  employees = [],
+  onThreadOpenChange,
+}) {
   const [section, setSection] = useState("chats"); // "chats" | "announcements"
   const [chatUnread, setChatUnread] = useState(0);
   const [announcementUnread, setAnnouncementUnread] = useState(0);
+
+  const switchSection = (next) => {
+    if (next !== "chats") onThreadOpenChange?.(false); // leaving Chats always clears full-screen mode
+    setSection(next);
+  };
 
   const refreshChatUnread = useCallback(async () => {
     try {
@@ -50,7 +59,7 @@ export default function MessagesHub({ viewer = "employee", employees = [] }) {
       <div className={styles.switcher}>
         <button
           className={`${styles.switchBtn} ${section === "chats" ? styles.switchActive : ""}`}
-          onClick={() => setSection("chats")}
+          onClick={() => switchSection("chats")}
         >
           <i className="ti ti-message-circle-2" />
           Chats
@@ -60,7 +69,7 @@ export default function MessagesHub({ viewer = "employee", employees = [] }) {
         </button>
         <button
           className={`${styles.switchBtn} ${section === "announcements" ? styles.switchActive : ""}`}
-          onClick={() => setSection("announcements")}
+          onClick={() => switchSection("announcements")}
         >
           <i className="ti ti-speakerphone" />
           Announcements
@@ -72,7 +81,7 @@ export default function MessagesHub({ viewer = "employee", employees = [] }) {
 
       <div className={styles.body}>
         {section === "chats" ? (
-          <ChatPanel viewer={viewer} />
+          <ChatPanel viewer={viewer} onThreadOpenChange={onThreadOpenChange} />
         ) : viewer === "admin" ? (
           <MessagesTab employees={employees} />
         ) : (

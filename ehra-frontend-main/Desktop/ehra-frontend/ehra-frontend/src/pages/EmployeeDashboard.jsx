@@ -206,6 +206,15 @@ export default function Dashboard() {
     location.state?.activeNav || "Dashboard",
   );
 
+  // Set while a Messages > Chats thread is open — used to hide the topbar,
+  // brand footer, and bottom nav on mobile so the thread reads as a real
+  // full-screen view rather than a panel wedged between them.
+  const [chatThreadOpen, setChatThreadOpen] = useState(false);
+  useEffect(() => {
+    if (activeNav !== "Messages" && chatThreadOpen) setChatThreadOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeNav]);
+
   // Summary
   const [summary, setSummary] = useState(null);
   const [loadingSummary, setLoadingSummary] = useState(true);
@@ -783,7 +792,9 @@ export default function Dashboard() {
       {/* ── Main ── */}
       <div className={styles.main}>
         {/* Topbar */}
-        <div className={styles.topbar}>
+        <div
+          className={`${styles.topbar} ${chatThreadOpen ? styles.hiddenOnMobileChat : ""}`}
+        >
           <div className={styles.empTopbarHeading}>
             <h1 className={styles.empGreeting}>
               <i
@@ -1002,15 +1013,16 @@ export default function Dashboard() {
         {/* Content area */}
         <div
           className={
-            activeNav === "Messages" ||
-            activeNav === "Workforce" ||
-            activeNav === "Attendance" ||
-            activeNav === "Leave" ||
-            activeNav === "Cover Requests" ||
-            activeNav === "Departments" ||
-            activeNav === "Notifications"
-              ? styles.contentFull
-              : styles.content
+            activeNav === "Messages"
+              ? `${styles.contentMessages} ${chatThreadOpen ? styles.chatFullscreenActive : ""}`
+              : activeNav === "Workforce" ||
+                  activeNav === "Attendance" ||
+                  activeNav === "Leave" ||
+                  activeNav === "Cover Requests" ||
+                  activeNav === "Departments" ||
+                  activeNav === "Notifications"
+                ? styles.contentFull
+                : styles.content
           }
         >
           {activeNav === "Notifications" ? (
@@ -1031,7 +1043,10 @@ export default function Dashboard() {
             myProfile?.isHod ? (
             <HodWorkforceTab />
           ) : activeNav === "Messages" ? (
-            <MessagesHub viewer="employee" />
+            <MessagesHub
+              viewer="employee"
+              onThreadOpenChange={setChatThreadOpen}
+            />
           ) : activeNav === "Leave" ? (
             <EmployeeLeaveTab isHod={myProfile?.isHod} />
           ) : activeNav === "Cover Requests" ? (
@@ -1456,7 +1471,9 @@ export default function Dashboard() {
           {/* Brand footer — last thing in the scrollable content, same
               spot for every tab. Matches Dashboard.jsx's employer-side
               footer. */}
-          <div className={styles.dashboardFooter}>
+          <div
+            className={`${styles.dashboardFooter} ${chatThreadOpen ? styles.hiddenOnMobileChat : ""}`}
+          >
             <Logo variant="horizontal" size={48} />
           </div>
         </div>
@@ -1466,7 +1483,10 @@ export default function Dashboard() {
           Every destination lives in one horizontally scrollable strip —
           swipe sideways to reach items past the visible edge, same as a
           native app's scrollable tab bar. Hidden entirely on desktop. */}
-      <nav className={styles.bottomNav} aria-label="Primary">
+      <nav
+        className={`${styles.bottomNav} ${chatThreadOpen ? styles.hiddenOnMobileChat : ""}`}
+        aria-label="Primary"
+      >
         <div className={styles.bottomNavScroll} ref={bottomNavScrollRef}>
           {NAV.filter(
             (n) =>
