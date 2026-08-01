@@ -6,6 +6,7 @@ import {
   sendChatMessage,
 } from "../api/chatApi";
 import useMessageStream from "../hooks/useMessageStream";
+import Avatar from "./Avatar";
 import styles from "./ChatPanel.module.css";
 
 function timeAgo(iso) {
@@ -48,16 +49,6 @@ function dayLabel(iso) {
     day: "numeric",
     year: "numeric",
   });
-}
-
-function initials(name) {
-  if (!name) return "?";
-  return name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase())
-    .join("");
 }
 
 function kindLabel(kind) {
@@ -231,10 +222,6 @@ export default function ChatPanel({ viewer = "employee", onThreadOpenChange }) {
     >
       {/* ── Contact list ── */}
       <div className={styles.listPanel}>
-        <div className={styles.listHeader}>
-          <h2 className={styles.listTitle}>Chats</h2>
-        </div>
-
         <div className={styles.list}>
           {loadingContacts ? (
             <p className={styles.emptyText}>Loading conversations…</p>
@@ -250,13 +237,11 @@ export default function ChatPanel({ viewer = "employee", onThreadOpenChange }) {
                 className={`${styles.contactRow} ${selected?.withKey === c.withKey ? styles.active : ""}`}
                 onClick={() => openContact(c)}
               >
-                <div className={styles.avatar}>
-                  {c.avatarUrl ? (
-                    <img src={c.avatarUrl} alt="" />
-                  ) : (
-                    <span>{initials(c.name)}</span>
-                  )}
-                </div>
+                <Avatar
+                  src={c.avatarUrl}
+                  name={c.name}
+                  className={styles.avatar}
+                />
                 <div className={styles.contactMain}>
                   <div className={styles.contactTop}>
                     <span className={styles.contactName}>{c.name}</span>
@@ -294,13 +279,11 @@ export default function ChatPanel({ viewer = "employee", onThreadOpenChange }) {
               <button className={styles.backBtn} onClick={goBack}>
                 <i className="ti ti-arrow-left" />
               </button>
-              <div className={styles.avatar}>
-                {selected.avatarUrl ? (
-                  <img src={selected.avatarUrl} alt="" />
-                ) : (
-                  <span>{initials(selected.name)}</span>
-                )}
-              </div>
+              <Avatar
+                src={selected.avatarUrl}
+                name={selected.name}
+                className={styles.avatar}
+              />
               <div className={styles.threadHeaderInfo}>
                 <span className={styles.threadName}>{selected.name}</span>
                 {kindLabel(selected.kind) && (

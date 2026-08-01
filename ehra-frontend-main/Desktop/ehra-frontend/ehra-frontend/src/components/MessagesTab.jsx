@@ -328,6 +328,7 @@ export default function MessagesTab({ employees = [], onDetailOpenChange }) {
                 <div className={styles.field}>
                   <label>Message</label>
                   <textarea
+                    className={styles.messageInput}
                     rows={8}
                     placeholder="Write your announcement here…"
                     value={body}
