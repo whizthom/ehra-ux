@@ -21,7 +21,7 @@ import BusinessReportModal from "../components/BusinessReportModal";
 import AttendanceSection from "../components/AttendanceSection";
 import QrCodeTab from "../components/QrcodeTab";
 import WorkforceTab from "../components/WorkforceTab";
-import MessagesTab from "../components/MessagesTab";
+import MessagesHub from "../components/MessagesHub";
 import LeavesTab from "../components/LeavesTab";
 import DepartmentsTab from "../components/DepartmentsTab";
 import ProfileEditApprovalPanel from "../components/ProfileEditApprovalPanel";
@@ -1419,7 +1419,7 @@ export default function Dashboard() {
           ) : activeNav === "Workforce" ? (
             <WorkforceTab departments={departments} />
           ) : activeNav === "Messages" ? (
-            <MessagesTab employees={employees} />
+            <MessagesHub viewer="admin" employees={employees} />
           ) : activeNav === "Leave" ? (
             <LeavesTab />
           ) : activeNav === "Attendance" ? (

@@ -22,7 +22,7 @@ import {
 // "Departments" reuses HodWorkforceTab, same as "Workforce" — both are
 // scoped to the HOD's own department via GET /employees/my-department.
 import HodWorkforceTab from "../components/Hodworkforcetab";
-import EmployeeInbox from "../components/EmployeeMessagesInbox";
+import MessagesHub from "../components/MessagesHub";
 import EmployeeLeaveTab from "../components/EmployeeLeaveTab";
 import EmployeeAttendanceTab from "../components/EmployeeAttendanceTab";
 import EmployeePenaltyTab from "../components/EmployeePenaltyTab";
@@ -1031,7 +1031,7 @@ export default function Dashboard() {
             myProfile?.isHod ? (
             <HodWorkforceTab />
           ) : activeNav === "Messages" ? (
-            <EmployeeInbox onUnreadCountChange={() => {}} />
+            <MessagesHub viewer="employee" />
           ) : activeNav === "Leave" ? (
             <EmployeeLeaveTab isHod={myProfile?.isHod} />
           ) : activeNav === "Cover Requests" ? (

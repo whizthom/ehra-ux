@@ -15,10 +15,12 @@ import { getAccessToken, API_BASE_URL } from "../api/authApi";
  *     in it (requester, cover person, HOD, or employer). Fires alongside
  *     onNewNotification, not instead of it — useful for patching a leave
  *     already on screen without waiting on a re-fetch.
+ *   - onNewChatMessage(payload)  — a new 1:1 chat ChatMessageDTO arrived
+ *   - onChatRead(payload)        — the other side of an open chat thread just read it ({conversationId})
  * @param {boolean} enabled       — set false to skip opening the connection
  */
 export default function useMessageStream(
-  { onNewMessage, onReadUpdate, onNewNotification, onLeaveUpdate } = {},
+  { onNewMessage, onReadUpdate, onNewNotification, onLeaveUpdate, onNewChatMessage, onChatRead } = {},
   enabled = true
 ) {
   useEffect(() => {
@@ -58,6 +60,18 @@ export default function useMessageStream(
     if (onLeaveUpdate) {
       es.addEventListener("leave_update", (e) => {
         try { onLeaveUpdate(JSON.parse(e.data)); } catch { /* ignore */ }
+      });
+    }
+
+    if (onNewChatMessage) {
+      es.addEventListener("new_chat_message", (e) => {
+        try { onNewChatMessage(JSON.parse(e.data)); } catch { /* ignore */ }
+      });
+    }
+
+    if (onChatRead) {
+      es.addEventListener("chat_read", (e) => {
+        try { onChatRead(JSON.parse(e.data)); } catch { /* ignore */ }
       });
     }
 
