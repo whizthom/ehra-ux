@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import styles from "./UpdateToast.module.css";
 
@@ -34,9 +35,45 @@ export default function UpdateToast() {
     },
   });
 
+  const [reloading, setReloading] = useState(false);
+  const fallbackTimer = useRef(null);
+
   const close = () => {
     setOfflineReady(false);
     setNeedRefresh(false);
+  };
+
+  // `updateServiceWorker(true)` is *supposed* to post a skip-waiting
+  // message to the new worker and reload once it takes over — but that
+  // whole handoff depends on `registration.waiting` still pointing at a
+  // real worker at the moment of the call. In practice that reference
+  // can go stale between the toast appearing and the click (another tab
+  // closing, a second update check completing in the background, etc.),
+  // in which case the library's internal call quietly does nothing —
+  // no error, no reload, just a button that looks broken.
+  //
+  // Rather than trying to prove that can't happen, we make the button
+  // reload unconditionally: try the clean handoff, but also arm a plain
+  // `window.location.reload()` as a fallback timer. If the clean path
+  // works, the page navigates away and this component (along with the
+  // pending timer) is torn down before the fallback ever fires. If the
+  // clean path silently no-ops, the fallback fires a moment later and
+  // the user still gets a reload — worse case is one slightly-delayed
+  // reload instead of a dead button.
+  const handleReload = () => {
+    if (reloading) return;
+    setReloading(true);
+
+    fallbackTimer.current = setTimeout(() => {
+      window.location.reload();
+    }, 1500);
+
+    Promise.resolve(updateServiceWorker(true)).catch(() => {
+      // If the library call itself rejects, don't wait out the full
+      // fallback delay — reload right away instead.
+      clearTimeout(fallbackTimer.current);
+      window.location.reload();
+    });
   };
 
   if (!offlineReady && !needRefresh) return null;
@@ -58,15 +95,21 @@ export default function UpdateToast() {
       <div className={styles.actions}>
         {needRefresh ? (
           <>
-            <button type="button" className={styles.later} onClick={close}>
+            <button
+              type="button"
+              className={styles.later}
+              onClick={close}
+              disabled={reloading}
+            >
               Later
             </button>
             <button
               type="button"
               className={styles.reload}
-              onClick={() => updateServiceWorker(true)}
+              onClick={handleReload}
+              disabled={reloading}
             >
-              Reload now
+              {reloading ? "Reloading…" : "Reload now"}
             </button>
           </>
         ) : (
