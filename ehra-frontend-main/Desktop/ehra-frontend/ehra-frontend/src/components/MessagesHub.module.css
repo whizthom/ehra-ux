@@ -17,6 +17,10 @@
     .switcher {
         padding: 10px 12px 12px;
     }
+
+    .hiddenOnMobileDetail {
+        display: none;
+    }
 }
 
 .switchBtn {

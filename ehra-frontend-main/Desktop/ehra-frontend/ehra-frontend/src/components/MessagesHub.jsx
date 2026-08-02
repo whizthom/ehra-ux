@@ -23,9 +23,18 @@ export default function MessagesHub({
   const [section, setSection] = useState("chats"); // "chats" | "announcements"
   const [chatUnread, setChatUnread] = useState(0);
   const [announcementUnread, setAnnouncementUnread] = useState(0);
+  // Mirrors onThreadOpenChange locally so the switcher pills themselves can
+  // hide on mobile too — otherwise a "full-screen" thread/message still had
+  // this row floating above it, eating into the screen it just claimed.
+  const [detailOpen, setDetailOpen] = useState(false);
+
+  const handleDetailOpenChange = (open) => {
+    setDetailOpen(open);
+    onThreadOpenChange?.(open);
+  };
 
   const switchSection = (next) => {
-    if (next !== "chats") onThreadOpenChange?.(false); // leaving Chats always clears full-screen mode
+    if (next !== "chats") handleDetailOpenChange(false); // leaving Chats always clears full-screen mode
     setSection(next);
   };
 
@@ -56,7 +65,9 @@ export default function MessagesHub({
 
   return (
     <div className={styles.container}>
-      <div className={styles.switcher}>
+      <div
+        className={`${styles.switcher} ${detailOpen ? styles.hiddenOnMobileDetail : ""}`}
+      >
         <button
           className={`${styles.switchBtn} ${section === "chats" ? styles.switchActive : ""}`}
           onClick={() => switchSection("chats")}
@@ -81,16 +92,19 @@ export default function MessagesHub({
 
       <div className={styles.body}>
         {section === "chats" ? (
-          <ChatPanel viewer={viewer} onThreadOpenChange={onThreadOpenChange} />
+          <ChatPanel
+            viewer={viewer}
+            onThreadOpenChange={handleDetailOpenChange}
+          />
         ) : viewer === "admin" ? (
           <MessagesTab
             employees={employees}
-            onDetailOpenChange={onThreadOpenChange}
+            onDetailOpenChange={handleDetailOpenChange}
           />
         ) : (
           <EmployeeInbox
             onUnreadCountChange={setAnnouncementUnread}
-            onDetailOpenChange={onThreadOpenChange}
+            onDetailOpenChange={handleDetailOpenChange}
           />
         )}
       </div>

@@ -27,6 +27,16 @@ function formatDate(iso) {
   });
 }
 
+function senderInitials(name) {
+  if (!name) return "?";
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase())
+    .join("");
+}
+
 // Placeholder rows shown while the first fetch is in flight — a shimmering
 // approximation of real list items reads as "this is already loading" far
 // faster than a static "Loading…" line, which is most of what "responsive"
@@ -235,25 +245,31 @@ export default function EmployeeInbox({
                 </span>
               )}
             </div>
-            <div className={styles.detailMeta}>
-              <span>
-                <i className="ti ti-user-circle" /> From {selected.senderName}
-              </span>
-              <span>
-                <i className="ti ti-calendar" />{" "}
-                {formatDate(selected.createdAt)}
-              </span>
-              {selected.broadcast && (
-                <span className={styles.broadcastTag}>
-                  <i className="ti ti-speakerphone" /> Sent to all employees
+
+            <div className={styles.senderRow}>
+              <div className={styles.senderAvatar}>
+                {senderInitials(selected.senderName)}
+              </div>
+              <div className={styles.senderInfo}>
+                <span className={styles.senderName}>{selected.senderName}</span>
+                <span className={styles.senderDate}>
+                  {formatDate(selected.createdAt)}
                 </span>
-              )}
+              </div>
               {selected.readByMe && (
                 <span className={styles.readTag}>
                   <i className="ti ti-check" /> Read
                 </span>
               )}
             </div>
+
+            {selected.broadcast && (
+              <div className={styles.detailMeta}>
+                <span className={styles.broadcastTag}>
+                  <i className="ti ti-speakerphone" /> Sent to all employees
+                </span>
+              </div>
+            )}
 
             <div className={styles.detailBody}>{selected.body}</div>
           </div>

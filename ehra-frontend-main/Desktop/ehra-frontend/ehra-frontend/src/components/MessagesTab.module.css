@@ -826,6 +826,16 @@
         display: inline;
     }
 
+    .detailHeader {
+        position: sticky;
+        top: -16px;
+        z-index: 1;
+        background: var(--bg-surface);
+        margin: -16px -16px 16px;
+        padding: 16px 16px 12px;
+        border-bottom: 0.5px solid var(--border-color);
+    }
+
     .composeBtnLabel {
         display: none;
     }
