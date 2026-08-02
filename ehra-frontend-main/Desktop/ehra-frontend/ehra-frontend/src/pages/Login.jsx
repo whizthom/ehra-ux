@@ -3,7 +3,11 @@ import { useLocation, useNavigate } from "react-router-dom";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import { useAuth } from "../context/AuthContext";
-import { sendPhoneOtp, confirmPhoneOtp, resetRecaptcha } from "../firebase";
+import {
+  sendPhoneOtp,
+  confirmPhoneOtp,
+  resetRecaptcha,
+} from "../firebase-lazy";
 import { verifyTwoFactorLogin } from "../api/phoneAuthApi";
 import styles from "./Login.module.css";
 import phoneStyles from "./PhoneAuth.module.css";

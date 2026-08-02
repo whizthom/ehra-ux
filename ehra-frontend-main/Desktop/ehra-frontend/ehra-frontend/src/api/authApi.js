@@ -1,4 +1,5 @@
 import axios from "axios";
+import { clearApiCache } from "../pwa/clearApiCache";
 
 // In dev, "/api" is handled by the Vite proxy (see vite.config.js), which
 // forwards to http://localhost:8080. In a production deploy (e.g. Render),
@@ -124,6 +125,13 @@ export const clearTokens = () => {
   // still has them from before this rebuild.
   localStorage.removeItem("userEmail");
   localStorage.removeItem("userRole");
+
+  // Best-effort, fire-and-forget — see clearApiCache's own comment for
+  // why this matters on a shared device. Not awaited: clearTokens() is
+  // called synchronously from several places (including an axios
+  // interceptor) that don't expect a promise back, and there's nothing
+  // useful to do if this fails other than proceed with the logout.
+  clearApiCache();
 };
 
 // Cross-tab sync: the `storage` event fires in every OTHER tab (never the

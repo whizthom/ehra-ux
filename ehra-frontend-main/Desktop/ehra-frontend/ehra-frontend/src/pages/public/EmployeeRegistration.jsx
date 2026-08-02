@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
 import "react-phone-number-input/style.css";
-import { sendPhoneOtp, confirmPhoneOtp, resetRecaptcha } from "../../firebase";
+import {
+  sendPhoneOtp,
+  confirmPhoneOtp,
+  resetRecaptcha,
+} from "../../firebase-lazy";
 import { checkPhone } from "../../api/phoneAuthApi";
 import { registerInvitedEmployee } from "../../api/invitationApi";
 import styles from "./EmployeeRegistration.module.css";
