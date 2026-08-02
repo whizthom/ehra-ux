@@ -20,8 +20,30 @@
 
   <!-- PWA -->
   <link rel="manifest" href="/manifest.webmanifest" />
-  <meta name="theme-color" content="#0b141a" />
-  <meta name="background-color" content="#0b141a" />
+  <meta name="theme-color" content="#f0f4f3" />
+  <meta name="background-color" content="#f0f4f3" />
+
+  <!-- Sets the theme-color meta tag (and documentElement[data-theme])
+       to match a saved theme preference BEFORE the page paints, so
+       someone using dark mode doesn't see a flash of the light status
+       bar color while React is still loading. src/theme/ThemeColorSync.jsx
+       takes over from here for every toggle after first load. Reads the
+       same localStorage key ThemeContext.jsx does — keep these in sync
+       if that key or the color values in theme.css ever change. -->
+  <script>
+    (function () {
+      try {
+        var theme = localStorage.getItem("ehra-theme");
+        if (theme !== "dark") theme = "light";
+        document.documentElement.setAttribute("data-theme", theme);
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute("content", theme === "dark" ? "#0b141a" : "#f0f4f3");
+      } catch (e) {
+        // localStorage unavailable (private browsing edge cases, etc.) —
+        // falls back to the light defaults already in the tags above.
+      }
+    })();
+  </script>
 
   <!-- Standalone/home-screen behavior on iOS (Android reads this from
        the manifest above instead). apple-mobile-web-app-title keeps the

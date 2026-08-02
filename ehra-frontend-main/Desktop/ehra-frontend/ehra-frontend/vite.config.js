@@ -5,17 +5,6 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // https://vite.dev/config/
 export default defineConfig({
-  build: {
-    rollupOptions: {
-      // fsevents is a macOS-only native dependency (pulled in transitively
-      // via rollup/chokidar's file watcher) that's simply never installed
-      // on Linux — npm skips it there by design. Rolldown's resolver
-      // errors on that instead of the graceful runtime no-op Rollup used
-      // to do, so it has to be told explicitly not to bundle it.
-      external: ["fsevents"],
-    },
-  },
-
   plugins: [
     react(),
     basicSsl(),
@@ -42,8 +31,8 @@ export default defineConfig({
         short_name: "Ehral",
         description:
           "Ehral — workforce, attendance and business management, in your pocket.",
-        theme_color: "#0b141a",
-        background_color: "#0b141a",
+        theme_color: "#f0f4f3",
+        background_color: "#f0f4f3",
         display: "standalone",
         display_override: ["standalone", "minimal-ui"],
         orientation: "portrait",
@@ -63,12 +52,6 @@ export default defineConfig({
       },
 
       workbox: {
-        // Default cap is 2 MiB; a couple of this app's vendor chunks
-        // (PDF/canvas tooling) run larger than that. Precaching them is
-        // still worth it for offline support, so raise the ceiling
-        // instead of excluding them.
-        maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
-
         // App-shell fallback: any navigation that isn't precached (e.g. a
         // deep link opened while offline, on a device that has never
         // fetched that exact route) resolves to the cached index.html so

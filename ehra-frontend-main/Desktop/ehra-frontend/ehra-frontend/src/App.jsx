@@ -10,6 +10,7 @@ import RouteLoading from "./components/RouteLoading";
 import InstallPrompt from "./pwa/InstallPrompt";
 import UpdateToast from "./pwa/UpdateToast";
 import OfflineBanner from "./pwa/OfflineBanner";
+import ThemeColorSync from "./theme/ThemeColorSync";
 
 // Auth/public entry pages stay eagerly bundled — one of these is always
 // the very first thing an unauthenticated visitor paints, so splitting
@@ -44,6 +45,7 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <ScrollRestoration />
+        <ThemeColorSync />
         <OfflineBanner />
         <UpdateToast />
 
