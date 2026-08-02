@@ -23,6 +23,7 @@ export default defineConfig({
         "favicon.svg",
         "apple-touch-icon.png",
         "icons/*.png",
+        "splash/*.png",
       ],
 
       manifest: {
