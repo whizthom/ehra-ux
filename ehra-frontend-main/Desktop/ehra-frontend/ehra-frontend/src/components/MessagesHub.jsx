@@ -97,10 +97,7 @@ export default function MessagesHub({
             onThreadOpenChange={handleDetailOpenChange}
           />
         ) : viewer === "admin" ? (
-          <MessagesTab
-            employees={employees}
-            onDetailOpenChange={handleDetailOpenChange}
-          />
+          <MessagesTab onDetailOpenChange={handleDetailOpenChange} />
         ) : (
           <EmployeeInbox
             onUnreadCountChange={setAnnouncementUnread}

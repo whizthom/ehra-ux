@@ -5,6 +5,7 @@ import {
   deleteAnnouncement,
 } from "../api/notificationApi";
 import useMessageStream from "../hooks/useMessageStream";
+import Dropdown from "./Dropdown";
 import styles from "./MessagesTab.module.css";
 
 function timeAgo(iso) {
@@ -29,6 +30,11 @@ function formatDate(iso) {
   });
 }
 
+function audienceLabel(a) {
+  if (!a.broadcast) return a.recipientName; // legacy single-recipient row
+  return a.target === "HODS_ONLY" ? "All HODs" : "All active employees";
+}
+
 function initials(name) {
   if (!name) return "?";
   return name
@@ -39,7 +45,7 @@ function initials(name) {
     .join("");
 }
 
-export default function MessagesTab({ employees = [], onDetailOpenChange }) {
+export default function MessagesTab({ onDetailOpenChange }) {
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
@@ -47,7 +53,7 @@ export default function MessagesTab({ employees = [], onDetailOpenChange }) {
 
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
-  const [recipientId, setRecipientId] = useState("all");
+  const [target, setTarget] = useState("ALL"); // "ALL" | "HODS_ONLY"
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState("");
   const [sendSuccess, setSendSuccess] = useState(false);
@@ -147,8 +153,7 @@ export default function MessagesTab({ employees = [], onDetailOpenChange }) {
       await sendAnnouncement({
         subject: subject.trim(),
         body: body.trim(),
-        recipientEmployeeId:
-          recipientId === "all" ? undefined : Number(recipientId),
+        target,
       });
       setSendSuccess(true);
       await fetchAll();
@@ -166,7 +171,7 @@ export default function MessagesTab({ employees = [], onDetailOpenChange }) {
   const resetCompose = () => {
     setSubject("");
     setBody("");
-    setRecipientId("all");
+    setTarget("ALL");
     setSendError("");
     setSendSuccess(false);
     setComposing(false);
@@ -240,7 +245,10 @@ export default function MessagesTab({ employees = [], onDetailOpenChange }) {
                   <div className={styles.listItemMeta}>
                     {a.broadcast ? (
                       <span className={styles.tagBroadcast}>
-                        <i className="ti ti-speakerphone" /> All employees
+                        <i
+                          className={`ti ${a.target === "HODS_ONLY" ? "ti-shield-star" : "ti-speakerphone"}`}
+                        />{" "}
+                        {audienceLabel(a)}
                       </span>
                     ) : (
                       <span className={styles.tagDirect}>
@@ -305,20 +313,24 @@ export default function MessagesTab({ employees = [], onDetailOpenChange }) {
                 )}
                 <div className={styles.field}>
                   <label>To</label>
-                  <select
-                    value={recipientId}
-                    onChange={(e) => setRecipientId(e.target.value)}
-                  >
-                    <option value="all">All active employees</option>
-                    {employees
-                      .filter((e) => e.status === "ACTIVE")
-                      .map((e) => (
-                        <option key={e.id} value={e.id}>
-                          {[e.firstName, e.lastName].filter(Boolean).join(" ")}{" "}
-                          — {e.email}
-                        </option>
-                      ))}
-                  </select>
+                  <Dropdown
+                    value={target}
+                    onChange={setTarget}
+                    options={[
+                      {
+                        value: "ALL",
+                        label: "All active employees",
+                        description: "Everyone, including HODs",
+                        icon: "ti-users",
+                      },
+                      {
+                        value: "HODS_ONLY",
+                        label: "All HODs",
+                        description: "Only Heads of Department, all at once",
+                        icon: "ti-shield-star",
+                      },
+                    ]}
+                  />
                 </div>
                 <div className={styles.field}>
                   <label>Subject</label>
@@ -380,11 +392,7 @@ export default function MessagesTab({ employees = [], onDetailOpenChange }) {
               </div>
               <div className={styles.metaRow}>
                 <span className={styles.metaLabel}>To</span>
-                <span>
-                  {selected.broadcast
-                    ? "All active employees"
-                    : selected.recipientName}
-                </span>
+                <span>{audienceLabel(selected)}</span>
               </div>
               <div className={styles.metaRow}>
                 <span className={styles.metaLabel}>Read receipts</span>
@@ -512,7 +520,15 @@ export default function MessagesTab({ employees = [], onDetailOpenChange }) {
             </div>
             <h4 className={styles.confirmTitle}>Delete this message?</h4>
             <p className={styles.confirmText}>
-              This message will be permanently removed from all employees'
+              This message will be permanently removed from{" "}
+              {(() => {
+                const target = announcements.find(
+                  (a) => a.id === deleteConfirm,
+                )?.target;
+                return target === "HODS_ONLY"
+                  ? "every HOD's"
+                  : "all employees'";
+              })()}{" "}
               inboxes immediately. This cannot be undone.
             </p>
             <div className={styles.confirmActions}>
