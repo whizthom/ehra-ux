@@ -71,11 +71,6 @@
     color: var(--text-primary);
 }
 
-.empEmail {
-    font-size: 11px;
-    color: var(--text-secondary);
-}
-
 .muted {
     color: var(--text-secondary);
 }

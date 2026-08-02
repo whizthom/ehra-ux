@@ -95,7 +95,6 @@ export default function AttendanceTable({
                       <div className={styles.empName}>
                         {r.employeeFirstName} {r.employeeLastName}
                       </div>
-                      <div className={styles.empEmail}>{r.employeeEmail}</div>
                     </div>
                   </div>
                 </td>
