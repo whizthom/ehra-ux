@@ -133,7 +133,20 @@ export default defineConfig({
       // Marking the package external stops Rolldown from ever
       // traversing into it — correct, since this code path is never
       // actually invoked at runtime.
-      external: [/^@vite-pwa\/assets-generator/],
+      // vite-plugin-pwa's own dist/index.js does
+      // `import("./generator-XXXX.js")` — a RELATIVE path — to reach its
+      // optional assets-generator integration (see comment above). A
+      // package-name-based external (e.g. matching "@vite-pwa/assets-
+      // generator") only catches that generator file's OWN imports, not
+      // the relative import that pulls the file itself in — so
+      // generator.js (and everything reachable only through it: a
+      // config loader, postcss, image/cert tooling) was still ending up
+      // bundled. Matching on the resolved id instead of the specifier
+      // string catches the file itself, cutting off the whole subtree
+      // at its one entry point.
+      external: (id) =>
+        id.includes("@vite-pwa/assets-generator") ||
+        /vite-plugin-pwa[\\/]dist[\\/]generator/.test(id),
     },
   },
 
