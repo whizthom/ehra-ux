@@ -1,151 +1,177 @@
-import { useEffect, useRef, useState } from "react";
-import { useRegisterSW } from "virtual:pwa-register/react";
-import styles from "./UpdateToast.module.css";
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import basicSsl from "@vitejs/plugin-basic-ssl";
+import { VitePWA } from "vite-plugin-pwa";
 
-/**
- * Registers the service worker and surfaces two states the rest of the
- * app never has to think about:
- *
- * - `offlineReady`: first install finished precaching — everything works
- *   offline from here on. Shown once, briefly, then dismissed.
- * - `needRefresh`: a NEW service worker has finished installing (i.e. a
- *   new deployment exists) and is waiting to take over. We deliberately
- *   do NOT auto-activate it (registerType: "prompt" in vite.config.js) —
- *   silently swapping the app under someone's fingers mid-form is worse
- *   than asking.
- *
- * IMPORTANT if you're testing this after deploying a fix to THIS file:
- * the tab you're testing in is still running whatever JS was active
- * before the deploy. A new sw.js gets detected and installed in the
- * background regardless, but it sits "waiting" and the OLD code (with
- * whatever bug it had) is what actually runs when you click the button
- * in that already-open tab — the fix can't apply to itself. Hard-refresh
- * (Ctrl/Cmd+Shift+R) or close and reopen the tab once after deploying a
- * change here, THEN test the button, so you're actually exercising the
- * new code and not the code this deploy was meant to replace.
- */
-export default function UpdateToast() {
-  const registrationRef = useRef(null);
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [
+    react(),
+    basicSsl(),
 
-  const {
-    offlineReady: [offlineReady, setOfflineReady],
-    needRefresh: [needRefresh, setNeedRefresh],
-  } = useRegisterSW({
-    onRegisteredSW(_url, registration) {
-      registrationRef.current = registration || null;
-      // Poll for a new deployment periodically — service workers only
-      // check for updates on navigation by default, which is too rare
-      // for a long-lived, rarely-refreshed dashboard tab.
-      if (!registration) return;
-      setInterval(
-        () => {
-          registration.update().catch(() => {});
-        },
-        60 * 60 * 1000,
-      ); // hourly is plenty; avoids hammering the CDN
+    // ── PWA (manifest + service worker) ─────────────────────────────────
+    //
+    // registerType: "prompt" — we own the "a new version is available"
+    // UI ourselves (see src/pwa/UpdateToast.jsx) instead of silently
+    // auto-reloading underneath someone mid-form. The service worker is
+    // registered from src/main.jsx via `virtual:pwa-register/react`.
+    VitePWA({
+      registerType: "prompt",
+      injectRegister: false, // we call registerSW ourselves (see main.jsx)
+      includeAssets: [
+        "favicon.ico",
+        "favicon.svg",
+        "apple-touch-icon.png",
+        "icons/*.png",
+      ],
+
+      manifest: {
+        id: "/",
+        name: "Ehral",
+        short_name: "Ehral",
+        description:
+          "Ehral — workforce, attendance and business management, in your pocket.",
+        theme_color: "#0b141a",
+        background_color: "#0b141a",
+        display: "standalone",
+        display_override: ["standalone", "minimal-ui"],
+        orientation: "portrait",
+        start_url: "/",
+        scope: "/",
+        icons: [
+          {
+            src: "icons/icon-72x72.png",
+            sizes: "72x72",
+            type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "icons/icon-96x96.png",
+            sizes: "96x96",
+            type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "icons/icon-128x128.png",
+            sizes: "128x128",
+            type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "icons/icon-144x144.png",
+            sizes: "144x144",
+            type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "icons/icon-152x152.png",
+            sizes: "152x152",
+            type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "icons/icon-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "icons/icon-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "icons/maskable-icon-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "maskable",
+          },
+          {
+            src: "icons/maskable-icon-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable",
+          },
+        ],
+      },
+
+      workbox: {
+        // App-shell fallback: any navigation that isn't precached (e.g. a
+        // deep link opened while offline, on a device that has never
+        // fetched that exact route) resolves to the cached index.html so
+        // React Router can still render it client-side, instead of the
+        // browser's own "no internet" page. See offline.html for the one
+        // case this can't cover (nothing has ever been cached at all).
+        navigateFallback: "/index.html",
+        navigateFallbackDenylist: [/^\/api\//],
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: false, // we prompt instead — see registerType above
+
+        runtimeCaching: [
+          // Google Fonts stylesheet
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: "StaleWhileRevalidate",
+            options: { cacheName: "google-fonts-stylesheets" },
+          },
+          // Google Fonts + Tabler icon font files
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "google-fonts-webfonts",
+              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/.*/i,
+            handler: "StaleWhileRevalidate",
+            options: { cacheName: "tabler-icons-cdn" },
+          },
+          // Read-only GET calls to the backend — lets recently visited
+          // pages (dashboard lists, profile, etc.) still render offline
+          // with last-known data. Never touches non-GET requests, so
+          // clock-ins, form submits, etc. are untouched and simply fail
+          // fast (as they always did) when offline.
+          {
+            urlPattern: ({ url, request }) =>
+              request.method === "GET" && url.pathname.startsWith("/api/"),
+            handler: "NetworkFirst",
+            method: "GET",
+            options: {
+              cacheName: "api-get-cache",
+              networkTimeoutSeconds: 8,
+              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
+      },
+
+      devOptions: {
+        // Service worker is disabled in `vite dev` by default; flip this
+        // on locally (and use `npm run build && npm run preview`, which
+        // is the more accurate way to test PWA behavior anyway) if you
+        // need to debug the worker itself.
+        enabled: false,
+        type: "module",
+      },
+    }),
+  ],
+
+  server: {
+    https: true,
+    host: "0.0.0.0",
+    strictPort: false,
+
+    proxy: {
+      "/api": {
+        target: "http://localhost:8080",
+        changeOrigin: true,
+      },
     },
-  });
-
-  const [reloading, setReloading] = useState(false);
-  const fallbackTimer = useRef(null);
-  const reloadedRef = useRef(false);
-
-  const doReload = () => {
-    if (reloadedRef.current) return;
-    reloadedRef.current = true;
-    clearTimeout(fallbackTimer.current);
-    window.location.reload();
-  };
-
-  // Listen for the browser's own signal that a new worker has taken
-  // control, rather than trusting a third-party helper's internal
-  // bookkeeping to still be valid by the time it fires. This is the
-  // same event the spec defines for exactly this purpose.
-  useEffect(() => {
-    if (!("serviceWorker" in navigator)) return;
-    navigator.serviceWorker.addEventListener("controllerchange", doReload);
-    return () =>
-      navigator.serviceWorker.removeEventListener("controllerchange", doReload);
-  }, []);
-
-  const close = () => {
-    setOfflineReady(false);
-    setNeedRefresh(false);
-  };
-
-  // Drives the handoff directly against the raw Service Worker API
-  // instead of going through vite-plugin-pwa's updateServiceWorker()
-  // helper — that helper's reload path depends on `registration.waiting`
-  // still pointing at a real worker AND on its own controllerchange
-  // listener still being attached by the time this fires; either one
-  // going stale between the toast appearing and the click makes it a
-  // silent no-op with no error. Doing it ourselves means there's no
-  // hidden step we can't see or account for:
-  //
-  //   1. If a waiting worker exists, tell it to activate.
-  //   2. The controllerchange listener above reloads once that
-  //      activation actually happens.
-  //   3. Regardless of either of those, force a reload after 1.5s no
-  //      matter what — the worst case is one slightly-delayed reload
-  //      instead of a button that does nothing.
-  const handleReload = async () => {
-    if (reloading) return;
-    setReloading(true);
-    fallbackTimer.current = setTimeout(doReload, 1500);
-
-    try {
-      let registration = registrationRef.current;
-      if (!registration && "serviceWorker" in navigator) {
-        registration = await navigator.serviceWorker.getRegistration();
-      }
-      registration?.waiting?.postMessage({ type: "SKIP_WAITING" });
-    } catch {
-      // Fall through to the timer below regardless.
-    }
-  };
-
-  if (!offlineReady && !needRefresh) return null;
-
-  return (
-    <div className={styles.toast} role="status">
-      <div className={styles.body}>
-        <p className={styles.title}>
-          {needRefresh
-            ? "A new version of Ehral is available."
-            : "Ehral is ready to work offline."}
-        </p>
-        {needRefresh && (
-          <p className={styles.subtitle}>
-            Reload to get the latest features and fixes.
-          </p>
-        )}
-      </div>
-      <div className={styles.actions}>
-        {needRefresh ? (
-          <>
-            <button
-              type="button"
-              className={styles.later}
-              onClick={close}
-              disabled={reloading}
-            >
-              Later
-            </button>
-            <button
-              type="button"
-              className={styles.reload}
-              onClick={handleReload}
-              disabled={reloading}
-            >
-              {reloading ? "Reloading…" : "Reload now"}
-            </button>
-          </>
-        ) : (
-          <button type="button" className={styles.later} onClick={close}>
-            Got it
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
+  },
+});
