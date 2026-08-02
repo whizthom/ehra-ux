@@ -2162,7 +2162,6 @@ export default function Dashboard() {
       <QuickSendMessageModal
         open={sendMsgOpen}
         onClose={() => setSendMsgOpen(false)}
-        employees={employees}
       />
 
       <BusinessReportModal

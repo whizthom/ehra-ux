@@ -398,12 +398,14 @@ export default function WorkforceTab({ departments }) {
         onConfirm={handleSoftDelete}
       />
 
-      {/* ── Personal message modal (mobile shortcut from the avatar) ── */}
+      {/* ── Personal message modal (mobile shortcut from the avatar) ──
+          Locked to this one employee — for official personal messages
+          (promotion, suspension, etc.), distinct from the broadcast
+          composer in Quick Actions / the Announcements tab. */}
       <QuickSendMessageModal
         open={!!messageTarget}
         onClose={() => setMessageTarget(null)}
-        employees={employees}
-        initialRecipientId={messageTarget?.id}
+        initialRecipient={messageTarget}
       />
     </div>
   );

@@ -5,39 +5,37 @@ import styles from "./QuickSendMessageModal.module.css";
 export default function QuickSendMessageModal({
   open,
   onClose,
-  employees = [],
-  initialRecipientId = null, // when set, opens pre-targeted at this employee
+  initialRecipient = null, // {id, firstName, lastName} — when set, locks this message to just them
 }) {
-  const [recipientId, setRecipientId] = useState("all");
+  const [target, setTarget] = useState("ALL"); // "ALL" | "HODS_ONLY" — irrelevant when initialRecipient is set
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  // Fresh form every time the modal opens — and if it was opened from a
-  // specific employee's "message" shortcut (e.g. Workforce grid card),
-  // pre-select them instead of defaulting to "all".
+  const recipientName = initialRecipient
+    ? [initialRecipient.firstName, initialRecipient.lastName]
+        .filter(Boolean)
+        .join(" ")
+    : null;
+
+  // Fresh form every time the modal opens.
   useEffect(() => {
     if (open) {
-      setRecipientId(
-        initialRecipientId != null ? String(initialRecipientId) : "all",
-      );
+      setTarget("ALL");
       setSubject("");
       setBody("");
       setError("");
       setSuccess(false);
       setSending(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, initialRecipientId]);
+  }, [open]);
 
   if (!open) return null;
 
-  const activeEmployees = employees.filter((e) => e.status === "ACTIVE");
-
   const reset = () => {
-    setRecipientId("all");
+    setTarget("ALL");
     setSubject("");
     setBody("");
     setError("");
@@ -65,8 +63,9 @@ export default function QuickSendMessageModal({
       await sendAnnouncement({
         subject: subject.trim(),
         body: body.trim(),
-        recipientEmployeeId:
-          recipientId === "all" ? undefined : Number(recipientId),
+        ...(initialRecipient
+          ? { target: "INDIVIDUAL", recipientEmployeeId: initialRecipient.id }
+          : { target }),
       });
       setSuccess(true);
     } catch (err) {
@@ -92,7 +91,9 @@ export default function QuickSendMessageModal({
             <div>
               <h3 className={styles.headerTitle}>Send Message</h3>
               <p className={styles.headerSub}>
-                Broadcast or send to an individual
+                {recipientName
+                  ? `Personal message to ${recipientName}`
+                  : "Broadcast to everyone, or just HODs"}
               </p>
             </div>
           </div>
@@ -110,24 +111,11 @@ export default function QuickSendMessageModal({
               </div>
               <p className={styles.successTitle}>Message sent!</p>
               <p className={styles.successSub}>
-                {recipientId === "all"
-                  ? "Your message has been delivered to all active employees."
-                  : `Your message has been delivered to ${
-                      activeEmployees.find(
-                        (e) => String(e.id) === String(recipientId),
-                      )
-                        ? [
-                            activeEmployees.find(
-                              (e) => String(e.id) === String(recipientId),
-                            ).firstName,
-                            activeEmployees.find(
-                              (e) => String(e.id) === String(recipientId),
-                            ).lastName,
-                          ]
-                            .filter(Boolean)
-                            .join(" ")
-                        : "the employee"
-                    }.`}
+                {recipientName
+                  ? `Your message has been delivered to ${recipientName}.`
+                  : target === "ALL"
+                    ? "Your message has been delivered to all active employees."
+                    : "Your message has been delivered to every HOD."}
               </p>
               <div className={styles.successActions}>
                 <button className={styles.sendAnotherBtn} onClick={reset}>
@@ -149,39 +137,27 @@ export default function QuickSendMessageModal({
               {/* To */}
               <div className={styles.field}>
                 <label>To</label>
-                <div className={styles.toToggle}>
-                  <button
-                    className={`${styles.toBtn} ${recipientId === "all" ? styles.toBtnActive : ""}`}
-                    onClick={() => setRecipientId("all")}
-                    type="button"
-                  >
-                    <i className="ti ti-speakerphone" /> All employees
-                  </button>
-                  <button
-                    className={`${styles.toBtn} ${recipientId !== "all" ? styles.toBtnActive : ""}`}
-                    onClick={() => setRecipientId(activeEmployees[0]?.id ?? "")}
-                    type="button"
-                  >
-                    <i className="ti ti-user" /> Specific person
-                  </button>
-                </div>
-                {recipientId !== "all" && (
-                  <select
-                    className={styles.selectEmployee}
-                    value={recipientId}
-                    onChange={(e) => setRecipientId(e.target.value)}
-                  >
-                    {activeEmployees.length === 0 ? (
-                      <option value="">No active employees</option>
-                    ) : (
-                      activeEmployees.map((e) => (
-                        <option key={e.id} value={e.id}>
-                          {[e.firstName, e.lastName].filter(Boolean).join(" ")}{" "}
-                          — {e.email}
-                        </option>
-                      ))
-                    )}
-                  </select>
+                {recipientName ? (
+                  <div className={styles.toLocked}>
+                    <i className="ti ti-user" /> {recipientName}
+                  </div>
+                ) : (
+                  <div className={styles.toToggle}>
+                    <button
+                      className={`${styles.toBtn} ${target === "ALL" ? styles.toBtnActive : ""}`}
+                      onClick={() => setTarget("ALL")}
+                      type="button"
+                    >
+                      <i className="ti ti-speakerphone" /> All employees
+                    </button>
+                    <button
+                      className={`${styles.toBtn} ${target === "HODS_ONLY" ? styles.toBtnActive : ""}`}
+                      onClick={() => setTarget("HODS_ONLY")}
+                      type="button"
+                    >
+                      <i className="ti ti-shield-star" /> All HODs
+                    </button>
+                  </div>
                 )}
               </div>
 

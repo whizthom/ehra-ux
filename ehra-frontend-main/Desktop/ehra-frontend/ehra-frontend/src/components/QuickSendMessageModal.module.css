@@ -170,22 +170,17 @@
     font-weight: 600;
 }
 
-.selectEmployee {
-    border: 1.5px solid var(--border-color);
-    border-radius: 8px;
+.toLocked {
+    display: flex;
+    align-items: center;
+    gap: 7px;
     padding: 9px 12px;
+    border: 1.5px solid var(--accent);
+    border-radius: 8px;
+    background: var(--bg-soft-accent);
+    color: var(--accent);
     font-size: 13px;
-    color: var(--text-primary);
-    background: var(--bg-surface-alt);
-    outline: none;
-    transition: border-color 0.15s;
-    font-family: inherit;
-    width: 100%;
-}
-
-.selectEmployee:focus {
-    border-color: var(--accent);
-    background: var(--bg-surface);
+    font-weight: 600;
 }
 
 /* ── Footer ── */
