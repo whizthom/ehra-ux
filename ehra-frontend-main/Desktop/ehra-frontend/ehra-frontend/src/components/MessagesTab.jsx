@@ -53,6 +53,7 @@ export default function MessagesTab({ employees = [], onDetailOpenChange }) {
   const [sendSuccess, setSendSuccess] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null); // id to confirm
   const [deleting, setDeleting] = useState(false);
+  const [recipientsOpen, setRecipientsOpen] = useState(false);
 
   // On phones the list and the open message/compose form can't share the
   // screen, so we show one at a time. This flag drives that via a single
@@ -64,6 +65,10 @@ export default function MessagesTab({ employees = [], onDetailOpenChange }) {
     return () => onDetailOpenChange?.(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showingDetail]);
+
+  useEffect(() => {
+    setRecipientsOpen(false);
+  }, [selected?.id]);
 
   const fetchAll = useCallback(async () => {
     try {
@@ -416,56 +421,64 @@ export default function MessagesTab({ employees = [], onDetailOpenChange }) {
 
             {selected.receipts && (
               <div className={styles.receiptsSection}>
-                <div className={styles.receiptsHeader}>
-                  <span className={styles.receiptsTitle}>Recipients</span>
+                <button
+                  type="button"
+                  className={styles.receiptsHeader}
+                  onClick={() => setRecipientsOpen((v) => !v)}
+                  aria-expanded={recipientsOpen}
+                >
+                  <span className={styles.receiptsTitle}>
+                    <i
+                      className={`ti ti-chevron-right ${styles.receiptsChevron} ${recipientsOpen ? styles.receiptsChevronOpen : ""}`}
+                    />
+                    Recipients
+                  </span>
                   <span className={styles.readBadge}>
                     {selected.readCount}/{selected.totalRecipients} read
                   </span>
-                </div>
-                {selected.receipts.length === 0 ? (
-                  <div className={styles.receiptsList}>
-                    <p className={styles.receiptsEmpty}>
-                      No recipients for this message.
-                    </p>
-                  </div>
-                ) : (
-                  <div className={styles.receiptsList}>
-                    {selected.receipts.map((r) => (
-                      <div
-                        key={r.employeeId}
-                        className={`${styles.receiptRow} ${!r.read ? styles.unreadRow : ""}`}
-                      >
-                        <div className={styles.receiptAvatar}>
-                          {r.employeeProfilePictureUrl ? (
-                            <img src={r.employeeProfilePictureUrl} alt="" />
-                          ) : (
-                            initials(r.employeeName)
-                          )}
-                        </div>
-                        <div className={styles.receiptInfo}>
-                          <div className={styles.receiptName}>
-                            {r.employeeName}
-                          </div>
-                          <div className={styles.receiptEmail}>
-                            {r.employeeEmail}
-                          </div>
-                        </div>
+                </button>
+                {recipientsOpen &&
+                  (selected.receipts.length === 0 ? (
+                    <div className={styles.receiptsList}>
+                      <p className={styles.receiptsEmpty}>
+                        No recipients for this message.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className={styles.receiptsList}>
+                      {selected.receipts.map((r) => (
                         <div
-                          className={`${styles.receiptStatus} ${
-                            r.read ? styles.readStatus : styles.unreadStatus
-                          }`}
+                          key={r.employeeId}
+                          className={`${styles.receiptRow} ${!r.read ? styles.unreadRow : ""}`}
                         >
-                          <i
-                            className={`ti ${r.read ? "ti-check" : "ti-clock"}`}
-                          />
-                          {r.read
-                            ? `Read ${formatDate(r.readAt)}`
-                            : "Not read yet"}
+                          <div className={styles.receiptAvatar}>
+                            {r.employeeProfilePictureUrl ? (
+                              <img src={r.employeeProfilePictureUrl} alt="" />
+                            ) : (
+                              initials(r.employeeName)
+                            )}
+                          </div>
+                          <div className={styles.receiptInfo}>
+                            <div className={styles.receiptName}>
+                              {r.employeeName}
+                            </div>
+                          </div>
+                          <div
+                            className={`${styles.receiptStatus} ${
+                              r.read ? styles.readStatus : styles.unreadStatus
+                            }`}
+                          >
+                            <i
+                              className={`ti ${r.read ? "ti-check" : "ti-clock"}`}
+                            />
+                            {r.read
+                              ? `Read ${formatDate(r.readAt)}`
+                              : "Not read yet"}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  ))}
               </div>
             )}
 
