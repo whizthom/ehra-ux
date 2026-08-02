@@ -117,6 +117,26 @@ export default defineConfig({
     }),
   ],
 
+  build: {
+    rollupOptions: {
+      // vite-plugin-pwa's own generator.js dynamically imports
+      // @vite-pwa/assets-generator (an opt-in CLI tool for auto-cropping
+      // icons from a source image, gated behind a `pwaAssets` config
+      // option we never set — we generate/commit our icons ourselves,
+      // see public/icons/). Under Rolldown that unreached dynamic import
+      // still gets statically analyzed and bundled as reachable output
+      // chunks instead of tree-shaken away — pulling in that tool's
+      // entire dependency chain (postcss, a config loader, cert
+      // generation for its own local dev server, ...) as multi-megabyte
+      // dead chunks in dist/assets/, which then blew past the service
+      // worker's default 2 MiB precache limit and failed the build.
+      // Marking the package external stops Rolldown from ever
+      // traversing into it — correct, since this code path is never
+      // actually invoked at runtime.
+      external: [/^@vite-pwa\/assets-generator/],
+    },
+  },
+
   server: {
     https: true,
     host: "0.0.0.0",
