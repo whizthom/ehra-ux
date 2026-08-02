@@ -5,9 +5,19 @@
 .container {
     display: flex;
     flex-direction: column;
-    height: 100%;
     gap: 0;
     min-height: 0;
+}
+
+/* Only the Requests section's two-pane list/detail layout needs a bounded
+   height (its .requestsLayout below relies on flex:1 + min-height:0 for
+   its own internal scrolling) — applying height:100% unconditionally to
+   every section forced short sections like Policies/Balances to always
+   be a full viewport tall too, leaving a large empty gap before the page's
+   real end (and the shared footer after it) instead of following right
+   after their actual content. */
+.containerFull {
+    height: 100%;
 }
 
 /* Two-pane list/detail layout used by the Requests section */

@@ -978,7 +978,9 @@ export default function LeavesTab() {
   };
 
   return (
-    <div className={styles.container}>
+    <div
+      className={`${styles.container} ${section === "requests" ? styles.containerFull : ""}`}
+    >
       {/* ── Top-level employer nav (Requests / Policies / Balances) ── */}
       <div className={styles.employerNavWrap}>
         <div className={styles.employerNav} ref={employerNavScrollRef}>
