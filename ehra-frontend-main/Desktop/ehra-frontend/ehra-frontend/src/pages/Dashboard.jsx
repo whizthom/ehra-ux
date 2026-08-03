@@ -99,6 +99,20 @@ function truncateName(name, max = 13) {
   return s.length > max ? `${s.slice(0, max)}...` : s;
 }
 
+// "Monday, Aug 3, 2026" — used for the pending leave requests widget's
+// start/end dates. Local to this file for the same reason as LeavesTab's
+// copy: this shouldn't ripple into other date displays that intentionally
+// stay in their current short format.
+function formatFullDate(d) {
+  if (!d) return "—";
+  return new Date(d).toLocaleDateString([], {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 function timeAgo(dateStr) {
   if (!dateStr) return "";
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -1937,14 +1951,12 @@ export default function Dashboard() {
                                         <div className={styles.empName}>
                                           {name || "—"}
                                         </div>
-                                        <div className={styles.empEmail}>
-                                          {lv.employeeEmail}
-                                        </div>
                                       </div>
                                     </div>
                                   </td>
                                   <td className={styles.muted}>
-                                    {lv.startDate} → {lv.endDate} ({lv.days} day
+                                    {formatFullDate(lv.startDate)} →{" "}
+                                    {formatFullDate(lv.endDate)} ({lv.days} day
                                     {lv.days > 1 ? "s" : ""})
                                   </td>
                                   <td
