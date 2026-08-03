@@ -171,6 +171,42 @@ API.interceptors.request.use((config) => {
 let isRefreshing = false;
 let failedQueue = [];
 
+// Shared by the interceptor below AND useMessageStream's SSE reconnect
+// logic (see src/hooks/useMessageStream.js) — both need "get me a
+// guaranteed-current access token" and both can end up wanting one at
+// the same moment (e.g. a dropped SSE connection reconnecting right as
+// a regular API call also 401s). A single in-flight promise means
+// whichever caller asks first triggers the real POST /auth/refresh, and
+// anyone else who asks while it's still in flight gets the same result
+// instead of firing a second, redundant refresh request — which matters
+// beyond just efficiency if the backend rotates refresh tokens on use,
+// since a second concurrent call would be using a token the first call
+// just invalidated.
+let refreshPromise = null;
+
+export async function refreshAccessToken() {
+  if (refreshPromise) return refreshPromise;
+
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) {
+    throw new Error("No refresh token available");
+  }
+
+  refreshPromise = (async () => {
+    try {
+      const { data } = await refreshClient.post("/auth/refresh", {
+        refreshToken,
+      });
+      saveSession(data);
+      return data.accessToken;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
 const processQueue = (error, token = null) => {
   failedQueue.forEach((p) =>
     error ? p.reject(error) : p.resolve(token)
@@ -237,24 +273,26 @@ API.interceptors.response.use(
 
       isRefreshing = true;
 
-      const refreshToken = getRefreshToken();
-
-      if (!refreshToken) {
+      // refreshAccessToken() throws a plain Error (no .response) when
+      // there's no refresh token at all — checked explicitly here rather
+      // than relying on the generic catch below, since that branch only
+      // clears the session for errors WITH a server response (see the
+      // comment on that branch). Without this check, "no refresh token"
+      // would fall through as a silent rejection instead of the
+      // immediate logout it deserves — there's no session to recover.
+      if (!getRefreshToken()) {
+        isRefreshing = false;
         clearTokens();
         window.location.href = "/login";
         return Promise.reject(error);
       }
 
       try {
-        const { data } = await refreshClient.post("/auth/refresh", {
-          refreshToken,
-        });
+        const accessToken = await refreshAccessToken();
 
-        saveSession(data);
+        original.headers.Authorization = `Bearer ${accessToken}`;
 
-        original.headers.Authorization = `Bearer ${data.accessToken}`;
-
-        processQueue(null, data.accessToken);
+        processQueue(null, accessToken);
 
         return await API(original);
       } catch (err) {
