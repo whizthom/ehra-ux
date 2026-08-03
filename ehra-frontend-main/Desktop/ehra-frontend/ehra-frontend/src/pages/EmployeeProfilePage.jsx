@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getEmployeeProfile, sendAnnouncement } from "../api/workforceApi";
 import { getUnreadCount, getMyUnreadCount } from "../api/notificationApi";
+import { getChatUnreadCount } from "../api/chatApi";
 import EmploymentTab from "../components/EmploymentTab";
 import PayrollTab from "../components/PayrollTab";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
@@ -200,6 +201,17 @@ export default function EmployeeProfilePage() {
       );
   }, [isAdmin]);
 
+  // Badge on the topbar message shortcut — same endpoint the dashboards'
+  // own message icon and sidebar "Messages" row use.
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+  useEffect(() => {
+    getChatUnreadCount()
+      .then(({ data }) => setUnreadMessagesCount(data?.count ?? 0))
+      .catch((err) =>
+        console.error("Failed to load unread message count:", err),
+      );
+  }, []);
+
   useEffect(() => {
     getEmployeeProfile(id)
       .then(({ data }) => setProfile(data))
@@ -320,6 +332,11 @@ export default function EmployeeProfilePage() {
                 style={{ fontSize: 17 }}
                 aria-hidden="true"
               />
+              {unreadMessagesCount > 0 && (
+                <span className={shellStyles.notifCount}>
+                  {unreadMessagesCount > 9 ? "9+" : unreadMessagesCount}
+                </span>
+              )}
             </div>
 
             {/* ── Notification bell — real unread count, jumps to the

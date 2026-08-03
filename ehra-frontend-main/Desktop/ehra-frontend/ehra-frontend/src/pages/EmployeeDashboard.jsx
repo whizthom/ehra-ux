@@ -32,6 +32,7 @@ import LogoutConfirmModal from "../components/LogoutConfirmModal";
 import CoverRequestsTab from "../components/CoverRequestsTab";
 import { getMyProfile } from "../api/employeeApi";
 import { getMyCoverRequests } from "../api/leaveApi";
+import { getChatUnreadCount } from "../api/chatApi";
 
 // ── Sidebar nav ────────────────────────────────────────────────────────────
 // "My Accounts" navigates to the full-page identity-level workspace
@@ -236,6 +237,11 @@ export default function Dashboard() {
   // Notifications page, since they read from the same state.
   const [pendingDeletes, setPendingDeletes] = useState([]); // [{ id, notif }]
   const deleteTimers = useRef(new Map());
+
+  // Unread chat/message count — powers the pop badge on the topbar
+  // message shortcut and the sidebar/nav "Messages" item, same as
+  // Dashboard.jsx (the employer view).
+  const [messagesUnread, setMessagesUnread] = useState(0);
   const notifRef = useRef(null);
   const qaScrollRef = useRef(null);
   const bottomNavScrollRef = useRef(null);
@@ -326,6 +332,15 @@ export default function Dashboard() {
       console.error("Failed to load notifications:", err);
     } finally {
       setLoadingNotifs(false);
+    }
+  }, []);
+
+  const fetchMessagesUnread = useCallback(async () => {
+    try {
+      const { data } = await getChatUnreadCount();
+      setMessagesUnread(data.count || 0);
+    } catch (err) {
+      console.error("Failed to load unread message count:", err);
     }
   }, []);
 
@@ -436,6 +451,7 @@ export default function Dashboard() {
     // endpoints below.
     fetchSummary();
     fetchNotifs();
+    fetchMessagesUnread();
     fetchMyProfile();
     fetchMyAttendanceSummary();
     fetchMyPayroll();
@@ -443,6 +459,7 @@ export default function Dashboard() {
   }, [
     fetchSummary,
     fetchNotifs,
+    fetchMessagesUnread,
     fetchMyProfile,
     fetchMyAttendanceSummary,
     fetchMyPayroll,
@@ -476,12 +493,23 @@ export default function Dashboard() {
         return [leave, ...prev];
       });
     },
+
+    // Keeps the topbar/sidebar message badge live without needing the
+    // Messages tab mounted — mirrors MessagesHub's own badge refresh.
+    onNewChatMessage: () => fetchMessagesUnread(),
+    onChatRead: () => fetchMessagesUnread(),
   });
 
   // Refresh notifications whenever the full-page Notifications tab is opened
   useEffect(() => {
     if (activeNav === "Notifications") fetchNotifs();
   }, [activeNav, fetchNotifs]);
+
+  // Re-sync the message badge whenever the Messages tab is opened or left —
+  // catches any reads that happened inside it without a matching SSE event.
+  useEffect(() => {
+    if (activeNav === "Messages") fetchMessagesUnread();
+  }, [activeNav, fetchMessagesUnread]);
 
   // Close notification panel on outside click
   useEffect(() => {
@@ -741,6 +769,11 @@ export default function Dashboard() {
                   {n.label === "Notifications" && unreadCount > 0 && (
                     <span className={styles.sbBadge}>{unreadCount}</span>
                   )}
+                  {n.label === "Messages" && messagesUnread > 0 && (
+                    <span className={styles.sbBadge}>
+                      {messagesUnread > 9 ? "9+" : messagesUnread}
+                    </span>
+                  )}
                   {n.label === "My Profile" &&
                     pendingProfileEdits.length > 0 && (
                       <span className={styles.sbBadge}>
@@ -852,6 +885,11 @@ export default function Dashboard() {
                 style={{ fontSize: 17 }}
                 aria-hidden="true"
               />
+              {messagesUnread > 0 && (
+                <span className={styles.notifCount}>
+                  {messagesUnread > 9 ? "9+" : messagesUnread}
+                </span>
+              )}
             </div>
 
             {/* ── Bell button + dropdown panel ── */}
