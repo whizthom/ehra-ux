@@ -219,7 +219,7 @@
     z-index: 30;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 900px) {
     .topbar {
         background: transparent;
         border-bottom: none;
@@ -351,8 +351,6 @@
 
     .empGreetingMobile {
         display: inline;
-        font-size: 19px;
-        font-weight: 700;
     }
 }
 

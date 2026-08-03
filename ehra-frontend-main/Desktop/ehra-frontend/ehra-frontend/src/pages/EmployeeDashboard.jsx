@@ -85,6 +85,12 @@ function fullName(first, last) {
   return [safeString(first), safeString(last)].filter(Boolean).join(" ").trim();
 }
 
+// Mobile header only — same rule as the employer dashboard's company name.
+function truncateName(name, max = 13) {
+  const s = safeString(name);
+  return s.length > max ? `${s.slice(0, max)}...` : s;
+}
+
 function timeAgo(dateStr) {
   if (!dateStr) return "";
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -809,7 +815,7 @@ export default function Dashboard() {
                 {loadingMyProfile
                   ? "Loading…"
                   : hasRealFirstName
-                    ? `Hi ${myFirstDisplay}`
+                    ? `Hi ${truncateName(myFirstDisplay)}`
                     : greeting.text}
               </span>
             </h1>
