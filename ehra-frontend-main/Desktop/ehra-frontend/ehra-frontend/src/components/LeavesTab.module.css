@@ -1376,6 +1376,47 @@
 
 @media (max-width: 860px) {
 
+    /* ── Requests list: no bounded panel, no internal scroll ──
+       The list used to be stretched to fill a fixed-height flex box
+       (via .containerFull + .requestsLayout's own flex/overflow:hidden),
+       which made it scroll inside its own little viewport instead of
+       with the page — and gave it a boxed-in, card-like look (distinct
+       surface background) unlike every other section here. Below this
+       width it now sits flush on the page background and flows in
+       normal document flow, same treatment as Leave Policies, so the
+       whole page — list, then the brand footer beneath it — scrolls
+       together as one.
+       This only applies while the list itself is showing. Opening the
+       detail view (.showDetail, via .containerDetailOpen below) still
+       switches back to the bounded full-screen overlay layout, since
+       that one genuinely needs to cover the screen as its own view. ── */
+    .containerFull {
+        height: auto;
+    }
+
+    .containerDetailOpen {
+        height: 100%;
+    }
+
+    .requestsLayout {
+        display: block;
+        flex: none;
+        min-height: 0;
+        overflow: visible;
+        /* Stays relative (not static) even in list mode — the detail
+           pane below is always mounted (just translated off-screen via
+           .showDetail), and position:absolute needs a positioned
+           ancestor nearby at all times, not just while it's visible. */
+        position: relative;
+    }
+
+    .requestsLayout.showDetail {
+        display: flex;
+        height: 100%;
+        min-height: 0;
+        overflow: hidden;
+    }
+
     /* ── Requests: list stays full-width in normal flow; detail becomes
        a full-screen overlay that slides in from the right instead of
        being squeezed into a second column or stacked below the list.
@@ -1386,6 +1427,14 @@
     .listPanel {
         width: 100%;
         border-right: none;
+        overflow: visible;
+        background: transparent;
+    }
+
+    .list {
+        flex: none;
+        min-height: 0;
+        overflow: visible;
     }
 
     .detailPanel {

@@ -979,7 +979,7 @@ export default function LeavesTab() {
 
   return (
     <div
-      className={`${styles.container} ${section === "requests" ? styles.containerFull : ""}`}
+      className={`${styles.container} ${section === "requests" ? styles.containerFull : ""} ${section === "requests" && showingDetail ? styles.containerDetailOpen : ""}`}
     >
       {/* ── Top-level employer nav (Requests / Policies / Balances) ── */}
       <div className={styles.employerNavWrap}>
