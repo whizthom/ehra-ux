@@ -24,6 +24,14 @@ import styles from "./UpdateToast.module.css";
  * change here, THEN test the button, so you're actually exercising the
  * new code and not the code this deploy was meant to replace.
  */
+
+// If "a new version is available" fires again within this many ms of a
+// reload WE just triggered, treat it as noise rather than a second real
+// deploy landing within seconds of the first — see the effect below for
+// why that happens.
+const POST_RELOAD_GRACE_MS = 15000;
+const JUST_UPDATED_KEY = "ehral:justUpdatedAt";
+
 export default function UpdateToast() {
   const registrationRef = useRef(null);
 
@@ -45,6 +53,34 @@ export default function UpdateToast() {
       ); // hourly is plenty; avoids hammering the CDN
     },
   });
+
+  // A full page reload destroys all component state, so if this toast
+  // shows up again right after the user clicked "Reload now", it isn't
+  // this same component instance somehow surviving — it's a fresh
+  // needRefresh=true firing moments after the fresh page loads. In
+  // practice that's almost always a stale re-detection of the very
+  // update we just applied (e.g. a CDN with multiple edge nodes each
+  // caching their own slightly-out-of-sync copy of sw.js), not a second
+  // real deploy landing within seconds of the first. sessionStorage
+  // (not a JS variable) is what lets this survive the reload itself.
+  useEffect(() => {
+    if (!needRefresh) return;
+    let justUpdatedAt;
+    try {
+      justUpdatedAt = Number(sessionStorage.getItem(JUST_UPDATED_KEY) || 0);
+    } catch {
+      return;
+    }
+    if (justUpdatedAt && Date.now() - justUpdatedAt < POST_RELOAD_GRACE_MS) {
+      try {
+        sessionStorage.removeItem(JUST_UPDATED_KEY);
+      } catch {
+        // Non-fatal — worst case the grace window is checked once more
+        // than necessary.
+      }
+      setNeedRefresh(false);
+    }
+  }, [needRefresh, setNeedRefresh]);
 
   const [reloading, setReloading] = useState(false);
   const fallbackTimer = useRef(null);
@@ -91,6 +127,13 @@ export default function UpdateToast() {
   const handleReload = async () => {
     if (reloading) return;
     setReloading(true);
+    try {
+      sessionStorage.setItem(JUST_UPDATED_KEY, String(Date.now()));
+    } catch {
+      // Non-fatal — worst case the post-reload grace check is skipped
+      // and a stale re-detection (if one happens) shows the toast again
+      // instead of being silently suppressed.
+    }
     fallbackTimer.current = setTimeout(doReload, 1500);
 
     try {
