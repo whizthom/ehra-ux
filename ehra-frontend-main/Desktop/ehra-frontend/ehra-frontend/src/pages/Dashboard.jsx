@@ -92,6 +92,13 @@ function fullName(first, last) {
   return [safeString(first), safeString(last)].filter(Boolean).join(" ").trim();
 }
 
+// Mobile header only — the company name there has real estate for roughly
+// this many characters before it starts crowding the icons on the right.
+function truncateName(name, max = 13) {
+  const s = safeString(name);
+  return s.length > max ? `${s.slice(0, max)}...` : s;
+}
+
 function timeAgo(dateStr) {
   if (!dateStr) return "";
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -1191,7 +1198,7 @@ export default function Dashboard() {
                   )}
                 </span>
                 <span className={styles.topbarMobileLogoText}>
-                  {loadingSummary ? "Loading…" : companyName}
+                  {loadingSummary ? "Loading…" : truncateName(companyName)}
                 </span>
               </span>
             </h1>

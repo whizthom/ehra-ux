@@ -801,9 +801,16 @@ export default function Dashboard() {
                 className={`ti ${greeting.icon} ${styles.empGreetingIcon}`}
                 aria-hidden="true"
               />
-              <span>
+              <span className={styles.empGreetingFull}>
                 {greeting.text}
                 {!loadingMyProfile && hasRealFirstName && `, ${myFirstDisplay}`}
+              </span>
+              <span className={styles.empGreetingMobile}>
+                {loadingMyProfile
+                  ? "Loading…"
+                  : hasRealFirstName
+                    ? `Hi ${myFirstDisplay}`
+                    : greeting.text}
               </span>
             </h1>
             <p className={styles.empGreetingSub}>

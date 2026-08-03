@@ -219,6 +219,13 @@
     z-index: 30;
 }
 
+@media (max-width: 640px) {
+    .topbar {
+        background: transparent;
+        border-bottom: none;
+    }
+}
+
 .topbarTitle {
     font-size: 15px;
     font-weight: 500;
@@ -282,7 +289,7 @@
     }
 
     .topbarMobileLogoText {
-        font-size: 16px;
+        font-size: 19px;
         font-weight: 700;
         color: var(--text-primary);
         overflow: hidden;
@@ -331,6 +338,22 @@
     font-size: 18px;
     color: var(--accent);
     flex-shrink: 0;
+}
+
+.empGreetingMobile {
+    display: none;
+}
+
+@media (max-width: 640px) {
+    .empGreetingFull {
+        display: none;
+    }
+
+    .empGreetingMobile {
+        display: inline;
+        font-size: 19px;
+        font-weight: 700;
+    }
 }
 
 .empGreetingSub {
