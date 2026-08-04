@@ -838,8 +838,18 @@ const EMPLOYER_SECTIONS = [
   { key: "balances", label: "Balances", icon: "ti-chart-bar" },
 ];
 
-export default function LeavesTab() {
+export default function LeavesTab({ onSectionChange } = {}) {
   const [section, setSection] = useState("requests");
+
+  // Dashboard.jsx renders the shared brand-footer Logo as a sibling of
+  // this whole component (see the "Brand footer" comment there) and
+  // has no visibility into which Leaves sub-tab is open on its own —
+  // this is the one line that tells it, so it can hide that footer
+  // specifically while Policies is open (see Dashboard.jsx's own
+  // comment on why, right where it checks leavesSection).
+  useEffect(() => {
+    onSectionChange?.(section);
+  }, [section, onSectionChange]);
 
   // ── On-leave count for nav badge ──────────────────────────────────────
   const [onLeaveCount, setOnLeaveCount] = useState(0);
