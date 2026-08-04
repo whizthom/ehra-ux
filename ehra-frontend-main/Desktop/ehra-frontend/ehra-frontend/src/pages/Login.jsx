@@ -240,7 +240,12 @@ export default function Login() {
           </div>
         </div>
 
-        <p className={styles.leftFooter}>© 2026 Ehra. All rights reserved.</p>
+        <div className={styles.leftFooterRow}>
+          <p className={styles.leftFooter}>© 2026 Ehra. All rights reserved.</p>
+          <a href="/pricing" className={styles.leftFooterLink}>
+            Pricing
+          </a>
+        </div>
       </div>
 
       {/* ── Right panel — sign in ── */}

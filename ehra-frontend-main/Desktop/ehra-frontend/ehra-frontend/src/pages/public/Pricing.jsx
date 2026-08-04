@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../context/AuthContext";
@@ -47,6 +47,56 @@ export default function Pricing() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const isSignedInAdmin = user?.role === "ROLE_ADMIN";
+
+  // ── Mobile card carousel ──────────────────────────────────────────────
+  // Below 640px, .cardsGrid becomes a horizontal snap-scroller (see
+  // pricing.module.css). The scrolling itself is pure CSS; this just
+  // tracks which card is centered so the dots below can reflect and
+  // control it — a small enhancement, not something the carousel depends
+  // on to function. Defaults to Pro (index 1) since that's the card
+  // worth landing on first.
+  const trackRef = useRef(null);
+  const cardRefs = useRef([]);
+  const [activeCardIndex, setActiveCardIndex] = useState(
+    Math.max(
+      PLANS.findIndex((p) => p.highlight),
+      0,
+    ),
+  );
+
+  useEffect(() => {
+    const track = trackRef.current;
+    const cards = cardRefs.current.filter(Boolean);
+    if (!track || !cards.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const mostVisible = entries.reduce(
+          (best, entry) =>
+            entry.intersectionRatio > (best?.intersectionRatio ?? 0)
+              ? entry
+              : best,
+          null,
+        );
+        if (mostVisible && mostVisible.intersectionRatio > 0.5) {
+          const index = cards.indexOf(mostVisible.target);
+          if (index !== -1) setActiveCardIndex(index);
+        }
+      },
+      { root: track, threshold: [0.5, 0.75, 1] },
+    );
+
+    cards.forEach((card) => observer.observe(card));
+    return () => observer.disconnect();
+  }, []);
+
+  function scrollToCard(index) {
+    cardRefs.current[index]?.scrollIntoView({
+      behavior: "smooth",
+      inline: "center",
+      block: "nearest",
+    });
+  }
 
   async function handleSelectPlan(plan) {
     setCheckoutState({ planId: plan.id, loading: false, error: null });
@@ -121,17 +171,51 @@ export default function Pricing() {
 
       <BillingToggle cycle={cycle} onChange={setCycle} />
 
-      <div className={styles.cardsGrid}>
-        {PLANS.map((plan) => (
-          <PricingCard
+      <p className={styles.swipeHint} aria-hidden="true">
+        <span className={styles.swipeArrow}>←</span>
+        Swipe to compare plans
+        <span className={styles.swipeArrow}>→</span>
+      </p>
+
+      <div className={styles.cardsGrid} ref={trackRef}>
+        {PLANS.map((plan, index) => (
+          <div
             key={plan.id}
-            plan={plan}
-            cycle={cycle}
-            loading={checkoutState.planId === plan.id && checkoutState.loading}
-            error={
-              checkoutState.planId === plan.id ? checkoutState.error : null
-            }
-            onSelect={handleSelectPlan}
+            className={styles.cardSlide}
+            ref={(el) => {
+              cardRefs.current[index] = el;
+            }}
+          >
+            <PricingCard
+              plan={plan}
+              cycle={cycle}
+              loading={
+                checkoutState.planId === plan.id && checkoutState.loading
+              }
+              error={
+                checkoutState.planId === plan.id ? checkoutState.error : null
+              }
+              onSelect={handleSelectPlan}
+            />
+          </div>
+        ))}
+      </div>
+
+      <div
+        className={styles.cardDots}
+        role="tablist"
+        aria-label="Choose a plan to view"
+      >
+        {PLANS.map((plan, index) => (
+          <button
+            key={plan.id}
+            type="button"
+            role="tab"
+            className={styles.cardDot}
+            data-active={index === activeCardIndex}
+            aria-selected={index === activeCardIndex}
+            aria-label={`Show ${plan.name} plan`}
+            onClick={() => scrollToCard(index)}
           />
         ))}
       </div>

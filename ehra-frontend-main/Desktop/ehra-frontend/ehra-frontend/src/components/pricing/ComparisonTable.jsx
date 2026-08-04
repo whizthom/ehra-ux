@@ -33,6 +33,9 @@ export default function ComparisonTable() {
       <h2 id="compare-heading" className={styles.sectionHeading}>
         Compare plans
       </h2>
+      <p className={styles.swipeHintTable} aria-hidden="true">
+        Swipe to see all columns →
+      </p>
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead>

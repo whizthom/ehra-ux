@@ -67,6 +67,14 @@ const NAV = [
     label: "My Accounts",
     section: "account",
     isFullPage: true,
+    route: "/my-accounts",
+  },
+  {
+    icon: "ti-credit-card",
+    label: "Billing",
+    section: "account",
+    isFullPage: true,
+    route: "/pricing",
   },
 ];
 
@@ -1154,7 +1162,7 @@ export default function Dashboard() {
                   className={`${styles.sbItem} ${activeNav === n.label && !n.isFullPage ? styles.active : ""}`}
                   onClick={() => {
                     if (n.isFullPage) {
-                      navigate("/my-accounts", {
+                      navigate(n.route ?? "/my-accounts", {
                         state: { returnPath: "/dashboard", activeNav },
                       });
                       return;
@@ -2263,7 +2271,7 @@ export default function Dashboard() {
               className={`${styles.bottomNavItem} ${activeNav === n.label && !n.isFullPage ? styles.bottomNavActive : ""}`}
               onClick={() =>
                 n.isFullPage
-                  ? navigate("/my-accounts", {
+                  ? navigate(n.route ?? "/my-accounts", {
                       state: { returnPath: "/dashboard", activeNav },
                     })
                   : setActiveNav(n.label)

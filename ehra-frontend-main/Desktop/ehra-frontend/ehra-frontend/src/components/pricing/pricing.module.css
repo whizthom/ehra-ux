@@ -523,3 +523,171 @@
     line-height: 1.55;
     color: var(--text-secondary);
 }
+
+/* ── Mobile: swipeable card carousel ────────────────────────────────────────
+   Below 640px (the phone breakpoint this codebase already uses elsewhere —
+   see theme.css's scrollbar-hiding rule at the same width), three stacked
+   full-height cards means a lot of scrolling before you ever see Premium.
+   Instead the deck becomes a horizontal, snap-scrolling carousel — each
+   plan gets its own "screen", Pro peeks in from the edge so it's obvious
+   there's more, and the whole thing feels like a native app's plan picker
+   rather than a webpage that happens to be narrow. Pure CSS scroll-snap —
+   no JS needed for the scrolling itself; the dot indicators below are a
+   small enhancement on top, not a requirement for it to work. */
+.swipeHint {
+    display: none;
+}
+
+.swipeHintTable {
+    display: none;
+}
+
+.cardSlide {
+    min-width: 0;
+}
+
+.cardDots {
+    display: none;
+}
+
+@media (max-width: 640px) {
+    .swipeHint {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin: -8px 0 16px;
+        letter-spacing: 0.01em;
+    }
+
+    .swipeArrow {
+        color: var(--accent);
+        animation: ehraSwipeNudge 1.6s ease-in-out infinite;
+    }
+
+    .swipeArrow:last-child {
+        animation-direction: reverse;
+    }
+
+    @keyframes ehraSwipeNudge {
+
+        0%,
+        100% {
+            transform: translateX(0);
+        }
+
+        50% {
+            transform: translateX(-3px);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .swipeArrow {
+            animation: none;
+        }
+    }
+
+    .cardsGrid {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scroll-padding-inline: 24px;
+        padding: 0 24px 4px;
+        gap: 14px;
+        max-width: 100%;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .cardSlide {
+        flex: 0 0 86%;
+        scroll-snap-align: center;
+        scroll-snap-stop: always;
+    }
+
+    .cardHighlight,
+    .cardHighlight:hover {
+        transform: none;
+    }
+
+    .card:hover {
+        transform: none;
+    }
+
+    .cardDots {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        margin-top: 18px;
+    }
+
+    .cardDot {
+        width: 8px;
+        height: 8px;
+        padding: 0;
+        border: none;
+        border-radius: 999px;
+        background: var(--border-color);
+        cursor: pointer;
+        transition: width 0.2s ease, background-color 0.2s ease;
+    }
+
+    .cardDot[data-active="true"] {
+        width: 22px;
+        background: var(--accent);
+    }
+
+    /* Comparison table: first column pinned so plan names stay visible
+     while swiping through Starter/Pro/Premium horizontally — otherwise
+     every row reads as a mystery of checkmarks with nothing labeling
+     them once you've scrolled past the first column. */
+    .swipeHintTable {
+        display: block;
+        text-align: center;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin: -20px 0 14px;
+    }
+
+    .table th:first-child,
+    .table td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 1;
+        background: var(--bg-surface);
+        box-shadow: 2px 0 6px var(--shadow-color);
+    }
+
+    .table thead th:first-child {
+        background: var(--bg-surface-alt);
+        z-index: 2;
+    }
+
+    .section {
+        margin-top: 56px;
+    }
+
+    .sectionHeading {
+        font-size: 20px;
+        margin-bottom: 22px;
+    }
+
+    .trustRow {
+        grid-template-columns: 1fr;
+        margin-top: 40px;
+    }
+
+    .toggleRow {
+        flex-wrap: wrap;
+        row-gap: 10px;
+        margin-bottom: 36px;
+    }
+
+    .header {
+        margin-bottom: 32px;
+    }
+}
