@@ -1,10 +1,28 @@
 /* ── Layout ──
    No card chrome here on purpose — this sits directly on the page
    background (same treatment as the Attendance tab), not inside a
-   bordered/shadowed panel. */
+   bordered/shadowed panel.
+   flex: 1 is the actual fix for the brand-footer/logo positioning —
+   Dashboard.jsx renders <LeavesTab/> and the shared footer as siblings
+   inside .contentFullNarrow (itself already full viewport height via
+   its own flex:1 inside .main). Without flex-grow here, this root div
+   only ever takes up as much height as whichever section's real content
+   needs. On a short section (Policies with a handful of leave types,
+   Balances with few employees, an empty On-Leave list) that stranded
+   the footer right after the short content instead of at the bottom of
+   the viewport — it looked like it was "floating in the middle" of a
+   mostly-empty screen instead of sitting at the true end of the page.
+   flex: 1 makes this div itself grow to fill any leftover space in
+   .contentFullNarrow first (its own children still stack at the top as
+   normal), so the footer that follows always lands flush with the
+   bottom of the viewport when content is short — and once real content
+   is tall enough to need scrolling, this has no effect either way: the
+   footer just follows right after it and everything scrolls together
+   as one, same as it already does on the main dashboard nav. */
 .container {
     display: flex;
     flex-direction: column;
+    flex: 1;
     gap: 0;
     min-height: 0;
 }
@@ -15,7 +33,10 @@
    every section forced short sections like Policies/Balances to always
    be a full viewport tall too, leaving a large empty gap before the page's
    real end (and the shared footer after it) instead of following right
-   after their actual content. */
+   after their actual content. Superseded by .container's own flex: 1
+   above for the "fill available height" part; kept for the desktop
+   Requests split-pane, whose fixed-height/overflow:hidden two-column
+   layout still wants an explicit height reference. */
 .containerFull {
     height: 100%;
 }
