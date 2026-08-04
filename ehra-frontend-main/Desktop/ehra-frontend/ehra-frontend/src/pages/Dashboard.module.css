@@ -1373,6 +1373,7 @@
 
     .topbar {
         padding: 6px 16px;
+        padding-top: calc(6px + env(safe-area-inset-top, 0px));
         min-height: 52px;
     }
 

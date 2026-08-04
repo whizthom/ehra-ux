@@ -142,9 +142,26 @@
     align-items: center;
     justify-content: space-between;
     padding: 22px 28px;
+    /* Pushes title/icons below the iOS status bar (viewport-fit=cover in
+       index.html means content draws all the way to the physical top of
+       the screen) — independent of background color, so this still
+       matters even with the transparent mobile override below. */
+    padding-top: calc(22px + env(safe-area-inset-top, 0px));
     background: var(--bg-surface);
     border-bottom: 1px solid var(--border-color);
     flex-shrink: 0;
+}
+
+/* Matches Dashboard.module.css's mobile treatment (the admin dashboard) —
+   a borderless header that blends into the page background instead of
+   sitting in its own bordered panel. .dash's background: var(--bg-page)
+   (plus the html/body backstop in theme.css) is what actually shows
+   through here once the topbar stops painting its own color. */
+@media (max-width: 640px) {
+    .topbar {
+        background: transparent;
+        border-bottom: none;
+    }
 }
 
 .pageTitle {

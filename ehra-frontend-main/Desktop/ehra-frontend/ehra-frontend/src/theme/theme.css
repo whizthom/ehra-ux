@@ -12,95 +12,108 @@
 ========================================================================= */
 
 :root {
-    /* Page / surfaces */
-    --bg-page: #f0f4f3;
-    --bg-sidebar: #0f6e56;
-    --bg-surface: #ffffff;
-    --bg-surface-alt: #f8fafc;
-    --bg-soft-accent: #e1f5ee;
-    --border-color: #e2e8f0;
-    --shadow-color: rgba(0, 0, 0, 0.12);
+   /* Page / surfaces */
+   --bg-page: #f0f4f3;
+   --bg-sidebar: #0f6e56;
+   --bg-surface: #ffffff;
+   --bg-surface-alt: #f8fafc;
+   --bg-soft-accent: #e1f5ee;
+   --border-color: #e2e8f0;
+   --shadow-color: rgba(0, 0, 0, 0.12);
 
-    /* Text */
-    --text-primary: #111111;
-    --text-secondary: #888888;
-    --sidebar-text: #ffffff;
-    --sidebar-muted: #5dcaa5;
+   /* Text */
+   --text-primary: #111111;
+   --text-secondary: #888888;
+   --sidebar-text: #ffffff;
+   --sidebar-muted: #5dcaa5;
 
-    /* Brand / accent (WhatsApp green) */
-    --accent: #0f6e56;
-    --accent-hover: #085041;
+   /* Brand / accent (WhatsApp green) */
+   --accent: #0f6e56;
+   --accent-hover: #085041;
 
-    /* Status */
-    --danger: #e24b4a;
-    --danger-hover: #a32d2d;
-    --warning: #f0a93a;
+   /* Status */
+   --danger: #e24b4a;
+   --danger-hover: #a32d2d;
+   --warning: #f0a93a;
 
-    /* Semantic status banners/badges (error, warning, info) */
-    --danger-bg: #fcebeb;
-    --danger-border: #f09595;
-    --danger-text: #a32d2d;
+   /* Semantic status banners/badges (error, warning, info) */
+   --danger-bg: #fcebeb;
+   --danger-border: #f09595;
+   --danger-text: #a32d2d;
 
-    --warning-bg: #faeeda;
-    --warning-border: #f0c988;
-    --warning-text: #854f0b;
+   --warning-bg: #faeeda;
+   --warning-border: #f0c988;
+   --warning-text: #854f0b;
 
-    --info-bg: #e6f1fb;
-    --info-border: #bfdbfe;
-    --info-text: #185fa5;
+   --info-bg: #e6f1fb;
+   --info-border: #bfdbfe;
+   --info-text: #185fa5;
 
-    /* Message bubbles (reserved for later passes) */
-    --bubble-sent-bg: #dcf8c6;
-    --bubble-received-bg: #ffffff;
+   /* Message bubbles (reserved for later passes) */
+   --bubble-sent-bg: #dcf8c6;
+   --bubble-received-bg: #ffffff;
 }
 
 [data-theme="dark"] {
-    /* Page / surfaces — WhatsApp's actual dark-mode blacks, not the
+   /* Page / surfaces — WhatsApp's actual dark-mode blacks, not the
        Pulse card's green-black. The Pulse card keeps its own gold/green
        palette regardless (it's a deliberate "hero" widget), so this is
        the rest of the app going a cleaner, more neutral direction. */
-    --bg-page: #0b141a;
-    --bg-sidebar: #111b21;
-    --bg-surface: #111b21;
-    --bg-surface-alt: #202c33;
-    --bg-soft-accent: rgba(0, 168, 132, 0.14);
-    --border-color: #222d34;
-    --shadow-color: rgba(0, 0, 0, 0.4);
+   --bg-page: #0b141a;
+   --bg-sidebar: #111b21;
+   --bg-surface: #111b21;
+   --bg-surface-alt: #202c33;
+   --bg-soft-accent: rgba(0, 168, 132, 0.14);
+   --border-color: #222d34;
+   --shadow-color: rgba(0, 0, 0, 0.4);
 
-    /* Text — WhatsApp's own light grey, not tinted cream. */
-    --text-primary: #e9edef;
-    --text-secondary: #8696a0;
-    --sidebar-text: #e9edef;
-    --sidebar-muted: #8696a0;
+   /* Text — WhatsApp's own light grey, not tinted cream. */
+   --text-primary: #e9edef;
+   --text-secondary: #8696a0;
+   --sidebar-text: #e9edef;
+   --sidebar-muted: #8696a0;
 
-    /* Brand / accent — WhatsApp's real dark-mode green, bright enough to
+   /* Brand / accent — WhatsApp's real dark-mode green, bright enough to
        read clearly on black without needing much saturation to stand
        out. */
-    --accent: #00a884;
-    --accent-hover: #06cf9c;
+   --accent: #00a884;
+   --accent-hover: #06cf9c;
 
-    /* Status — kept as translucent tints (from the last pass) rather
+   /* Status — kept as translucent tints (from the last pass) rather
        than solid fills, just recolored back to a more standard red/amber
        instead of the rose/muted-gold pairing. */
-    --danger: #f15c6d;
-    --danger-hover: #ff8a94;
-    --warning: #ffc24b;
+   --danger: #f15c6d;
+   --danger-hover: #ff8a94;
+   --warning: #ffc24b;
 
-    --danger-bg: rgba(241, 92, 109, 0.14);
-    --danger-border: rgba(241, 92, 109, 0.35);
-    --danger-text: #ffb4bd;
+   --danger-bg: rgba(241, 92, 109, 0.14);
+   --danger-border: rgba(241, 92, 109, 0.35);
+   --danger-text: #ffb4bd;
 
-    --warning-bg: rgba(255, 194, 75, 0.14);
-    --warning-border: rgba(255, 194, 75, 0.35);
-    --warning-text: #f0c674;
+   --warning-bg: rgba(255, 194, 75, 0.14);
+   --warning-border: rgba(255, 194, 75, 0.35);
+   --warning-text: #f0c674;
 
-    --info-bg: rgba(125, 184, 240, 0.12);
-    --info-border: rgba(125, 184, 240, 0.3);
-    --info-text: #7db8f0;
+   --info-bg: rgba(125, 184, 240, 0.12);
+   --info-border: rgba(125, 184, 240, 0.3);
+   --info-text: #7db8f0;
 
-    /* Message bubbles — WhatsApp's actual bubble colors. */
-    --bubble-sent-bg: #005c4b;
-    --bubble-received-bg: #202c33;
+   /* Message bubbles — WhatsApp's actual bubble colors. */
+   --bubble-sent-bg: #005c4b;
+   --bubble-received-bg: #202c33;
+}
+
+/* Full-bleed background backstop. .dash (Dashboard.module.css /
+   EmployeeDashboard.module.css) already paints --bg-page across its own
+   box, but nothing previously guaranteed html/body underneath it did
+   too — normally invisible, but viewport-fit=cover (index.html) means
+   content draws all the way under the iOS status bar, and any gap
+   between what .dash covers and the true physical screen edge would
+   show the browser's own default white instead of the app's actual
+   background right at that boundary. */
+html,
+body {
+   background: var(--bg-page);
 }
 
 /* Smooth, subtle transition when switching themes */
@@ -109,5 +122,5 @@ body,
 [class*="sidebar"],
 [class*="topbar"],
 [class*="panel"] {
-    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+   transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
