@@ -574,6 +574,33 @@
     }
 }
 
+/* Leave tab only. Same shell as .contentFullNarrow above (which several
+   other tabs — Attendance, Departments, My profile, QR Code, Notifications
+   — also use and shouldn't be affected), but with the same generous
+   end-of-scroll breathing room .content (the main Dashboard page) has.
+   Without it, LeavesTab's sections — especially the shorter ones like
+   Policies/Balances — end with noticeably less space before the shared
+   footer than every other tab does. */
+.contentLeave {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 10px;
+    padding-bottom: 35vh;
+    min-height: 0;
+    min-width: 0;
+    overscroll-behavior: contain;
+}
+
+@media (max-width: 480px) {
+    .contentLeave {
+        padding: 14px 6px;
+        padding-bottom: 35vh;
+    }
+}
+
 /* Messages tab only. It renders its own WhatsApp-style two-pane layout
    (ChatPanel/MessagesHub) which needs to reach the true edges of the
    screen on a phone — unlike Attendance/Departments/etc, which still want
@@ -1360,6 +1387,11 @@
 
     .contentFullNarrow {
         padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .contentLeave {
+        padding: 16px;
+        padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px) + 35vh);
     }
 
     .contentMessages {

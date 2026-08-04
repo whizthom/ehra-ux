@@ -263,13 +263,6 @@ export default function Dashboard() {
   );
   const isMobile = useIsMobile();
 
-  // Which sub-tab is open within the Leave tab (Requests/On Leave/
-  // Policies/Balances) — reported up by LeavesTab itself via
-  // onSectionChange, since Dashboard has no visibility into it
-  // otherwise. Only used to hide the brand footer below on Policies —
-  // see that condition for why.
-  const [leavesSection, setLeavesSection] = useState(null);
-
   // Set while a Messages > Chats thread is open — used to hide the topbar,
   // brand footer, and bottom nav on mobile so the thread reads as a real
   // full-screen view rather than a panel wedged between them.
@@ -1469,16 +1462,17 @@ export default function Dashboard() {
           className={
             activeNav === "Attendance" ||
             activeNav === "Departments" ||
-            activeNav === "Leave" ||
             activeNav === "My profile" ||
             activeNav === "QR Code" ||
             activeNav === "Notifications"
               ? styles.contentFullNarrow
-              : activeNav === "Messages"
-                ? `${styles.contentMessages} ${chatThreadOpen ? styles.chatFullscreenActive : ""}`
-                : activeNav === "Workforce" || activeNav === "Profile Edits"
-                  ? styles.contentFull
-                  : styles.content
+              : activeNav === "Leave"
+                ? styles.contentLeave
+                : activeNav === "Messages"
+                  ? `${styles.contentMessages} ${chatThreadOpen ? styles.chatFullscreenActive : ""}`
+                  : activeNav === "Workforce" || activeNav === "Profile Edits"
+                    ? styles.contentFull
+                    : styles.content
           }
         >
           {activeNav === "Notifications" ? (
@@ -1506,7 +1500,7 @@ export default function Dashboard() {
               onThreadOpenChange={setChatThreadOpen}
             />
           ) : activeNav === "Leave" ? (
-            <LeavesTab onSectionChange={setLeavesSection} />
+            <LeavesTab />
           ) : activeNav === "Attendance" ? (
             <AttendanceSection />
           ) : activeNav === "QR Code" ? (
@@ -2202,18 +2196,12 @@ export default function Dashboard() {
           )}
 
           {/* Brand footer — last thing in the scrollable content, same
-              spot for every tab since it sits after the tab-switch above
-              but still inside this scrolling wrapper. Suppressed
-              specifically on the Leave > Policies sub-section (removed
-              on request) — everywhere else, including the other three
-              Leave sub-tabs (Requests/On Leave/Balances), keeps it. */}
-          {!(activeNav === "Leave" && leavesSection === "policies") && (
-            <div
-              className={`${styles.dashboardFooter} ${chatThreadOpen ? styles.hiddenOnMobileChat : ""}`}
-            >
-              <Logo variant="horizontal" size={48} />
-            </div>
-          )}
+              spot for every tab. */}
+          <div
+            className={`${styles.dashboardFooter} ${chatThreadOpen ? styles.hiddenOnMobileChat : ""}`}
+          >
+            <Logo variant="horizontal" size={48} />
+          </div>
         </div>
       </div>
 
