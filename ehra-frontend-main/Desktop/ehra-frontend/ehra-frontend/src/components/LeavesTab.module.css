@@ -889,12 +889,15 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    /* Breathing room at the end of scroll for this flowing section —
-       applied here rather than on the shared .contentFullNarrow ancestor,
-       since that ancestor also hosts the bounded Requests split-pane,
-       whose height:100% panel would shrink by this same amount under
-       border-box sizing if the padding lived there instead. */
-    padding-bottom: 35vh;
+    /* No padding-bottom here — the shared Dashboard content wrapper
+       (.contentFullNarrow, in Dashboard.module.css) already adds 35vh of
+       end-of-scroll breathing room for every tab on that wrapper,
+       including this one. Adding a second 35vh here stacked on top of it,
+       shoving the brand-footer logo an extra third-of-a-viewport further
+       down than it sits for every other section (Requests/Balances/
+       On-Leave) — it looked "lost"/disconnected from the page bottom
+       instead of following right after the last policy row like it does
+       everywhere else. */
 }
 
 .policyNote {
