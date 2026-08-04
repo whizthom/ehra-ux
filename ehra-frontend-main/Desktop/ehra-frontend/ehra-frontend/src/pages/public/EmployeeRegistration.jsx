@@ -326,12 +326,11 @@ export default function EmployeeRegistration() {
       {/* ── Right panel ── */}
       <div className={styles.right}>
         <div className={styles.mobileHero}>
-          <div className={styles.mobileDotGrid} aria-hidden="true" />
           <div
             className={styles.mobileLogoRow}
-            style={{ "--text-primary": "#ffffff" }}
+            style={{ "--text-primary": "#0b1f1a" }}
           >
-            <Logo variant="horizontal" size={64} />
+            <Logo variant="horizontal" size={52} />
           </div>
           <p className={styles.mobileEyebrow}>Employee registration</p>
           <h1 className={styles.mobileHeadline}>{STEPS[step - 1].title}</h1>

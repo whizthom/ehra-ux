@@ -439,13 +439,21 @@
     display: none;
 }
 
-/* ── Responsive ── */
+/* ── Responsive ─────────────────────────────────────────────────────────
+   Mobile locks to the device's real visible viewport (100dvh) and never
+   scrolls at the page level, in either direction — only the form body
+   (the region between the fixed header and footer) scrolls internally if
+   a given step's content is taller than the available space. The logo
+   sits directly on the white canvas with no background box, left-aligned,
+   matching Login.jsx's mobile treatment exactly. ─────────────────────── */
 @media (max-width: 768px) {
     .page {
-        display: block;
-        height: auto;
-        min-height: 100vh;
-        overflow: visible;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        height: 100dvh;
+        width: 100vw;
+        overflow: hidden;
     }
 
     .left {
@@ -453,66 +461,39 @@
     }
 
     .right {
-        overflow: visible;
+        flex: 1;
+        min-height: 0;
+        width: 100%;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
     }
 
     .mobileHero {
         position: relative;
         display: flex;
         flex-direction: column;
-        gap: 6px;
-        padding: 26px 24px 22px;
-        background: #0b1f1a;
-        background-image: radial-gradient(circle at 14% 12%, rgba(85, 224, 174, 0.2), transparent 46%),
-            radial-gradient(circle at 90% 85%, rgba(198, 161, 91, 0.16), transparent 50%);
-        background-size: 160% 160%;
-        animation: ehraBgDrift 22s ease-in-out infinite;
-        border-radius: 0 0 28px 28px;
-        box-shadow: 0 20px 40px -22px rgba(11, 31, 26, 0.5);
-        overflow: hidden;
-    }
-
-    .mobileDotGrid {
-        position: absolute;
-        inset: 0;
-        background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-        background-size: 18px 18px;
-        animation: ehraDotDrift 60s linear infinite;
-        mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 85%, transparent);
-        pointer-events: none;
+        gap: 4px;
+        flex-shrink: 0;
+        padding: 18px 20px 14px;
+        background: transparent;
     }
 
     .mobileLogoRow {
         position: relative;
         z-index: 1;
         display: flex;
+        justify-content: flex-start;
         align-items: center;
         gap: 9px;
-        margin-bottom: 14px;
-    }
-
-    .mobileLogoIcon {
-        width: 30px;
-        height: 30px;
-        background: rgba(255, 255, 255, 0.12);
-        border: 0.5px solid rgba(255, 255, 255, 0.18);
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 15px;
-    }
-
-    .mobileLogoText {
-        color: #fff;
-        font-size: 15px;
-        font-weight: 600;
+        margin-bottom: 10px;
+        background: transparent;
     }
 
     .mobileEyebrow {
         position: relative;
         z-index: 1;
-        color: #55e0ae;
+        color: #0f6e56;
         font-size: 11px;
         font-weight: 600;
         letter-spacing: 1.2px;
@@ -524,8 +505,8 @@
         z-index: 1;
         font-family: "Fraunces", Georgia, serif;
         font-weight: 550;
-        font-size: 19px;
-        color: #fff;
+        font-size: 18px;
+        color: #0b1f1a;
         line-height: 1.3;
         margin-top: 2px;
     }
@@ -535,14 +516,14 @@
         z-index: 1;
         display: flex;
         gap: 6px;
-        margin-top: 18px;
+        margin-top: 14px;
     }
 
     .mobileStepDot {
         flex: 1;
         height: 4px;
         border-radius: 2px;
-        background: rgba(255, 255, 255, 0.14);
+        background: #e2e8f0;
         transition: background 0.2s;
     }
 
@@ -551,28 +532,52 @@
     }
 
     .mobileStepActive {
-        background: linear-gradient(90deg, #55e0ae, rgba(85, 224, 174, 0.35));
-    }
-
-    .formBody {
-        padding: 20px 24px;
+        background: linear-gradient(90deg, #0f6e56, #55e0ae);
     }
 
     .rightHeader {
-        padding: 20px 24px 14px;
+        flex-shrink: 0;
+        padding: 0 20px 14px;
+    }
+
+    .formBody {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 16px 20px;
+        box-sizing: border-box;
     }
 
     .formFooter {
-        padding: 12px 24px 20px;
+        flex-shrink: 0;
+        padding: 12px 20px 16px;
+        box-sizing: border-box;
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 420px) {
     .grid2 {
         grid-template-columns: 1fr;
     }
 
     .mobileHeadline {
-        font-size: 18px;
+        font-size: 17px;
+    }
+
+    .mobileHero {
+        padding: 14px 16px 12px;
+    }
+
+    .rightHeader {
+        padding: 0 16px 12px;
+    }
+
+    .formBody {
+        padding: 14px 16px;
+    }
+
+    .formFooter {
+        padding: 10px 16px 14px;
     }
 }

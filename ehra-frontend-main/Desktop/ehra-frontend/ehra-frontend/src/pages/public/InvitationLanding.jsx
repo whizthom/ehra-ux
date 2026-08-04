@@ -113,14 +113,11 @@ export default function InvitationLanding() {
 
       {/* ── Right panel ── */}
       <div className={styles.right}>
-        <div className={styles.mobileHero}>
-          <div className={styles.mobileDotGrid} aria-hidden="true" />
-          <div
-            className={styles.mobileLogoRow}
-            style={{ "--text-primary": "#ffffff" }}
-          >
-            <Logo variant="horizontal" size={64} />
-          </div>
+        <div
+          className={styles.mobileLogoRow}
+          style={{ "--text-primary": "#0b1f1a" }}
+        >
+          <Logo variant="horizontal" size={56} />
         </div>
 
         {/* Loading */}
