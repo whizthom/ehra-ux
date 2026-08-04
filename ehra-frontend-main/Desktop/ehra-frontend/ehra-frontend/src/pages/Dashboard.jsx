@@ -1469,17 +1469,16 @@ export default function Dashboard() {
           className={
             activeNav === "Attendance" ||
             activeNav === "Departments" ||
+            activeNav === "Leave" ||
             activeNav === "My profile" ||
             activeNav === "QR Code" ||
             activeNav === "Notifications"
               ? styles.contentFullNarrow
-              : activeNav === "Leave"
-                ? styles.contentLeave
-                : activeNav === "Messages"
-                  ? `${styles.contentMessages} ${chatThreadOpen ? styles.chatFullscreenActive : ""}`
-                  : activeNav === "Workforce" || activeNav === "Profile Edits"
-                    ? styles.contentFull
-                    : styles.content
+              : activeNav === "Messages"
+                ? `${styles.contentMessages} ${chatThreadOpen ? styles.chatFullscreenActive : ""}`
+                : activeNav === "Workforce" || activeNav === "Profile Edits"
+                  ? styles.contentFull
+                  : styles.content
           }
         >
           {activeNav === "Notifications" ? (
@@ -2205,12 +2204,9 @@ export default function Dashboard() {
           {/* Brand footer — last thing in the scrollable content, same
               spot for every tab since it sits after the tab-switch above
               but still inside this scrolling wrapper. Suppressed
-              specifically on the Leave > Policies sub-section (on
-              request) — everywhere else, including the other three Leave
-              sub-tabs (Requests/On Leave/Balances), keeps it. Policies
-              still gets the same bottom spacing as every other page via
-              .contentLeave's own padding-bottom — that's independent of
-              whether this footer div renders at all. */}
+              specifically on the Leave > Policies sub-section (removed
+              on request) — everywhere else, including the other three
+              Leave sub-tabs (Requests/On Leave/Balances), keeps it. */}
           {!(activeNav === "Leave" && leavesSection === "policies") && (
             <div
               className={`${styles.dashboardFooter} ${chatThreadOpen ? styles.hiddenOnMobileChat : ""}`}
