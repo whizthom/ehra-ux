@@ -63,7 +63,26 @@ export default defineConfig({
         navigateFallbackDenylist: [/^\/api\//],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
-        skipWaiting: false, // we prompt instead — see registerType above
+        // A new service worker finishing install used to sit in a
+        // "waiting" state until every open tab closed, or someone
+        // explicitly triggered it — an ordinary reload doesn't release
+        // that, so a plain refresh could keep serving the OLD version
+        // for a while after a real deploy, sometimes needing several
+        // reloads (or the UpdateToast's "Reload now" button) before it
+        // actually took effect. skipWaiting: true (paired with
+        // clientsClaim above) makes a newly-installed worker activate
+        // immediately in the background as soon as it's ready — so the
+        // very next reload, ordinary or otherwise, always gets the
+        // latest deploy on the first try.
+        //
+        // The UpdateToast prompt (registerType: "prompt" above) still
+        // shows and still matters: the worker activating doesn't change
+        // what's already running in an open tab's memory — someone
+        // mid-form won't get yanked onto new code without reloading —
+        // it just guarantees that whenever a reload DOES happen (the
+        // toast's button, or just an ordinary refresh), it's immediate
+        // instead of a coin flip.
+        skipWaiting: true,
 
         runtimeCaching: [
           // Google Fonts stylesheet
