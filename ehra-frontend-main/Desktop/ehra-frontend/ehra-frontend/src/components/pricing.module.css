@@ -1,0 +1,525 @@
+/* ── Page shell ─────────────────────────────────────────────────────────── */
+.page {
+    min-height: 100vh;
+    background: var(--bg-page);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--text-primary);
+    padding-bottom: 96px;
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px clamp(20px, 5vw, 64px);
+}
+
+.topbarLink {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border: 1px solid var(--border-color);
+    padding: 9px 18px;
+    border-radius: 999px;
+    transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.topbarLink:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--bg-soft-accent);
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.header {
+    max-width: 720px;
+    margin: 8px auto 44px;
+    padding: 0 24px;
+    text-align: center;
+}
+
+.eyebrow {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--bg-soft-accent);
+    padding: 6px 14px;
+    border-radius: 999px;
+    margin-bottom: 18px;
+}
+
+.title {
+    font-size: clamp(28px, 4.4vw, 42px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 14px;
+}
+
+.subtitle {
+    font-size: 17px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+/* ── Billing toggle ─────────────────────────────────────────────────────── */
+.toggleRow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin: 0 auto 48px;
+}
+
+.toggleTrack {
+    position: relative;
+    display: inline-flex;
+    background: var(--bg-surface-alt);
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    padding: 4px;
+    gap: 2px;
+}
+
+.toggleThumb {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    background: var(--accent);
+    border-radius: 999px;
+    transition: transform 0.28s cubic-bezier(0.65, 0, 0.35, 1);
+    box-shadow: 0 2px 8px rgba(15, 110, 86, 0.35);
+}
+
+.toggleTrack[data-cycle="YEARLY"] .toggleThumb {
+    transform: translateX(100%);
+}
+
+.toggleOption {
+    position: relative;
+    z-index: 1;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 8px 22px;
+    border-radius: 999px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: color 0.2s ease;
+    min-width: 96px;
+}
+
+.toggleOption[data-active="true"] {
+    color: #ffffff;
+}
+
+.toggleSavingsPill {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--bg-soft-accent);
+    border: 1px solid var(--border-color);
+    padding: 5px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+/* ── Cards grid ─────────────────────────────────────────────────────────── */
+.cardsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 24px;
+    align-items: stretch;
+}
+
+@media (max-width: 980px) {
+    .cardsGrid {
+        grid-template-columns: 1fr;
+        max-width: 480px;
+    }
+}
+
+.card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 32px 28px;
+    box-shadow: 0 1px 2px var(--shadow-color);
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px var(--shadow-color);
+}
+
+.cardHighlight {
+    border: 1.5px solid var(--accent);
+    box-shadow: 0 0 0 4px var(--bg-soft-accent), 0 20px 44px rgba(15, 110, 86, 0.18);
+}
+
+@media (min-width: 981px) {
+    .cardHighlight {
+        transform: scale(1.045);
+        z-index: 1;
+    }
+
+    .cardHighlight:hover {
+        transform: scale(1.045) translateY(-4px);
+    }
+}
+
+.cardDark {
+    background: #0b1f1a;
+    background-image: radial-gradient(circle at 15% 0%, rgba(85, 224, 174, 0.16), transparent 45%);
+    border-color: #16332b;
+    color: #f4f7f6;
+}
+
+.cardDark .planTagline {
+    color: #a9c4bb;
+}
+
+.cardDark .featureText {
+    color: #dce9e4;
+}
+
+.cardDark .featureCheck {
+    color: #55e0ae;
+}
+
+.cardDark .priceUnit {
+    color: #a9c4bb;
+}
+
+.badge {
+    position: absolute;
+    top: -13px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 6px 16px;
+    border-radius: 999px;
+    box-shadow: 0 4px 10px rgba(15, 110, 86, 0.35);
+    white-space: nowrap;
+}
+
+.planName {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.planTagline {
+    font-size: 14px;
+    color: var(--text-secondary);
+    min-height: 40px;
+    line-height: 1.4;
+    margin-bottom: 20px;
+}
+
+.priceRow {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.priceAmount {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.priceUnit {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.savingsBadge {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--bg-soft-accent);
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 20px;
+}
+
+.cardDark .savingsBadge {
+    color: #55e0ae;
+    background: rgba(85, 224, 174, 0.12);
+}
+
+.priceSpacer {
+    height: 20px;
+    margin-bottom: 20px;
+}
+
+.ctaButton {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 13px 18px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    border: 1.5px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+    cursor: pointer;
+    transition: background-color 0.18s ease, color 0.18s ease, transform 0.12s ease;
+    margin-bottom: 26px;
+}
+
+.ctaButton:hover {
+    transform: translateY(-1px);
+}
+
+.ctaButtonPrimary {
+    background: var(--accent);
+    color: #fff;
+}
+
+.ctaButtonPrimary:hover {
+    background: var(--accent-hover);
+}
+
+.ctaButton:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.cardDark .ctaButton {
+    border-color: #55e0ae;
+    color: #55e0ae;
+}
+
+.cardDark .ctaButtonPrimary {
+    background: #55e0ae;
+    color: #0b1f1a;
+}
+
+.cardDark .ctaButtonPrimary:hover {
+    background: #74e9bd;
+}
+
+.featureList {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    flex: 1;
+}
+
+.featureItem {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.featureCheck {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    color: var(--accent);
+    margin-top: 1px;
+}
+
+.featureText {
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--text-primary);
+}
+
+.checkoutError {
+    font-size: 12.5px;
+    color: var(--danger-text);
+    background: var(--danger-bg);
+    border: 1px solid var(--danger-border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin: -14px 0 20px;
+}
+
+/* ── Comparison table ───────────────────────────────────────────────────── */
+.section {
+    max-width: 1120px;
+    margin: 88px auto 0;
+    padding: 0 24px;
+}
+
+.sectionHeading {
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 32px;
+    letter-spacing: -0.01em;
+}
+
+.tableWrap {
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    background: var(--bg-surface);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 560px;
+}
+
+.table th,
+.table td {
+    padding: 14px 18px;
+    text-align: center;
+    font-size: 13.5px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table tr:last-child th,
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.table thead th {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+    background: var(--bg-surface-alt);
+}
+
+.table th:first-child,
+.table td:first-child {
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.table thead th:not(:first-child) {
+    color: var(--accent);
+}
+
+.tableCheck {
+    color: var(--accent);
+    width: 18px;
+    height: 18px;
+}
+
+.tableDash {
+    color: var(--text-secondary);
+}
+
+/* ── Trust badges ───────────────────────────────────────────────────────── */
+.trustRow {
+    max-width: 1120px;
+    margin: 56px auto 0;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
+@media (max-width: 720px) {
+    .trustRow {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.trustItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+
+.trustIcon {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    color: var(--accent);
+}
+
+/* ── FAQ ─────────────────────────────────────────────────────────────────── */
+.faqSection {
+    max-width: 760px;
+}
+
+.faqItem {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.faqTrigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: none;
+    border: none;
+    text-align: left;
+    padding: 18px 4px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.faqChevron {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    color: var(--text-secondary);
+    transition: transform 0.2s ease;
+}
+
+.faqChevron[data-open="true"] {
+    transform: rotate(180deg);
+    color: var(--accent);
+}
+
+.faqAnswer {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.25s ease;
+}
+
+.faqAnswer[data-open="true"] {
+    max-height: 240px;
+}
+
+.faqAnswerInner {
+    padding: 0 4px 18px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+}

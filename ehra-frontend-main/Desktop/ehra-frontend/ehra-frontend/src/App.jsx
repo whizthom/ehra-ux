@@ -25,6 +25,7 @@ import InvitationLanding from "./pages/public/InvitationLanding";
 import EmployeeRegistration from "./pages/public/EmployeeRegistration";
 import RegistrationSubmitted from "./pages/public/RegistrationSubmitted";
 import QrDisplayPage from "./pages/public/QrDisplayPage";
+import Pricing from "./pages/public/Pricing";
 
 import NotFound from "./pages/NotFound";
 
@@ -100,6 +101,11 @@ function App() {
                 (see AttendanceController's public /qr/display/{token}
                 endpoint), not a JWT or any kind of session credential. */}
             <Route path="/qr-display/:token" element={<QrDisplayPage />} />
+
+            {/* PRICING — public, reachable signed-in or signed-out (see
+                Pricing.jsx's docstring for the signed-in-admin checkout
+                path vs. the signed-out "go sign up first" path). */}
+            <Route path="/pricing" element={<Pricing />} />
 
             {/* EMPLOYER DASHBOARD */}
 
