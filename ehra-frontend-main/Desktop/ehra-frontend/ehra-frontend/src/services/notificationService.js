@@ -9,10 +9,10 @@
  * every call site.
  *
  * How to wire up FCM later:
- *   1. `npm install firebase` messaging is already available — the repo
- *      already depends on the `firebase` package (see src/firebase.js,
- *      used today for phone auth) and can share the same initializeApp()
- *      instance.
+ *   1. `npm install firebase` — as of the Termii phone-auth migration,
+ *      the repo no longer depends on the `firebase` package at all (see
+ *      src/firebase-lazy.js), so this would be a fresh install, not a
+ *      reuse of an existing initializeApp() instance.
  *   2. Implement `subscribe()` for real: call `getToken()` from
  *      "firebase/messaging" (guarded by the same `isSupported()` check
  *      used here), send the token to a new backend endpoint (e.g.

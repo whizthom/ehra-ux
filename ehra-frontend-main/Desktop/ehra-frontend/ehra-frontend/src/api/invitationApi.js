@@ -16,9 +16,10 @@ export const generateInvitation = () =>
   API.post("/invitations/generate").then((r) => r.data);
 
 // POST /api/invitations/register — public sign-up form for someone with
-// NO existing Ehra account. idToken is a Firebase phone verification
-// (see EmployeeRegistration.jsx's phone/OTP steps), re-verified
-// server-side — never a plain client-supplied phone field. Creates a
+// NO existing Ehra account. idToken is a phoneVerificationToken from the
+// Termii OTP verification step (see EmployeeRegistration.jsx's phone/OTP
+// steps), re-verified server-side — never a plain client-supplied phone
+// field. Creates a
 // brand-new Identity + a PENDING_APPROVAL EmployeeMembership at the
 // inviting business, and logs the person straight in (same
 // AuthResponseDTO shape as login()/registerWithPhone()) — no separate

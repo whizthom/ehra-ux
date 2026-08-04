@@ -1,41 +1,58 @@
 /**
- * Drop-in, lazily-loaded replacement for `../firebase`'s phone-auth
- * exports. Same three function names, same signatures, same behavior —
- * the only difference is that `firebase/auth` (and its `libphonenumber`
- * dependency, together ~200KB minified) isn't fetched or parsed until
- * one of these is actually called, instead of being bundled into
- * whichever page imports it.
+ * Drop-in replacement for the old Firebase-backed phone-OTP helpers
+ * (Global Phone Number Authentication rebuild — Firebase → Termii).
  *
- * Why this exists: Register, Login, ForgotPassword and
- * EmployeeRegistration all import phone-OTP helpers directly, and all
- * four are public-facing pages that need to render immediately (they're
- * not behind React.lazy — see App.jsx's comment on why auth pages stay
- * eager). Most visits to any of these pages never touch phone auth at
- * all (email/password login, or filling in the business-name step
- * before ever tapping "send code"), so shipping Firebase's auth SDK to
- * every single one of them up front was pure waste. Each of the
- * functions below is only ever called from an event handler (a button
- * click), never during initial render, so deferring the import here has
- * zero effect on behavior — just on when the bytes get downloaded.
+ * Same three exported function names, same call signatures, same
+ * calling convention as before:
+ *   const confirmationResult = await sendPhoneOtp(phoneNumber);
+ *   const idToken = await confirmPhoneOtp(confirmationResult, code);
+ *   await resetRecaptcha();
  *
- * Nothing about `../firebase` itself changed; this file only adds an
- * indirection in front of it. If a future change needs the underlying
- * Firebase Auth instance directly (not just these three helpers),
- * import `../firebase` as before — this wrapper is additive, not a
- * replacement for that module.
+ * That's exactly why Login.jsx, Register.jsx, ForgotPassword.jsx and
+ * EmployeeRegistration.jsx — all four of which import from this file —
+ * needed ZERO changes to their own logic for this migration. Only
+ * what's underneath changed: instead of loading the Firebase Auth SDK
+ * and running its client-side OTP flow, these now call Ehra's own
+ * backend (see api/phoneAuthApi.js), which in turn calls Termii's
+ * Send/Verify Token API — Termii's API key has to stay server-side, so
+ * unlike Firebase there's no client SDK to lazy-load here at all
+ * anymore.
+ *
+ * Termii's OTP API doesn't need a CAPTCHA challenge the way Firebase's
+ * invisible reCAPTCHA did, so resetRecaptcha() is now a no-op — kept
+ * only so the resend/retry call sites that still invoke it don't need
+ * to change.
+ *
+ * The filename stays "firebase-lazy" (rather than something like
+ * "otp-auth") purely so every existing import keeps working unmodified.
+ * Feel free to rename it and update the four import sites together in a
+ * future pass — it's no longer doing any lazy-loading, so the name is
+ * now just a historical label.
  */
 
-export async function sendPhoneOtp(phoneNumber, containerId) {
-  const mod = await import("./firebase");
-  return mod.sendPhoneOtp(phoneNumber, containerId);
+import { sendOtp, verifyOtp } from "./api/phoneAuthApi";
+
+export async function sendPhoneOtp(phoneNumber, _containerId) {
+  const { pinId } = await sendOtp(phoneNumber);
+  // Shaped to loosely mirror Firebase's ConfirmationResult so
+  // confirmPhoneOtp() below has something to thread pinId through —
+  // call sites never need to look inside this object themselves.
+  return { pinId, phoneNumber };
 }
 
 export async function confirmPhoneOtp(confirmationResult, code) {
-  const mod = await import("./firebase");
-  return mod.confirmPhoneOtp(confirmationResult, code);
+  const { phoneVerificationToken } = await verifyOtp(
+    confirmationResult.pinId,
+    code,
+  );
+  // Plays the exact role a Firebase ID token used to: passed straight
+  // into checkPhone / registerWithPhone / verifyPhoneForReset /
+  // verifyTwoFactorLogin (api/phoneAuthApi.js) as their "idToken" arg.
+  return phoneVerificationToken;
 }
 
-export async function resetRecaptcha(containerId) {
-  const mod = await import("./firebase");
-  return mod.resetRecaptcha(containerId);
+export async function resetRecaptcha(_containerId) {
+  // No-op — Termii's OTP API has no client-side CAPTCHA challenge to
+  // reset. Kept as an export so every existing call site keeps working
+  // without changes.
 }

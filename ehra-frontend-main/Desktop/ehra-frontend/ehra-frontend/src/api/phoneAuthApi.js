@@ -1,5 +1,24 @@
 import API, { saveSession } from "./authApi";
 
+// ── OTP (Termii) ─────────────────────────────────────────────────────────
+// Global Phone Number Authentication rebuild — Firebase → Termii. These
+// two replace what used to be direct Firebase Auth SDK calls in
+// ../firebase-lazy; that file now calls these instead of talking to a
+// third-party SDK directly, since Termii's API key has to stay
+// server-side (unlike Firebase's client-side web config).
+
+// STEP 5: triggers a Termii OTP SMS to phoneNumber. Returns { pinId } —
+// hold onto this and send it back, together with the code the person
+// types, to verifyOtp() below.
+export const sendOtp = (phoneNumber) =>
+  API.post("/auth/phone/otp/send", { phoneNumber }).then((r) => r.data);
+
+// STEP 5-6: redeems pinId + the typed code against Termii. Returns
+// { phoneVerificationToken, phoneNumber } — phoneVerificationToken is
+// what every function below expects as its "idToken" argument.
+export const verifyOtp = (pinId, otp) =>
+  API.post("/auth/phone/otp/verify", { pinId, otp }).then((r) => r.data);
+
 // ── Registration (STEP 6-9) ─────────────────────────────────────────────
 
 // Checks whether a just-verified phone number already has an Ehra

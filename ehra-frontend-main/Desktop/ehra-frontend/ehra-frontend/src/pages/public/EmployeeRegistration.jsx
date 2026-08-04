@@ -326,11 +326,12 @@ export default function EmployeeRegistration() {
       {/* ── Right panel ── */}
       <div className={styles.right}>
         <div className={styles.mobileHero}>
+          <div className={styles.mobileDotGrid} aria-hidden="true" />
           <div
             className={styles.mobileLogoRow}
-            style={{ "--text-primary": "#0b1f1a" }}
+            style={{ "--text-primary": "#ffffff" }}
           >
-            <Logo variant="horizontal" size={52} />
+            <Logo variant="horizontal" size={64} />
           </div>
           <p className={styles.mobileEyebrow}>Employee registration</p>
           <h1 className={styles.mobileHeadline}>{STEPS[step - 1].title}</h1>
@@ -669,20 +670,17 @@ export default function EmployeeRegistration() {
 }
 
 function friendlyFirebaseError(err) {
-  const code = err?.code || "";
-  if (code.includes("invalid-phone-number")) {
-    return "That phone number doesn't look valid. Please check it and try again.";
+  // Global Phone Number Authentication rebuild (Firebase → Termii):
+  // errors now come from Ehra's own backend via api/phoneAuthApi.js, not
+  // the Firebase SDK, so the friendly message is whatever
+  // PhoneVerificationException / OtpDeliveryException put in
+  // ErrorResponseDTO.message (see GlobalExceptionHandler) — surfaced
+  // here first, ahead of any generic fallback.
+  const backendMessage = err?.response?.data?.message;
+  if (backendMessage) {
+    return backendMessage;
   }
-  if (code.includes("too-many-requests")) {
-    return "Too many attempts. Please wait a moment before trying again.";
-  }
-  if (
-    code.includes("invalid-verification-code") ||
-    code.includes("code-expired")
-  ) {
-    return "That code is incorrect or has expired. Please try again.";
-  }
-  if (code.includes("network-request-failed")) {
+  if (err?.code === "ERR_NETWORK") {
     return "Network error — please check your connection and try again.";
   }
   return err?.message || "Something went wrong. Please try again.";
