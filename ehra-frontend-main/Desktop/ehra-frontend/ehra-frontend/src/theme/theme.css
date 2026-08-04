@@ -124,3 +124,35 @@ body,
 [class*="panel"] {
    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
+
+/* Hide scrollbars on mobile only — native apps don't show a persistent
+   scrollbar track/thumb, and that visible track is one of the more
+   obvious "this is just a website" tells on an installed PWA, phone-
+   sized screens especially. Desktop keeps its normal scrollbar; this is
+   scoped to match this codebase's established phone breakpoint (used
+   the same way throughout — LeavesTab, EmployeeDashboard, etc.), not
+   the wider ~900px cutoff used elsewhere for the sidebar/bottom-nav
+   switch. This only hides the scrollbar itself; scrolling still works
+   exactly the same on mobile (touch drag, keyboard) — mobile Safari/
+   Chrome already auto-hide their scrollbars by default, so this mainly
+   affects Android WebView, where a track is shown persistently
+   otherwise. Applied globally with a wildcard rather than to
+   Dashboard.module.css/EmployeeDashboard.module.css/etc. individually,
+   since there are scroll containers (.content, chat panels, tables,
+   dropdowns, modals, ...) spread across dozens of component
+   stylesheets — a universal rule here is the only way to actually
+   guarantee "the whole app", not just the ones anyone remembers to
+   update. */
+@media (max-width: 640px) {
+   * {
+      scrollbar-width: none;
+      /* Firefox */
+      -ms-overflow-style: none;
+      /* legacy Edge/IE */
+   }
+
+   *::-webkit-scrollbar {
+      display: none;
+      /* Chrome, Safari, Edge (Chromium), Android WebView */
+   }
+}
