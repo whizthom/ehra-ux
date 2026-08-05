@@ -594,15 +594,23 @@
         display: flex;
         overflow-x: auto;
         scroll-snap-type: x mandatory;
-        scroll-padding-inline: 24px;
-        padding: 0 24px 4px;
-        gap: 14px;
+        scroll-padding-inline: 16px;
+        /* Extra top padding — not cosmetic: this is a horizontally-scrolling
+       container, and scroll containers clip overflow on BOTH axes once
+       either one is set to auto/scroll. Without room reserved here, the
+       "Most Popular" ribbon (which intentionally pokes above the card
+       via a negative top offset) gets sliced off instead of floating
+       above it. */
+        padding: 20px 16px 4px;
+        gap: 12px;
         max-width: 100%;
         -webkit-overflow-scrolling: touch;
     }
 
     .cardSlide {
-        flex: 0 0 86%;
+        /* Wider slide — less of the neighboring card peeking in, more room
+       for each plan's own content to breathe on a phone screen. */
+        flex: 0 0 92%;
         scroll-snap-align: center;
         scroll-snap-stop: always;
     }
@@ -653,6 +661,26 @@
         margin: -20px 0 14px;
     }
 
+    .table {
+        /* Narrower minimum than desktop's 560px — the table only has 4
+       columns (Feature + 3 plans), so this is roughly one pinned label
+       column plus three comfortably-tappable plan columns, not an
+       arbitrary shrink. */
+        min-width: 420px;
+    }
+
+    .table th,
+    .table td {
+        padding: 11px 10px;
+        font-size: 12.5px;
+    }
+
+    .table th:first-child,
+    .table td:first-child {
+        padding-left: 14px;
+        padding-right: 12px;
+    }
+
     .table th:first-child,
     .table td:first-child {
         position: sticky;
@@ -669,6 +697,7 @@
 
     .section {
         margin-top: 56px;
+        padding: 0 16px;
     }
 
     .sectionHeading {
