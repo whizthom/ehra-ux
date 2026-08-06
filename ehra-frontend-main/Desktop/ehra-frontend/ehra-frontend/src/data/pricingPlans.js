@@ -59,7 +59,7 @@ export const PLANS = [
       "Phone number login",
       "QR attendance (if enabled)",
       "Core business management tools",
-      "Penalty deduction — free for your first 2 months after you turn it on, then requires Pro",
+      "Unlimited penalty deductions",
     ],
   },
   {
@@ -143,7 +143,7 @@ export const COMPARISON_ROWS = [
   { label: "Leave management", values: { STARTER: true, PRO: true, PREMIUM: true } },
   {
     label: "Penalty deduction",
-    values: { STARTER: "First 2 months free", PRO: "Unlimited", PREMIUM: "Unlimited" },
+    values: { STARTER: "Unlimited", PRO: "Unlimited", PREMIUM: "Unlimited" },
   },
   { label: "Priority support", values: { STARTER: false, PRO: true, PREMIUM: true } },
   { label: "AI features", values: { STARTER: false, PRO: false, PREMIUM: "Future" } },

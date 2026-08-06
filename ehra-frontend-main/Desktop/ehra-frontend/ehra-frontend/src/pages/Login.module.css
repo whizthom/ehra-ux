@@ -226,35 +226,11 @@
     margin-top: 1px;
 }
 
-.leftFooterRow {
+.leftFooter {
     position: relative;
     z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.leftFooter {
     color: #6f8b81;
     font-size: 12px;
-}
-
-.leftFooterLink {
-    color: #cfe8de;
-    font-size: 12px;
-    font-weight: 600;
-    text-decoration: none;
-    padding: 5px 12px;
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 999px;
-    transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
-}
-
-.leftFooterLink:hover {
-    color: #ffffff;
-    border-color: rgba(255, 255, 255, 0.32);
-    background: rgba(255, 255, 255, 0.06);
 }
 
 /* ── Right panel — the form, plain on the canvas ───────────────────────

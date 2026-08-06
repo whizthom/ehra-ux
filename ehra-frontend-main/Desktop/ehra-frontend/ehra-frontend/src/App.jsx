@@ -105,7 +105,14 @@ function App() {
             {/* PRICING — public, reachable signed-in or signed-out (see
                 Pricing.jsx's docstring for the signed-in-admin checkout
                 path vs. the signed-out "go sign up first" path). */}
-            <Route path="/pricing" element={<Pricing />} />
+            <Route
+              path="/pricing"
+              element={
+                <ProtectedRoute>
+                  <Pricing />
+                </ProtectedRoute>
+              }
+            />
 
             {/* EMPLOYER DASHBOARD */}
 

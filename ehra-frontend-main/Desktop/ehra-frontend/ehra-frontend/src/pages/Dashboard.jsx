@@ -31,6 +31,8 @@ import PenaltyTab from "../components/PenaltyTab";
 import ReportsTab from "../components/ReportsTab";
 import TodaysPulse from "../components/TodaysPulse";
 import Logo from "../components/Logo";
+import PlanBadge from "../components/plan/PlanBadge";
+import PlanExpiryReminder from "../components/plan/PlanExpiryReminder";
 import {
   getAllProfileEdits,
   getPendingProfileEdits,
@@ -43,6 +45,7 @@ import {
   updateAttendanceProfileSetting,
 } from "../api/businessApi";
 import { getMyProfile } from "../api/employeeApi";
+import { getMySubscription } from "../api/subscriptionApi";
 
 // ── Sidebar nav ────────────────────────────────────────────────────────────
 // "My Accounts" is handled specially — clicking it navigates to the
@@ -71,7 +74,7 @@ const NAV = [
   },
   {
     icon: "ti-credit-card",
-    label: "Billing",
+    label: "Plans",
     section: "account",
     isFullPage: true,
     route: "/pricing",
@@ -301,6 +304,11 @@ export default function Dashboard() {
   const [notifs, setNotifs] = useState([]);
   const [loadingNotifs, setLoadingNotifs] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  // Mobile-only "more" menu (the ⋮ kebab in the topbar) — houses
+  // destinations that don't need a permanent slot in the bottom nav
+  // strip. Plans is the first tenant; more can join later without
+  // needing a new UI pattern.
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const [actioningNotif, setActioningNotif] = useState(null); // id being actioned
   // Optimistic delete-with-undo: a notification leaves `notifs` the instant
   // the user deletes it, but the actual DELETE call is held for 3s so the
@@ -317,6 +325,7 @@ export default function Dashboard() {
   // once the Messages tab itself is mounted).
   const [messagesUnread, setMessagesUnread] = useState(0);
   const notifRef = useRef(null);
+  const moreMenuRef = useRef(null);
   const qaScrollRef = useRef(null);
   const bottomNavScrollRef = useRef(null);
   const qaThumb = useScrollThumb(qaScrollRef);
@@ -388,6 +397,13 @@ export default function Dashboard() {
   // Business (company) profile — Settings tab
   const [businessProfile, setBusinessProfile] = useState(null);
   const [loadingBusinessProfile, setLoadingBusinessProfile] = useState(true);
+
+  // Current plan — powers the topbar PlanBadge and the periodic
+  // PlanExpiryReminder toast. Owned once here (not inside those
+  // components) so both read the exact same fetch instead of doubling
+  // up requests.
+  const [subscription, setSubscription] = useState(null);
+  const [loadingSubscription, setLoadingSubscription] = useState(true);
 
   // Personal attendance profile — Settings tab. Off by default; toggling
   // this changes whether the employer counts as staff and is subject to
@@ -520,6 +536,21 @@ export default function Dashboard() {
     }
   }, []);
 
+  // Current subscription/plan — deliberately swallows errors the same
+  // way the other summary widgets do (log and move on) rather than
+  // surfacing a dashboard-wide failure state just because the plan pill
+  // couldn't load.
+  const fetchSubscription = useCallback(async () => {
+    try {
+      const data = await getMySubscription();
+      setSubscription(data);
+    } catch (err) {
+      console.error("Failed to load subscription:", err);
+    } finally {
+      setLoadingSubscription(false);
+    }
+  }, []);
+
   // Personal attendance profile
   const fetchAttendanceProfile = useCallback(async () => {
     try {
@@ -623,6 +654,7 @@ export default function Dashboard() {
     fetchBusinessProfile();
     fetchAttendanceProfile();
     fetchMyProfile();
+    fetchSubscription();
   }, [
     fetchSummary,
     fetchNotifs,
@@ -636,7 +668,22 @@ export default function Dashboard() {
     fetchBusinessProfile,
     fetchAttendanceProfile,
     fetchMyProfile,
+    fetchSubscription,
   ]);
+
+  // Keep the plan pill/expiry reminder current without needing a full
+  // page reload: re-check periodically, and whenever the tab regains
+  // focus (the most likely moment to actually notice a change — e.g.
+  // coming back from paying on the Pricing page in another tab, or the
+  // scheduled expiry job having run while this tab sat idle overnight).
+  useEffect(() => {
+    const intervalId = window.setInterval(fetchSubscription, 5 * 60 * 1000);
+    window.addEventListener("focus", fetchSubscription);
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", fetchSubscription);
+    };
+  }, [fetchSubscription]);
 
   // ── Real-time: prepend new notifications without reloading ─────────────
   useMessageStream({
@@ -692,6 +739,18 @@ export default function Dashboard() {
     if (notifOpen) document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [notifOpen]);
+
+  // Close the mobile "more" menu on outside click — same pattern as the
+  // notification panel above.
+  useEffect(() => {
+    function handleClick(e) {
+      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target)) {
+        setMoreMenuOpen(false);
+      }
+    }
+    if (moreMenuOpen) document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [moreMenuOpen]);
 
   // ── Actions ───────────────────────────────────────────────────────────
 
@@ -1271,6 +1330,17 @@ export default function Dashboard() {
           </div>
 
           <div className={styles.topbarRight}>
+            {/* ── Current plan — click through to /pricing to manage ── */}
+            <PlanBadge
+              subscription={subscription}
+              loading={loadingSubscription}
+              onClick={() =>
+                navigate("/pricing", {
+                  state: { returnPath: "/dashboard", activeNav },
+                })
+              }
+            />
+
             {/* ── Message shortcut — jumps straight to the Messages tab ── */}
             <div
               className={styles.notifBtn}
@@ -1453,6 +1523,43 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
+
+            {/* ── Mobile-only "more" menu (⋮) — Plans lives here instead
+                of in the bottom nav strip; see NAV.filter above. ── */}
+            {isMobile && (
+              <div className={styles.notifWrapper} ref={moreMenuRef}>
+                <div
+                  className={styles.notifBtn}
+                  onClick={() => setMoreMenuOpen((v) => !v)}
+                  aria-label="More"
+                  title="More"
+                >
+                  <i
+                    className="ti ti-dots-vertical"
+                    style={{ fontSize: 17 }}
+                    aria-hidden="true"
+                  />
+                </div>
+
+                {moreMenuOpen && (
+                  <div className={styles.moreMenuPanel}>
+                    <button
+                      type="button"
+                      className={styles.moreMenuItem}
+                      onClick={() => {
+                        setMoreMenuOpen(false);
+                        navigate("/pricing", {
+                          state: { returnPath: "/dashboard", activeNav },
+                        });
+                      }}
+                    >
+                      <i className="ti ti-credit-card" aria-hidden="true" />
+                      Plans
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* ── Settings icon (theme toggle) ── */}
             <ThemeToggleMenu />
@@ -2262,8 +2369,14 @@ export default function Dashboard() {
             (n) =>
               // Notifications and Messages stay reachable on mobile via the
               // topbar bell icon / elsewhere, but are dropped from this
-              // strip specifically.
-              n.label !== "Notifications" && n.label !== "Messages",
+              // strip specifically. Plans moves into the topbar's kebab
+              // ("more") menu on mobile instead — see the topbarRight
+              // block above — to keep this scrollable strip focused on
+              // day-to-day workflow tabs rather than an occasional
+              // account-settings destination.
+              n.label !== "Notifications" &&
+              n.label !== "Messages" &&
+              n.label !== "Plans",
           ).map((n) => (
             <button
               key={n.label}
@@ -2326,6 +2439,8 @@ export default function Dashboard() {
         onConfirm={handleLogout}
         loading={loggingOut}
       />
+
+      <PlanExpiryReminder subscription={subscription} />
     </div>
   );
 }

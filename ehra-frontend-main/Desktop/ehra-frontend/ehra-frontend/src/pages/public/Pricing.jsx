@@ -18,23 +18,25 @@ import {
 } from "../../api/subscriptionApi";
 
 /**
- * /pricing — public marketing page. Reachable signed-out (so it can be
- * linked from marketing/landing surfaces) and signed-in (so an existing
- * admin can upgrade from inside the app).
+ * /pricing — reachable only when signed in (see the ProtectedRoute wrapper
+ * around this route in App.jsx). Any authenticated Identity can view it;
+ * only an Employer/admin context can actually check out (enforced both
+ * here and, for real, by the backend's /api/subscription/** being
+ * admin-only — see SecurityConfig).
  *
  * Checkout flow:
- *   1. Starter's "Start Free" always goes to signup — there's nothing to
- *      pay for.
- *   2. Pro/Premium, signed out: send them to signup with the intended plan
- *      as a query param, so they land back here (or straight into
- *      checkout) once their account exists. Nothing to charge yet without
- *      a business to attach the subscription to.
+ *   1. Starter's "Start Free" — there's nothing to pay for, so this just
+ *      returns them to the dashboard rather than sending them anywhere
+ *      signup-shaped (they already have an account, that's how they got
+ *      here).
+ *   2. Pro/Premium, signed in but NOT in an admin/employer context (e.g.
+ *      viewing as an employee): nothing to check out from here either —
+ *      sends them back to the dashboard rather than attempting a request
+ *      the backend would reject anyway.
  *   3. Pro/Premium, signed in as an admin: initialize a checkout on the
  *      backend, open the real Paystack popup, then verify the transaction
- *      server-side before treating it as paid. The backend endpoints this
- *      calls (see src/api/subscriptionApi.js) are the next build pass —
- *      until they exist this fails with a clear message instead of
- *      silently pretending payment succeeded.
+ *      server-side before treating it as paid. Never trusts the popup's
+ *      own success callback alone.
  */
 export default function Pricing() {
   const [cycle, setCycle] = useState(BILLING_CYCLES.MONTHLY);
@@ -102,12 +104,12 @@ export default function Pricing() {
     setCheckoutState({ planId: plan.id, loading: false, error: null });
 
     if (plan.id === PLAN_IDS.STARTER) {
-      navigate("/");
+      navigate("/dashboard");
       return;
     }
 
     if (!isSignedInAdmin) {
-      navigate(`/?plan=${plan.id}&cycle=${cycle}`);
+      navigate("/dashboard");
       return;
     }
 
@@ -154,8 +156,8 @@ export default function Pricing() {
     <div className={styles.page}>
       <div className={styles.topbar}>
         <Logo size={40} variant="horizontal" />
-        <a href="/login" className={styles.topbarLink}>
-          Log in
+        <a href="/dashboard" className={styles.topbarLink}>
+          Dashboard
         </a>
       </div>
 

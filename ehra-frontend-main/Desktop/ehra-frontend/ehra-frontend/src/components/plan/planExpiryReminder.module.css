@@ -1,0 +1,206 @@
+.toast {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 500;
+    width: 360px;
+    max-width: calc(100vw - 32px);
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 16px 16px 14px;
+    border-radius: 16px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 16px 40px var(--shadow-color);
+    overflow: hidden;
+    animation: planToastIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes planToastIn {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 480px) {
+    .toast {
+        right: 16px;
+        left: 16px;
+        bottom: 16px;
+        width: auto;
+        max-width: none;
+    }
+}
+
+.toastIcon {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+}
+
+.toastBody {
+    flex: 1;
+    min-width: 0;
+}
+
+.toastHeading {
+    font-size: 13.5px;
+    font-weight: 700;
+    margin-bottom: 3px;
+    color: var(--text-primary);
+}
+
+.toastMessage {
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+.toastActions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.renewBtn {
+    height: 30px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.renewBtn:hover {
+    background: var(--accent-hover);
+}
+
+.dismissBtn {
+    height: 30px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.dismissBtn:hover {
+    color: var(--text-primary);
+}
+
+.closeBtn {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.closeBtn:hover {
+    background: var(--bg-surface-alt);
+    color: var(--text-primary);
+}
+
+.progressTrack {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--bg-surface-alt);
+}
+
+.progressFill {
+    height: 100%;
+    width: 100%;
+    transform-origin: left;
+    /* Matches PlanExpiryReminder's AUTO_DISMISS_MS exactly — if that
+     constant changes, update this duration too. */
+    animation: planToastDeplete 14s linear forwards;
+}
+
+@keyframes planToastDeplete {
+    from {
+        transform: scaleX(1);
+    }
+
+    to {
+        transform: scaleX(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .toast {
+        animation: none;
+    }
+
+    .progressFill {
+        animation: none;
+        transform: scaleX(0.4);
+    }
+}
+
+/* ── Tier coloring — mirrors PlanBadge's palette so the toast and the
+   topbar pill always agree on what "urgent" looks like. ── */
+
+.upcoming .toastIcon {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.upcoming .progressFill {
+    background: var(--warning);
+}
+
+.soon .toastIcon {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.soon .progressFill {
+    background: var(--warning);
+}
+
+.soon {
+    border-color: var(--warning-border);
+}
+
+.urgent .toastIcon {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.urgent .progressFill {
+    background: var(--danger);
+}
+
+.urgent {
+    border-color: var(--danger-border);
+}
