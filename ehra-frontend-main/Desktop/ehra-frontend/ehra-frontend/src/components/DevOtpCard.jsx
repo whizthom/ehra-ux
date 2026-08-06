@@ -34,9 +34,7 @@ export default function DevOtpCard({ code }) {
         🧪 Development Mode
       </div>
       <div style={{ marginBottom: 8 }}>
-        Normally this verification code would be sent to your phone. Since Mock
-        Mode is enabled on the backend (<code>otp.provider=mock</code>), the
-        generated code is shown below instead.
+              Normally this verification code would be sent to your phone.
       </div>
       <div
         style={{
