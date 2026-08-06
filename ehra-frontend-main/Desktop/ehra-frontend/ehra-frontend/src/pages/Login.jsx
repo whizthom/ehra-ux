@@ -9,6 +9,7 @@ import {
   resetRecaptcha,
 } from "../firebase-lazy";
 import { verifyTwoFactorLogin } from "../api/phoneAuthApi";
+import DevOtpCard from "../components/DevOtpCard";
 import styles from "./Login.module.css";
 import phoneStyles from "./PhoneAuth.module.css";
 import Logo from "../components/Logo";
@@ -396,6 +397,8 @@ export default function Login() {
                   Cancel
                 </button>
               </div>
+
+              <DevOtpCard code={confirmationResult?.developmentOtp} />
 
               <div className={styles.field}>
                 <label className={styles.label}>Verification code</label>

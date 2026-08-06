@@ -8,6 +8,7 @@ import {
   resetRecaptcha,
 } from "../firebase-lazy";
 import { checkPhone, registerWithPhone } from "../api/phoneAuthApi";
+import DevOtpCard from "../components/DevOtpCard";
 import styles from "./Register.module.css";
 import phoneStyles from "./PhoneAuth.module.css";
 import Logo from "../components/Logo";
@@ -342,6 +343,8 @@ export default function Register() {
                   Change number
                 </button>
               </div>
+
+              <DevOtpCard code={confirmationResult?.developmentOtp} />
 
               <div className={styles.field}>
                 <label>Verification code</label>

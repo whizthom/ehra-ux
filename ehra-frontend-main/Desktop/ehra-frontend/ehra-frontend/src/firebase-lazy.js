@@ -1,6 +1,7 @@
 /**
  * Drop-in replacement for the old Firebase-backed phone-OTP helpers
- * (Global Phone Number Authentication rebuild — Firebase → Termii).
+ * (Global Phone Number Authentication rebuild — Firebase → Termii →
+ * provider-independent, see the backend's com.Ehra.otp package).
  *
  * Same three exported function names, same call signatures, same
  * calling convention as before:
@@ -10,13 +11,14 @@
  *
  * That's exactly why Login.jsx, Register.jsx, ForgotPassword.jsx and
  * EmployeeRegistration.jsx — all four of which import from this file —
- * needed ZERO changes to their own logic for this migration. Only
- * what's underneath changed: instead of loading the Firebase Auth SDK
- * and running its client-side OTP flow, these now call Ehra's own
- * backend (see api/phoneAuthApi.js), which in turn calls Termii's
- * Send/Verify Token API — Termii's API key has to stay server-side, so
- * unlike Firebase there's no client SDK to lazy-load here at all
- * anymore.
+ * needed ZERO changes to their own logic across the Firebase -> Termii
+ * migration. The ONE thing they DO now read off confirmationResult,
+ * added for the provider-independent rebuild, is
+ * `confirmationResult.developmentOtp` — see sendPhoneOtp() below. It's
+ * only ever present when the backend's otp.provider is set to "mock"
+ * (com.Ehra.otp.impl.MockOtpService); against any real provider it's
+ * always undefined, and each page's Development Mode card simply
+ * doesn't render.
  *
  * Termii's OTP API doesn't need a CAPTCHA challenge the way Firebase's
  * invisible reCAPTCHA did, so resetRecaptcha() is now a no-op — kept
@@ -33,11 +35,14 @@
 import { sendOtp, verifyOtp } from "./api/phoneAuthApi";
 
 export async function sendPhoneOtp(phoneNumber, _containerId) {
-  const { pinId } = await sendOtp(phoneNumber);
+  const { pinId, developmentOtp } = await sendOtp(phoneNumber);
   // Shaped to loosely mirror Firebase's ConfirmationResult so
   // confirmPhoneOtp() below has something to thread pinId through —
-  // call sites never need to look inside this object themselves.
-  return { pinId, phoneNumber };
+  // call sites never need to look inside this object themselves,
+  // except to read `developmentOtp` for the Development Mode card
+  // (undefined against any real provider — see PhoneOtpSendResponseDTO
+  // on the backend).
+  return { pinId, phoneNumber, developmentOtp };
 }
 
 export async function confirmPhoneOtp(confirmationResult, code) {

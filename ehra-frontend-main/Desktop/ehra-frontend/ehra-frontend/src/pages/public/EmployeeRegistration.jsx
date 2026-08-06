@@ -9,6 +9,7 @@ import {
 } from "../../firebase-lazy";
 import { checkPhone } from "../../api/phoneAuthApi";
 import { registerInvitedEmployee } from "../../api/invitationApi";
+import DevOtpCard from "../../components/DevOtpCard";
 import styles from "./EmployeeRegistration.module.css";
 import phoneStyles from "../PhoneAuth.module.css";
 import Logo from "../../components/Logo";
@@ -421,6 +422,8 @@ export default function EmployeeRegistration() {
                   Change number
                 </button>
               </div>
+
+              <DevOtpCard code={confirmationResult?.developmentOtp} />
 
               <div className={styles.field}>
                 <label>Verification code *</label>
