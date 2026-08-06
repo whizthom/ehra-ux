@@ -502,6 +502,19 @@
     cursor: not-allowed;
 }
 
+/* Desktop-only — see the comment at PlanBadge's render site in
+   Dashboard.jsx. 900px matches every other desktop-only topbar item in
+   this file (.inviteBtn below, the sidebar/bottom-nav split, etc). */
+.planBadgeSlot {
+    display: flex;
+}
+
+@media (max-width: 900px) {
+    .planBadgeSlot {
+        display: none;
+    }
+}
+
 @media (max-width: 900px) {
     .inviteBtn {
         display: none;
@@ -1836,47 +1849,6 @@
 .notifMarkAll:disabled {
     opacity: 0.4;
     cursor: not-allowed;
-}
-
-.moreMenuPanel {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    min-width: 160px;
-    background: var(--bg-surface);
-    border: 0.5px solid var(--border-color);
-    border-radius: 12px;
-    box-shadow: 0 8px 32px var(--shadow-color);
-    z-index: 200;
-    overflow: hidden;
-    animation: panelIn 0.15s ease;
-    padding: 6px;
-}
-
-.moreMenuItem {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border: none;
-    background: none;
-    border-radius: 8px;
-    font-size: 13.5px;
-    font-weight: 500;
-    color: var(--text-primary);
-    cursor: pointer;
-    font-family: inherit;
-    text-align: left;
-}
-
-.moreMenuItem:hover {
-    background: var(--bg-surface-alt);
-}
-
-.moreMenuItem i {
-    font-size: 15px;
-    color: var(--accent);
 }
 
 .notifList {

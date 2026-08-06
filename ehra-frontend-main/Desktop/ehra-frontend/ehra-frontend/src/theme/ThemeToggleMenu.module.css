@@ -204,3 +204,72 @@
 .switchOn .knob {
     transform: translateX(18px);
 }
+
+/* ── "My account" category — current plan + Plans link. Mobile/tablet
+   only: on desktop this same information already lives directly in the
+   topbar via PlanBadge (see Dashboard.jsx), so repeating it here would
+   just be noise in an already-short popover. ── */
+.accountSection {
+    border-bottom: 0.5px solid var(--border-color);
+}
+
+@media (min-width: 901px) {
+    .accountSection {
+        display: none;
+    }
+}
+
+.sectionLabel {
+    padding: 12px 16px 4px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.settingsSection .sectionLabel {
+    padding-top: 10px;
+}
+
+.planDot {
+    width: 8px;
+    height: 8px;
+}
+
+.planDaysChip {
+    font-size: 10px;
+}
+
+.planSkeleton {
+    width: 100px;
+    height: 14px;
+    border-radius: 999px;
+    background: var(--bg-surface-alt);
+    opacity: 0.7;
+}
+
+.menuItem {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--text-primary);
+    cursor: pointer;
+    text-align: left;
+}
+
+.menuItem:hover {
+    background: var(--bg-surface-alt);
+}
+
+.menuItem i:first-child {
+    font-size: 15px;
+    color: var(--accent);
+    flex-shrink: 0;
+}

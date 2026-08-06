@@ -304,11 +304,6 @@ export default function Dashboard() {
   const [notifs, setNotifs] = useState([]);
   const [loadingNotifs, setLoadingNotifs] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
-  // Mobile-only "more" menu (the ⋮ kebab in the topbar) — houses
-  // destinations that don't need a permanent slot in the bottom nav
-  // strip. Plans is the first tenant; more can join later without
-  // needing a new UI pattern.
-  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const [actioningNotif, setActioningNotif] = useState(null); // id being actioned
   // Optimistic delete-with-undo: a notification leaves `notifs` the instant
   // the user deletes it, but the actual DELETE call is held for 3s so the
@@ -325,7 +320,6 @@ export default function Dashboard() {
   // once the Messages tab itself is mounted).
   const [messagesUnread, setMessagesUnread] = useState(0);
   const notifRef = useRef(null);
-  const moreMenuRef = useRef(null);
   const qaScrollRef = useRef(null);
   const bottomNavScrollRef = useRef(null);
   const qaThumb = useScrollThumb(qaScrollRef);
@@ -739,18 +733,6 @@ export default function Dashboard() {
     if (notifOpen) document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [notifOpen]);
-
-  // Close the mobile "more" menu on outside click — same pattern as the
-  // notification panel above.
-  useEffect(() => {
-    function handleClick(e) {
-      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target)) {
-        setMoreMenuOpen(false);
-      }
-    }
-    if (moreMenuOpen) document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [moreMenuOpen]);
 
   // ── Actions ───────────────────────────────────────────────────────────
 
@@ -1330,16 +1312,21 @@ export default function Dashboard() {
           </div>
 
           <div className={styles.topbarRight}>
-            {/* ── Current plan — click through to /pricing to manage ── */}
-            <PlanBadge
-              subscription={subscription}
-              loading={loadingSubscription}
-              onClick={() =>
-                navigate("/pricing", {
-                  state: { returnPath: "/dashboard", activeNav },
-                })
-              }
-            />
+            {/* ── Current plan — desktop only. On mobile/tablet this moves
+                into the Settings dropdown's "My account" section instead
+                (see ThemeToggleMenu below) rather than crowding this
+                already-tight icon row. ── */}
+            <div className={styles.planBadgeSlot}>
+              <PlanBadge
+                subscription={subscription}
+                loading={loadingSubscription}
+                onClick={() =>
+                  navigate("/pricing", {
+                    state: { returnPath: "/dashboard", activeNav },
+                  })
+                }
+              />
+            </div>
 
             {/* ── Message shortcut — jumps straight to the Messages tab ── */}
             <div
@@ -1524,45 +1511,18 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* ── Mobile-only "more" menu (⋮) — Plans lives here instead
-                of in the bottom nav strip; see NAV.filter above. ── */}
-            {isMobile && (
-              <div className={styles.notifWrapper} ref={moreMenuRef}>
-                <div
-                  className={styles.notifBtn}
-                  onClick={() => setMoreMenuOpen((v) => !v)}
-                  aria-label="More"
-                  title="More"
-                >
-                  <i
-                    className="ti ti-dots-vertical"
-                    style={{ fontSize: 17 }}
-                    aria-hidden="true"
-                  />
-                </div>
-
-                {moreMenuOpen && (
-                  <div className={styles.moreMenuPanel}>
-                    <button
-                      type="button"
-                      className={styles.moreMenuItem}
-                      onClick={() => {
-                        setMoreMenuOpen(false);
-                        navigate("/pricing", {
-                          state: { returnPath: "/dashboard", activeNav },
-                        });
-                      }}
-                    >
-                      <i className="ti ti-credit-card" aria-hidden="true" />
-                      Plans
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* ── Settings icon (theme toggle) ── */}
-            <ThemeToggleMenu />
+            {/* ── Settings icon (theme toggle) — also houses "My account"
+                (current plan + Plans link) on mobile/tablet; see
+                ThemeToggleMenu.jsx. ── */}
+            <ThemeToggleMenu
+              subscription={subscription}
+              loadingSubscription={loadingSubscription}
+              onViewPlans={() =>
+                navigate("/pricing", {
+                  state: { returnPath: "/dashboard", activeNav },
+                })
+              }
+            />
 
             <button
               className={styles.inviteBtn}
