@@ -34,7 +34,7 @@ export default function DevOtpCard({ code }) {
         🧪 Development Mode
       </div>
       <div style={{ marginBottom: 8 }}>
-              Normally this verification code would be sent to your phone.
+              {/* Normally this verification code would be sent to your phone. */}
       </div>
       <div
         style={{
