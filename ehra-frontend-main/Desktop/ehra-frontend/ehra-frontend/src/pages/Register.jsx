@@ -48,7 +48,7 @@ const RESEND_COOLDOWN_SECONDS = 30;
 export default function Register() {
   const navigate = useNavigate();
 
-  // step: "phone" -> "otp" -> "business"
+  // step: "phone" -> "otp" -> "business" -> "personal"
   const [step, setStep] = useState("phone");
   const [phone, setPhone] = useState(() => loadDraft()?.phone || "");
   const [otp, setOtp] = useState("");
@@ -60,6 +60,11 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [showConfirmPw, setShowConfirmPw] = useState(false);
+
+  // ── STEP 4: Personal Information ────────────────────────────────────────
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -154,8 +159,11 @@ export default function Register() {
     }
   };
 
-  // ── STEP 3: business name + password, create the account ──────────────
-  const handleCreateAccount = async () => {
+  // ── STEP 3: business name + password — just advances to Personal Info,
+  //    nothing is submitted to the backend yet (that happens together, in
+  //    one call, once Personal Information is complete too — see
+  //    PhoneRegisterRequestDTO). ─────────────────────────────────────────
+  const handleContinueToPersonal = () => {
     setError("");
     if (!businessName.trim()) {
       setError("Business name is required.");
@@ -169,24 +177,56 @@ export default function Register() {
       setError("Passwords do not match.");
       return;
     }
+    setStep("personal");
+  };
+
+  // ── STEP 4: first name, last name, email — creates the account ─────────
+  const handleCreateAccount = async () => {
+    setError("");
+    if (!firstName.trim() || !lastName.trim()) {
+      setError("First and last name are required.");
+      return;
+    }
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email.trim())) {
+      setError("Enter a valid email address.");
+      return;
+    }
 
     setLoading(true);
     try {
-      const data = await registerWithPhone(
-        idToken,
-        businessName.trim(),
+      const data = await registerWithPhone(idToken, {
+        businessName: businessName.trim(),
         password,
-      );
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim().toLowerCase(),
+      });
       clearDraft();
       // STEP 9-10: auto-logged in — redirect exactly as a normal login
       // would, straight into the dashboard (never a needsContextSelection
       // case for a brand-new business, but handled the same way for
       // consistency with every other entry point).
-      navigate(data.needsContextSelection ? "/select-workspace" : "/dashboard");
+      navigate(
+        data.needsContextSelection ? "/select-workspace" : "/dashboard",
+        {
+          // Lets the Dashboard show a one-time, dismissible Welcome card
+          // ("We've sent a verification email to ...") right after
+          // registration without an extra round trip — see Dashboard's
+          // WelcomeCard. Purely a UI hint; the source of truth for
+          // verification status is always GET /api/auth/email/status.
+          state: {
+            justRegistered: true,
+            firstName: firstName.trim(),
+            email: email.trim(),
+          },
+        },
+      );
     } catch (err) {
       const data = err.response?.data;
       if (err.response?.status === 409) {
-        // STEP 7 defense in depth — the /register call itself re-checks.
+        // STEP 7 defense in depth — the /register call itself re-checks
+        // both phone AND (now) email uniqueness.
         navigate("/login", {
           state: { message: data?.message, phone },
         });
@@ -202,8 +242,8 @@ export default function Register() {
     }
   };
 
-  const stepIndex = { phone: 1, otp: 1, business: 2 }[step];
-  const progressPct = { phone: 15, otp: 45, business: 80 }[step];
+  const stepIndex = { phone: 1, otp: 1, business: 2, personal: 3 }[step];
+  const progressPct = { phone: 12, otp: 35, business: 62, personal: 90 }[step];
 
   return (
     <div className={styles.page}>
@@ -240,11 +280,22 @@ export default function Register() {
               <div
                 className={`${styles.stepDot} ${stepIndex >= 2 ? styles.dotActive : styles.dotPending}`}
               >
-                2
+                {stepIndex > 2 ? <i className="ti ti-check" /> : 2}
               </div>
               <div className={styles.stepBody}>
                 <p className={styles.stepLabel}>Name your business</p>
                 <p className={styles.stepSub}>Business name & password</p>
+              </div>
+            </div>
+            <div className={styles.step}>
+              <div
+                className={`${styles.stepDot} ${stepIndex >= 3 ? styles.dotActive : styles.dotPending}`}
+              >
+                3
+              </div>
+              <div className={styles.stepBody}>
+                <p className={styles.stepLabel}>Tell us about you</p>
+                <p className={styles.stepSub}>Name & email address</p>
               </div>
             </div>
           </div>
@@ -279,8 +330,9 @@ export default function Register() {
               {step === "phone" && "Verify your phone number"}
               {step === "otp" && "Enter the verification code"}
               {step === "business" && "Name your business"}
+              {step === "personal" && "Tell us about you"}
             </span>
-            <span className={styles.stepCount}>Step {stepIndex} of 2</span>
+            <span className={styles.stepCount}>Step {stepIndex} of 3</span>
           </div>
         </div>
 
@@ -437,7 +489,7 @@ export default function Register() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     onKeyDown={(e) =>
-                      e.key === "Enter" && handleCreateAccount()
+                      e.key === "Enter" && handleContinueToPersonal()
                     }
                   />
                   <button
@@ -480,6 +532,68 @@ export default function Register() {
               </div>
             </>
           )}
+
+          {/* ══ STEP 4: PERSONAL INFORMATION ══ */}
+          {step === "personal" && (
+            <>
+              <div className={styles.field}>
+                <label>First name</label>
+                <div className={styles.inputWrap}>
+                  <i className={`ti ti-user ${styles.prefix}`} />
+                  <input
+                    type="text"
+                    placeholder="Emmanuel"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" &&
+                      document.getElementById("phone-signup-last-name").focus()
+                    }
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div className={styles.field}>
+                <label>Last name</label>
+                <div className={styles.inputWrap}>
+                  <i className={`ti ti-user ${styles.prefix}`} />
+                  <input
+                    id="phone-signup-last-name"
+                    type="text"
+                    placeholder="Okafor"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" &&
+                      document.getElementById("phone-signup-email").focus()
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className={styles.field}>
+                <label>Email address</label>
+                <div className={styles.inputWrap}>
+                  <i className={`ti ti-mail ${styles.prefix}`} />
+                  <input
+                    id="phone-signup-email"
+                    type="email"
+                    placeholder="emmanuel@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && handleCreateAccount()
+                    }
+                  />
+                </div>
+                <span className={phoneStyles.hint}>
+                  We'll send a verification link here — you can start using Ehra
+                  right away and verify whenever suits you.
+                </span>
+              </div>
+            </>
+          )}
         </div>
 
         <div className={styles.formFooter}>
@@ -506,6 +620,17 @@ export default function Register() {
             </button>
           )}
           {step === "business" && (
+            <button
+              type="button"
+              className={styles.submitBtn}
+              onClick={handleContinueToPersonal}
+              disabled={loading}
+            >
+              Continue
+              <i className="ti ti-arrow-right" />
+            </button>
+          )}
+          {step === "personal" && (
             <button
               type="button"
               className={styles.submitBtn}

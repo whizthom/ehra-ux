@@ -20,6 +20,7 @@ import Register from "./pages/Register";
 import CompleteSetup from "./pages/CompleteSetup";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
+import VerifyEmail from "./pages/VerifyEmail";
 
 import InvitationLanding from "./pages/public/InvitationLanding";
 import EmployeeRegistration from "./pages/public/EmployeeRegistration";
@@ -60,6 +61,12 @@ function App() {
 
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+
+            {/* Reached from the link in the verification email — works
+                whether or not the browser tab is logged in, since the
+                token itself is the credential (see
+                EmailVerificationController#verifyEmail, public). */}
+            <Route path="/verify-email" element={<VerifyEmail />} />
 
             {/* Shown after login when the Identity holds more than one
                 membership and hasn't picked an active workspace yet.

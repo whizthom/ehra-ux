@@ -1,11 +1,23 @@
 import { useEffect, useState } from "react";
-import { getSecuritySettings, toggleTwoFactor } from "../api/phoneAuthApi";
+import {
+  getSecuritySettings,
+  toggleTwoFactor,
+  sendEmailVerification,
+} from "../api/phoneAuthApi";
 import styles from "./SecuritySettingsSection.module.css";
 
 export default function SecuritySettingsSection() {
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // "Verify Email" / "Resend Verification Email" — same call either way
+  // (see EmailVerificationService). devLink is only ever populated when
+  // the backend is running with email.provider=mock.
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [devLink, setDevLink] = useState(null);
 
   // Confirmation modal state — toggling 2FA either direction requires the
   // current password (see TwoFactorToggleRequestDTO's rationale).
@@ -57,6 +69,29 @@ export default function SecuritySettingsSection() {
     }
   };
 
+  const handleVerifyEmail = async () => {
+    setEmailSending(true);
+    setEmailError("");
+    setDevLink(null);
+    try {
+      const status = await sendEmailVerification();
+      setEmailSent(true);
+      // ONLY ever non-null in Development Mode (email.provider=mock) —
+      // never happens against a real provider in production. See
+      // EmailProviderManager#isMockActive.
+      if (status?.developmentVerificationLink) {
+        setDevLink(status.developmentVerificationLink);
+      }
+    } catch (err) {
+      setEmailError(
+        err?.response?.data?.message ||
+          "We couldn't send the verification email. Please try again.",
+      );
+    } finally {
+      setEmailSending(false);
+    }
+  };
+
   if (loading) {
     return <p className={styles.loading}>Loading your security settings…</p>;
   }
@@ -92,6 +127,66 @@ export default function SecuritySettingsSection() {
             </span>
           )}
         </div>
+      </div>
+
+      <div className={styles.card}>
+        <div className={styles.cardHeader}>
+          <div className={styles.cardIcon}>
+            <i className="ti ti-mail" />
+          </div>
+          <div>
+            <h3>Verified email</h3>
+            <p>
+              Required for subscriptions, security alerts, and future account
+              recovery — everything else in Ehra works without it.
+            </p>
+          </div>
+        </div>
+        <div className={styles.phoneRow}>
+          <span className={styles.phoneNumber}>
+            {settings?.email || "Not set"}
+          </span>
+          {settings?.emailVerified ? (
+            <span className={styles.verifiedBadge}>
+              <i className="ti ti-rosette-discount-check" /> Verified
+            </span>
+          ) : (
+            settings?.email && (
+              <button
+                type="button"
+                className={styles.verifyBtn}
+                onClick={handleVerifyEmail}
+                disabled={emailSending}
+              >
+                {emailSending
+                  ? "Sending…"
+                  : emailSent
+                    ? "Resend Verification Email"
+                    : "Verify Email"}
+              </button>
+            )
+          )}
+        </div>
+
+        {!settings?.emailVerified && emailSent && !emailError && (
+          <p className={styles.emailHint}>
+            Check {settings?.email} for a verification link.
+          </p>
+        )}
+        {emailError && (
+          <div className={styles.errorBox}>
+            <i className="ti ti-alert-circle" />
+            <span>{emailError}</span>
+          </div>
+        )}
+        {devLink && (
+          <div className={styles.devLinkBox}>
+            <p>Development Mode — Verification Link</p>
+            <a href={devLink} target="_blank" rel="noreferrer">
+              Open Link
+            </a>
+          </div>
+        )}
       </div>
 
       <div className={styles.card}>

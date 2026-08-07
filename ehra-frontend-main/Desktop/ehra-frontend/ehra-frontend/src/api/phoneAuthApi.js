@@ -26,13 +26,20 @@ export const verifyOtp = (pinId, otp) =>
 export const checkPhone = (idToken) =>
   API.post("/auth/phone/check", { idToken }).then((r) => r.data);
 
-// Business name + password only — creates the Identity + Business, logs
-// the person straight in. Returns an AuthResponseDTO shape, same as login().
-export const registerWithPhone = async (idToken, businessName, password) => {
+// Business Setup (businessName + password) + Personal Information
+// (firstName, lastName, email) in one submit — creates the Identity +
+// Business, logs the person straight in, and the backend automatically
+// queues a verification email for `email` (never awaited — see
+// EmailVerificationService). Returns an AuthResponseDTO shape, same as
+// login().
+export const registerWithPhone = async (idToken, { businessName, password, firstName, lastName, email }) => {
   const { data } = await API.post("/auth/phone/register", {
     idToken,
     businessName,
     password,
+    firstName,
+    lastName,
+    email,
   });
   saveSession(data);
   return data;
@@ -75,3 +82,27 @@ export const getSecuritySettings = () =>
 
 export const toggleTwoFactor = (enabled, password) =>
   API.put("/auth/security/2fa", { enabled, password }).then((r) => r.data);
+
+// ── Email verification ───────────────────────────────────────────────────
+// Never a blocker on registration or general product usage — see
+// com.Ehra.email.service.EmailVerificationService. Used by the Security
+// page's "Verify Email" / "Resend Verification Email" and by the Verify
+// page the person lands on after clicking the emailed link.
+
+// Settings > Security's "Verified Email" section. developmentVerificationLink
+// is only ever non-null when the backend is running with
+// email.provider=mock — the "Development Mode" card.
+export const getEmailStatus = () =>
+  API.get("/auth/email/status").then((r) => r.data);
+
+// "Verify Email" (first send) and "Resend Verification Email" (expired
+// link) are the exact same call — the backend always invalidates any
+// still-pending token and issues a fresh one.
+export const sendEmailVerification = () =>
+  API.post("/auth/email/send-verification").then((r) => r.data);
+
+// Redeems the token from https://ehral.com/verify-email?token=xxxxxxxx —
+// public on the backend (the token itself is the credential), so this
+// works even if the browser tab clicking the email link isn't logged in.
+export const verifyEmailToken = (token) =>
+  API.post("/auth/verify-email", { token }).then((r) => r.data);
