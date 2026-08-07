@@ -1,0 +1,103 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 30, 26, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1200;
+    padding: 20px;
+}
+
+.card {
+    width: 100%;
+    max-width: 440px;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 32px 30px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+.emoji {
+    font-size: 34px;
+    margin-bottom: 8px;
+}
+
+.title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a2e27;
+    margin: 0 0 12px;
+}
+
+.desc {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #4a5c56;
+    margin: 0 0 12px;
+}
+
+.devBox {
+    margin: 16px 0;
+    padding: 12px 14px;
+    background: #fff8e6;
+    border: 1px dashed #f0ad4e;
+    border-radius: 10px;
+    text-align: left;
+}
+
+.devLabel {
+    font-weight: 700;
+    font-size: 12.5px;
+    color: #7a4a00;
+    margin-bottom: 6px;
+}
+
+.devLink {
+    font-size: 13px;
+    color: #0f6e56;
+    font-weight: 600;
+    word-break: break-all;
+}
+
+.resentNote {
+    font-size: 13px;
+    color: #0f6e56;
+    margin: 8px 0 0;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.primaryBtn {
+    flex: 1;
+    background: #0f6e56;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.secondaryBtn {
+    flex: 1;
+    background: transparent;
+    color: #0f6e56;
+    border: 1px solid #d8e6e1;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.secondaryBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

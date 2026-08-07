@@ -33,6 +33,8 @@ import TodaysPulse from "../components/TodaysPulse";
 import Logo from "../components/Logo";
 import PlanBadge from "../components/plan/PlanBadge";
 import PlanExpiryReminder from "../components/plan/PlanExpiryReminder";
+import WelcomeCard from "../components/WelcomeCard";
+import OnboardingChecklist from "../components/OnboardingChecklist";
 import {
   getAllProfileEdits,
   getPendingProfileEdits,
@@ -248,7 +250,7 @@ function useIsMobile(breakpoint = 900) {
 export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
   // Mobile bottom-nav "Log out" — confirmed via LogoutConfirmModal before
   // the session is actually torn down, so a stray tap on a crowded phone
@@ -1653,6 +1655,13 @@ export default function Dashboard() {
                 {inviteLinkPanel}
               </div>
 
+              <OnboardingChecklist
+                identityId={user?.identityId}
+                businessProfile={businessProfile}
+                employees={employees}
+                profilePictureUrl={myProfile?.profilePictureUrl}
+              />
+
               {/* Today's Pulse — mobile-only hero widget, replaces the
                   totals row on phones (see .todaysPulseMobile). */}
               <div className={styles.todaysPulseMobile}>
@@ -2401,6 +2410,13 @@ export default function Dashboard() {
       />
 
       <PlanExpiryReminder subscription={subscription} />
+
+      <WelcomeCard
+        identityId={user?.identityId}
+        justRegistered={Boolean(location.state?.justRegistered)}
+        firstName={location.state?.firstName}
+        email={location.state?.email}
+      />
     </div>
   );
 }
