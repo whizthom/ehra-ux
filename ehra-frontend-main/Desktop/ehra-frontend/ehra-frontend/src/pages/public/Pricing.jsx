@@ -16,6 +16,7 @@ import {
   verifyCheckout,
   payWithPaystack,
 } from "../../api/subscriptionApi";
+import VerifyEmailToUpgradeModal from "../../components/VerifyEmailToUpgradeModal";
 
 /**
  * /pricing — reachable only when signed in (see the ProtectedRoute wrapper
@@ -34,9 +35,15 @@ import {
  *      sends them back to the dashboard rather than attempting a request
  *      the backend would reject anyway.
  *   3. Pro/Premium, signed in as an admin: initialize a checkout on the
- *      backend, open the real Paystack popup, then verify the transaction
- *      server-side before treating it as paid. Never trusts the popup's
- *      own success callback alone.
+ *      backend. If the backend blocks it with 403 (business email not
+ *      verified — see EmailVerificationService
+ *      #requireVerifiedEmailForSecurity), show VerifyEmailToUpgradeModal
+ *      instead of the Paystack popup; once verified (auto-detected via
+ *      polling, or a manual "I've verified" click), the SAME checkout
+ *      attempt resumes automatically. Otherwise, open the real Paystack
+ *      popup directly, then verify the transaction server-side before
+ *      treating it as paid. Never trusts the popup's own success
+ *      callback alone.
  */
 export default function Pricing() {
   const [cycle, setCycle] = useState(BILLING_CYCLES.MONTHLY);
@@ -49,6 +56,14 @@ export default function Pricing() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const isSignedInAdmin = user?.role === "ROLE_ADMIN";
+
+  // Shown INSTEAD OF the Paystack popup when checkout/initialize comes
+  // back 403 — i.e. the email-verification gate
+  // (EmailVerificationService#requireVerifiedEmailForSecurity) blocked
+  // it. Remembers which plan/cycle was being attempted so verifying
+  // successfully can resume the EXACT same checkout automatically,
+  // straight into the Paystack popup, with no re-click needed.
+  const [verifyPrompt, setVerifyPrompt] = useState(null); // { plan } | null
 
   // ── Mobile card carousel ──────────────────────────────────────────────
   // Below 640px, .cardsGrid becomes a horizontal snap-scroller (see
@@ -100,19 +115,7 @@ export default function Pricing() {
     });
   }
 
-  async function handleSelectPlan(plan) {
-    setCheckoutState({ planId: plan.id, loading: false, error: null });
-
-    if (plan.id === PLAN_IDS.STARTER) {
-      navigate("/dashboard");
-      return;
-    }
-
-    if (!isSignedInAdmin) {
-      navigate("/dashboard");
-      return;
-    }
-
+  async function launchPaystackForPlan(plan) {
     setCheckoutState({ planId: plan.id, loading: true, error: null });
     try {
       const { reference, amount, email, publicKey } = await initializeCheckout(
@@ -143,13 +146,38 @@ export default function Pricing() {
           setCheckoutState({ planId: null, loading: false, error: null });
         },
       });
-    } catch {
+    } catch (err) {
+      // 403 here can ONLY mean the email-verification gate — a non-admin
+      // never reaches this call at all (isSignedInAdmin is checked
+      // before initializeCheckout is ever attempted, and /api/subscription/**
+      // is admin-only at the route level regardless — see SecurityConfig).
+      if (err?.response?.status === 403) {
+        setCheckoutState({ planId: null, loading: false, error: null });
+        setVerifyPrompt({ plan });
+        return;
+      }
       setCheckoutState({
         planId: plan.id,
         loading: false,
         error: "Checkout isn't available yet — please try again shortly.",
       });
     }
+  }
+
+  async function handleSelectPlan(plan) {
+    setCheckoutState({ planId: plan.id, loading: false, error: null });
+
+    if (plan.id === PLAN_IDS.STARTER) {
+      navigate("/dashboard");
+      return;
+    }
+
+    if (!isSignedInAdmin) {
+      navigate("/dashboard");
+      return;
+    }
+
+    await launchPaystackForPlan(plan);
   }
 
   return (
@@ -225,6 +253,20 @@ export default function Pricing() {
       <ComparisonTable />
       <TrustBadges />
       <FAQAccordion />
+
+      {verifyPrompt && (
+        <VerifyEmailToUpgradeModal
+          onClose={() => setVerifyPrompt(null)}
+          onVerified={() => {
+            const { plan } = verifyPrompt;
+            setVerifyPrompt(null);
+            // Straight into Paystack — no re-click needed, exactly like
+            // the "if verified, leads them straight to processing"
+            // requirement.
+            launchPaystackForPlan(plan);
+          }}
+        />
+      )}
     </div>
   );
 }
