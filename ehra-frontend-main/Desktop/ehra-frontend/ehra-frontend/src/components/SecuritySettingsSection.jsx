@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   getSecuritySettings,
   toggleTwoFactor,
   sendEmailVerification,
+  sendBusinessEmailVerification,
 } from "../api/phoneAuthApi";
 import styles from "./SecuritySettingsSection.module.css";
 
@@ -11,39 +12,69 @@ export default function SecuritySettingsSection() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // "Verify Email" / "Resend Verification Email" — same call either way
-  // (see EmailVerificationService). devLink is only ever populated when
-  // the backend is running with email.provider=mock.
-  const [emailSending, setEmailSending] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
-  const [emailError, setEmailError] = useState("");
-  const [devLink, setDevLink] = useState(null);
+  const emailCardRef = useRef(null);
+
+  // ── Personal email (employee context only — see render below) ────────
+  const [personalSending, setPersonalSending] = useState(false);
+  const [personalSent, setPersonalSent] = useState(false);
+  const [personalError, setPersonalError] = useState("");
+  const [personalDevLink, setPersonalDevLink] = useState(null);
+
+  // ── Business email (employer context — "enter it and verify right
+  //    there") ───────────────────────────────────────────────────────
+  const [businessEmailInput, setBusinessEmailInput] = useState("");
+  const [businessSending, setBusinessSending] = useState(false);
+  const [businessSent, setBusinessSent] = useState(false);
+  const [businessError, setBusinessError] = useState("");
+  const [businessDevLink, setBusinessDevLink] = useState(null);
 
   // Confirmation modal state — toggling 2FA either direction requires the
-  // current password (see TwoFactorToggleRequestDTO's rationale).
+  // current password (see TwoFactorToggleRequestDTO's rationale). A
+  // SEPARATE "verify first" modal (no password field) appears instead
+  // whenever the person tries to ENABLE 2FA without the required email
+  // verified yet — see requiredEmailVerified below.
   const [confirming, setConfirming] = useState(null); // "enable" | "disable" | null
   const [password, setPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [confirmError, setConfirmError] = useState("");
+  const [showVerifyFirst, setShowVerifyFirst] = useState(false);
+
+  const loadSettings = () =>
+    getSecuritySettings()
+      .then((data) => {
+        setSettings(data);
+        setBusinessEmailInput(data?.businessEmail || "");
+      })
+      .catch(() => setError("Couldn't load your security settings."));
 
   useEffect(() => {
     let cancelled = false;
-    getSecuritySettings()
-      .then((data) => {
-        if (!cancelled) setSettings(data);
-      })
-      .catch(() => {
-        if (!cancelled) setError("Couldn't load your security settings.");
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+    loadSettings().finally(() => {
+      if (!cancelled) setLoading(false);
+    });
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // The single rule that governs both the subscription gate on the
+  // backend and the 2FA toggle here: an employer needs their BUSINESS
+  // email verified, OR their personal email already happens to be
+  // verified (continuity rule); an employee (no business context) just
+  // needs their personal email verified. Mirrors
+  // EmailVerificationService#requireVerifiedEmailForSecurity exactly, so
+  // what this button does and what the backend actually enforces never
+  // drift apart.
+  const requiredEmailVerified = settings?.hasBusinessContext
+    ? Boolean(settings?.businessEmailVerified || settings?.emailVerified)
+    : Boolean(settings?.emailVerified);
+
   const openConfirm = (action) => {
+    if (action === "enable" && !requiredEmailVerified) {
+      setShowVerifyFirst(true);
+      return;
+    }
     setConfirming(action);
     setPassword("");
     setConfirmError("");
@@ -61,34 +92,74 @@ export default function SecuritySettingsSection() {
       setSettings(updated);
       setConfirming(null);
     } catch (err) {
-      setConfirmError(
-        err?.response?.data?.message || "Incorrect password. Please try again.",
-      );
+      const msg = err?.response?.data?.message || "";
+      // Defense-in-depth: the backend enforces the same email-verified
+      // gate independently (never trust the frontend's own check alone).
+      // If it fires anyway (e.g. status changed in another tab), swap
+      // straight to the "verify first" modal instead of a raw error.
+      if (err?.response?.status === 403) {
+        setConfirming(null);
+        setShowVerifyFirst(true);
+        return;
+      }
+      setConfirmError(msg || "Incorrect password. Please try again.");
     } finally {
       setSaving(false);
     }
   };
 
-  const handleVerifyEmail = async () => {
-    setEmailSending(true);
-    setEmailError("");
-    setDevLink(null);
+  const jumpToEmailCard = () => {
+    setShowVerifyFirst(false);
+    emailCardRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  };
+
+  const handleVerifyPersonalEmail = async () => {
+    setPersonalSending(true);
+    setPersonalError("");
+    setPersonalDevLink(null);
     try {
       const status = await sendEmailVerification();
-      setEmailSent(true);
-      // ONLY ever non-null in Development Mode (email.provider=mock) —
-      // never happens against a real provider in production. See
-      // EmailProviderManager#isMockActive.
+      setPersonalSent(true);
       if (status?.developmentVerificationLink) {
-        setDevLink(status.developmentVerificationLink);
+        setPersonalDevLink(status.developmentVerificationLink);
       }
     } catch (err) {
-      setEmailError(
+      setPersonalError(
         err?.response?.data?.message ||
           "We couldn't send the verification email. Please try again.",
       );
     } finally {
-      setEmailSending(false);
+      setPersonalSending(false);
+    }
+  };
+
+  const handleVerifyBusinessEmail = async () => {
+    setBusinessSending(true);
+    setBusinessError("");
+    setBusinessDevLink(null);
+    try {
+      const typed = businessEmailInput.trim().toLowerCase();
+      const changed = typed && typed !== (settings?.businessEmail || "");
+      const status = await sendBusinessEmailVerification(
+        changed ? typed : undefined,
+      );
+      setBusinessSent(true);
+      if (status?.email) {
+        setSettings((s) => ({ ...s, businessEmail: status.email }));
+      }
+      if (status?.developmentVerificationLink) {
+        setBusinessDevLink(status.developmentVerificationLink);
+      }
+    } catch (err) {
+      setBusinessError(
+        err?.response?.data?.message ||
+          "We couldn't send the verification email. Please try again.",
+      );
+    } finally {
+      setBusinessSending(false);
     }
   };
 
@@ -104,6 +175,10 @@ export default function SecuritySettingsSection() {
       </div>
     );
   }
+
+  const businessEmailChanged =
+    businessEmailInput.trim().toLowerCase() !==
+    (settings?.businessEmail || "").toLowerCase();
 
   return (
     <div className={styles.wrap}>
@@ -129,63 +204,139 @@ export default function SecuritySettingsSection() {
         </div>
       </div>
 
-      <div className={styles.card}>
-        <div className={styles.cardHeader}>
-          <div className={styles.cardIcon}>
-            <i className="ti ti-mail" />
-          </div>
-          <div>
-            <h3>Verified email</h3>
-            <p>
-              Required for subscriptions, security alerts, and future account
-              recovery — everything else in Ehra works without it.
-            </p>
-          </div>
-        </div>
-        <div className={styles.phoneRow}>
-          <span className={styles.phoneNumber}>
-            {settings?.email || "Not set"}
-          </span>
-          {settings?.emailVerified ? (
-            <span className={styles.verifiedBadge}>
-              <i className="ti ti-rosette-discount-check" /> Verified
-            </span>
-          ) : (
-            settings?.email && (
-              <button
-                type="button"
-                className={styles.verifyBtn}
-                onClick={handleVerifyEmail}
-                disabled={emailSending}
-              >
-                {emailSending
-                  ? "Sending…"
-                  : emailSent
-                    ? "Resend Verification Email"
-                    : "Verify Email"}
-              </button>
-            )
-          )}
-        </div>
+      <div className={styles.card} ref={emailCardRef}>
+        {settings?.hasBusinessContext ? (
+          <>
+            <div className={styles.cardHeader}>
+              <div className={styles.cardIcon}>
+                <i className="ti ti-building" />
+              </div>
+              <div>
+                <h3>Business email</h3>
+                <p>
+                  Required to purchase a subscription and to enable Two-Factor
+                  Authentication. Personal email is managed separately from My
+                  Profile and is never required.
+                </p>
+              </div>
+            </div>
 
-        {!settings?.emailVerified && emailSent && !emailError && (
-          <p className={styles.emailHint}>
-            Check {settings?.email} for a verification link.
-          </p>
-        )}
-        {emailError && (
-          <div className={styles.errorBox}>
-            <i className="ti ti-alert-circle" />
-            <span>{emailError}</span>
-          </div>
-        )}
-        {devLink && (
-          <div className={styles.devLinkBox}>
-            <p>Development Mode — Verification Link</p>
-            <a href={devLink} target="_blank" rel="noreferrer">
-              Open Link
-            </a>
-          </div>
+            {settings?.businessEmailVerified ? (
+              <div className={styles.phoneRow}>
+                <span className={styles.phoneNumber}>
+                  {settings?.businessEmail}
+                </span>
+                <span className={styles.verifiedBadge}>
+                  <i className="ti ti-rosette-discount-check" /> Verified
+                </span>
+              </div>
+            ) : (
+              <div className={styles.emailEditRow}>
+                <input
+                  type="email"
+                  className={styles.emailInput}
+                  placeholder="business@yourcompany.com"
+                  value={businessEmailInput}
+                  onChange={(e) => setBusinessEmailInput(e.target.value)}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && handleVerifyBusinessEmail()
+                  }
+                />
+                <button
+                  type="button"
+                  className={styles.verifyBtn}
+                  onClick={handleVerifyBusinessEmail}
+                  disabled={businessSending || !businessEmailInput.trim()}
+                >
+                  {businessSending
+                    ? "Sending…"
+                    : businessEmailChanged
+                      ? "Save & Verify"
+                      : businessSent
+                        ? "Resend Verification Email"
+                        : "Verify"}
+                </button>
+              </div>
+            )}
+
+            {!settings?.businessEmailVerified &&
+              businessSent &&
+              !businessError && (
+                <p className={styles.emailHint}>
+                  Check {settings?.businessEmail} for a verification link.
+                </p>
+              )}
+            {businessError && (
+              <div className={styles.errorBox}>
+                <i className="ti ti-alert-circle" />
+                <span>{businessError}</span>
+              </div>
+            )}
+            {businessDevLink && (
+              <div className={styles.devLinkBox}>
+                <p>Development Mode — Verification Link</p>
+                <a href={businessDevLink} target="_blank" rel="noreferrer">
+                  Open Link
+                </a>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <div className={styles.cardHeader}>
+              <div className={styles.cardIcon}>
+                <i className="ti ti-mail" />
+              </div>
+              <div>
+                <h3>Verified email</h3>
+                <p>Required to enable Two-Factor Authentication.</p>
+              </div>
+            </div>
+            <div className={styles.phoneRow}>
+              <span className={styles.phoneNumber}>
+                {settings?.email || "Not set"}
+              </span>
+              {settings?.emailVerified ? (
+                <span className={styles.verifiedBadge}>
+                  <i className="ti ti-rosette-discount-check" /> Verified
+                </span>
+              ) : (
+                settings?.email && (
+                  <button
+                    type="button"
+                    className={styles.verifyBtn}
+                    onClick={handleVerifyPersonalEmail}
+                    disabled={personalSending}
+                  >
+                    {personalSending
+                      ? "Sending…"
+                      : personalSent
+                        ? "Resend Verification Email"
+                        : "Verify Email"}
+                  </button>
+                )
+              )}
+            </div>
+            {!settings?.emailVerified && personalSent && !personalError && (
+              <p className={styles.emailHint}>
+                Check {settings?.email} for a verification link.
+              </p>
+            )}
+            {personalError && (
+              <div className={styles.errorBox}>
+                <i className="ti ti-alert-circle" />
+                <span>{personalError}</span>
+              </div>
+            )}
+            {personalDevLink && (
+              <div className={styles.devLinkBox}>
+                <p>Development Mode — Verification Link</p>
+                <a href={personalDevLink} target="_blank" rel="noreferrer">
+                  Open Link
+                </a>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -213,6 +364,13 @@ export default function SecuritySettingsSection() {
                 A verified phone number is required to enable this.
               </p>
             )}
+            {settings?.phoneVerified && !requiredEmailVerified && (
+              <p className={styles.toggleHint}>
+                {settings?.hasBusinessContext
+                  ? "A verified business email is required to enable this."
+                  : "A verified email is required to enable this."}
+              </p>
+            )}
           </div>
           <button
             type="button"
@@ -228,6 +386,42 @@ export default function SecuritySettingsSection() {
           </button>
         </div>
       </div>
+
+      {/* "Verify your email first" — shown INSTEAD OF the password modal
+          whenever the person tries to enable 2FA without the required
+          email verified. No password field here at all: there is nothing
+          to confirm yet. */}
+      {showVerifyFirst && (
+        <div
+          className={styles.modalBackdrop}
+          onClick={() => setShowVerifyFirst(false)}
+        >
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <h4>Verify your email first</h4>
+            <p>
+              {settings?.hasBusinessContext
+                ? "Two-Factor Authentication needs a verified business email. Verify it below, then come back to enable 2FA."
+                : "Two-Factor Authentication needs a verified email. Verify it below, then come back to enable 2FA."}
+            </p>
+            <div className={styles.modalActions}>
+              <button
+                type="button"
+                className={styles.cancelBtn}
+                onClick={() => setShowVerifyFirst(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={styles.confirmBtn}
+                onClick={jumpToEmailCard}
+              >
+                Go to email verification
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {confirming && (
         <div

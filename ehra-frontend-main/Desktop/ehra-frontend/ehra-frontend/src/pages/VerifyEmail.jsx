@@ -19,6 +19,7 @@ export default function VerifyEmail() {
   // "loading" -> "success" | "expired" | "error"
   const [status, setStatus] = useState("loading");
   const [message, setMessage] = useState("");
+  const [target, setTarget] = useState(null); // "PERSONAL" | "BUSINESS" | null
   const [resending, setResending] = useState(false);
   const [resent, setResent] = useState(false);
 
@@ -32,8 +33,9 @@ export default function VerifyEmail() {
     let cancelled = false;
     (async () => {
       try {
-        await verifyEmailToken(token);
+        const result = await verifyEmailToken(token);
         if (cancelled) return;
+        setTarget(result?.target || null);
         setStatus("success");
         // Give the success state a moment to register before bouncing
         // onward — a person who just clicked an email link benefits from
@@ -101,11 +103,13 @@ export default function VerifyEmail() {
             <div className={`${styles.iconWrap} ${styles.iconSuccess}`}>
               <i className="ti ti-circle-check" />
             </div>
-            <h1 className={styles.title}>🎉 Email Verified!</h1>
+            <h1 className={styles.title}>
+              🎉 {target === "BUSINESS" ? "Business Email" : "Email"} Verified!
+            </h1>
             <p className={styles.desc}>
-              Your email has been successfully verified. Your account is now
-              ready for subscriptions, enhanced security, and future account
-              recovery.
+              {target === "BUSINESS"
+                ? "Your business email has been successfully verified. You're all set for subscriptions and Two-Factor Authentication."
+                : "Your email has been successfully verified. Your account is now ready for enhanced security and future account recovery."}
             </p>
             <div className={styles.actions}>
               <button

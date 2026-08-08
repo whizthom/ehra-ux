@@ -93,6 +93,29 @@
     border-radius: 999px;
 }
 
+.emailEditRow {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.emailInput {
+    flex: 1;
+    min-width: 200px;
+    padding: 9px 12px;
+    font-size: 13.5px;
+    border: 1px solid var(--border-color, #d8e6e1);
+    border-radius: 8px;
+    color: var(--text-primary);
+    background: #ffffff;
+}
+
+.emailInput:focus {
+    outline: none;
+    border-color: #0f6e56;
+}
+
 .verifyBtn {
     display: inline-flex;
     align-items: center;
@@ -105,6 +128,8 @@
     padding: 7px 14px;
     border-radius: 8px;
     cursor: pointer;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .verifyBtn:disabled {

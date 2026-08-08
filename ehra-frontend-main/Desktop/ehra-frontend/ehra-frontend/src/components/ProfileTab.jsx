@@ -145,6 +145,7 @@ export default function ProfileTab({
   const [tab, setTab] = useState("view");
   const [selfForm, setSelfForm] = useState({
     phone: profile?.phone || "",
+    email: profile?.email || "",
     dateOfBirth: profile?.dateOfBirth || "",
     gender: profile?.gender || "",
     address: profile?.address || "",
@@ -211,6 +212,7 @@ export default function ProfileTab({
       const payload = {
         // Self-service
         phone: selfForm.phone || null,
+        email: selfForm.email || null,
         dateOfBirth: selfForm.dateOfBirth || null,
         gender: selfForm.gender || null,
         address: selfForm.address || null,
@@ -340,7 +342,25 @@ export default function ProfileTab({
           </Section>
 
           <Section title="Contact" icon="ti-mail">
-            <Field label="Email" value={profile.email} />
+            <Field
+              label="Email"
+              value={
+                profile.email ? (
+                  <span className={styles.emailWithBadge}>
+                    {profile.email}
+                    {profile.emailVerified ? (
+                      <span className={styles.verifiedTag}>
+                        <i className="ti ti-rosette-discount-check" /> Verified
+                      </span>
+                    ) : (
+                      <span className={styles.unverifiedTag}>Unverified</span>
+                    )}
+                  </span>
+                ) : (
+                  "—"
+                )
+              }
+            />
             <Field label="Phone" value={profile.phone} />
             <Field label="Address" value={profile.address} span />
           </Section>
@@ -425,6 +445,14 @@ export default function ProfileTab({
                 onChange={handleSelfChange}
                 type="tel"
                 placeholder={fmt(profile.phone)}
+              />
+              <FormField
+                label="Personal email (optional)"
+                name="email"
+                value={selfForm.email}
+                onChange={handleSelfChange}
+                type="email"
+                placeholder={fmt(profile.email)}
               />
               <FormField
                 label="Gender"
