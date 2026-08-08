@@ -29,7 +29,7 @@ export default function LogoutConfirmModal({
         <div className={styles.modalIcon}>
           <i
             className="ti ti-logout"
-            style={{ fontSize: 26, color: "var(--warning-text)" }}
+            style={{ fontSize: 26, color: "var(--danger-text)" }}
             aria-hidden="true"
           />
         </div>
