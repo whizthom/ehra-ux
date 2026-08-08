@@ -145,7 +145,6 @@ export default function ProfileTab({
   const [tab, setTab] = useState("view");
   const [selfForm, setSelfForm] = useState({
     phone: profile?.phone || "",
-    email: profile?.email || "",
     dateOfBirth: profile?.dateOfBirth || "",
     gender: profile?.gender || "",
     address: profile?.address || "",
@@ -212,7 +211,6 @@ export default function ProfileTab({
       const payload = {
         // Self-service
         phone: selfForm.phone || null,
-        email: selfForm.email || null,
         dateOfBirth: selfForm.dateOfBirth || null,
         gender: selfForm.gender || null,
         address: selfForm.address || null,
@@ -446,14 +444,35 @@ export default function ProfileTab({
                 type="tel"
                 placeholder={fmt(profile.phone)}
               />
-              <FormField
-                label="Personal email (optional)"
-                name="email"
-                value={selfForm.email}
-                onChange={handleSelfChange}
-                type="email"
-                placeholder={fmt(profile.email)}
-              />
+              <div className={`${styles.formField}`}>
+                <label>Personal email</label>
+                <p className={styles.fieldNote}>
+                  {fmt(profile.email)}
+                  {profile.email && (
+                    <span
+                      className={
+                        profile.emailVerified
+                          ? styles.verifiedTag
+                          : styles.unverifiedTag
+                      }
+                      style={{ marginLeft: 8 }}
+                    >
+                      {profile.emailVerified ? (
+                        <>
+                          <i className="ti ti-rosette-discount-check" />{" "}
+                          Verified
+                        </>
+                      ) : (
+                        "Unverified"
+                      )}
+                    </span>
+                  )}
+                  <br />
+                  <span className={styles.fieldHint}>
+                    Change and verify this from Settings &gt; Security.
+                  </span>
+                </p>
+              </div>
               <FormField
                 label="Gender"
                 name="gender"

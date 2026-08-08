@@ -99,9 +99,17 @@ export const getEmailStatus = () =>
 
 // "Verify Email" (first send) and "Resend Verification Email" (expired
 // link) are the exact same call — the backend always invalidates any
-// still-pending token and issues a fresh one.
-export const sendEmailVerification = () =>
-  API.post("/auth/email/send-verification").then((r) => r.data);
+// still-pending token and issues a fresh one. Pass `email` to update the
+// Identity's personal email AND send a fresh verification in one call —
+// this is the ONLY way to change a personal email; it deliberately never
+// goes through the profile-edit approval chain (see
+// EmailVerificationService#sendPersonalEmailVerification), so an
+// employee can set/change their own email and use it for verification
+// immediately, with no employer/HOD sign-off required.
+export const sendEmailVerification = (email) =>
+  API.post("/auth/email/send-verification", email ? { email } : {}).then(
+    (r) => r.data,
+  );
 
 // ── Email verification: BUSINESS (Business#email) ───────────────────────
 // This — NOT the personal email above — is what actually gates

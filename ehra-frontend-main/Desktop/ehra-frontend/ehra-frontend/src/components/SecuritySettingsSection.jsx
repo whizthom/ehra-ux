@@ -14,7 +14,9 @@ export default function SecuritySettingsSection() {
 
   const emailCardRef = useRef(null);
 
-  // ── Personal email (employee context only — see render below) ────────
+  // ── Personal email (employee context — "enter it and verify right
+  //    there", exactly like the business card below) ───────────────────
+  const [personalEmailInput, setPersonalEmailInput] = useState("");
   const [personalSending, setPersonalSending] = useState(false);
   const [personalSent, setPersonalSent] = useState(false);
   const [personalError, setPersonalError] = useState("");
@@ -44,6 +46,7 @@ export default function SecuritySettingsSection() {
       .then((data) => {
         setSettings(data);
         setBusinessEmailInput(data?.businessEmail || "");
+        setPersonalEmailInput(data?.email || "");
       })
       .catch(() => setError("Couldn't load your security settings."));
 
@@ -121,8 +124,13 @@ export default function SecuritySettingsSection() {
     setPersonalError("");
     setPersonalDevLink(null);
     try {
-      const status = await sendEmailVerification();
+      const typed = personalEmailInput.trim().toLowerCase();
+      const changed = typed && typed !== (settings?.email || "");
+      const status = await sendEmailVerification(changed ? typed : undefined);
       setPersonalSent(true);
+      if (status?.email) {
+        setSettings((s) => ({ ...s, email: status.email }));
+      }
       if (status?.developmentVerificationLink) {
         setPersonalDevLink(status.developmentVerificationLink);
       }
@@ -288,35 +296,51 @@ export default function SecuritySettingsSection() {
                 <i className="ti ti-mail" />
               </div>
               <div>
-                <h3>Verified email</h3>
-                <p>Required to enable Two-Factor Authentication.</p>
+                <h3>Personal email</h3>
+                <p>
+                  Required to enable Two-Factor Authentication. Set or change it
+                  any time — no approval needed.
+                </p>
               </div>
             </div>
-            <div className={styles.phoneRow}>
-              <span className={styles.phoneNumber}>
-                {settings?.email || "Not set"}
-              </span>
-              {settings?.emailVerified ? (
+
+            {settings?.emailVerified ? (
+              <div className={styles.phoneRow}>
+                <span className={styles.phoneNumber}>{settings?.email}</span>
                 <span className={styles.verifiedBadge}>
                   <i className="ti ti-rosette-discount-check" /> Verified
                 </span>
-              ) : (
-                settings?.email && (
-                  <button
-                    type="button"
-                    className={styles.verifyBtn}
-                    onClick={handleVerifyPersonalEmail}
-                    disabled={personalSending}
-                  >
-                    {personalSending
-                      ? "Sending…"
+              </div>
+            ) : (
+              <div className={styles.emailEditRow}>
+                <input
+                  type="email"
+                  className={styles.emailInput}
+                  placeholder="you@example.com"
+                  value={personalEmailInput}
+                  onChange={(e) => setPersonalEmailInput(e.target.value)}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && handleVerifyPersonalEmail()
+                  }
+                />
+                <button
+                  type="button"
+                  className={styles.verifyBtn}
+                  onClick={handleVerifyPersonalEmail}
+                  disabled={personalSending || !personalEmailInput.trim()}
+                >
+                  {personalSending
+                    ? "Sending…"
+                    : personalEmailInput.trim().toLowerCase() !==
+                        (settings?.email || "").toLowerCase()
+                      ? "Save & Verify"
                       : personalSent
                         ? "Resend Verification Email"
-                        : "Verify Email"}
-                  </button>
-                )
-              )}
-            </div>
+                        : "Verify"}
+                </button>
+              </div>
+            )}
+
             {!settings?.emailVerified && personalSent && !personalError && (
               <p className={styles.emailHint}>
                 Check {settings?.email} for a verification link.
