@@ -87,6 +87,17 @@
     transition: background 0.15s;
 }
 
+/* --danger-text in dark mode (#ffb4bd) is a light pink meant for TEXT
+   sitting on a translucent --danger-bg, not for use as a solid button
+   fill — using it here made this button render pale-pink-on-white
+   instead of a proper filled danger button, and looked like the modal
+   hadn't picked up dark mode at all. --danger is the actual solid-fill
+   danger color in both themes; only overriding it for dark mode keeps
+   light mode exactly as it already was. */
+[data-theme="dark"] .confirmBtn {
+    background: var(--danger);
+}
+
 .confirmBtn:hover:not(:disabled) {
     background: var(--danger-hover);
 }

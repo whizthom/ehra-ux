@@ -1181,10 +1181,14 @@ export default function Dashboard() {
       {/* ── Sidebar ── */}
       <aside className={styles.sidebar}>
         <div className={styles.sbLogo}>
-          {/* Desktop sidebar always shows Ehral's own logo here — the
-              business's own logo/name still appear in the mobile topbar
-              brand below (styles.topbarMobileBrand) and elsewhere in the
-              app; this slot alone is Ehral-branded, not tenant-branded. */}
+          {/* Desktop sidebar always shows Ehral's own logo here — flat
+              white (tone="sidebar") rather than the normal two-tone
+              brand colors, because --accent equals --bg-sidebar exactly
+              in light mode (both #0f6e56), which makes the wordmark's
+              "e" disappear against the sidebar background. The
+              business's own logo/name still appear in the mobile
+              topbar brand below (styles.topbarMobileBrand); this slot
+              alone is Ehral-branded, not tenant-branded. */}
           <Logo variant="horizontal" size={30} tone="sidebar" title="Ehral" />
         </div>
 
@@ -1258,7 +1262,7 @@ export default function Dashboard() {
               <button
                 type="button"
                 className={styles.sbLogoutBtn}
-                onClick={handleLogout}
+                onClick={() => setShowLogoutConfirm(true)}
                 aria-label="Log out"
                 title="Log out"
               >

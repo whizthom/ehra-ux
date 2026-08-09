@@ -118,6 +118,16 @@
     border-radius: 10px;
 }
 
+/* --bg-soft-accent is a background-tint token (a near-transparent 14%
+   teal wash in dark mode — see theme.css), not built for use as text.
+   Using it as the badge's number color left the count almost unreadable
+   against the translucent white pill in dark mode. --accent-hover in
+   dark mode is a bright, saturated light green designed to read clearly
+   against dark surfaces — same fix approach as .sbItem above. */
+[data-theme="dark"] .sbBadge {
+    color: var(--accent-hover);
+}
+
 .sbFooter {
     padding: 14px 20px;
     border-top: 0.5px solid rgba(255, 255, 255, 0.1);
