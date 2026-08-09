@@ -14,7 +14,6 @@ import { getChatUnreadCount } from "../api/chatApi";
 import useMessageStream from "../hooks/useMessageStream";
 import styles from "./Dashboard.module.css";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
-import Logo from "../components/Logo";
 import AddDepartmentModal from "../components/AddDepartmentModal";
 import RemoveEmployeeModal from "../components/RemoveEmployeeModal";
 import LogoutConfirmModal from "../components/LogoutConfirmModal";

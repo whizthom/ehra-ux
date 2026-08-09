@@ -7,7 +7,6 @@ import { getMyPenaltySummary } from "../api/penaltyApi";
 import useMessageStream from "../hooks/useMessageStream";
 import styles from "./Dashboard.module.css";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
-import Logo from "../components/Logo";
 import {
   getAllProfileEdits,
   getPendingProfileEdits,
