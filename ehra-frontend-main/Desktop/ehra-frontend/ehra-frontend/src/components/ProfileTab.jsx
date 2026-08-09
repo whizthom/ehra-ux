@@ -346,7 +346,8 @@ export default function ProfileTab({
                 profile.email ? (
                   <span className={styles.emailWithBadge}>
                     {profile.email}
-                    {profile.emailVerified ? (
+                    {profile.email?.toLowerCase() ===
+                    profile.verifiedEmail?.toLowerCase() ? (
                       <span className={styles.verifiedTag}>
                         <i className="ti ti-rosette-discount-check" /> Verified
                       </span>
@@ -451,13 +452,15 @@ export default function ProfileTab({
                   {profile.email && (
                     <span
                       className={
-                        profile.emailVerified
+                        profile.email?.toLowerCase() ===
+                        profile.verifiedEmail?.toLowerCase()
                           ? styles.verifiedTag
                           : styles.unverifiedTag
                       }
                       style={{ marginLeft: 8 }}
                     >
-                      {profile.emailVerified ? (
+                      {profile.email?.toLowerCase() ===
+                      profile.verifiedEmail?.toLowerCase() ? (
                         <>
                           <i className="ti ti-rosette-discount-check" />{" "}
                           Verified

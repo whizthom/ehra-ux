@@ -86,53 +86,36 @@ export const toggleTwoFactor = (enabled, password) =>
 // ── Email verification: PERSONAL (Identity#email) ───────────────────────
 // Optional everywhere — never required to enable 2FA or buy a
 // subscription on its own for an employer (see
-// EmailVerificationService#requireVerifiedEmailForSecurity's "continuity"
-// rule), and the ONLY relevant email for an employee. Set/edited from My
-// Profile; this section only handles verifying it.
+// ── Email verification ────────────────────────────────────────────────
+// ONE shared verified email per Identity, used identically regardless of
+// whether the caller is currently in an employer or employee context —
+// see EmailVerificationService's class doc. Verifying from any account
+// linked to this Identity (any Business it owns, or its use as an
+// employee elsewhere) proves the SAME email for all of them; there is no
+// separate "business email" concept anymore.
 
-// Settings > Security's personal-email fallback display (shown for an
-// employee, or alongside the business card for an employer).
-// developmentVerificationLink is only ever non-null when the backend is
-// running with email.provider=mock — the "Development Mode" card.
+// Settings > Security's "Verified email" section, and the Welcome card /
+// upgrade-prompt's auto-detection. developmentVerificationLink is only
+// ever non-null when the backend is running with email.provider=mock —
+// the "Development Mode" card.
 export const getEmailStatus = () =>
   API.get("/auth/email/status").then((r) => r.data);
 
 // "Verify Email" (first send) and "Resend Verification Email" (expired
 // link) are the exact same call — the backend always invalidates any
-// still-pending token and issues a fresh one. Pass `email` to update the
-// Identity's personal email AND send a fresh verification in one call —
-// this is the ONLY way to change a personal email; it deliberately never
-// goes through the profile-edit approval chain (see
-// EmailVerificationService#sendPersonalEmailVerification), so an
-// employee can set/change their own email and use it for verification
-// immediately, with no employer/HOD sign-off required.
+// still-pending token and issues a fresh one. Pass `email` to verify a
+// specific address instead of resending to whatever's already mid-
+// verification. This is completely decoupled from the freely-editable
+// display email fields (My Profile's personal email, a business's own
+// contact email) — none of those ever need to match what's verified
+// here, and editing them never resets verification.
 export const sendEmailVerification = (email) =>
   API.post("/auth/email/send-verification", email ? { email } : {}).then(
-    (r) => r.data,
-  );
-
-// ── Email verification: BUSINESS (Business#email) ───────────────────────
-// This — NOT the personal email above — is what actually gates
-// subscription checkout and Email 2FA for an employer. businessId is
-// always derived server-side from the caller's JWT (active-context
-// business), never sent from here.
-
-export const getBusinessEmailStatus = () =>
-  API.get("/auth/business-email/status").then((r) => r.data);
-
-// "Enter the business email and verify right away, right there" — pass
-// `email` to update the Business's email AND send a fresh verification
-// in one call; omit it (or call with no args) to just resend to whatever
-// address is already on file.
-export const sendBusinessEmailVerification = (email) =>
-  API.post("/auth/business-email/send-verification", email ? { email } : {}).then(
     (r) => r.data,
   );
 
 // Redeems the token from https://ehral.com/verify-email?token=xxxxxxxx —
 // public on the backend (the token itself is the credential), so this
 // works even if the browser tab clicking the email link isn't logged in.
-// Works for either a personal or business token; the response's `target`
-// field ("PERSONAL" | "BUSINESS") says which one it was.
 export const verifyEmailToken = (token) =>
   API.post("/auth/verify-email", { token }).then((r) => r.data);

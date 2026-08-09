@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  getBusinessEmailStatus,
-  sendBusinessEmailVerification,
-} from "../api/phoneAuthApi";
+import { getEmailStatus, sendEmailVerification } from "../api/phoneAuthApi";
 import styles from "./VerifyEmailToUpgradeModal.module.css";
 
 // Shown INSTEAD OF the Paystack popup whenever checkout/initialize comes
@@ -12,7 +9,7 @@ import styles from "./VerifyEmailToUpgradeModal.module.css";
 // plan does.
 //
 // "If verified, it leads them straight to processing" — this modal
-// polls business-email status every few seconds while open, so the
+// polls verified-email status every few seconds while open, so the
 // moment the person clicks the link in their inbox (in another tab), it
 // auto-detects that and calls onVerified() itself — no manual "I've
 // verified, continue" click required, though that button is also there
@@ -28,7 +25,7 @@ export default function VerifyEmailToUpgradeModal({ onVerified, onClose }) {
 
   useEffect(() => {
     let cancelled = false;
-    getBusinessEmailStatus()
+    getEmailStatus()
       .then((status) => {
         if (cancelled) return;
         setCurrentEmail(status?.email || "");
@@ -42,14 +39,14 @@ export default function VerifyEmailToUpgradeModal({ onVerified, onClose }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Auto-continue the moment the business email becomes verified —
+  // Auto-continue the moment the email becomes verified —
   // catches the person clicking the emailed link in another tab without
   // making them come back and click anything here.
   useEffect(() => {
     if (!sent) return;
     const interval = setInterval(async () => {
       try {
-        const status = await getBusinessEmailStatus();
+        const status = await getEmailStatus();
         if (status?.emailVerified) {
           clearInterval(interval);
           onVerified();
@@ -69,9 +66,7 @@ export default function VerifyEmailToUpgradeModal({ onVerified, onClose }) {
     try {
       const typed = emailInput.trim().toLowerCase();
       const changed = typed && typed !== currentEmail;
-      const status = await sendBusinessEmailVerification(
-        changed ? typed : undefined,
-      );
+      const status = await sendEmailVerification(changed ? typed : undefined);
       setSent(true);
       if (status?.email) setCurrentEmail(status.email);
       if (status?.developmentVerificationLink) {
@@ -91,7 +86,7 @@ export default function VerifyEmailToUpgradeModal({ onVerified, onClose }) {
     setChecking(true);
     setError("");
     try {
-      const status = await getBusinessEmailStatus();
+      const status = await getEmailStatus();
       if (status?.emailVerified) {
         onVerified();
       } else {
@@ -112,11 +107,10 @@ export default function VerifyEmailToUpgradeModal({ onVerified, onClose }) {
         <div className={styles.iconWrap}>
           <i className="ti ti-mail-check" />
         </div>
-        <h2 className={styles.title}>Verify your business email to continue</h2>
+        <h2 className={styles.title}>Verify your email to continue</h2>
         <p className={styles.desc}>
-          Subscriptions require a verified business email. Confirm the address
-          below, and we'll take you straight to payment the moment it's
-          verified.
+          Subscriptions require a verified email. Confirm the address below, and
+          we'll take you straight to payment the moment it's verified.
         </p>
 
         <div className={styles.emailEditRow}>
