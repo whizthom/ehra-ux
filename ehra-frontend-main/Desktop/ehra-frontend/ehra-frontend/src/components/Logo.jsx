@@ -26,7 +26,9 @@ const HRAL_PATH =
 const ICON_W = 718;
 const ICON_H = 492;
 
-function Mark({ markSize, gradientId }) {
+function Mark({ markSize, gradientId, tone }) {
+  const fill =
+    tone === "sidebar" ? "var(--sidebar-text)" : `url(#${gradientId})`;
   return (
     <svg
       width={markSize}
@@ -35,26 +37,35 @@ function Mark({ markSize, gradientId }) {
       className={styles.mark}
       aria-hidden="true"
     >
-      <defs>
-        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="var(--accent)" />
-          <stop offset="100%" stopColor="var(--text-primary)" />
-        </linearGradient>
-      </defs>
-      <g
-        transform="translate(0,492) scale(0.1,-0.1)"
-        fill={`url(#${gradientId})`}
-        stroke="none"
-      >
+      {tone !== "sidebar" && (
+        <defs>
+          <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="var(--accent)" />
+            <stop offset="100%" stopColor="var(--text-primary)" />
+          </linearGradient>
+        </defs>
+      )}
+      <g transform="translate(0,492) scale(0.1,-0.1)" fill={fill} stroke="none">
         <path d={ICON_PATH} />
       </g>
     </svg>
   );
 }
 
-function Wordmark({ height }) {
+function Wordmark({ height, tone }) {
   // "e" occupies x[0,200], "hral" occupies x[200,784] — 784 wide, 260 tall
   // total, matching the traced source crops exactly.
+  //
+  // tone="sidebar" is a single flat color (var(--sidebar-text)) for both
+  // glyph groups instead of the two-tone accent/text-primary brand
+  // treatment — the sidebar's background (var(--bg-sidebar)) is a solid
+  // brand-color fill in both themes, so the normal accent-colored "e"
+  // would have little to no contrast against it. var(--sidebar-text) is
+  // already the color used for every other label in the sidebar, so this
+  // keeps the logo visually consistent with its surroundings.
+  const eColor = tone === "sidebar" ? "var(--sidebar-text)" : "var(--accent)";
+  const hralColor =
+    tone === "sidebar" ? "var(--sidebar-text)" : "var(--text-primary)";
   return (
     <svg
       height={height}
@@ -66,7 +77,7 @@ function Wordmark({ height }) {
       <g transform="translate(0,0)">
         <g
           transform="translate(0,260) scale(0.1,-0.1)"
-          fill="var(--accent)"
+          fill={eColor}
           stroke="none"
         >
           <path d={E_PATH} />
@@ -75,7 +86,7 @@ function Wordmark({ height }) {
       <g transform="translate(200,0)">
         <g
           transform="translate(0,260) scale(0.1,-0.1)"
-          fill="var(--text-primary)"
+          fill={hralColor}
           stroke="none"
         >
           <path d={HRAL_PATH} />
@@ -90,6 +101,7 @@ export default function Logo({
   variant = "stacked", // "stacked" | "horizontal" | "icon"
   className = "",
   title = "Ehra",
+  tone = "brand", // "brand" (default two-tone) | "sidebar" (flat --sidebar-text)
 }) {
   const reactId = useId();
   const gradientId = `ehraLogoMarkGradient-${reactId.replace(/:/g, "")}`;
@@ -101,7 +113,7 @@ export default function Logo({
         role="img"
         aria-label={title}
       >
-        <Mark markSize={size} gradientId={gradientId} />
+        <Mark markSize={size} gradientId={gradientId} tone={tone} />
       </span>
     );
   }
@@ -113,8 +125,8 @@ export default function Logo({
         role="img"
         aria-label={title}
       >
-        <Mark markSize={size} gradientId={gradientId} />
-        <Wordmark height={size * 0.42} />
+        <Mark markSize={size} gradientId={gradientId} tone={tone} />
+        <Wordmark height={size * 0.42} tone={tone} />
       </span>
     );
   }
@@ -126,8 +138,8 @@ export default function Logo({
       role="img"
       aria-label={title}
     >
-      <Mark markSize={size} gradientId={gradientId} />
-      <Wordmark height={size * 0.34} />
+      <Mark markSize={size} gradientId={gradientId} tone={tone} />
+      <Wordmark height={size * 0.34} tone={tone} />
     </span>
   );
 }

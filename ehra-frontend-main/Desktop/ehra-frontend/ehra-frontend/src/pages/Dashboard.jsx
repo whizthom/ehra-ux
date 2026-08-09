@@ -14,6 +14,7 @@ import { getChatUnreadCount } from "../api/chatApi";
 import useMessageStream from "../hooks/useMessageStream";
 import styles from "./Dashboard.module.css";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
+import Logo from "../components/Logo";
 import AddDepartmentModal from "../components/AddDepartmentModal";
 import RemoveEmployeeModal from "../components/RemoveEmployeeModal";
 import LogoutConfirmModal from "../components/LogoutConfirmModal";
@@ -1181,18 +1182,11 @@ export default function Dashboard() {
       {/* ── Sidebar ── */}
       <aside className={styles.sidebar}>
         <div className={styles.sbLogo}>
-          {businessProfile?.logo ? (
-            <img
-              src={businessProfile.logo}
-              alt={businessProfile?.name || "Business logo"}
-              className={styles.sbLogoImg}
-            />
-          ) : (
-            <div className={styles.sbLogoIcon}>💼</div>
-          )}
-          <span className={styles.sbLogoText}>
-            {businessProfile?.name || "Ehra"}
-          </span>
+          {/* Desktop sidebar always shows Ehral's own logo here — the
+              business's own logo/name still appear in the mobile topbar
+              brand below (styles.topbarMobileBrand) and elsewhere in the
+              app; this slot alone is Ehral-branded, not tenant-branded. */}
+          <Logo variant="horizontal" size={30} tone="sidebar" title="Ehral" />
         </div>
 
         <nav className={styles.sbNav}>
