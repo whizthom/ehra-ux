@@ -10,10 +10,26 @@ import API, { saveSession } from "./authApi";
 export const validateInvitation = (token) =>
   API.get(`/invitations/${token}`).then((r) => r.data);
 
-// POST /api/invitations/generate — employer-only, generates a fresh
-// invite link for their business.
-export const generateInvitation = () =>
-  API.post("/invitations/generate").then((r) => r.data);
+// POST /api/invitations/generate — employer-only. multiUse=false (the
+// default) generates today's single-use link; multiUse=true generates
+// the reusable "share with everyone" link instead — see the Invite
+// Employee modal's "Multi-use link" tab.
+export const generateInvitation = (multiUse = false) =>
+  API.post("/invitations/generate", { multiUse }).then((r) => r.data);
+
+// POST /api/invitations/bulk — the Invite Employee modal's "Invite by
+// email" tab. `emails` is the raw text exactly as pasted
+// (comma/newline/semicolon-separated) — parsing happens server-side.
+// Creates one individually-bound single-use invite per valid address and
+// emails each recipient automatically; returns which addresses were sent
+// to versus skipped (and why), plus a batchId for #getInvitationBatch.
+export const sendBulkInvitations = (emails) =>
+  API.post("/invitations/bulk", { emails }).then((r) => r.data);
+
+// GET /api/invitations/batch/{batchId} — lets the employer come back
+// later and see who from a bulk email-invite has actually registered.
+export const getInvitationBatch = (batchId) =>
+  API.get(`/invitations/batch/${batchId}`).then((r) => r.data);
 
 // POST /api/invitations/register — public sign-up form for someone with
 // NO existing Ehra account. idToken is a phoneVerificationToken from the

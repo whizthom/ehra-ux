@@ -35,6 +35,7 @@ import PlanBadge from "../components/plan/PlanBadge";
 import PlanExpiryReminder from "../components/plan/PlanExpiryReminder";
 import WelcomeCard from "../components/WelcomeCard";
 import OnboardingChecklist from "../components/OnboardingChecklist";
+import InviteEmployeeModal from "../components/InviteEmployeeModal";
 import {
   getAllProfileEdits,
   getPendingProfileEdits,
@@ -369,10 +370,9 @@ export default function Dashboard() {
   const [actioningLeaveId, setActioningLeaveId] = useState(null);
 
   // Invite link
-  const [inviteLink, setInviteLink] = useState("");
-  const [loadingInvite, setLoadingInvite] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [inviteClosing, setInviteClosing] = useState(false);
+  // Invite Employee modal — one popup, three ways to invite (single
+  // link, reusable link, invite by email). See InviteEmployeeModal.jsx.
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
   // Departments
   const [departments, setDepartments] = useState([]);
@@ -1010,36 +1010,6 @@ export default function Dashboard() {
     }
   };
 
-  const generateInviteLink = async () => {
-    try {
-      setLoadingInvite(true);
-      const { data } = await API.post("/invitations/generate");
-      setInviteLink(data.invitationLink);
-    } catch {
-      alert("Unable to generate invitation link. Please try again.");
-    } finally {
-      setLoadingInvite(false);
-    }
-  };
-
-  const copyInviteLink = () => {
-    navigator.clipboard.writeText(inviteLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  // Lets the user cancel the invite-link card off the screen once
-  // they're done with it: plays a brief exit animation, then actually
-  // clears the link once it's finished sliding/fading away.
-  const dismissInviteLink = () => {
-    setInviteClosing(true);
-    setTimeout(() => {
-      setInviteLink("");
-      setCopied(false);
-      setInviteClosing(false);
-    }, 200);
-  };
-
   const handleDepartmentCreated = (newDept) => {
     setDepartments((prev) => [...prev, newDept]);
   };
@@ -1063,62 +1033,6 @@ export default function Dashboard() {
     activeEmployees: 0,
     pendingApprovals: 0,
   };
-
-  // Generated invite link card — pulled out so it can be rendered in two
-  // spots: its usual place near the top of the page (desktop/tablet),
-  // and again right under the Quick actions row on phones, directly
-  // beneath the "Invite employee" pill that triggers it, so the result
-  // shows up exactly where the tap happened instead of off-screen above.
-  const inviteLinkPanel = inviteLink ? (
-    <div
-      className={`${styles.invitePanel} ${inviteClosing ? styles.invitePanelClosing : ""}`}
-    >
-      <button
-        type="button"
-        className={styles.invCancelBtn}
-        onClick={dismissInviteLink}
-        aria-label="Dismiss invite link"
-        title="Dismiss"
-      >
-        <i className="ti ti-x" aria-hidden="true" />
-      </button>
-
-      <i
-        className="ti ti-link"
-        style={{ fontSize: 18, color: "var(--accent)", flexShrink: 0 }}
-        aria-hidden="true"
-      />
-      <input className={styles.inviteLinkInput} readOnly value={inviteLink} />
-      <div className={styles.invActions}>
-        <button
-          className={`${styles.invActionBtn} ${styles.invCopy}`}
-          onClick={copyInviteLink}
-        >
-          <i
-            className={`ti ${copied ? "ti-check" : "ti-copy"}`}
-            style={{ fontSize: 14 }}
-            aria-hidden="true"
-          />
-          {copied ? "Copied!" : "Copy"}
-        </button>
-        <a
-          href={`https://wa.me/?text=${encodeURIComponent(
-            `You've been invited to join ${companyName} on Ehra.\n\n${inviteLink}`,
-          )}`}
-          target="_blank"
-          rel="noreferrer"
-          className={`${styles.invActionBtn} ${styles.invWa}`}
-        >
-          <i
-            className="ti ti-brand-whatsapp"
-            style={{ fontSize: 14 }}
-            aria-hidden="true"
-          />{" "}
-          Share
-        </a>
-      </div>
-    </div>
-  ) : null;
 
   // Today's Pulse (mobile hero widget) — real attendance figures. "Staff"
   // = active employees (the people expected to clock in); "clocked in" =
@@ -1525,15 +1439,14 @@ export default function Dashboard() {
 
             <button
               className={styles.inviteBtn}
-              onClick={generateInviteLink}
-              disabled={loadingInvite}
+              onClick={() => setInviteModalOpen(true)}
             >
               <i
                 className="ti ti-user-plus"
                 style={{ fontSize: 15 }}
                 aria-hidden="true"
               />
-              {loadingInvite ? "Generating…" : "Invite employee"}
+              Invite employee
             </button>
           </div>
         </div>
@@ -1648,10 +1561,6 @@ export default function Dashboard() {
                 </div>
               )}
 
-              <div className={styles.inviteLinkDesktopSlot}>
-                {inviteLinkPanel}
-              </div>
-
               <OnboardingChecklist
                 identityId={user?.identityId}
                 businessProfile={businessProfile}
@@ -1755,7 +1664,7 @@ export default function Dashboard() {
                           icon: "ti-user-plus",
                           label: "Invite employee",
                           color: "teal",
-                          action: generateInviteLink,
+                          action: () => setInviteModalOpen(true),
                         },
                         {
                           icon: "ti-building-plus",
@@ -1793,14 +1702,6 @@ export default function Dashboard() {
                         }}
                       />
                     </div>
-                  </div>
-
-                  {/* Phones only: the generated invite link shows up right
-                      here, directly under the row that has the "Invite
-                      employee" pill, instead of only appearing near the
-                      top of the page. */}
-                  <div className={styles.inviteLinkMobileSlot}>
-                    {inviteLinkPanel}
                   </div>
                 </div>
 
@@ -2320,6 +2221,12 @@ export default function Dashboard() {
       <BusinessReportModal
         open={reportSummaryOpen}
         onClose={() => setReportSummaryOpen(false)}
+      />
+
+      <InviteEmployeeModal
+        open={inviteModalOpen}
+        onClose={() => setInviteModalOpen(false)}
+        companyName={companyName}
       />
 
       {/* ── Mobile bottom navigation ──────────────────────────────────────

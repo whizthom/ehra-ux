@@ -1,0 +1,239 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1300;
+    padding: 20px;
+}
+
+.card {
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 26px 26px 28px;
+    box-shadow: 0 20px 60px var(--shadow-color);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.header h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.closeBtn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 4px;
+}
+
+.tabs {
+    display: flex;
+    gap: 6px;
+    background: var(--bg-surface-alt);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 20px;
+}
+
+.tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.tabActive {
+    background: var(--bg-surface);
+    color: var(--accent);
+    box-shadow: 0 1px 3px var(--shadow-color);
+}
+
+.tabBody {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.desc {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+.linkRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--bg-surface-alt);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+}
+
+.linkInput {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 12.5px;
+    color: var(--text-primary);
+    outline: none;
+}
+
+.linkActions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.actionBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 9px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+}
+
+.copyBtn {
+    background: var(--accent);
+    color: #ffffff;
+}
+
+.waBtn {
+    background: #25d366;
+    color: #ffffff;
+}
+
+.regenBtn {
+    margin-left: auto;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 9px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.generateBtn {
+    align-self: flex-start;
+    background: var(--accent);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 20px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.generateBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.emailsTextarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--bg-surface-alt);
+    resize: vertical;
+}
+
+.emailsTextarea::placeholder {
+    color: var(--text-secondary);
+}
+
+.emailsTextarea:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.errorBox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border: 1px solid var(--danger-border);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 12.5px;
+}
+
+.bulkResult {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 14px;
+    background: var(--bg-surface-alt);
+    border-radius: 10px;
+}
+
+.bulkSentNote {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+.skippedList ul {
+    margin: 4px 0 0;
+    padding-left: 18px;
+}
+
+.skippedList li {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+.skippedHeading {
+    margin: 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
