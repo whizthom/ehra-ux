@@ -5,6 +5,7 @@
 .page {
     display: flex;
     height: 100vh;
+    height: 100dvh;
     width: 100vw;
     overflow: hidden;
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -218,7 +219,7 @@
 }
 
 .rightHeader {
-    padding: 28px 48px 20px;
+    padding: 20px 48px 14px;
     border-bottom: 0.5px solid #e1e8e5;
 }
 
@@ -279,8 +280,12 @@
 
 .formBody {
     flex: 1;
-    overflow-y: auto;
-    padding: 28px 48px;
+    min-height: 0;
+    overflow: hidden;
+    padding: 24px 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 /* Each field/notice rises in with a slight stagger — replays on every
@@ -325,7 +330,7 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
 }
 
 .field label {
@@ -426,7 +431,7 @@
     padding: 12px 14px;
     display: flex;
     gap: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 14px;
 }
 
 .infoBox i {
@@ -455,12 +460,56 @@
     color: #a32d2d;
 }
 
-.formFooter {
-    padding: 16px 48px 28px;
-    border-top: 0.5px solid #e1e8e5;
+/* ── "Already have an account?" — moved up from the page footer where
+   users kept missing it. A filled, tappable pill rather than a plain
+   text link so it reads as its own actionable element sitting right
+   above the first field, not as fine print. */
+.signinPrompt {
     display: flex;
-    flex-direction: column;
-    gap: 12px;
+    align-items: center;
+    gap: 10px;
+    background: #eaf6f1;
+    border: 0.5px solid #bfe4d5;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 18px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.signinPrompt:hover {
+    background: #dcf1e8;
+    border-color: #9ad6bd;
+}
+
+.signinPromptIcon {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    background: #0f6e56;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.signinPromptText {
+    flex: 1;
+    font-size: 12.5px;
+    color: #3d4a45;
+}
+
+.signinPromptText strong {
+    color: #0f6e56;
+}
+
+.signinPromptArrow {
+    font-size: 14px;
+    color: #0f6e56;
+    flex-shrink: 0;
 }
 
 .submitBtn {
@@ -479,6 +528,11 @@
     gap: 8px;
     font-family: inherit;
     transition: background 0.15s, transform 0.05s;
+    /* Sits directly under each step's last field/notice now (see
+       Register.jsx) instead of in a page-bottom footer bar, so it's
+       always "under the last content exactly" rather than pinned to
+       the very bottom of the viewport. */
+    margin-top: 4px;
 }
 
 .submitBtn:hover:not(:disabled) {
@@ -492,24 +546,6 @@
 .submitBtn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-}
-
-.footerNote {
-    text-align: center;
-    font-size: 13px;
-    color: #66766f;
-}
-
-.footerNote a {
-    color: #0f6e56;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-}
-
-.footerNote a:hover {
-    color: #085041;
-    text-decoration: underline;
 }
 
 /* ── Mobile hero — replaces the left brand panel below 900px ──────────── */
@@ -621,9 +657,13 @@
         margin-bottom: 11px;
     }
 
-    .formFooter {
-        flex-shrink: 0;
-        padding: 8px 22px 16px;
+    .signinPrompt {
+        padding: 8px 12px;
+        margin-bottom: 12px;
+    }
+
+    .signinPromptText {
+        font-size: 11.5px;
     }
 }
 

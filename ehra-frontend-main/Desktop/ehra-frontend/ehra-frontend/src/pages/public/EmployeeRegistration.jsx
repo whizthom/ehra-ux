@@ -366,298 +366,304 @@ export default function EmployeeRegistration() {
           </div>
         </div>
 
-        {/* Body */}
-        <div className={styles.formBody}>
-          {error && (
-            <div className={styles.errorBox}>
-              <span>⚠</span>
-              <span>{error}</span>
-            </div>
-          )}
-
-          {/* Step 1: phone */}
-          {step === 1 && (
-            <>
-              <div className={styles.field}>
-                <label>Phone number *</label>
-                <div className={phoneStyles.phoneInputWrap}>
-                  <PhoneInput
-                    international
-                    defaultCountry="NG"
-                    countryCallingCodeEditable={false}
-                    placeholder="Enter your phone number"
-                    value={phone}
-                    onChange={setPhone}
-                    onKeyDown={(e) => e.key === "Enter" && handleSendOtp()}
-                    className={phoneStyles.phoneInput}
-                  />
-                </div>
-                <span className={phoneStyles.hint}>
-                  This becomes your permanent Ehra login identity.
-                </span>
+        {/* Body + footer are wrapped together and vertically centered as
+            one unit (see .formArea) so the Back/Next row always sits
+            right under that step's last field — never stretched down to
+            the bottom of the viewport regardless of how short a given
+            step's content is. */}
+        <div className={styles.formArea}>
+          <div className={styles.formBody}>
+            {error && (
+              <div className={styles.errorBox}>
+                <span>⚠</span>
+                <span>{error}</span>
               </div>
-              <p className={styles.stepNote}>
-                We'll send a one-time code via SMS to verify this number.
-                Standard messaging rates may apply.
-              </p>
-            </>
-          )}
+            )}
 
-          {/* Step 2: OTP */}
-          {step === 2 && (
-            <>
-              <div className={phoneStyles.otpHeadline}>
-                <p>
-                  We sent a 6-digit code to <strong>{phone}</strong>
-                </p>
-                <button
-                  type="button"
-                  className={phoneStyles.changeNumberBtn}
-                  onClick={() => {
-                    setStep(1);
-                    setOtp("");
-                    setError("");
-                  }}
-                >
-                  Change number
-                </button>
-              </div>
-
-              <DevOtpCard code={confirmationResult?.developmentOtp} />
-
-              <div className={styles.field}>
-                <label>Verification code *</label>
-                <input
-                  ref={otpInputRef}
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  maxLength={6}
-                  placeholder="000000"
-                  value={otp}
-                  onChange={(e) =>
-                    setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
-                  }
-                  onKeyDown={(e) => e.key === "Enter" && handleVerifyOtp()}
-                  className={phoneStyles.otpInput}
-                />
-              </div>
-
-              <button
-                type="button"
-                className={phoneStyles.resendBtn}
-                onClick={handleResendOtp}
-                disabled={resendIn > 0 || loading}
-              >
-                {resendIn > 0 ? `Resend code in ${resendIn}s` : "Resend code"}
-              </button>
-            </>
-          )}
-
-          {/* Step 3: personal info */}
-          {step === 3 && (
-            <>
-              <div className={styles.grid2}>
-                <div className={styles.field}>
-                  <label>First name *</label>
-                  <input
-                    name="firstName"
-                    value={form.firstName}
-                    onChange={handle}
-                    placeholder="Ada"
-                  />
-                </div>
-                <div className={styles.field}>
-                  <label>Last name *</label>
-                  <input
-                    name="lastName"
-                    value={form.lastName}
-                    onChange={handle}
-                    placeholder="Lovelace"
-                  />
-                </div>
-              </div>
-              <div className={styles.grid1}>
-                <div className={styles.field}>
-                  <label>
-                    Middle name{" "}
-                    <span className={styles.optional}>(optional)</span>
-                  </label>
-                  <input
-                    name="middleName"
-                    value={form.middleName}
-                    onChange={handle}
-                    placeholder="Byron"
-                  />
-                </div>
-                <div className={styles.field}>
-                  <label>Date of birth *</label>
-                  <input
-                    type="date"
-                    name="dateOfBirth"
-                    value={form.dateOfBirth}
-                    onChange={handle}
-                  />
-                </div>
-                <div className={styles.field}>
-                  <label>Gender *</label>
-                  <select name="gender" value={form.gender} onChange={handle}>
-                    <option value="">Select gender</option>
-                    <option>Male</option>
-                    <option>Female</option>
-                    <option>Non-binary</option>
-                    <option>Prefer not to say</option>
-                  </select>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Step 4: contact details (phone already verified — no phone field here) */}
-          {step === 4 && (
-            <div className={styles.grid1}>
-              <div className={styles.field}>
-                <label>Email address *</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={form.email}
-                  onChange={handle}
-                  placeholder="ada@company.com"
-                />
-              </div>
-              <div className={styles.field}>
-                <label>Home address *</label>
-                <input
-                  name="address"
-                  value={form.address}
-                  onChange={handle}
-                  placeholder="123 Main St, Lagos"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Step 5: emergency contact */}
-          {step === 5 && (
-            <>
-              <p className={styles.stepNote}>
-                Provide details of someone we can contact on your behalf in case
-                of an emergency.
-              </p>
-              <div className={styles.grid1}>
-                <div className={styles.field}>
-                  <label>Full name *</label>
-                  <input
-                    name="emergencyContactName"
-                    value={form.emergencyContactName}
-                    onChange={handle}
-                    placeholder="Jane Lovelace"
-                  />
-                </div>
+            {/* Step 1: phone */}
+            {step === 1 && (
+              <>
                 <div className={styles.field}>
                   <label>Phone number *</label>
+                  <div className={phoneStyles.phoneInputWrap}>
+                    <PhoneInput
+                      international
+                      defaultCountry="NG"
+                      countryCallingCodeEditable={false}
+                      placeholder="Enter your phone number"
+                      value={phone}
+                      onChange={setPhone}
+                      onKeyDown={(e) => e.key === "Enter" && handleSendOtp()}
+                      className={phoneStyles.phoneInput}
+                    />
+                  </div>
+                  <span className={phoneStyles.hint}>
+                    This becomes your permanent Ehra login identity.
+                  </span>
+                </div>
+                <p className={styles.stepNote}>
+                  We'll send a one-time code via SMS to verify this number.
+                  Standard messaging rates may apply.
+                </p>
+              </>
+            )}
+
+            {/* Step 2: OTP */}
+            {step === 2 && (
+              <>
+                <div className={phoneStyles.otpHeadline}>
+                  <p>
+                    We sent a 6-digit code to <strong>{phone}</strong>
+                  </p>
+                  <button
+                    type="button"
+                    className={phoneStyles.changeNumberBtn}
+                    onClick={() => {
+                      setStep(1);
+                      setOtp("");
+                      setError("");
+                    }}
+                  >
+                    Change number
+                  </button>
+                </div>
+
+                <DevOtpCard code={confirmationResult?.developmentOtp} />
+
+                <div className={styles.field}>
+                  <label>Verification code *</label>
                   <input
-                    type="tel"
-                    name="emergencyContactPhone"
-                    value={form.emergencyContactPhone}
+                    ref={otpInputRef}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    placeholder="000000"
+                    value={otp}
+                    onChange={(e) =>
+                      setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                    }
+                    onKeyDown={(e) => e.key === "Enter" && handleVerifyOtp()}
+                    className={phoneStyles.otpInput}
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  className={phoneStyles.resendBtn}
+                  onClick={handleResendOtp}
+                  disabled={resendIn > 0 || loading}
+                >
+                  {resendIn > 0 ? `Resend code in ${resendIn}s` : "Resend code"}
+                </button>
+              </>
+            )}
+
+            {/* Step 3: personal info */}
+            {step === 3 && (
+              <>
+                <div className={styles.grid2}>
+                  <div className={styles.field}>
+                    <label>First name *</label>
+                    <input
+                      name="firstName"
+                      value={form.firstName}
+                      onChange={handle}
+                      placeholder="Ada"
+                    />
+                  </div>
+                  <div className={styles.field}>
+                    <label>Last name *</label>
+                    <input
+                      name="lastName"
+                      value={form.lastName}
+                      onChange={handle}
+                      placeholder="Lovelace"
+                    />
+                  </div>
+                </div>
+                <div className={styles.grid1}>
+                  <div className={styles.field}>
+                    <label>
+                      Middle name{" "}
+                      <span className={styles.optional}>(optional)</span>
+                    </label>
+                    <input
+                      name="middleName"
+                      value={form.middleName}
+                      onChange={handle}
+                      placeholder="Byron"
+                    />
+                  </div>
+                  <div className={styles.field}>
+                    <label>Date of birth *</label>
+                    <input
+                      type="date"
+                      name="dateOfBirth"
+                      value={form.dateOfBirth}
+                      onChange={handle}
+                    />
+                  </div>
+                  <div className={styles.field}>
+                    <label>Gender *</label>
+                    <select name="gender" value={form.gender} onChange={handle}>
+                      <option value="">Select gender</option>
+                      <option>Male</option>
+                      <option>Female</option>
+                      <option>Non-binary</option>
+                      <option>Prefer not to say</option>
+                    </select>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Step 4: contact details (phone already verified — no phone field here) */}
+            {step === 4 && (
+              <div className={styles.grid1}>
+                <div className={styles.field}>
+                  <label>Email address *</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={form.email}
                     onChange={handle}
-                    placeholder="+234 800 000 0001"
+                    placeholder="ada@company.com"
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label>Home address *</label>
+                  <input
+                    name="address"
+                    value={form.address}
+                    onChange={handle}
+                    placeholder="123 Main St, Lagos"
                   />
                 </div>
               </div>
-            </>
-          )}
+            )}
 
-          {/* Step 6: password */}
-          {step === 6 && (
-            <>
-              <p className={styles.stepNote}>
-                Choose a strong password to secure your Ehra account.
-              </p>
-              <div className={styles.grid1}>
-                <div className={styles.field}>
-                  <label>Password *</label>
-                  <div className={styles.pwWrap}>
+            {/* Step 5: emergency contact */}
+            {step === 5 && (
+              <>
+                <p className={styles.stepNote}>
+                  Provide details of someone we can contact on your behalf in
+                  case of an emergency.
+                </p>
+                <div className={styles.grid1}>
+                  <div className={styles.field}>
+                    <label>Full name *</label>
                     <input
-                      type={showPw ? "text" : "password"}
-                      name="password"
-                      value={form.password}
+                      name="emergencyContactName"
+                      value={form.emergencyContactName}
                       onChange={handle}
-                      placeholder="Min. 8 characters"
+                      placeholder="Jane Lovelace"
                     />
-                    <button
-                      type="button"
-                      className={styles.pwToggle}
-                      onClick={() => setShowPw((v) => !v)}
-                      aria-label={showPw ? "Hide password" : "Show password"}
+                  </div>
+                  <div className={styles.field}>
+                    <label>Phone number *</label>
+                    <input
+                      type="tel"
+                      name="emergencyContactPhone"
+                      value={form.emergencyContactPhone}
+                      onChange={handle}
+                      placeholder="+234 800 000 0001"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Step 6: password */}
+            {step === 6 && (
+              <>
+                <p className={styles.stepNote}>
+                  Choose a strong password to secure your Ehra account.
+                </p>
+                <div className={styles.grid1}>
+                  <div className={styles.field}>
+                    <label>Password *</label>
+                    <div className={styles.pwWrap}>
+                      <input
+                        type={showPw ? "text" : "password"}
+                        name="password"
+                        value={form.password}
+                        onChange={handle}
+                        placeholder="Min. 8 characters"
+                      />
+                      <button
+                        type="button"
+                        className={styles.pwToggle}
+                        onClick={() => setShowPw((v) => !v)}
+                        aria-label={showPw ? "Hide password" : "Show password"}
+                      >
+                        {showPw ? "🙈" : "👁"}
+                      </button>
+                    </div>
+                  </div>
+                  <div className={styles.field}>
+                    <label>Confirm password *</label>
+                    <div className={styles.pwWrap}>
+                      <input
+                        type="password"
+                        name="confirmPassword"
+                        value={form.confirmPassword}
+                        onChange={handle}
+                        placeholder="Repeat your password"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.pwRules}>
+                  <p className={styles.pwRulesTitle}>Password requirements</p>
+                  {pwRules.map((r) => (
+                    <div
+                      key={r.label}
+                      className={`${styles.pwRule} ${r.ok ? styles.pwRuleOk : ""}`}
                     >
-                      {showPw ? "🙈" : "👁"}
-                    </button>
-                  </div>
+                      <span>{r.ok ? "✓" : "○"}</span>
+                      {r.label}
+                    </div>
+                  ))}
                 </div>
-                <div className={styles.field}>
-                  <label>Confirm password *</label>
-                  <div className={styles.pwWrap}>
-                    <input
-                      type="password"
-                      name="confirmPassword"
-                      value={form.confirmPassword}
-                      onChange={handle}
-                      placeholder="Repeat your password"
-                    />
-                  </div>
-                </div>
-              </div>
+              </>
+            )}
+          </div>
 
-              <div className={styles.pwRules}>
-                <p className={styles.pwRulesTitle}>Password requirements</p>
-                {pwRules.map((r) => (
-                  <div
-                    key={r.label}
-                    className={`${styles.pwRule} ${r.ok ? styles.pwRuleOk : ""}`}
-                  >
-                    <span>{r.ok ? "✓" : "○"}</span>
-                    {r.label}
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className={styles.formFooter}>
-          {step > 1 && (
+          {/* Footer */}
+          <div className={styles.formFooter}>
+            {step > 1 && (
+              <button
+                type="button"
+                className={styles.btnBack}
+                onClick={() => {
+                  setStep((s) => s - 1);
+                  setError("");
+                }}
+              >
+                Back
+              </button>
+            )}
             <button
               type="button"
-              className={styles.btnBack}
-              onClick={() => {
-                setStep((s) => s - 1);
-                setError("");
-              }}
+              className={styles.btnNext}
+              onClick={
+                step === 1 ? handleSendOtp : step === 2 ? handleVerifyOtp : next
+              }
+              disabled={loading}
             >
-              Back
+              {loading
+                ? "Please wait…"
+                : step === 1
+                  ? "Send code →"
+                  : step === 2
+                    ? "Verify code →"
+                    : step === 6
+                      ? "Submit registration"
+                      : "Continue →"}
             </button>
-          )}
-          <button
-            type="button"
-            className={styles.btnNext}
-            onClick={
-              step === 1 ? handleSendOtp : step === 2 ? handleVerifyOtp : next
-            }
-            disabled={loading}
-          >
-            {loading
-              ? "Please wait…"
-              : step === 1
-                ? "Send code →"
-                : step === 2
-                  ? "Verify code →"
-                  : step === 6
-                    ? "Submit registration"
-                    : "Continue →"}
-          </button>
+          </div>
         </div>
       </div>
 

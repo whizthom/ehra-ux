@@ -347,6 +347,27 @@ export default function Register() {
           {/* ══ STEP 1: PHONE ══ */}
           {step === "phone" && (
             <>
+              {/* Moved up from the page footer — users were missing the
+                  sign-in link buried at the very bottom of the page.
+                  Only shown on this first step: by the time someone's
+                  verified their phone (step 2+), handleVerifyOtp has
+                  already redirected any existing account straight to
+                  /login, so nobody past this point actually needs it. */}
+              <a
+                className={styles.signinPrompt}
+                onClick={() => navigate("/login")}
+              >
+                <span className={styles.signinPromptIcon}>
+                  <i className="ti ti-login-2" />
+                </span>
+                <span className={styles.signinPromptText}>
+                  Already have an account? <strong>Sign in instead</strong>
+                </span>
+                <i
+                  className={`ti ti-arrow-right ${styles.signinPromptArrow}`}
+                />
+              </a>
+
               <div className={styles.field}>
                 <label>Phone number</label>
                 <div className={phoneStyles.phoneInputWrap}>
@@ -373,6 +394,16 @@ export default function Register() {
                   Standard messaging rates may apply.
                 </p>
               </div>
+
+              <button
+                type="button"
+                className={styles.submitBtn}
+                onClick={handleSendOtp}
+                disabled={loading}
+              >
+                {loading ? "Sending code…" : "Send verification code"}
+                {!loading && <i className="ti ti-arrow-right" />}
+              </button>
             </>
           )}
 
@@ -426,6 +457,16 @@ export default function Register() {
                 disabled={resendIn > 0 || loading}
               >
                 {resendIn > 0 ? `Resend code in ${resendIn}s` : "Resend code"}
+              </button>
+
+              <button
+                type="button"
+                className={styles.submitBtn}
+                onClick={handleVerifyOtp}
+                disabled={loading}
+              >
+                {loading ? "Verifying…" : "Verify code"}
+                {!loading && <i className="ti ti-arrow-right" />}
               </button>
             </>
           )}
@@ -530,6 +571,16 @@ export default function Register() {
                   going forward.
                 </p>
               </div>
+
+              <button
+                type="button"
+                className={styles.submitBtn}
+                onClick={handleContinueToPersonal}
+                disabled={loading}
+              >
+                Continue
+                <i className="ti ti-arrow-right" />
+              </button>
             </>
           )}
 
@@ -592,59 +643,18 @@ export default function Register() {
                   right away and verify whenever suits you.
                 </span>
               </div>
+
+              <button
+                type="button"
+                className={styles.submitBtn}
+                onClick={handleCreateAccount}
+                disabled={loading}
+              >
+                {loading ? "Creating account…" : "Create account"}
+                {!loading && <i className="ti ti-arrow-right" />}
+              </button>
             </>
           )}
-        </div>
-
-        <div className={styles.formFooter}>
-          {step === "phone" && (
-            <button
-              type="button"
-              className={styles.submitBtn}
-              onClick={handleSendOtp}
-              disabled={loading}
-            >
-              {loading ? "Sending code…" : "Send verification code"}
-              {!loading && <i className="ti ti-arrow-right" />}
-            </button>
-          )}
-          {step === "otp" && (
-            <button
-              type="button"
-              className={styles.submitBtn}
-              onClick={handleVerifyOtp}
-              disabled={loading}
-            >
-              {loading ? "Verifying…" : "Verify code"}
-              {!loading && <i className="ti ti-arrow-right" />}
-            </button>
-          )}
-          {step === "business" && (
-            <button
-              type="button"
-              className={styles.submitBtn}
-              onClick={handleContinueToPersonal}
-              disabled={loading}
-            >
-              Continue
-              <i className="ti ti-arrow-right" />
-            </button>
-          )}
-          {step === "personal" && (
-            <button
-              type="button"
-              className={styles.submitBtn}
-              onClick={handleCreateAccount}
-              disabled={loading}
-            >
-              {loading ? "Creating account…" : "Create account"}
-              {!loading && <i className="ti ti-arrow-right" />}
-            </button>
-          )}
-          <p className={styles.footerNote}>
-            Already have an account?{" "}
-            <a onClick={() => navigate("/login")}>Sign in</a>
-          </p>
         </div>
       </div>
 
