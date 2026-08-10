@@ -106,156 +106,158 @@ export default function InviteEmployeeModal({ open, onClose, companyName }) {
           </button>
         </div>
 
-        <div className={styles.tabs}>
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              type="button"
-              className={`${styles.tab} ${tab === t.key ? styles.tabActive : ""}`}
-              onClick={() => setTab(t.key)}
-            >
-              <i className={`ti ${t.icon}`} />
-              {t.label}
-            </button>
-          ))}
-        </div>
+        <div className={styles.body}>
+          <div className={styles.tabs}>
+            {TABS.map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                className={`${styles.tab} ${tab === t.key ? styles.tabActive : ""}`}
+                onClick={() => setTab(t.key)}
+              >
+                <i className={`ti ${t.icon}`} />
+                {t.label}
+              </button>
+            ))}
+          </div>
 
-        {(tab === "single" || tab === "multi") && (
-          <div className={styles.tabBody}>
-            <p className={styles.desc}>
-              {tab === "single"
-                ? "A one-time link — it stops working the moment one person registers with it. Generate a fresh one for each new hire."
-                : "A reusable link — the same link works for any number of people, so you can post it in a group chat or notice board. Generate once, share as many times as you like."}
-            </p>
+          {(tab === "single" || tab === "multi") && (
+            <div className={styles.tabBody}>
+              <p className={styles.desc}>
+                {tab === "single"
+                  ? "A one-time link — it stops working the moment one person registers with it. Generate a fresh one for each new hire."
+                  : "A reusable link — the same link works for any number of people, so you can post it in a group chat or notice board. Generate once, share as many times as you like."}
+              </p>
 
-            {currentLink ? (
-              <>
-                <div className={styles.linkRow}>
-                  <i
-                    className="ti ti-link"
-                    style={{ color: "var(--accent)" }}
-                  />
-                  <input
-                    className={styles.linkInput}
-                    readOnly
-                    value={currentLink}
-                    onFocus={(e) => e.target.select()}
-                  />
+              {currentLink ? (
+                <>
+                  <div className={styles.linkRow}>
+                    <i
+                      className="ti ti-link"
+                      style={{ color: "var(--accent)" }}
+                    />
+                    <input
+                      className={styles.linkInput}
+                      readOnly
+                      value={currentLink}
+                      onFocus={(e) => e.target.select()}
+                    />
+                  </div>
+                  <div className={styles.linkActions}>
+                    <button
+                      type="button"
+                      className={`${styles.actionBtn} ${styles.copyBtn}`}
+                      onClick={handleCopy}
+                    >
+                      <i className={`ti ${copied ? "ti-check" : "ti-copy"}`} />
+                      {copied ? "Copied!" : "Copy"}
+                    </button>
+                    <a
+                      href={`https://wa.me/?text=${encodeURIComponent(
+                        `You've been invited to join ${companyName} on Ehra.\n\n${currentLink}`,
+                      )}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={`${styles.actionBtn} ${styles.waBtn}`}
+                    >
+                      <i className="ti ti-brand-whatsapp" />
+                      Share
+                    </a>
+                    <button
+                      type="button"
+                      className={styles.regenBtn}
+                      onClick={handleGenerate}
+                      disabled={generating}
+                    >
+                      {generating ? "Generating…" : "Generate new"}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  className={styles.generateBtn}
+                  onClick={handleGenerate}
+                  disabled={generating}
+                >
+                  {generating
+                    ? "Generating…"
+                    : tab === "single"
+                      ? "Generate link"
+                      : "Generate reusable link"}
+                </button>
+              )}
+
+              {linkError && (
+                <div className={styles.errorBox}>
+                  <i className="ti ti-alert-circle" />
+                  <span>{linkError}</span>
                 </div>
-                <div className={styles.linkActions}>
-                  <button
-                    type="button"
-                    className={`${styles.actionBtn} ${styles.copyBtn}`}
-                    onClick={handleCopy}
-                  >
-                    <i className={`ti ${copied ? "ti-check" : "ti-copy"}`} />
-                    {copied ? "Copied!" : "Copy"}
-                  </button>
-                  <a
-                    href={`https://wa.me/?text=${encodeURIComponent(
-                      `You've been invited to join ${companyName} on Ehra.\n\n${currentLink}`,
-                    )}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={`${styles.actionBtn} ${styles.waBtn}`}
-                  >
-                    <i className="ti ti-brand-whatsapp" />
-                    Share
-                  </a>
-                  <button
-                    type="button"
-                    className={styles.regenBtn}
-                    onClick={handleGenerate}
-                    disabled={generating}
-                  >
-                    {generating ? "Generating…" : "Generate new"}
-                  </button>
-                </div>
-              </>
-            ) : (
+              )}
+            </div>
+          )}
+
+          {tab === "email" && (
+            <div className={styles.tabBody}>
+              <p className={styles.desc}>
+                Paste the email addresses of everyone you want to invite,
+                separated by commas. Each person gets their own unique, one-time
+                link sent straight to their inbox.
+              </p>
+
+              <textarea
+                className={styles.emailsTextarea}
+                placeholder="jane@example.com, tunde@example.com, amaka@example.com"
+                value={emailsInput}
+                onChange={(e) => setEmailsInput(e.target.value)}
+                rows={4}
+              />
+
               <button
                 type="button"
                 className={styles.generateBtn}
-                onClick={handleGenerate}
-                disabled={generating}
+                onClick={handleSendBulk}
+                disabled={sending || !emailsInput.trim()}
               >
-                {generating
-                  ? "Generating…"
-                  : tab === "single"
-                    ? "Generate link"
-                    : "Generate reusable link"}
+                {sending ? "Sending…" : "Send invitations"}
               </button>
-            )}
 
-            {linkError && (
-              <div className={styles.errorBox}>
-                <i className="ti ti-alert-circle" />
-                <span>{linkError}</span>
-              </div>
-            )}
-          </div>
-        )}
+              {bulkError && (
+                <div className={styles.errorBox}>
+                  <i className="ti ti-alert-circle" />
+                  <span>{bulkError}</span>
+                </div>
+              )}
 
-        {tab === "email" && (
-          <div className={styles.tabBody}>
-            <p className={styles.desc}>
-              Paste the email addresses of everyone you want to invite,
-              separated by commas. Each person gets their own unique, one-time
-              link sent straight to their inbox.
-            </p>
-
-            <textarea
-              className={styles.emailsTextarea}
-              placeholder="jane@example.com, tunde@example.com, amaka@example.com"
-              value={emailsInput}
-              onChange={(e) => setEmailsInput(e.target.value)}
-              rows={4}
-            />
-
-            <button
-              type="button"
-              className={styles.generateBtn}
-              onClick={handleSendBulk}
-              disabled={sending || !emailsInput.trim()}
-            >
-              {sending ? "Sending…" : "Send invitations"}
-            </button>
-
-            {bulkError && (
-              <div className={styles.errorBox}>
-                <i className="ti ti-alert-circle" />
-                <span>{bulkError}</span>
-              </div>
-            )}
-
-            {bulkResult && (
-              <div className={styles.bulkResult}>
-                {bulkResult.sent?.length > 0 && (
-                  <p className={styles.bulkSentNote}>
-                    <i className="ti ti-circle-check" /> Sent to{" "}
-                    {bulkResult.sent.length}{" "}
-                    {bulkResult.sent.length === 1 ? "address" : "addresses"}:{" "}
-                    {bulkResult.sent.join(", ")}
-                  </p>
-                )}
-                {bulkResult.skipped?.length > 0 && (
-                  <div className={styles.skippedList}>
-                    <p className={styles.skippedHeading}>
-                      Skipped ({bulkResult.skipped.length}):
+              {bulkResult && (
+                <div className={styles.bulkResult}>
+                  {bulkResult.sent?.length > 0 && (
+                    <p className={styles.bulkSentNote}>
+                      <i className="ti ti-circle-check" /> Sent to{" "}
+                      {bulkResult.sent.length}{" "}
+                      {bulkResult.sent.length === 1 ? "address" : "addresses"}:{" "}
+                      {bulkResult.sent.join(", ")}
                     </p>
-                    <ul>
-                      {bulkResult.skipped.map((s) => (
-                        <li key={s.email}>
-                          <strong>{s.email}</strong> — {s.reason}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+                  )}
+                  {bulkResult.skipped?.length > 0 && (
+                    <div className={styles.skippedList}>
+                      <p className={styles.skippedHeading}>
+                        Skipped ({bulkResult.skipped.length}):
+                      </p>
+                      <ul>
+                        {bulkResult.skipped.map((s) => (
+                          <li key={s.email}>
+                            <strong>{s.email}</strong> — {s.reason}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

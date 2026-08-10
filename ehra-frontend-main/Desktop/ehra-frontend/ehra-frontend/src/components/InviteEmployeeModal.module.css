@@ -13,19 +13,39 @@
     width: 100%;
     max-width: 520px;
     max-height: 90vh;
-    overflow-y: auto;
     background: var(--bg-surface);
     border: 1px solid var(--border-color);
     border-radius: 16px;
-    padding: 26px 26px 28px;
     box-shadow: 0 20px 60px var(--shadow-color);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* ── Mobile: full-screen sheet, same convention as BusinessReportModal ──
+   so the invite popup gets a real, comfortable mobile layout instead of
+   a shrunk-down desktop card — fixed header, independently scrolling
+   body, no wasted overlay padding, and safe-area-aware bottom spacing
+   for devices with a home indicator. */
+@media (max-width: 640px) {
+    .overlay {
+        padding: 0;
+    }
+
+    .card {
+        max-width: 100%;
+        max-height: 100vh;
+        height: 100%;
+        border-radius: 0;
+    }
 }
 
 .header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 18px;
+    padding: 22px 26px 16px;
+    flex-shrink: 0;
 }
 
 .header h2 {
@@ -43,6 +63,42 @@
     font-size: 18px;
     line-height: 1;
     padding: 4px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+    .header {
+        padding: 16px 16px 12px;
+    }
+
+    /* Bigger tap target — comfortably inside the 44px minimum for a
+       reliable thumb tap on a phone. */
+    .closeBtn {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        background: var(--bg-surface-alt);
+    }
+}
+
+.body {
+    padding: 0 26px 28px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+@media (max-width: 640px) {
+    .body {
+        padding: 0 16px calc(20px + env(safe-area-inset-bottom, 0px));
+        -webkit-overflow-scrolling: touch;
+    }
 }
 
 .tabs {
@@ -69,6 +125,34 @@
     border-radius: 8px;
     cursor: pointer;
     white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    .tabs {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        overflow-x: auto;
+        scrollbar-width: none;
+        margin: 0 -16px 18px;
+        padding: 10px 16px;
+        border-radius: 0;
+        background: var(--bg-surface-alt);
+    }
+
+    .tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Let each tab size to its label instead of squeezing three tabs
+       into equal thirds — "Reusable link" and "Invite by email" no
+       longer wrap or truncate on a narrow phone screen. */
+    .tab {
+        flex: none;
+        padding: 10px 14px;
+        font-size: 13px;
+        min-height: 40px;
+    }
 }
 
 .tabActive {
@@ -102,6 +186,7 @@
 
 .linkInput {
     flex: 1;
+    min-width: 0;
     border: none;
     background: transparent;
     font-size: 12.5px;
@@ -118,6 +203,7 @@
 .actionBtn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     font-size: 12.5px;
     font-weight: 600;
@@ -180,6 +266,51 @@
     resize: vertical;
 }
 
+@media (max-width: 640px) {
+    .linkRow {
+        padding: 12px 14px;
+    }
+
+    /* 16px is the iOS Safari threshold below which focusing an input
+       triggers an automatic viewport zoom — bumping these up keeps the
+       layout from jumping the moment someone taps in. */
+    .linkInput {
+        font-size: 16px;
+    }
+
+    .linkActions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .actionBtn,
+    .regenBtn {
+        width: 100%;
+        margin-left: 0;
+        padding: 13px 14px;
+        font-size: 14px;
+        min-height: 46px;
+    }
+
+    .regenBtn {
+        order: 3;
+    }
+
+    .generateBtn {
+        align-self: stretch;
+        width: 100%;
+        padding: 14px 20px;
+        font-size: 15px;
+        min-height: 48px;
+    }
+
+    .emailsTextarea {
+        font-size: 16px;
+        padding: 14px;
+        min-height: 120px;
+    }
+}
+
 .emailsTextarea::placeholder {
     color: var(--text-secondary);
 }
@@ -236,4 +367,21 @@
     font-size: 12.5px;
     font-weight: 600;
     color: var(--text-primary);
+}
+
+@media (max-width: 640px) {
+    .desc {
+        font-size: 13.5px;
+    }
+
+    .errorBox,
+    .bulkResult {
+        font-size: 13px;
+        padding: 12px 14px;
+    }
+
+    .bulkSentNote,
+    .skippedList li {
+        font-size: 13px;
+    }
 }
