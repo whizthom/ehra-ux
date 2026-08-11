@@ -6,9 +6,17 @@ import API, { saveSession } from "./authApi";
 // scanning a QR-shared invite link) and over the app's https dev server,
 // not just from the machine running the backend.
 
-// GET /api/invitations/{token} — public, no auth required.
+// GET /api/invitations/{token} — public, no auth required. This is very
+// often the very FIRST request of a session (someone lands here straight
+// from an email/WhatsApp link) — given a longer timeout than the shared
+// instance's default 15s so an ordinary slow network doesn't get
+// misread by the caller as "this invitation doesn't exist." (Railway's
+// Hobby plan runs 24/7 by default and does NOT cold-start unless the
+// "Serverless"/App-Sleeping toggle is explicitly enabled on the backend
+// service — worth double-checking that toggle is off in Railway's
+// dashboard if this call is ever slow to fail.)
 export const validateInvitation = (token) =>
-  API.get(`/invitations/${token}`).then((r) => r.data);
+  API.get(`/invitations/${token}`, { timeout: 45000 }).then((r) => r.data);
 
 // POST /api/invitations/generate — employer-only. multiUse=false (the
 // default) generates today's single-use link; multiUse=true generates

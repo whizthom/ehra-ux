@@ -19,6 +19,15 @@ export default function InvitationLanding() {
   const [valid, setValid] = useState(false);
   const [businessName, setBusinessName] = useState("");
 
+  // Separate from `valid`: this is true only when the backend actually
+  // answered "no such invitation / expired / used / revoked" — as opposed
+  // to the request itself failing (timeout, cold-start backend, dropped
+  // connection, CORS misconfig, etc.). Collapsing both into a single
+  // "invalid" state used to permanently tell a real invitee their link
+  // was dead just because the server hadn't answered in time, with no way
+  // to tell the two apart or retry. See loadInvitation below.
+  const [loadError, setLoadError] = useState(false);
+
   // Authenticated-accept flow state (existing Identity — a business owner
   // picking up part-time work, or anyone already on Ehra being invited to
   // a second business). Kept separate from the anonymous /register/:token
@@ -27,7 +36,18 @@ export default function InvitationLanding() {
   const [accepted, setAccepted] = useState(false);
   const [acceptError, setAcceptError] = useState("");
 
-  useEffect(() => {
+  // Purely cosmetic: validateInvitation can now legitimately take a while
+  // (see its 45s timeout, sized for a cold-starting backend) — after a
+  // few seconds of silence, say so, rather than leaving a bare spinner
+  // that starts to look stuck or broken.
+  const [slowLoad, setSlowLoad] = useState(false);
+
+  // Pulled out of the effect so the "Try again" button can re-run the exact
+  // same check without duplicating it.
+  const loadInvitation = () => {
+    setLoading(true);
+    setLoadError(false);
+
     validateInvitation(token)
       .then((data) => {
         // Defensive: a token that matches no invitation at all (typo'd,
@@ -43,8 +63,28 @@ export default function InvitationLanding() {
           typeof data?.businessName === "string" ? data.businessName : "",
         );
       })
-      .catch(() => setValid(false))
+      .catch((err) => {
+        // A real answer from the backend ("no such invitation", expired,
+        // used, revoked) always comes back as a normal 200 with
+        // {valid: false} from InvitationServiceImpl.validateInvitation —
+        // that path is handled above and never lands here. Anything that
+        // throws is the REQUEST itself failing: no response at all
+        // (dropped connection, DNS hiccup, a sleeping backend that hasn't
+        // finished waking up within the request timeout — see the Render
+        // free-tier cold-start note in authApi.js), a genuine 5xx, or a
+        // CORS misconfiguration. None of those mean the invitation is
+        // invalid, so this must not be reported as "invitation
+        // unavailable" — that told real invitees with perfectly good
+        // links that their invite was dead.
+        setValid(false);
+        setLoadError(true);
+      })
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadInvitation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const initials = (businessName || "")
@@ -133,8 +173,27 @@ export default function InvitationLanding() {
           </div>
         )}
 
-        {/* Invalid */}
-        {!loading && !valid && (
+        {/* Couldn't reach the server — NOT the same as a dead invitation.
+            Distinct from the branch below so a cold-starting backend or a
+            dropped connection never gets reported to a real invitee as
+            "this link is invalid." */}
+        {!loading && !valid && loadError && (
+          <div className={styles.state}>
+            <div className={`${styles.iconWrap} ${styles.iconDanger}`}>📡</div>
+            <p className={styles.stateTitle}>Couldn't check this invitation</p>
+            <p className={styles.stateSub}>
+              We couldn't reach the server just now — this doesn't mean your
+              invitation is invalid. Please check your connection and try again.
+            </p>
+            <button className={styles.acceptBtn} onClick={loadInvitation}>
+              Try again →
+            </button>
+          </div>
+        )}
+
+        {/* Backend genuinely answered "not valid": no such token, or it's
+            expired / used / revoked. */}
+        {!loading && !valid && !loadError && (
           <div className={styles.state}>
             <div className={`${styles.iconWrap} ${styles.iconDanger}`}>🔗</div>
             <p className={styles.stateTitle}>Invitation unavailable</p>
