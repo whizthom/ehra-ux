@@ -8,7 +8,11 @@ import {
   confirmPhoneOtp,
   resetRecaptcha,
 } from "../firebase-lazy";
-import { verifyTwoFactorLogin } from "../api/phoneAuthApi";
+import {
+  verifyTwoFactorLogin,
+  verifyEmailTwoFactorLogin,
+  resendEmailTwoFactorCode,
+} from "../api/phoneAuthApi";
 import DevOtpCard from "../components/DevOtpCard";
 import styles from "./Login.module.css";
 import phoneStyles from "./PhoneAuth.module.css";
@@ -81,7 +85,9 @@ export default function Login() {
   const [showPw, setShowPw] = useState(false);
 
   // 2FA step — null until /auth/login comes back with requiresTwoFactor.
-  const [twoFactor, setTwoFactor] = useState(null); // { pendingToken, phoneNumber }
+  // method is "PHONE" or "EMAIL" (see AuthResponseDTO#twoFactorMethod);
+  // maskedEmail is only present for the EMAIL method.
+  const [twoFactor, setTwoFactor] = useState(null); // { pendingToken, method, phoneNumber, maskedEmail }
   const [otp, setOtp] = useState("");
   const [confirmationResult, setConfirmationResult] = useState(null);
   const [resendIn, setResendIn] = useState(0);
@@ -139,12 +145,25 @@ export default function Login() {
       const data = await login(form.phone, form.password);
 
       if (data.requiresTwoFactor) {
+        if (data.twoFactorMethod === "EMAIL") {
+          // Backend already sent the code (see AuthController#login) —
+          // no client-side send step needed here, unlike the PHONE path.
+          setTwoFactor({
+            pendingToken: data.twoFactorToken,
+            method: "EMAIL",
+            maskedEmail: data.maskedEmail,
+          });
+          setResendIn(30);
+          return;
+        }
+
         // Kick off the OTP challenge immediately so the person doesn't
         // have to press an extra "send code" button on top of "sign in".
         const result = await sendPhoneOtp(data.phoneNumber);
         setConfirmationResult(result);
         setTwoFactor({
           pendingToken: data.twoFactorToken,
+          method: "PHONE",
           phoneNumber: data.phoneNumber,
         });
         setResendIn(30);
@@ -183,13 +202,24 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
+      if (twoFactor.method === "EMAIL") {
+        await resendEmailTwoFactorCode(twoFactor.pendingToken);
+        setOtp("");
+        setResendIn(30);
+        return;
+      }
       resetRecaptcha();
       const result = await sendPhoneOtp(twoFactor.phoneNumber);
       setConfirmationResult(result);
       setOtp("");
       setResendIn(30);
     } catch (err) {
-      setError(friendlyFirebaseError(err));
+      setError(
+        twoFactor.method === "EMAIL"
+          ? err?.response?.data?.message ||
+              "Couldn't resend the code. Please try again."
+          : friendlyFirebaseError(err),
+      );
     } finally {
       setLoading(false);
     }
@@ -203,12 +233,25 @@ export default function Login() {
     }
     setLoading(true);
     try {
-      const idToken = await confirmPhoneOtp(confirmationResult, otp.trim());
-      const data = await verifyTwoFactorLogin(twoFactor.pendingToken, idToken);
+      let data;
+      if (twoFactor.method === "EMAIL") {
+        data = await verifyEmailTwoFactorLogin(
+          twoFactor.pendingToken,
+          otp.trim(),
+        );
+      } else {
+        const idToken = await confirmPhoneOtp(confirmationResult, otp.trim());
+        data = await verifyTwoFactorLogin(twoFactor.pendingToken, idToken);
+      }
       await refreshSession?.();
       routeAfterLogin(data);
     } catch (err) {
-      setError(err?.response?.data?.message || friendlyFirebaseError(err));
+      setError(
+        twoFactor.method === "EMAIL"
+          ? err?.response?.data?.message ||
+              "That code is incorrect or has expired."
+          : err?.response?.data?.message || friendlyFirebaseError(err),
+      );
     } finally {
       setLoading(false);
     }
@@ -386,7 +429,12 @@ export default function Login() {
 
               <div className={phoneStyles.otpHeadline}>
                 <p>
-                  Code sent to <strong>{twoFactor.phoneNumber}</strong>
+                  Code sent to{" "}
+                  <strong>
+                    {twoFactor.method === "EMAIL"
+                      ? twoFactor.maskedEmail
+                      : twoFactor.phoneNumber}
+                  </strong>
                 </p>
                 <button
                   type="button"
@@ -401,7 +449,9 @@ export default function Login() {
                 </button>
               </div>
 
-              <DevOtpCard code={confirmationResult?.developmentOtp} />
+              {twoFactor.method !== "EMAIL" && (
+                <DevOtpCard code={confirmationResult?.developmentOtp} />
+              )}
 
               <div className={styles.field}>
                 <label className={styles.label}>Verification code</label>

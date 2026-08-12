@@ -50,7 +50,8 @@ export const registerWithPhone = async (idToken, { businessName, password, first
 // Second step of login when the initial POST /auth/login response comes
 // back with requiresTwoFactor: true. pendingToken is that response's
 // twoFactorToken; idToken is a FRESH OTP verification (not the one from
-// registration).
+// registration). PHONE method only — see verifyEmailTwoFactorLogin below
+// for the EMAIL method's counterpart.
 export const verifyTwoFactorLogin = async (pendingToken, idToken) => {
   const { data } = await API.post("/auth/2fa/verify", {
     pendingToken,
@@ -59,6 +60,25 @@ export const verifyTwoFactorLogin = async (pendingToken, idToken) => {
   saveSession(data);
   return data;
 };
+
+// ── Login with Two-Factor Authentication — EMAIL method ─────────────────
+// Used when POST /auth/login's requiresTwoFactor response has
+// twoFactorMethod: "EMAIL" instead of "PHONE" — the backend has already
+// sent a 6-digit code to the Identity's verified email at that point
+// (see AuthController#login), so there's no separate "send" call before
+// this, only verify/resend.
+
+export const verifyEmailTwoFactorLogin = async (pendingToken, code) => {
+  const { data } = await API.post("/auth/2fa/email/verify", {
+    pendingToken,
+    code,
+  });
+  saveSession(data);
+  return data;
+};
+
+export const resendEmailTwoFactorCode = (pendingToken) =>
+  API.post("/auth/2fa/email/resend", { pendingToken }).then((r) => r.data);
 
 // ── Forgot Password ──────────────────────────────────────────────────────
 
@@ -80,8 +100,10 @@ export const confirmPasswordReset = (resetToken, newPassword) =>
 export const getSecuritySettings = () =>
   API.get("/auth/security").then((r) => r.data);
 
-export const toggleTwoFactor = (enabled, password) =>
-  API.put("/auth/security/2fa", { enabled, password }).then((r) => r.data);
+export const toggleTwoFactor = (enabled, password, method) =>
+  API.put("/auth/security/2fa", { enabled, password, method }).then(
+    (r) => r.data,
+  );
 
 // ── Email verification: PERSONAL (Identity#email) ───────────────────────
 // Optional everywhere — never required to enable 2FA or buy a

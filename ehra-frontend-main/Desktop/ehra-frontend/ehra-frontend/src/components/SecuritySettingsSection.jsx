@@ -29,6 +29,7 @@ export default function SecuritySettingsSection() {
   // without a verified email yet.
   const [confirming, setConfirming] = useState(null); // "enable" | "disable" | null
   const [password, setPassword] = useState("");
+  const [method, setMethod] = useState("PHONE"); // chosen only when confirming === "enable"
   const [saving, setSaving] = useState(false);
   const [confirmError, setConfirmError] = useState("");
   const [showVerifyFirst, setShowVerifyFirst] = useState(false);
@@ -60,6 +61,15 @@ export default function SecuritySettingsSection() {
     setConfirming(action);
     setPassword("");
     setConfirmError("");
+    if (action === "enable") {
+      // Pre-select the person's last choice, falling back to whichever
+      // channel is actually usable — mirrors the backend's own default
+      // in PhoneAuthServiceImpl#toggleTwoFactor.
+      const preferred = settings?.twoFactorMethod || "PHONE";
+      setMethod(
+        preferred === "EMAIL" || !settings?.phoneVerified ? "EMAIL" : "PHONE",
+      );
+    }
   };
 
   const handleConfirm = async () => {
@@ -70,7 +80,11 @@ export default function SecuritySettingsSection() {
     setSaving(true);
     setConfirmError("");
     try {
-      const updated = await toggleTwoFactor(confirming === "enable", password);
+      const updated = await toggleTwoFactor(
+        confirming === "enable",
+        password,
+        confirming === "enable" ? method : undefined,
+      );
       setSettings(updated);
       setConfirming(null);
     } catch (err) {
@@ -248,7 +262,12 @@ export default function SecuritySettingsSection() {
             <h3>Two-Factor Authentication</h3>
             <p>
               When enabled, signing in requires your password AND a code sent to
-              your verified phone.
+              your{" "}
+              {settings?.twoFactorEnabled &&
+              settings?.twoFactorMethod === "EMAIL"
+                ? "verified email"
+                : "verified phone"}
+              .
             </p>
           </div>
         </div>
@@ -256,14 +275,11 @@ export default function SecuritySettingsSection() {
         <div className={styles.toggleRow}>
           <div>
             <p className={styles.toggleLabel}>
-              {settings?.twoFactorEnabled ? "Enabled" : "Disabled"}
+              {settings?.twoFactorEnabled
+                ? `Enabled · ${settings?.twoFactorMethod === "EMAIL" ? "Email" : "Phone"}`
+                : "Disabled"}
             </p>
-            {!settings?.phoneVerified && (
-              <p className={styles.toggleHint}>
-                A verified phone number is required to enable this.
-              </p>
-            )}
-            {settings?.phoneVerified && !settings?.emailVerified && (
+            {!settings?.emailVerified && (
               <p className={styles.toggleHint}>
                 A verified email is required to enable this.
               </p>
@@ -273,7 +289,7 @@ export default function SecuritySettingsSection() {
             type="button"
             role="switch"
             aria-checked={settings?.twoFactorEnabled}
-            disabled={!settings?.phoneVerified}
+            disabled={!settings?.emailVerified && !settings?.phoneVerified}
             className={`${styles.switch} ${settings?.twoFactorEnabled ? styles.switchOn : ""}`}
             onClick={() =>
               openConfirm(settings?.twoFactorEnabled ? "disable" : "enable")
@@ -331,6 +347,47 @@ export default function SecuritySettingsSection() {
                 : "Disable Two-Factor Authentication?"}
             </h4>
             <p>Confirm your password to continue.</p>
+
+            {confirming === "enable" && (
+              <div className={styles.methodChoice}>
+                <label
+                  className={`${styles.methodOption} ${method === "PHONE" ? styles.methodOptionSelected : ""}`}
+                >
+                  <input
+                    type="radio"
+                    name="twoFactorMethod"
+                    value="PHONE"
+                    checked={method === "PHONE"}
+                    disabled={!settings?.phoneVerified}
+                    onChange={() => setMethod("PHONE")}
+                  />
+                  <span>
+                    <strong>Text message</strong>
+                    <small>
+                      {settings?.maskedPhoneNumber || "No verified phone"}
+                    </small>
+                  </span>
+                </label>
+                <label
+                  className={`${styles.methodOption} ${method === "EMAIL" ? styles.methodOptionSelected : ""}`}
+                >
+                  <input
+                    type="radio"
+                    name="twoFactorMethod"
+                    value="EMAIL"
+                    checked={method === "EMAIL"}
+                    disabled={!settings?.emailVerified}
+                    onChange={() => setMethod("EMAIL")}
+                  />
+                  <span>
+                    <strong>Email</strong>
+                    <small>
+                      {settings?.verifiedEmail || "No verified email"}
+                    </small>
+                  </span>
+                </label>
+              </div>
+            )}
 
             {confirmError && (
               <div className={styles.errorBox}>

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Logo from "../../components/Logo";
 import DeviceFrame from "../../components/about/DeviceFrame";
@@ -132,7 +132,27 @@ const START_LINES = [
   "One customer.",
 ];
 
+const STORY_STEPS = [
+  { icon: "ti-user", label: "A few people" },
+  { icon: "ti-trending-up", label: "Growing responsibilities" },
+  { icon: "ti-apps", label: "Scattered systems" },
+  {
+    icon: "ti-hexagon-letter-e",
+    label: "Ehral",
+    sublabel: "Built to grow with it",
+  },
+];
+
 export default function About() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   useEffect(() => {
     const prevTitle = document.title;
     document.title = "Ehral — Building the Future of African Business";
@@ -154,10 +174,16 @@ export default function About() {
 
   return (
     <div className={styles.page}>
-      {/* ── Nav ── */}
-      <header className={styles.nav}>
+      {/* ── Nav — sticky; transparent over the hero, solid once scrolled ── */}
+      <header
+        className={`${styles.nav} ${scrolled ? styles.navScrolled : styles.navTransparent}`}
+      >
         <Link to="/" className={styles.navLogo} aria-label="Ehral home">
-          <Logo variant="horizontal" size={44} />
+          <Logo
+            variant="horizontal"
+            size={44}
+            tone={scrolled ? "brand" : "sidebar"}
+          />
         </Link>
         <div className={styles.navActions}>
           <Link to="/login" className={styles.navGhost}>
@@ -195,6 +221,56 @@ export default function About() {
         <p className={styles.heroFooter}>
           Behind every business is a living organization of people.
         </p>
+      </section>
+
+      {/* ── Story behind Ehral — why it exists, right after the hero ── */}
+      <section className={styles.storySection}>
+        <div className={styles.storyLabel}>
+          <span className={styles.eyebrowDark}>Our story</span>
+          <h2 className={styles.h2}>The story behind Ehral.</h2>
+        </div>
+        <div className={styles.storyText}>
+          <p className={styles.lead}>
+            Ehral started with a simple observation: businesses can grow faster
+            than the systems around them.
+          </p>
+          <p className={styles.lead}>
+            A business begins with a few people and a simple way of doing
+            things. Then it grows — more employees, more responsibilities, more
+            decisions, more information to keep track of. And the simple systems
+            that worked at the start begin to strain.
+          </p>
+          <p className={styles.lead}>
+            Employee information ends up in spreadsheets. Attendance lives in a
+            notebook. Leave requests happen over WhatsApp. Announcements
+            disappear inside group chats. The owner becomes the person holding
+            it all together.
+          </p>
+          <p className={styles.leadStrong}>
+            The business is growing. But the systems supporting it are
+            struggling to grow with it.
+          </p>
+          <p className={styles.lead}>
+            Ehral was created around a simple belief: businesses shouldn&rsquo;t
+            have to become large before they can have the right systems around
+            them. We wanted to build something that could start where a business
+            is today, and grow with it tomorrow.
+          </p>
+          <p className={styles.lead}>
+            We started with the workforce, because people are at the heart of
+            every business. That is where Ehral begins — but it doesn&rsquo;t
+            have to end there. Over time, we believe Ehral can connect
+            businesses, employees and customers through one identity and one
+            growing ecosystem.
+          </p>
+          <p className={styles.leadStrong}>
+            Today, we&rsquo;re focused on helping businesses manage their people
+            and operations better. Tomorrow, we want to help them connect.
+          </p>
+          <div className={styles.storyVisual}>
+            <WorkflowDiagram endGlow steps={STORY_STEPS} />
+          </div>
+        </div>
       </section>
 
       {/* ── 2. Every business starts somewhere ── */}
