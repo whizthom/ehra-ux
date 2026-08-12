@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Logo from "../../components/Logo";
+import founderPhoto from "../../assets/emmanuel-oluwabamise.jpg";
 import DeviceFrame from "../../components/about/DeviceFrame";
 import ProductShowcase from "../../components/about/ProductShowcase";
 import DashboardPreview from "../../components/about/DashboardPreview";
@@ -510,12 +511,11 @@ export default function About() {
       {/* ── 12. Founder story — a face, not the hero ── */}
       <section className={styles.founderSection}>
         <div className={styles.founderPortrait}>
-          <span className={styles.founderPlaceholder} aria-hidden="true">
-            EO
-          </span>
-          <span className={styles.founderPlaceholderNote}>
-            Founder photo coming soon
-          </span>
+          <img
+            src={founderPhoto}
+            alt="Emmanuel Oluwabamise, Founder of Ehral Systems"
+            className={styles.founderImage}
+          />
         </div>
         <div className={styles.founderText}>
           <span className={styles.eyebrowDark}>Why I started Ehral</span>
