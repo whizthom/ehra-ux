@@ -251,40 +251,73 @@
     scroll-margin-top: 96px;
 }
 
-/* ── Story behind Ehral — editorial two-column layout, right after hero ── */
+/* ── Story behind Ehral — stacked editorial layout, right after hero.
+   Header centered on top; body reads as a single "spine-railed" column
+   with the two key lines pulled out as standalone statements; visual
+   sits full-width underneath. Same treatment at every breakpoint, so
+   there's nothing extra to override in the responsive blocks below. ── */
 .storySection {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 56px;
-    max-width: 1080px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 900px;
     margin: 0 auto;
-    padding: 88px 48px;
+    padding: 96px 48px;
     scroll-margin-top: 96px;
 }
 
-.storyLabel {
+.storyHeader {
     display: flex;
     flex-direction: column;
-    align-self: start;
-    position: sticky;
-    top: 110px;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 48px;
 }
 
-.storyLabel .h2 {
+.storyHeader .h2 {
     max-width: none;
 }
 
 .storyText {
     display: flex;
     flex-direction: column;
+    align-self: stretch;
+    max-width: 620px;
+    margin: 0 auto;
+    padding-left: 26px;
+    border-left: 2px solid var(--border, #e1e8e5);
+}
+
+.storyText .lead {
+    max-width: none;
+}
+
+/* The two lines that carry the section's real weight — broken out of
+   the paragraph rail entirely so they land as their own beat rather
+   than blending into the surrounding prose. */
+.storyPullQuote {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-style: italic;
+    font-size: clamp(19px, 2.6vw, 23px);
+    line-height: 1.5;
+    color: var(--accent, #0f6e56);
+    text-align: center;
+    max-width: 560px;
+    margin: 8px auto 32px;
+    padding: 0;
+    border: none;
 }
 
 .storyVisual {
+    align-self: stretch;
+    max-width: 720px;
+    width: 100%;
     background: var(--bg-card, #fff);
     border: 1px solid var(--border, #e1e8e5);
     border-radius: 20px;
     padding: 32px 24px;
-    margin-top: 12px;
+    margin: 24px auto 0;
 }
 
 .sectionCard {
@@ -680,13 +713,11 @@
     }
 
     .storySection {
-        grid-template-columns: 1fr;
         padding: 64px 28px;
-        gap: 28px;
     }
 
-    .storyLabel {
-        position: static;
+    .storyText {
+        padding-left: 20px;
     }
 
     .founderSection {
@@ -726,13 +757,11 @@
     }
 
     .storySection {
-        grid-template-columns: 1fr;
         padding: 52px 18px;
-        gap: 24px;
     }
 
-    .storyLabel {
-        position: static;
+    .storyText {
+        padding-left: 16px;
     }
 
     .nav {

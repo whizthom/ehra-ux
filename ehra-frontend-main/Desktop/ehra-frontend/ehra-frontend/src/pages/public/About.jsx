@@ -11,6 +11,7 @@ import WorkflowDiagram from "../../components/about/WorkflowDiagram";
 import QRCodeAttendanceDemo from "../../components/about/QRCodeAttendanceDemo";
 import LeaveWorkflow from "../../components/about/LeaveWorkflow";
 import EcosystemDiagram from "../../components/about/EcosystemDiagram";
+import useLiveWorkspaceData from "../../components/about/useLiveWorkspaceData";
 import styles from "./About.module.css";
 
 const WORKFORCE_FEATURES = [
@@ -146,6 +147,7 @@ const STORY_STEPS = [
 
 export default function About() {
   const [scrolled, setScrolled] = useState(false);
+  const liveData = useLiveWorkspaceData();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -218,15 +220,18 @@ export default function About() {
             Discover Ehral
           </a>
         </div>
-        <ProductShowcase />
+        <ProductShowcase liveData={liveData} />
         <p className={styles.heroFooter}>
           Behind every business is a living organization of people.
         </p>
       </section>
 
-      {/* ── Story behind Ehral — why it exists, right after the hero ── */}
+      {/* ── Story behind Ehral — why it exists, right after the hero.
+           Stacked on desktop and up: header centered on top, full story
+           underneath in a single editorial column with a "spine" rail
+           and the two key lines pulled out as standalone statements. ── */}
       <section className={styles.storySection}>
-        <div className={styles.storyLabel}>
+        <div className={styles.storyHeader}>
           <span className={styles.eyebrowDark}>Our story</span>
           <h2 className={styles.h2}>The story behind Ehral.</h2>
         </div>
@@ -247,7 +252,7 @@ export default function About() {
             disappear inside group chats. The owner becomes the person holding
             it all together.
           </p>
-          <p className={styles.leadStrong}>
+          <p className={styles.storyPullQuote}>
             The business is growing. But the systems supporting it are
             struggling to grow with it.
           </p>
@@ -264,13 +269,13 @@ export default function About() {
             businesses, employees and customers through one identity and one
             growing ecosystem.
           </p>
-          <p className={styles.leadStrong}>
+          <p className={styles.storyPullQuote}>
             Today, we&rsquo;re focused on helping businesses manage their people
             and operations better. Tomorrow, we want to help them connect.
           </p>
-          <div className={styles.storyVisual}>
-            <WorkflowDiagram endGlow steps={STORY_STEPS} />
-          </div>
+        </div>
+        <div className={styles.storyVisual}>
+          <WorkflowDiagram endGlow steps={STORY_STEPS} />
         </div>
       </section>
 
@@ -458,12 +463,12 @@ export default function About() {
           label="app.ehral.com/reports"
           className={styles.centerFrame}
         >
-          <DashboardPreview screen="reports" />
+          <DashboardPreview screen="reports" liveData={liveData} />
         </DeviceFrame>
         <div className={styles.phoneRow}>
-          <MobileProductPreview screen="attendance" />
-          <MobileProductPreview screen="leave" />
-          <MobileProductPreview screen="chat" />
+          <MobileProductPreview screen="attendance" liveData={liveData} />
+          <MobileProductPreview screen="leave" liveData={liveData} />
+          <MobileProductPreview screen="chat" liveData={liveData} />
         </div>
       </section>
 

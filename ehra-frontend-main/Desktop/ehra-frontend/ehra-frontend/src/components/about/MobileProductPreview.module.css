@@ -22,6 +22,51 @@
     margin-bottom: 2px;
 }
 
+.screenHeaderRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2px;
+}
+
+.screenHeaderRow .screenHeader {
+    margin-bottom: 0;
+}
+
+.liveBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    color: var(--accent, #0f6e56);
+    background: rgba(15, 110, 86, 0.1);
+    border-radius: 999px;
+    padding: 3px 7px;
+}
+
+.liveDot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent, #0f6e56);
+    animation: mobileLivePulse 1.8s ease-in-out infinite;
+}
+
+@keyframes mobileLivePulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.35;
+    }
+}
+
 /* ── Shared cards ── */
 .listCard {
     background: var(--bg-card, #fff);
