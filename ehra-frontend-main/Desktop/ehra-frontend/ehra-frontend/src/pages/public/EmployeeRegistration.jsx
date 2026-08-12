@@ -13,6 +13,7 @@ import DevOtpCard from "../../components/DevOtpCard";
 import styles from "./EmployeeRegistration.module.css";
 import phoneStyles from "../PhoneAuth.module.css";
 import Logo from "../../components/Logo";
+import AboutEhralLink from "../../components/nav/AboutEhralLink";
 
 // Same key InvitationLanding.jsx uses to hand off an invite token across a
 // trip to /login — reused here so "this phone already has an account"
@@ -286,6 +287,7 @@ export default function EmployeeRegistration() {
     <div className={styles.page}>
       {/* ── Left panel ── */}
       <div className={styles.left}>
+        <AboutEhralLink tone="dark" />
         <div className={styles.logoRow} style={{ "--text-primary": "#ffffff" }}>
           <Logo variant="horizontal" size={80} />
         </div>
@@ -326,6 +328,7 @@ export default function EmployeeRegistration() {
 
       {/* ── Right panel ── */}
       <div className={styles.right}>
+        <AboutEhralLink tone="light" className={styles.mobileOnlyAboutLink} />
         <div className={styles.mobileHero}>
           <div className={styles.mobileDotGrid} aria-hidden="true" />
           <div

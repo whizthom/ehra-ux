@@ -196,10 +196,19 @@
 /* ── Right ── */
 .right {
     flex: 1;
+    position: relative;
     background: #fff;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+}
+
+/* Duplicate "About Ehral" entry for the mobile layout, where .left (and
+   the AboutEhralLink already inside it) is hidden below 768px in favor
+   of .mobileHero. Hidden by default; the 768px media query below
+   switches it on. */
+.mobileOnlyAboutLink {
+    display: none;
 }
 
 .rightHeader {
@@ -487,6 +496,10 @@
         flex-shrink: 0;
         padding: 18px 20px 14px;
         background: transparent;
+    }
+
+    .mobileOnlyAboutLink {
+        display: inline-flex;
     }
 
     .mobileLogoRow {

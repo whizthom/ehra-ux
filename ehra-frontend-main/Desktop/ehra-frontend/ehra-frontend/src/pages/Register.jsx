@@ -12,6 +12,7 @@ import DevOtpCard from "../components/DevOtpCard";
 import styles from "./Register.module.css";
 import phoneStyles from "./PhoneAuth.module.css";
 import Logo from "../components/Logo";
+import AboutEhralLink from "../components/nav/AboutEhralLink";
 
 // Draft is kept in sessionStorage (not localStorage) so it survives a trip
 // between steps or an accidental refresh, but doesn't linger forever on a
@@ -250,6 +251,7 @@ export default function Register() {
       {/* ── Left ── */}
       <div className={styles.left}>
         <div className={styles.dotGrid} aria-hidden="true" />
+        <AboutEhralLink tone="dark" />
 
         <div className={styles.logoRow} style={{ "--text-primary": "#ffffff" }}>
           <Logo variant="horizontal" size={80} />
@@ -306,6 +308,7 @@ export default function Register() {
 
       {/* ── Right ── */}
       <div className={styles.right}>
+        <AboutEhralLink tone="light" className={styles.mobileOnlyAboutLink} />
         <div className={styles.mobileHero}>
           <div className={styles.mobileDotGrid} aria-hidden="true" />
           <div

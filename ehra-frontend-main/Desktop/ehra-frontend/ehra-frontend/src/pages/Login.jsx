@@ -13,6 +13,7 @@ import DevOtpCard from "../components/DevOtpCard";
 import styles from "./Login.module.css";
 import phoneStyles from "./PhoneAuth.module.css";
 import Logo from "../components/Logo";
+import AboutEhralLink from "../components/nav/AboutEhralLink";
 
 // A believable, static glimpse of what's happening inside a live workspace —
 // the same kind of event this app already surfaces as real notifications.
@@ -218,6 +219,7 @@ export default function Login() {
       {/* ── Left panel — brand + live product moment ── */}
       <div className={styles.left}>
         <div className={styles.dotGrid} aria-hidden="true" />
+        <AboutEhralLink tone="dark" />
 
         <div className={styles.logoRow} style={{ "--text-primary": "#ffffff" }}>
           <Logo variant="horizontal" size={80} />
@@ -246,6 +248,7 @@ export default function Login() {
 
       {/* ── Right panel — sign in ── */}
       <div className={styles.right}>
+        <AboutEhralLink tone="light" className={styles.mobileOnlyAboutLink} />
         <div
           className={styles.mobileLogoRow}
           style={{ "--text-primary": "#0b1f1a" }}

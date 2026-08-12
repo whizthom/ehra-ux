@@ -1,0 +1,174 @@
+.wrap {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    align-items: center;
+    gap: 44px;
+}
+
+/* ── QR panel ── */
+.qrPanel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.ring {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    padding: 8px;
+    background: conic-gradient(var(--accent, #0f6e56) 0deg, rgba(15, 110, 86, 0.12) 0deg);
+    animation: qrCountdown 4s linear infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qrBox {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--bg-card, #fff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 20px 45px -16px rgba(11, 31, 26, 0.35);
+}
+
+.qrGrid {
+    width: 130px;
+    height: 130px;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 3px;
+    padding: 10px;
+    background: #0b1f1a;
+    border-radius: 12px;
+}
+
+.qrGrid span {
+    border-radius: 1px;
+}
+
+.cellOff {
+    background: transparent;
+}
+
+.cellOn {
+    background: #fff;
+    animation: qrFlicker 4s ease-in-out infinite;
+}
+
+.qrCaption {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-secondary, #6f8b81);
+}
+
+.qrCaption i {
+    font-size: 13px;
+    color: var(--accent, #0f6e56);
+}
+
+@keyframes qrCountdown {
+    0% {
+        background: conic-gradient(var(--accent, #0f6e56) 0deg, rgba(15, 110, 86, 0.12) 0deg);
+    }
+
+    100% {
+        background: conic-gradient(var(--accent, #0f6e56) 360deg, rgba(15, 110, 86, 0.12) 360deg);
+    }
+}
+
+@keyframes qrFlicker {
+
+    0%,
+    88%,
+    100% {
+        opacity: 1;
+    }
+
+    92% {
+        opacity: 0.35;
+    }
+}
+
+/* ── Flow ── */
+.flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.flowStep {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding-bottom: 26px;
+}
+
+.flowStep:last-child {
+    padding-bottom: 0;
+}
+
+.flowDot {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(15, 110, 86, 0.1);
+    color: var(--accent, #0f6e56);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+    z-index: 1;
+}
+
+.flowLine {
+    position: absolute;
+    left: 19px;
+    top: 38px;
+    width: 1px;
+    height: calc(100% - 38px);
+    background: var(--border, #e1e8e5);
+}
+
+.flowText {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding-top: 7px;
+}
+
+.flowText strong {
+    font-size: 14px;
+    color: var(--text-primary, #0b1f1a);
+    font-weight: 600;
+}
+
+.flowText span {
+    font-size: 12px;
+    color: var(--text-secondary, #6f8b81);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .ring,
+    .cellOn {
+        animation: none;
+    }
+}
+
+@media (max-width: 720px) {
+    .wrap {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 28px;
+    }
+}

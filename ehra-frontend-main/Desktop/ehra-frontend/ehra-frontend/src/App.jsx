@@ -27,6 +27,7 @@ import EmployeeRegistration from "./pages/public/EmployeeRegistration";
 import RegistrationSubmitted from "./pages/public/RegistrationSubmitted";
 import QrDisplayPage from "./pages/public/QrDisplayPage";
 import Pricing from "./pages/public/Pricing";
+import About from "./pages/public/About";
 
 import NotFound from "./pages/NotFound";
 
@@ -61,6 +62,13 @@ function App() {
 
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+
+            {/* Public "About Ehral" story page — linked to only from
+                Login, Register and EmployeeRegistration (see
+                <AboutEhralLink /> on each). Not part of any app-shell
+                nav, so it's safe to keep here alongside the other
+                pre-auth public routes. */}
+            <Route path="/about" element={<About />} />
 
             {/* Reached from the link in the verification email — works
                 whether or not the browser tab is logged in, since the

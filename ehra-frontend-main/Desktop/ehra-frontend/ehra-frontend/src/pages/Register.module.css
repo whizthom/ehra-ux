@@ -212,10 +212,19 @@
 /* ── Right ── */
 .right {
     flex: 1;
+    position: relative;
     background: #fbfdfc;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+}
+
+/* Duplicate "About Ehral" entry for the mobile layout, where .left (and
+   the AboutEhralLink already inside it) is hidden below 900px in favor
+   of .mobileHero. Hidden by default; the 900px media query below
+   switches it on. */
+.mobileOnlyAboutLink {
+    display: none;
 }
 
 .rightHeader {
@@ -582,6 +591,10 @@
         background: transparent;
         overflow: hidden;
         animation: heroSlide 0.5s cubic-bezier(0.16, 0.8, 0.24, 1) both;
+    }
+
+    .mobileOnlyAboutLink {
+        display: inline-flex;
     }
 
     .mobileDotGrid {

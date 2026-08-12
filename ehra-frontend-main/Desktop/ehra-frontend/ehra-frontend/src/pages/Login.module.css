@@ -238,6 +238,14 @@
    the sage canvas. Depth comes from two soft, out-of-focus brand-colour
    glows (mint + brass) instead of a container edge, so it still reads as
    considered rather than bare. ──────────────────────────────────────── */
+/* Duplicate "About Ehral" entry for the mobile layout, where .left (and
+   the AboutEhralLink already inside it) is hidden below 900px in favor
+   of .mobileLogoRow. Hidden by default; the 900px media query below
+   switches it on. */
+.mobileOnlyAboutLink {
+    display: none;
+}
+
 .right {
     flex: 1;
     position: relative;
@@ -700,6 +708,10 @@
         align-items: flex-start;
         justify-content: flex-start;
         overflow: hidden;
+    }
+
+    .mobileOnlyAboutLink {
+        display: inline-flex;
     }
 
     .mobileLogoRow {
