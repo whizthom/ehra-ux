@@ -24,11 +24,6 @@ const WORKFORCE_FEATURES = [
     description: "Group employees by department and responsibility.",
   },
   {
-    icon: "ti-fingerprint",
-    title: "Attendance",
-    description: "Know who arrived, when, and from where.",
-  },
-  {
     icon: "ti-calendar-off",
     title: "Leave management",
     description:
@@ -82,55 +77,7 @@ const BUSINESS_FEATURES = [
   },
 ];
 
-const BUSINESS_TYPES = [
-  { icon: "ti-school", label: "Schools" },
-  { icon: "ti-scissors", label: "Salons & barbershops" },
-  { icon: "ti-building-skyscraper", label: "Hotels" },
-  { icon: "ti-tools-kitchen-2", label: "Restaurants" },
-  { icon: "ti-shopping-cart", label: "Supermarkets & retail" },
-  { icon: "ti-stethoscope", label: "Clinics" },
-  { icon: "ti-trending-up", label: "Growing businesses" },
-];
-
-const WHY_POINTS = [
-  {
-    icon: "ti-plug-connected",
-    title: "One connected platform",
-    description:
-      "Workforce, attendance and business records in the same place.",
-  },
-  {
-    icon: "ti-users-group",
-    title: "Built around the workforce",
-    description:
-      "The people behind the business come first, not the paperwork.",
-  },
-  {
-    icon: "ti-device-mobile",
-    title: "Mobile-first",
-    description:
-      "Designed to be used from a phone, not adapted to one afterward.",
-  },
-  {
-    icon: "ti-list-check",
-    title: "Structured workflows",
-    description:
-      "Leave, attendance and approvals follow a clear, repeatable process.",
-  },
-  {
-    icon: "ti-map-pin",
-    title: "Built for this region",
-    description:
-      "Phone-based identity, local payments, and realities other tools ignore.",
-  },
-  {
-    icon: "ti-arrow-up-right",
-    title: "Room to grow",
-    description: "Starts with the workforce, and grows with the business.",
-  },
-];
-
-const NG_POINTS = [
+const REALITY_POINTS = [
   "Mobile-first usage",
   "Phone-based identity",
   "SMS / OTP authentication",
@@ -139,17 +86,63 @@ const NG_POINTS = [
   "Flexible workforce structures",
 ];
 
+const WHY_POINTS = [
+  {
+    icon: "ti-seedling",
+    title: "Built for businesses while they're becoming",
+    description: "Not only for businesses that have already made it.",
+  },
+  {
+    icon: "ti-users-group",
+    title: "People first",
+    description: "Every business is ultimately powered by people.",
+  },
+  {
+    icon: "ti-device-mobile",
+    title: "Mobile-first",
+    description:
+      "Designed around how people actually work, not adapted to a phone afterward.",
+  },
+  {
+    icon: "ti-plug-connected",
+    title: "Connected by design",
+    description:
+      "Workforce, operations and relationships shouldn't live in isolated systems.",
+  },
+  {
+    icon: "ti-map-pin",
+    title: "Built around African realities",
+    description: "Not adapted afterward — designed around them from the start.",
+  },
+  {
+    icon: "ti-arrow-up-right",
+    title: "Room to grow",
+    description:
+      "Ehral should become more useful as the business grows, not less.",
+  },
+];
+
+const START_LINES = [
+  "One classroom.",
+  "One chair.",
+  "One table.",
+  "One shop.",
+  "One idea.",
+  "One employee.",
+  "One customer.",
+];
+
 export default function About() {
   useEffect(() => {
     const prevTitle = document.title;
-    document.title = "Ehral — Workforce, Attendance & Business Management";
+    document.title = "Ehral — Building the Future of African Business";
 
     let meta = document.querySelector('meta[name="description"]');
     const prevDesc = meta?.getAttribute("content");
     if (meta) {
       meta.setAttribute(
         "content",
-        "Ehral is a connected platform for workforce, attendance and business management, designed to help growing businesses manage their people and operations in one place.",
+        "Ehral helps African businesses manage their people, organize their operations and grow toward a more connected business ecosystem.",
       );
     }
 
@@ -171,46 +164,85 @@ export default function About() {
             Sign in
           </Link>
           <Link to="/" className={styles.navCta}>
-            Get Started
+            Get started
           </Link>
         </div>
       </header>
 
-      {/* ── 1. Hero ── */}
+      {/* ── 1. Hero — story-first, not feature-first ── */}
       <section className={styles.hero}>
-        <span className={styles.eyebrow}>Business management, connected</span>
+        <span className={styles.eyebrow}>Africa is building</span>
         <h1 className={styles.h1}>
-          Workforce, attendance and business management — in your pocket.
+          Africa is building.
+          <br />
+          We&rsquo;re building with it.
         </h1>
         <p className={styles.heroDesc}>
-          Ehral brings essential business operations — employee records,
-          attendance, leave, communication and more — into one connected
-          platform.
+          Every day, businesses across Africa begin with an idea, a few people
+          and the determination to make something work. Ehral exists to help
+          those businesses grow — by bringing their people, operations and
+          relationships into one connected platform.
         </p>
         <div className={styles.heroCtas}>
           <Link to="/" className={styles.btnPrimary}>
-            Get Started
+            Get started
           </Link>
-          <a href="#what-is-ehral" className={styles.btnGhost}>
-            Explore the platform
+          <a href="#belief" className={styles.btnGhost}>
+            Discover Ehral
           </a>
         </div>
         <ProductShowcase />
         <p className={styles.heroFooter}>
-          Built for businesses. Designed for people.
+          Behind every business is a living organization of people.
         </p>
       </section>
 
-      {/* ── 2. The problem ── */}
+      {/* ── 2. Every business starts somewhere ── */}
       <section className={styles.section}>
-        <span className={styles.eyebrowDark}>The problem</span>
+        <h2 className={styles.h2}>Every great business starts somewhere.</h2>
+        <p className={styles.lead}>
+          A classroom. A salon chair. A restaurant table. A shop. A small
+          office. A kitchen. A few people who decided to build something of
+          their own.
+        </p>
+        <p className={styles.leadStrong}>
+          The business may be small. The ambition rarely is.
+        </p>
+        <div className={styles.transformCard}>
+          <WorkflowDiagram
+            endGlow
+            steps={[
+              { icon: "ti-user", label: "One person" },
+              { icon: "ti-bulb", label: "One idea" },
+              { icon: "ti-building-store", label: "One business" },
+              { icon: "ti-users", label: "A team" },
+              { icon: "ti-trending-up", label: "Growth" },
+            ]}
+          />
+        </div>
+      </section>
+
+      {/* ── 3. The real problem ── */}
+      <section className={styles.section}>
+        <span className={styles.eyebrowDark}>The real problem</span>
         <h2 className={styles.h2}>
-          Running a business shouldn&rsquo;t mean managing ten different tools.
+          When the business grows, everything around it grows too.
         </h2>
         <p className={styles.lead}>
-          Attendance in one place. Employee information somewhere else. Leave
-          requests over WhatsApp. Payment records in a notebook. Ehral brings
-          all of it into one environment.
+          More people. More locations. More decisions. More responsibilities.
+          More information.
+        </p>
+        <p className={styles.lead}>
+          An employee&rsquo;s information may be in a spreadsheet. Attendance
+          may live in a notebook. Leave requests may arrive through WhatsApp.
+          Important announcements may disappear inside group chats. Payments may
+          be written down somewhere else. And the owner becomes the system
+          connecting everything together.
+        </p>
+        <p className={styles.leadStrong}>
+          The business is growing.
+          <br />
+          But the systems holding it together are struggling to grow with it.
         </p>
         <div className={styles.transformCard}>
           <WorkflowDiagram
@@ -230,40 +262,70 @@ export default function About() {
         </div>
       </section>
 
-      {/* ── 3. What is Ehral ── */}
-      <section id="what-is-ehral" className={styles.section}>
-        <span className={styles.eyebrowDark}>What is Ehral?</span>
-        <h2 className={styles.h2}>More than HR.</h2>
-        <p className={styles.lead}>
-          Ehral is a connected platform designed to help businesses manage their
-          workforce, organize daily operations, and build stronger connections
-          with the people they work with and serve.
+      {/* ── 4. The belief — emotional peak ── */}
+      <section
+        id="belief"
+        className={`${styles.section} ${styles.sectionDark}`}
+      >
+        <h2 className={styles.beliefLine}>
+          We believe the size of a business should never limit the quality of
+          the tools behind it.
+        </h2>
+        <p className={styles.leadLight}>
+          A five-person business can represent someone&rsquo;s life&rsquo;s
+          work. A small school can shape hundreds of lives. A growing restaurant
+          can support families. A local business can become tomorrow&rsquo;s
+          great company.
         </p>
-        <DeviceFrame
-          variant="browser"
-          label="app.ehral.com/dashboard"
-          className={styles.centerFrame}
-        >
-          <DashboardPreview screen="overview" />
-        </DeviceFrame>
+        <p className={styles.beliefSmall}>
+          Small does not mean insignificant.
+          <br />
+          Growing does not mean unimportant.
+        </p>
       </section>
 
-      {/* ── 4. Workforce ── */}
+      {/* ── 5. Built for African realities ── */}
+      <section className={styles.section}>
+        <span className={styles.eyebrowDark}>
+          Built for this business environment
+        </span>
+        <h2 className={styles.h2}>
+          Technology should adapt to the way businesses actually work.
+        </h2>
+        <p className={styles.lead}>
+          We don&rsquo;t believe African businesses need to become more like
+          enterprise companies somewhere else before technology can work for
+          them. Businesses here have their own realities. People use phones
+          first. Teams can span locations. Owners often wear several hats.
+          Relationships between people and businesses are rarely simple.
+        </p>
+        <ul className={styles.ngList}>
+          {REALITY_POINTS.map((point) => (
+            <li key={point}>
+              <i className="ti ti-check" />
+              {point}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* ── 6. Every business is powered by people ── */}
       <section className={styles.section}>
         <span className={styles.eyebrowDark}>The Ehral workforce</span>
-        <h2 className={styles.h2}>Know your workforce. Manage it better.</h2>
+        <h2 className={styles.h2}>Every business is powered by people.</h2>
         <p className={styles.lead}>
-          Your employees are at the heart of your business. Ehral gives
-          employers a structured way to manage the people behind it.
+          Before there are reports, branches or revenue, there are people
+          showing up every day to make the business work. Know your workforce.
+          Manage it better.
         </p>
         <div className={styles.grid3}>
           {WORKFORCE_FEATURES.map((f) => (
-            <FeatureVisual key={f.title} {...f} />
+            <FeatureVisual key={f.title} {...f} status={undefined} />
           ))}
         </div>
       </section>
 
-      {/* ── 5. Smart attendance ── */}
+      {/* ── 7. Smart attendance ── */}
       <section className={`${styles.section} ${styles.sectionCard}`}>
         <span className={styles.eyebrowDark}>Smart attendance</span>
         <h2 className={styles.h2}>Attendance without the attendance book.</h2>
@@ -275,12 +337,10 @@ export default function About() {
         <QRCodeAttendanceDemo />
       </section>
 
-      {/* ── 6. Leave management ── */}
+      {/* ── 8. Leave management ── */}
       <section className={`${styles.section} ${styles.sectionCard}`}>
         <span className={styles.eyebrowDark}>Leave management</span>
-        <h2 className={styles.h2}>
-          Turn leave requests into a real business process.
-        </h2>
+        <h2 className={styles.h2}>Turn conversations into processes.</h2>
         <p className={styles.lead}>
           Instead of &ldquo;Sir, please I want to go on leave next week&rdquo;
           followed by several WhatsApp messages, Ehral turns the request into a
@@ -289,24 +349,26 @@ export default function About() {
         <LeaveWorkflow />
       </section>
 
-      {/* ── 7. Communication ── */}
+      {/* ── 9. Business management ── */}
       <section className={styles.section}>
-        <span className={styles.eyebrowDark}>Communication</span>
-        <h2 className={styles.h2}>Keep your business connected.</h2>
+        <span className={styles.eyebrowDark}>Business management</span>
+        <h2 className={styles.h2}>
+          The business is bigger than the workforce.
+        </h2>
         <p className={styles.lead}>
-          Notifications, announcements and real-time messaging — so employees
-          hear about what matters directly from their workplace, not through a
-          group chat.
+          Once the people are organized, businesses need a place to organize
+          everything else.
         </p>
-        <div className={styles.phoneRow}>
-          <MobileProductPreview screen="chat" />
-          <MobileProductPreview screen="notifications" />
+        <div className={styles.grid3}>
+          {BUSINESS_FEATURES.map((f) => (
+            <FeatureVisual key={f.title} {...f} status={f.status} />
+          ))}
         </div>
       </section>
 
-      {/* ── 8. Reports ── */}
+      {/* ── 10. Product proof — one real dashboard, once ── */}
       <section className={styles.section}>
-        <span className={styles.eyebrowDark}>Reports & visibility</span>
+        <span className={styles.eyebrowDark}>See it for yourself</span>
         <h2 className={styles.h2}>
           See what&rsquo;s happening inside your business.
         </h2>
@@ -321,33 +383,6 @@ export default function About() {
         >
           <DashboardPreview screen="reports" />
         </DeviceFrame>
-      </section>
-
-      {/* ── 9. Business management ── */}
-      <section className={styles.section}>
-        <span className={styles.eyebrowDark}>Business management</span>
-        <h2 className={styles.h2}>Your business, organized in one place.</h2>
-        <p className={styles.lead}>
-          Beyond individual employee records, Ehral is becoming the place where
-          more of your everyday business activity happens.
-        </p>
-        <div className={styles.grid3}>
-          {BUSINESS_FEATURES.map((f) => (
-            <FeatureVisual key={f.title} {...f} />
-          ))}
-        </div>
-      </section>
-
-      {/* ── 10. Mobile-first ── */}
-      <section className={`${styles.section} ${styles.sectionDark}`}>
-        <span className={styles.eyebrowLight}>Mobile-first</span>
-        <h2 className={styles.h2Light}>
-          Your business doesn&rsquo;t stop when you leave the office.
-        </h2>
-        <p className={styles.leadLight}>
-          Attendance, leave, employee management and communication — all
-          designed to work as well from a phone as from a desk.
-        </p>
         <div className={styles.phoneRow}>
           <MobileProductPreview screen="attendance" />
           <MobileProductPreview screen="leave" />
@@ -355,37 +390,20 @@ export default function About() {
         </div>
       </section>
 
-      {/* ── 11. Built for real businesses ── */}
-      <section className={styles.section}>
-        <span className={styles.eyebrowDark}>Who it&rsquo;s for</span>
-        <h2 className={styles.h2}>
-          Built for the businesses that keep everyday life moving.
-        </h2>
-        <p className={styles.lead}>
-          Ehral is designed particularly with small and medium-sized businesses
-          in mind — not exclusively for these industries, but built with them
-          front of mind.
-        </p>
-        <div className={styles.typeGrid}>
-          {BUSINESS_TYPES.map((t) => (
-            <div className={styles.typeChip} key={t.label}>
-              <i className={`ti ${t.icon}`} />
-              <span>{t.label}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── 12. One identity ── */}
+      {/* ── 11. One identity ── */}
       <section className={`${styles.section} ${styles.sectionCard}`}>
         <span className={styles.eyebrowDark}>One identity</span>
         <h2 className={styles.h2}>
-          One person. Multiple business relationships.
+          A person doesn&rsquo;t belong to just one business.
         </h2>
         <p className={styles.lead}>
-          Someone could be an employer in one business, an employee in another,
-          and — over time — a customer of a third. Ehral is built around a
-          connected identity rather than separate logins for every relationship.
+          Someone can be an employer in one business. An employee in another. A
+          customer of a third. And perhaps a business owner again somewhere
+          else.
+        </p>
+        <p className={styles.leadStrong}>
+          Real life doesn&rsquo;t divide people into separate accounts. Why
+          should technology?
         </p>
         <div className={styles.identityWrap}>
           <div className={styles.identityRoles}>
@@ -413,24 +431,67 @@ export default function About() {
         </div>
       </section>
 
-      {/* ── 13 & 14. The bigger vision + ecosystem ── */}
+      {/* ── 12. Founder story — a face, not the hero ── */}
+      <section className={styles.founderSection}>
+        <div className={styles.founderPortrait}>
+          <span className={styles.founderPlaceholder} aria-hidden="true">
+            EO
+          </span>
+          <span className={styles.founderPlaceholderNote}>
+            Founder photo coming soon
+          </span>
+        </div>
+        <div className={styles.founderText}>
+          <span className={styles.eyebrowDark}>Why I started Ehral</span>
+          <h2 className={styles.h2}>
+            &ldquo;I kept seeing the same challenge.&rdquo;
+          </h2>
+          <p className={styles.lead}>
+            I started Ehral because I kept seeing the same challenge: businesses
+            trying to grow while important parts of their operations remained
+            scattered across spreadsheets, paper, phones and conversations.
+          </p>
+          <p className={styles.lead}>
+            I believe African businesses shouldn&rsquo;t have to become large
+            corporations before they can have access to powerful technology.
+            Ehral is my attempt to build something different — technology
+            designed around the realities of the businesses and people it is
+            meant to serve.
+          </p>
+          <p className={styles.lead}>
+            We are starting with the workforce because people are at the heart
+            of every business. But the ambition is much bigger. I want Ehral to
+            grow alongside African businesses — from helping them manage their
+            day-to-day work to eventually helping businesses, employees and
+            customers connect within one ecosystem.
+          </p>
+          <div className={styles.founderSignature}>
+            <strong>Emmanuel Oluwabamise</strong>
+            <span>Founder, Ehral Systems</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 13. The bigger ambition + connected ecosystem ── */}
       <section className={`${styles.section} ${styles.sectionDark}`}>
-        <span className={styles.tagVisionLight}>Where we&rsquo;re going</span>
+        <span className={styles.tagVisionLight}>Long-term vision</span>
         <h2 className={styles.h2Light}>
-          Ehral is becoming more than workforce software.
+          We&rsquo;re building something bigger than workforce software.
         </h2>
         <p className={styles.leadLight}>
-          Today, Ehral connects a business to its workforce and operations. The
-          longer-term vision connects businesses, employees, customers and other
-          businesses within one ecosystem — never presented as available today,
-          always as the direction we&rsquo;re building toward.
+          Today, Ehral helps businesses manage their people and operations. But
+          we believe the future can be much more connected. A school may need a
+          supplier. A restaurant may need a local producer. A salon may need a
+          distributor. A customer may be looking for a business they can trust.
+          We envision a future where businesses, employees and customers can
+          discover, connect and interact through one connected ecosystem.
         </p>
         <EcosystemDiagram />
         <div className={styles.visionGrid}>
           <FeatureVisual
             icon="ti-map"
             title="Business discovery"
-            description="Find and be found by businesses nearby."
+            description="Businesses finding one another, and being found."
             status="vision"
           />
           <FeatureVisual
@@ -446,13 +507,18 @@ export default function About() {
             status="vision"
           />
         </div>
+        <p className={styles.visionNote}>
+          Some of these capabilities are part of our long-term vision and are
+          not available today.
+        </p>
       </section>
 
-      {/* ── 15. Why Ehral ── */}
+      {/* ── 14. Why Ehral ── */}
       <section className={styles.section}>
-        <span className={styles.eyebrowDark}>Why Ehral?</span>
+        <span className={styles.eyebrowDark}>Why Ehral</span>
         <h2 className={styles.h2}>
-          Because small businesses deserve powerful software too.
+          Because the size of a business doesn&rsquo;t measure the size of its
+          ambition.
         </h2>
         <div className={styles.grid3}>
           {WHY_POINTS.map((p) => (
@@ -461,56 +527,59 @@ export default function About() {
         </div>
       </section>
 
-      {/* ── 16. Built for the region ── */}
-      <section className={`${styles.section} ${styles.sectionCard}`}>
-        <span className={styles.eyebrowDark}>
-          Built for this business environment
-        </span>
-        <h2 className={styles.h2}>
-          Technology that adapts to how businesses actually operate.
-        </h2>
-        <p className={styles.lead}>
-          Ehral isn&rsquo;t enterprise software copied from another market —
-          it&rsquo;s built with the realities of the businesses that use it
-          every day in mind.
-        </p>
-        <ul className={styles.ngList}>
-          {NG_POINTS.map((point) => (
-            <li key={point}>
-              <i className="ti ti-check" />
-              {point}
-            </li>
+      {/* ── 15. Emotional center — cinematic ── */}
+      <section className={styles.finalStatement}>
+        <div className={styles.stackedLines}>
+          {START_LINES.map((line) => (
+            <span key={line} className={styles.stackedLine}>
+              {line}
+            </span>
           ))}
-        </ul>
+        </div>
+        <p className={styles.finalLine}>
+          Every great business starts somewhere.
+          <br />
+          Ehral is built to grow with it.
+        </p>
       </section>
 
-      {/* ── 17. Cinematic future statement ── */}
-      <section className={styles.finalStatement}>
-        <Logo variant="icon" size={56} />
-        <p className={styles.finalLine}>
-          Ehral begins with the workforce.
-          <br />
-          It grows into business management.
-          <br />
-          And ultimately connects businesses, employees and customers in one
+      {/* ── 16. Where we're going ── */}
+      <section className={`${styles.section} ${styles.sectionDark}`}>
+        <span className={styles.tagVisionLight}>Where we&rsquo;re going</span>
+        <p className={styles.roadmapLine}>
+          Today, we help businesses run better.
+        </p>
+        <p className={styles.roadmapLine}>
+          Tomorrow, we want to help them connect.
+        </p>
+        <p className={styles.roadmapLine}>
+          Eventually, we want Ehral to become part of the infrastructure through
+          which businesses, employees and customers interact.
+        </p>
+        <p className={styles.leadLight}>
+          We&rsquo;re building toward a world where businesses don&rsquo;t just
+          manage their operations — they become part of a connected business
           ecosystem.
         </p>
       </section>
 
-      {/* ── 18. Final CTA ── */}
+      {/* ── 17. Final CTA — mission, not a feature pitch ── */}
       <section className={styles.cta}>
-        <h2 className={styles.h2}>Ready to bring your business together?</h2>
-        <p className={styles.lead}>
-          Start managing your workforce and business operations with Ehral.
-        </p>
+        <h2 className={styles.h2}>Your business is becoming something.</h2>
+        <p className={styles.lead}>Give it the systems to grow with it.</p>
         <div className={styles.heroCtas}>
           <Link to="/" className={styles.btnPrimary}>
-            Get Started
+            Get started with Ehral
           </Link>
           <Link to="/login" className={styles.btnGhost}>
-            Sign in
+            Explore the platform
           </Link>
         </div>
+        <p className={styles.finalInvitation}>
+          Africa is building.
+          <br />
+          Let&rsquo;s build with it.
+        </p>
       </section>
 
       <footer className={styles.footer}>
