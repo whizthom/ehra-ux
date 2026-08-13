@@ -182,11 +182,101 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 96px 24px 40px;
+    padding: 88px 24px 40px;
     background: #0b1f1a;
     background-image: radial-gradient(circle at 15% 10%, rgba(85, 224, 174, 0.16), transparent 45%),
         radial-gradient(circle at 90% 85%, rgba(198, 161, 91, 0.14), transparent 45%);
     overflow: hidden;
+}
+
+/* Small pill above the eyebrow — a concrete, clickable trust signal
+   sitting right at the top of the hero, the way a product-grade SaaS
+   hero opens with a stat or headline chip before the H1. */
+.heroChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #dff3ec;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+    padding: 7px 14px 7px 12px;
+    text-decoration: none;
+    margin-bottom: 22px;
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.heroChip:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.24);
+    transform: translateY(-1px);
+}
+
+.heroChip i {
+    font-size: 13px;
+    color: #55e0ae;
+}
+
+.heroChipDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #55e0ae;
+    box-shadow: 0 0 0 3px rgba(85, 224, 174, 0.18);
+}
+
+/* ── Capability ticker — infinite horizontal scroll strip, directly
+   under the hero. Mirrors the "stat belt" pattern of clean product
+   marketing sites: a thin, dark, always-moving strip of concrete
+   proof points before the page settles into its editorial sections. ── */
+.tickerWrap {
+    background: #081713;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid var(--border, #e1e8e5);
+    overflow: hidden;
+    padding: 14px 0;
+}
+
+.ticker {
+    display: flex;
+    align-items: center;
+    width: max-content;
+    animation: tickerScroll 28s linear infinite;
+}
+
+.tickerItem {
+    display: inline-flex;
+    align-items: center;
+    gap: 28px;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    color: #9fc2b8;
+    white-space: nowrap;
+    padding: 0 28px;
+}
+
+.tickerDot {
+    color: #3f5c53;
+    font-size: 10px;
+}
+
+@keyframes tickerScroll {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ticker {
+        animation: none;
+    }
 }
 
 .heroDesc {
@@ -322,9 +412,10 @@
 
 .sectionCard {
     background: var(--bg-card, #fff);
+    border: 1px solid var(--border, #e1e8e5);
     border-radius: 28px;
     max-width: 1080px;
-    box-shadow: 0 2px 0 var(--border, #e1e8e5);
+    box-shadow: 0 24px 60px -36px rgba(11, 31, 26, 0.16);
 }
 
 .sectionDark {
@@ -393,6 +484,7 @@
 .grid3 {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+    align-items: stretch;
     gap: 18px;
 }
 
@@ -438,6 +530,7 @@
 .visionGrid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+    align-items: stretch;
     gap: 16px;
     max-width: 900px;
     margin-top: 40px;

@@ -124,6 +124,15 @@ const WHY_POINTS = [
   },
 ];
 
+const TICKER_ITEMS = [
+  "Employee management",
+  "Attendance & leave",
+  "Departments & branches",
+  "Reports & announcements",
+  "Mobile-first, phone-based identity",
+  "Built for African businesses",
+];
+
 const START_LINES = [
   "One classroom.",
   "One chair.",
@@ -200,6 +209,11 @@ export default function About() {
 
       {/* ── 1. Hero — story-first, not feature-first ── */}
       <section className={styles.hero}>
+        <a href="#belief" className={styles.heroChip}>
+          <span className={styles.heroChipDot} />
+          Why we built Ehral
+          <i className="ti ti-arrow-narrow-right" aria-hidden="true" />
+        </a>
         <span className={styles.eyebrow}>Africa is building</span>
         <h1 className={styles.h1}>
           Africa is building.
@@ -225,6 +239,20 @@ export default function About() {
           Behind every business is a living organization of people.
         </p>
       </section>
+
+      {/* ── Capability ticker — a scrolling strip of what Ehral covers,
+           sitting directly under the hero as concrete proof before the
+           narrative sections begin. ── */}
+      <div className={styles.tickerWrap} aria-hidden="true">
+        <div className={styles.ticker}>
+          {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
+            <span className={styles.tickerItem} key={`${item}-${i}`}>
+              {item}
+              <span className={styles.tickerDot}>•</span>
+            </span>
+          ))}
+        </div>
+      </div>
 
       {/* ── Story behind Ehral — why it exists, right after the hero.
            Stacked on desktop and up: header centered on top, full story
