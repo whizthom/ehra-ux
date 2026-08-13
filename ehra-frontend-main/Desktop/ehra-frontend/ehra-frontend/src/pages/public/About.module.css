@@ -2,7 +2,28 @@
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     background: var(--bg-page, #f0f4f3);
     color: var(--text-primary, #0b1f1a);
+    --gold: #e8b652;
+    --gold-deep: #a97a1c;
     overflow-x: hidden;
+}
+
+/* ── Scroll-triggered heading motion ──
+   Plain global classes (not CSS-module scoped) so About.jsx can toggle
+   them with a single querySelectorAll(".js-reveal") + IntersectionObserver,
+   without importing a class name per element. Headings/eyebrows start
+   faded + offset and settle into place the first time they cross into
+   view; prefers-reduced-motion short-circuits this in JS by adding
+   .js-inview immediately instead of observing. */
+:global(.js-reveal) {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.7s cubic-bezier(0.16, 0.8, 0.24, 1), transform 0.7s cubic-bezier(0.16, 0.8, 0.24, 1);
+    will-change: opacity, transform;
+}
+
+:global(.js-reveal.js-inview) {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 /* ── Nav ──
@@ -41,6 +62,38 @@
 
 .navLogo {
     display: flex;
+}
+
+.navLinks {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.navLink {
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.navTransparent .navLink {
+    color: #cfe3dd;
+}
+
+.navScrolled .navLink {
+    color: var(--text-secondary, #4d635c);
+}
+
+.navLink:hover {
+    color: var(--accent, #0f6e56);
+}
+
+.navTransparent .navLink:hover {
+    color: #fff;
 }
 
 .navActions {
@@ -128,6 +181,10 @@
     color: #fff;
     max-width: 780px;
     margin: 0 auto;
+}
+
+.h1Accent {
+    color: var(--gold, #e8b652);
 }
 
 .h2,
@@ -312,6 +369,29 @@
     transform: translateY(-1px);
 }
 
+.btnGold {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--gold, #e8b652);
+    color: #2b1c05;
+    font-weight: 600;
+    font-size: 14.5px;
+    text-decoration: none;
+    padding: 13px 22px;
+    border-radius: 999px;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.btnGold i {
+    font-size: 15px;
+}
+
+.btnGold:hover {
+    background: #f2c977;
+    transform: translateY(-1px);
+}
+
 .btnGhost {
     color: #eaf5f0;
     font-weight: 600;
@@ -457,6 +537,26 @@
     margin-top: 8px;
 }
 
+.beliefPills {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+.beliefPill {
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: #eaf5f0;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    padding: 12px 22px;
+}
+
 /* ── Vision note / roadmap lines ── */
 .visionNote {
     font-size: 13px;
@@ -592,31 +692,132 @@
     font-size: 26px;
 }
 
-/* ── Nigerian/regional list ── */
+/* ── "Built for this environment" card — bordered white container,
+   text on the left and the reality checklist as chips on the right. ── */
+.envCard {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+    background: var(--bg-card, #fff);
+    border: 1px solid var(--border, #e1e8e5);
+    border-radius: 24px;
+    padding: 44px 40px;
+}
+
+.envText .h2,
+.envText .lead {
+    max-width: none;
+}
+
+.envText .lead {
+    margin-bottom: 0;
+}
+
+/* ── Nigerian/regional list — bordered chip boxes ── */
 .ngList {
     list-style: none;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px 24px;
+    gap: 10px;
     padding: 0;
-    max-width: 600px;
+    max-width: none;
 }
 
 .ngList li {
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 13.5px;
+    font-weight: 600;
     color: var(--text-primary, #0b1f1a);
+    background: var(--bg-page, #f0f4f3);
+    border: 1px solid var(--border, #e1e8e5);
+    border-radius: 12px;
+    padding: 14px 16px;
 }
 
 .ngList i {
     color: var(--accent, #0f6e56);
     font-size: 15px;
+    flex-shrink: 0;
 }
 
-/* ── Founder section ── */
+/* ── Dotted-pattern section background — a faint dot grid that fades
+   out toward the top/bottom edges via a mask, used behind sections
+   that want a bit of texture without competing with the content. ── */
+.sectionDotted {
+    position: relative;
+}
+
+.sectionDotted::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(11, 31, 26, 0.12) 1px, transparent 1px);
+    background-size: 20px 20px;
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 40%, transparent 85%);
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 40%, transparent 85%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.sectionDotted>* {
+    position: relative;
+    z-index: 1;
+}
+
+/* ── Why Ehral — single bordered container, six cells sharing internal
+   dividers instead of six floating cards. Numbered 01–06 like a spec
+   sheet rather than a marketing grid. ── */
+.whyGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border: 1px solid var(--border, #e1e8e5);
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--bg-card, #fff);
+}
+
+.whyCell {
+    padding: 32px 28px;
+    border-right: 1px solid var(--border, #e1e8e5);
+    border-bottom: 1px solid var(--border, #e1e8e5);
+}
+
+.whyCell:nth-child(3n) {
+    border-right: none;
+}
+
+.whyCell:nth-child(n+4) {
+    border-bottom: none;
+}
+
+.whyNum {
+    display: block;
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-size: 14px;
+    color: var(--gold-deep, #a97a1c);
+    margin-bottom: 14px;
+}
+
+.whyTitle {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-size: 17px;
+    line-height: 1.3;
+    color: var(--text-primary, #0b1f1a);
+    margin: 0 0 8px;
+}
+
+.whyDesc {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text-secondary, #6f8b81);
+    margin: 0;
+}
+
 .founderSection {
     display: grid;
     grid-template-columns: 300px 1fr;
@@ -674,7 +875,24 @@
     color: var(--text-secondary, #6f8b81);
 }
 
-/* ── Cinematic statement ── */
+/* ── Final CTA banner — a rounded, contained dark card (not full-bleed)
+   with a soft radial glow, echoing the reference design's closing
+   banner rather than another full-width dark section. ── */
+.ctaBanner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: #0b1f1a;
+    background-image: radial-gradient(circle at 50% 30%, rgba(85, 224, 174, 0.16), transparent 60%);
+    border-radius: 28px;
+    padding: 72px 32px;
+}
+
+.h2LightMuted {
+    color: #7f9a92;
+}
+
 .finalStatement {
     display: flex;
     flex-direction: column;
@@ -775,20 +993,81 @@
 
 /* ── Footer ── */
 .footer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    text-align: center;
-    padding: 40px 24px 56px;
-    border-top: 1px solid var(--border, #e1e8e5);
-    color: var(--text-secondary, #6f8b81);
-    font-size: 12.5px;
+    background: #0b1f1a;
+    color: #b8ccc5;
+    padding: 64px 48px 28px;
 }
 
-.footer p {
-    font-size: 13px;
-    max-width: 380px;
+.footerTop {
+    display: flex;
+    justify-content: space-between;
+    gap: 48px;
+    max-width: 1140px;
+    margin: 0 auto;
+    padding-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.footerBrand {
+    max-width: 320px;
+}
+
+.footerBrand p {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #7f9a92;
+    margin-top: 14px;
+}
+
+.footerCols {
+    display: flex;
+    gap: 56px;
+    flex-wrap: wrap;
+}
+
+.footerCol {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footerColHeading {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #55e0ae;
+    margin-bottom: 4px;
+}
+
+.footerCol a {
+    font-size: 13.5px;
+    color: #b8ccc5;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.footerCol a:hover {
+    color: #fff;
+}
+
+.footerBottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    max-width: 1140px;
+    margin: 0 auto;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 12.5px;
+    color: #6f8b81;
+    flex-wrap: wrap;
+}
+
+.footerTagline {
+    font-family: "Fraunces", Georgia, serif;
+    color: #b8ccc5;
 }
 
 /* ── Responsive ── */
@@ -831,14 +1110,68 @@
     .nav {
         padding: 14px 20px;
     }
+
+    .navLinks {
+        display: none;
+    }
+
+    .envCard {
+        grid-template-columns: 1fr;
+        gap: 28px;
+        padding: 32px 28px;
+    }
+
+    .whyGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .whyCell:nth-child(3n) {
+        border-right: 1px solid var(--border, #e1e8e5);
+    }
+
+    .whyCell:nth-child(2n) {
+        border-right: none;
+    }
+
+    .whyCell:nth-child(n+4) {
+        border-bottom: 1px solid var(--border, #e1e8e5);
+    }
+
+    .whyCell:nth-child(n+5) {
+        border-bottom: none;
+    }
+
+    .footerTop {
+        flex-direction: column;
+        gap: 32px;
+    }
 }
 
 @media (max-width: 640px) {
 
     .grid3,
     .visionGrid,
-    .ngList {
+    .ngList,
+    .whyGrid {
         grid-template-columns: 1fr;
+    }
+
+    .whyCell {
+        border-right: none !important;
+        border-bottom: 1px solid var(--border, #e1e8e5) !important;
+    }
+
+    .whyCell:last-child {
+        border-bottom: none !important;
+    }
+
+    .ctaBanner {
+        padding: 48px 22px;
+        border-radius: 20px;
+    }
+
+    .footerCols {
+        gap: 32px;
     }
 
     .hero {

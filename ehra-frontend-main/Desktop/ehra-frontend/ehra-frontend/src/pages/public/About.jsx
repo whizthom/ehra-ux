@@ -124,6 +124,32 @@ const WHY_POINTS = [
   },
 ];
 
+const NAV_LINKS = [
+  { href: "#story", label: "Story" },
+  { href: "#problem", label: "The problem" },
+  { href: "#platform", label: "Platform" },
+  { href: "#founder", label: "Founder" },
+  { href: "#vision", label: "Vision" },
+];
+
+const FOOTER_LINKS = {
+  Platform: [
+    { label: "Employees", href: "#workforce" },
+    { label: "Attendance", href: "#platform" },
+    { label: "Leave", href: "#workforce" },
+    { label: "Branches", href: "#business" },
+  ],
+  Company: [
+    { label: "About", href: "#story" },
+    { label: "Vision", href: "#vision" },
+    { label: "Founder", href: "#founder" },
+  ],
+  Legal: [
+    { label: "Privacy", href: "/privacy" },
+    { label: "Terms", href: "/terms" },
+  ],
+};
+
 const TICKER_ITEMS = [
   "Employee management",
   "Attendance & leave",
@@ -184,6 +210,30 @@ export default function About() {
     };
   }, []);
 
+  useEffect(() => {
+    const els = document.querySelectorAll(".js-reveal");
+    if (!els.length) return undefined;
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      els.forEach((el) => el.classList.add("js-inview"));
+      return undefined;
+    }
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("js-inview");
+            io.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.2, rootMargin: "0px 0px -60px 0px" },
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+
   return (
     <div className={styles.page}>
       {/* ── Nav — sticky; transparent over the hero, solid once scrolled ── */}
@@ -197,6 +247,13 @@ export default function About() {
             tone={scrolled ? "brand" : "sidebar"}
           />
         </Link>
+        <nav className={styles.navLinks} aria-label="Section links">
+          {NAV_LINKS.map((link) => (
+            <a key={link.href} href={link.href} className={styles.navLink}>
+              {link.label}
+            </a>
+          ))}
+        </nav>
         <div className={styles.navActions}>
           <Link to="/login" className={styles.navGhost}>
             Sign in
@@ -214,11 +271,13 @@ export default function About() {
           Why we built Ehral
           <i className="ti ti-arrow-narrow-right" aria-hidden="true" />
         </a>
-        <span className={styles.eyebrow}>Africa is building</span>
-        <h1 className={styles.h1}>
+        <span className={`${styles.eyebrow} js-reveal`}>
+          Africa is building
+        </span>
+        <h1 className={`${styles.h1} js-reveal`}>
           Africa is building.
           <br />
-          We&rsquo;re building with it.
+          <span className={styles.h1Accent}>We&rsquo;re building with it.</span>
         </h1>
         <p className={styles.heroDesc}>
           Every day, businesses across Africa begin with an idea, a few people
@@ -227,8 +286,9 @@ export default function About() {
           relationships into one connected platform.
         </p>
         <div className={styles.heroCtas}>
-          <Link to="/" className={styles.btnPrimary}>
+          <Link to="/" className={styles.btnGold}>
             Get started
+            <i className="ti ti-arrow-narrow-right" aria-hidden="true" />
           </Link>
           <a href="#belief" className={styles.btnGhost}>
             Discover Ehral
@@ -258,10 +318,10 @@ export default function About() {
            Stacked on desktop and up: header centered on top, full story
            underneath in a single editorial column with a "spine" rail
            and the two key lines pulled out as standalone statements. ── */}
-      <section className={styles.storySection}>
+      <section className={styles.storySection} id="story">
         <div className={styles.storyHeader}>
-          <span className={styles.eyebrowDark}>Our story</span>
-          <h2 className={styles.h2}>The story behind Ehral.</h2>
+          <span className={`${styles.eyebrowDark} js-reveal`}>Our story</span>
+          <h2 className={`${styles.h2} js-reveal`}>The story behind Ehral.</h2>
         </div>
         <div className={styles.storyText}>
           <p className={styles.lead}>
@@ -280,7 +340,7 @@ export default function About() {
             disappear inside group chats. The owner becomes the person holding
             it all together.
           </p>
-          <p className={styles.storyPullQuote}>
+          <p className={`${styles.storyPullQuote} js-reveal`}>
             The business is growing. But the systems supporting it are
             struggling to grow with it.
           </p>
@@ -297,7 +357,7 @@ export default function About() {
             businesses, employees and customers through one identity and one
             growing ecosystem.
           </p>
-          <p className={styles.storyPullQuote}>
+          <p className={`${styles.storyPullQuote} js-reveal`}>
             Today, we&rsquo;re focused on helping businesses manage their people
             and operations better. Tomorrow, we want to help them connect.
           </p>
@@ -309,7 +369,9 @@ export default function About() {
 
       {/* ── 2. Every business starts somewhere ── */}
       <section className={styles.section}>
-        <h2 className={styles.h2}>Every great business starts somewhere.</h2>
+        <h2 className={`${styles.h2} js-reveal`}>
+          Every great business starts somewhere.
+        </h2>
         <p className={styles.lead}>
           A classroom. A salon chair. A restaurant table. A shop. A small
           office. A kitchen. A few people who decided to build something of
@@ -333,9 +395,11 @@ export default function About() {
       </section>
 
       {/* ── 3. The real problem ── */}
-      <section className={styles.section}>
-        <span className={styles.eyebrowDark}>The real problem</span>
-        <h2 className={styles.h2}>
+      <section className={styles.section} id="problem">
+        <span className={`${styles.eyebrowDark} js-reveal`}>
+          The real problem
+        </span>
+        <h2 className={`${styles.h2} js-reveal`}>
           When the business grows, everything around it grows too.
         </h2>
         <p className={styles.lead}>
@@ -377,7 +441,7 @@ export default function About() {
         id="belief"
         className={`${styles.section} ${styles.sectionDark}`}
       >
-        <h2 className={styles.beliefLine}>
+        <h2 className={`${styles.beliefLine} js-reveal`}>
           We believe the size of a business should never limit the quality of
           the tools behind it.
         </h2>
@@ -387,42 +451,56 @@ export default function About() {
           can support families. A local business can become tomorrow&rsquo;s
           great company.
         </p>
-        <p className={styles.beliefSmall}>
-          Small does not mean insignificant.
-          <br />
-          Growing does not mean unimportant.
-        </p>
+        <div className={styles.beliefPills}>
+          <span className={`${styles.beliefPill} js-reveal`}>
+            Small does not mean insignificant.
+          </span>
+          <span className={`${styles.beliefPill} js-reveal`}>
+            Growing does not mean unimportant.
+          </span>
+        </div>
       </section>
 
       {/* ── 5. Built for African realities ── */}
       <section className={styles.section}>
-        <span className={styles.eyebrowDark}>
-          Built for this business environment
-        </span>
-        <h2 className={styles.h2}>
-          Technology should adapt to the way businesses actually work.
-        </h2>
-        <p className={styles.lead}>
-          We don&rsquo;t believe African businesses need to become more like
-          enterprise companies somewhere else before technology can work for
-          them. Businesses here have their own realities. People use phones
-          first. Teams can span locations. Owners often wear several hats.
-          Relationships between people and businesses are rarely simple.
-        </p>
-        <ul className={styles.ngList}>
-          {REALITY_POINTS.map((point) => (
-            <li key={point}>
-              <i className="ti ti-check" />
-              {point}
-            </li>
-          ))}
-        </ul>
+        <div className={styles.envCard}>
+          <div className={styles.envText}>
+            <span className={`${styles.eyebrowDark} js-reveal`}>
+              Built for this business environment
+            </span>
+            <h2 className={`${styles.h2} js-reveal`}>
+              Technology should adapt to the way businesses actually work.
+            </h2>
+            <p className={styles.lead}>
+              We don&rsquo;t believe African businesses need to become more like
+              enterprise companies somewhere else before technology can work for
+              them. Businesses here have their own realities. People use phones
+              first. Teams can span locations. Owners often wear several hats.
+              Relationships between people and businesses are rarely simple.
+            </p>
+          </div>
+          <ul className={styles.ngList}>
+            {REALITY_POINTS.map((point) => (
+              <li key={point}>
+                <i className="ti ti-check" />
+                {point}
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
 
       {/* ── 6. Every business is powered by people ── */}
-      <section className={styles.section}>
-        <span className={styles.eyebrowDark}>The Ehral workforce</span>
-        <h2 className={styles.h2}>Every business is powered by people.</h2>
+      <section
+        className={`${styles.section} ${styles.sectionDotted}`}
+        id="workforce"
+      >
+        <span className={`${styles.eyebrowDark} js-reveal`}>
+          The Ehral workforce
+        </span>
+        <h2 className={`${styles.h2} js-reveal`}>
+          Every business is powered by people.
+        </h2>
         <p className={styles.lead}>
           Before there are reports, branches or revenue, there are people
           showing up every day to make the business work. Know your workforce.
@@ -437,8 +515,12 @@ export default function About() {
 
       {/* ── 7. Smart attendance ── */}
       <section className={`${styles.section} ${styles.sectionCard}`}>
-        <span className={styles.eyebrowDark}>Smart attendance</span>
-        <h2 className={styles.h2}>Attendance without the attendance book.</h2>
+        <span className={`${styles.eyebrowDark} js-reveal`}>
+          Smart attendance
+        </span>
+        <h2 className={`${styles.h2} js-reveal`}>
+          Attendance without the attendance book.
+        </h2>
         <p className={styles.lead}>
           A dynamic QR code that refreshes periodically, with optional location
           verification — designed to make clocking in simple while giving
@@ -449,8 +531,12 @@ export default function About() {
 
       {/* ── 8. Leave management ── */}
       <section className={`${styles.section} ${styles.sectionCard}`}>
-        <span className={styles.eyebrowDark}>Leave management</span>
-        <h2 className={styles.h2}>Turn conversations into processes.</h2>
+        <span className={`${styles.eyebrowDark} js-reveal`}>
+          Leave management
+        </span>
+        <h2 className={`${styles.h2} js-reveal`}>
+          Turn conversations into processes.
+        </h2>
         <p className={styles.lead}>
           Instead of &ldquo;Sir, please I want to go on leave next week&rdquo;
           followed by several WhatsApp messages, Ehral turns the request into a
@@ -460,9 +546,11 @@ export default function About() {
       </section>
 
       {/* ── 9. Business management ── */}
-      <section className={styles.section}>
-        <span className={styles.eyebrowDark}>Business management</span>
-        <h2 className={styles.h2}>
+      <section className={styles.section} id="business">
+        <span className={`${styles.eyebrowDark} js-reveal`}>
+          Business management
+        </span>
+        <h2 className={`${styles.h2} js-reveal`}>
           The business is bigger than the workforce.
         </h2>
         <p className={styles.lead}>
@@ -477,9 +565,11 @@ export default function About() {
       </section>
 
       {/* ── 10. Product proof — one real dashboard, once ── */}
-      <section className={styles.section}>
-        <span className={styles.eyebrowDark}>See it for yourself</span>
-        <h2 className={styles.h2}>
+      <section className={styles.section} id="platform">
+        <span className={`${styles.eyebrowDark} js-reveal`}>
+          See it for yourself
+        </span>
+        <h2 className={`${styles.h2} js-reveal`}>
           See what&rsquo;s happening inside your business.
         </h2>
         <p className={styles.lead}>
@@ -502,8 +592,8 @@ export default function About() {
 
       {/* ── 11. One identity ── */}
       <section className={`${styles.section} ${styles.sectionCard}`}>
-        <span className={styles.eyebrowDark}>One identity</span>
-        <h2 className={styles.h2}>
+        <span className={`${styles.eyebrowDark} js-reveal`}>One identity</span>
+        <h2 className={`${styles.h2} js-reveal`}>
           A person doesn&rsquo;t belong to just one business.
         </h2>
         <p className={styles.lead}>
@@ -542,7 +632,7 @@ export default function About() {
       </section>
 
       {/* ── 12. Founder story — a face, not the hero ── */}
-      <section className={styles.founderSection}>
+      <section className={styles.founderSection} id="founder">
         <div className={styles.founderPortrait}>
           <img
             src={founderPhoto}
@@ -551,8 +641,10 @@ export default function About() {
           />
         </div>
         <div className={styles.founderText}>
-          <span className={styles.eyebrowDark}>Why I started Ehral</span>
-          <h2 className={styles.h2}>
+          <span className={`${styles.eyebrowDark} js-reveal`}>
+            Why I started Ehral
+          </span>
+          <h2 className={`${styles.h2} js-reveal`}>
             &ldquo;I kept seeing the same challenge.&rdquo;
           </h2>
           <p className={styles.lead}>
@@ -582,9 +674,14 @@ export default function About() {
       </section>
 
       {/* ── 13. The bigger ambition + connected ecosystem ── */}
-      <section className={`${styles.section} ${styles.sectionDark}`}>
-        <span className={styles.tagVisionLight}>Long-term vision</span>
-        <h2 className={styles.h2Light}>
+      <section
+        className={`${styles.section} ${styles.sectionDark}`}
+        id="vision"
+      >
+        <span className={`${styles.tagVisionLight} js-reveal`}>
+          Long-term vision
+        </span>
+        <h2 className={`${styles.h2Light} js-reveal`}>
           We&rsquo;re building something bigger than workforce software.
         </h2>
         <p className={styles.leadLight}>
@@ -624,14 +721,20 @@ export default function About() {
 
       {/* ── 14. Why Ehral ── */}
       <section className={styles.section}>
-        <span className={styles.eyebrowDark}>Why Ehral</span>
-        <h2 className={styles.h2}>
+        <span className={`${styles.eyebrowDark} js-reveal`}>Why Ehral</span>
+        <h2 className={`${styles.h2} js-reveal`}>
           Because the size of a business doesn&rsquo;t measure the size of its
           ambition.
         </h2>
-        <div className={styles.grid3}>
-          {WHY_POINTS.map((p) => (
-            <FeatureVisual key={p.title} {...p} status={undefined} />
+        <div className={styles.whyGrid}>
+          {WHY_POINTS.map((p, i) => (
+            <div className={`${styles.whyCell} js-reveal`} key={p.title}>
+              <span className={styles.whyNum}>
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <h3 className={styles.whyTitle}>{p.title}</h3>
+              <p className={styles.whyDesc}>{p.description}</p>
+            </div>
           ))}
         </div>
       </section>
@@ -645,7 +748,7 @@ export default function About() {
             </span>
           ))}
         </div>
-        <p className={styles.finalLine}>
+        <p className={`${styles.finalLine} js-reveal`}>
           Every great business starts somewhere.
           <br />
           Ehral is built to grow with it.
@@ -654,14 +757,16 @@ export default function About() {
 
       {/* ── 16. Where we're going ── */}
       <section className={`${styles.section} ${styles.sectionDark}`}>
-        <span className={styles.tagVisionLight}>Where we&rsquo;re going</span>
-        <p className={styles.roadmapLine}>
+        <span className={`${styles.tagVisionLight} js-reveal`}>
+          Where we&rsquo;re going
+        </span>
+        <p className={`${styles.roadmapLine} js-reveal`}>
           Today, we help businesses run better.
         </p>
-        <p className={styles.roadmapLine}>
+        <p className={`${styles.roadmapLine} js-reveal`}>
           Tomorrow, we want to help them connect.
         </p>
-        <p className={styles.roadmapLine}>
+        <p className={`${styles.roadmapLine} js-reveal`}>
           Eventually, we want Ehral to become part of the infrastructure through
           which businesses, employees and customers interact.
         </p>
@@ -673,28 +778,58 @@ export default function About() {
       </section>
 
       {/* ── 17. Final CTA — mission, not a feature pitch ── */}
-      <section className={styles.cta}>
-        <h2 className={styles.h2}>Your business is becoming something.</h2>
-        <p className={styles.lead}>Give it the systems to grow with it.</p>
-        <div className={styles.heroCtas}>
-          <Link to="/" className={styles.btnPrimary}>
-            Get started with Ehral
-          </Link>
-          <Link to="/login" className={styles.btnGhost}>
-            Explore the platform
-          </Link>
+      <section className={styles.section}>
+        <div className={styles.ctaBanner}>
+          <span className={`${styles.tagVisionLight} js-reveal`}>
+            Every great business starts somewhere
+          </span>
+          <h2 className={`${styles.h2Light} js-reveal`}>
+            Your business is becoming something.
+            <br />
+            <span className={styles.h2LightMuted}>
+              Give it the systems to grow with it.
+            </span>
+          </h2>
+          <div className={styles.heroCtas}>
+            <Link to="/" className={styles.btnGold}>
+              Get started with Ehral
+              <i className="ti ti-arrow-narrow-right" aria-hidden="true" />
+            </Link>
+            <Link to="/login" className={styles.btnGhost}>
+              Explore the platform
+            </Link>
+          </div>
         </div>
-        <p className={styles.finalInvitation}>
-          Africa is building.
-          <br />
-          Let&rsquo;s build with it.
-        </p>
       </section>
 
       <footer className={styles.footer}>
-        <Logo variant="horizontal" size={36} />
-        <p>Workforce, attendance and business management — in your pocket.</p>
-        <span>© 2026 Ehral. All rights reserved.</span>
+        <div className={styles.footerTop}>
+          <div className={styles.footerBrand}>
+            <Logo variant="horizontal" size={36} />
+            <p>
+              Workforce and business operations, built around how African
+              businesses actually work.
+            </p>
+          </div>
+          <div className={styles.footerCols}>
+            {Object.entries(FOOTER_LINKS).map(([heading, links]) => (
+              <div className={styles.footerCol} key={heading}>
+                <span className={styles.footerColHeading}>{heading}</span>
+                {links.map((link) => (
+                  <a key={link.label} href={link.href}>
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className={styles.footerBottom}>
+          <span>© 2026 Ehral Systems. All rights reserved.</span>
+          <span className={styles.footerTagline}>
+            Africa is building. Let&rsquo;s build with it.
+          </span>
+        </div>
       </footer>
     </div>
   );
