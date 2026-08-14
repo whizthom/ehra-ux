@@ -53,6 +53,20 @@
         background: var(--bg-page);
     }
 
+    /* .windowCol already has flex:1 unconditionally above, which is why
+       an OPEN chat correctly fills the screen on mobile. .listCol never
+       had that — as a bare flex item with no flex-grow, it just shrinks
+       to fit its content's intrinsic width instead of stretching to fill
+       .hub, which is what was actually causing the chat list to look
+       narrower than full-width (ChatList.module.css's own width:100%
+       rule on .listPanel was resolving relative to that too-narrow box).
+       Only scoped to mobile — on desktop .listCol is deliberately its
+       content's ~340px width, sitting beside .windowCol. */
+    .listCol {
+        flex: 1;
+        width: 100%;
+    }
+
     .listColHiddenMobile {
         display: none;
     }
