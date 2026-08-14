@@ -5,6 +5,16 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // https://vite.dev/config/
 export default defineConfig({
+  // sockjs-client (used by the real-time messaging WebSocket, see
+  // src/services/messagingSocket.js) references the Node.js `global`
+  // object internally. Vite/Rolldown doesn't polyfill that for the
+  // browser the way webpack used to, so without this the bundle throws
+  // "ReferenceError: global is not defined" the first time any code path
+  // pulls sockjs-client in. globalThis is the browser-native equivalent.
+  define: {
+    global: "globalThis",
+  },
+
   plugins: [
     react(),
     basicSsl(),
