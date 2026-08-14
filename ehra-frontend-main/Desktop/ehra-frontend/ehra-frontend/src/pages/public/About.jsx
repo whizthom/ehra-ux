@@ -266,38 +266,46 @@ export default function About() {
 
       {/* ── 1. Hero — story-first, not feature-first ── */}
       <section className={styles.hero}>
-        <a href="#belief" className={styles.heroChip}>
-          <span className={styles.heroChipDot} />
-          Why we built Ehral
-          <i className="ti ti-arrow-narrow-right" aria-hidden="true" />
-        </a>
-        <span className={`${styles.eyebrow} js-reveal`}>
-          FOR EVERY BUSINESS
-        </span>
-        <h1 className={`${styles.h1} js-reveal`}>
-          Every business starts small.
-          <br />
-          <span className={styles.h1Accent}>
-            The right tools shouldn&rsquo;nt come later.
-          </span>
-        </h1>
-        <p className={styles.heroDesc}>
-          Most business software is built for companies that have already grown.
-          Ehral was built differently, to give growing businesses access to the
-          tools they need from the very beginning — Manage your people,
-          streamline daily operations, and grow with confidence using one
-          simple,connected platform.
-        </p>
-        <div className={styles.heroCtas}>
-          <Link to="/" className={styles.btnGold}>
-            Get started
-            <i className="ti ti-arrow-narrow-right" aria-hidden="true" />
-          </Link>
-          <a href="#belief" className={styles.btnGhost}>
-            Discover Ehral
-          </a>
+        <div className={styles.heroInner}>
+          <div className={styles.heroContent}>
+            <a href="#belief" className={styles.heroChip}>
+              <span className={styles.heroChipDot} />
+              Why we built Ehral
+              <i className="ti ti-arrow-narrow-right" aria-hidden="true" />
+            </a>
+            <span className={`${styles.eyebrow} js-reveal`}>
+              FOR EVERY BUSINESS
+            </span>
+            <h1 className={`${styles.h1} js-reveal`}>
+              Every business starts small.
+              <br />
+              <span className={styles.h1Accent}>
+                The right tools shouldn&rsquo;t come later.
+              </span>
+            </h1>
+            <p className={styles.heroDesc}>
+              Most business software is built for companies that have already
+              grown. Ehral was built differently, to give growing businesses
+              access to the tools they need from the very beginning — manage
+              your people, streamline daily operations, and grow with confidence
+              using one simple, connected platform.
+            </p>
+            <div className={styles.heroCtas}>
+              <Link to="/" className={styles.btnGold}>
+                Get started
+                <i className="ti ti-arrow-narrow-right" aria-hidden="true" />
+              </Link>
+              <a href="#belief" className={styles.btnGhost}>
+                Discover Ehral
+              </a>
+            </div>
+          </div>
+
+          <div className={styles.heroVisual}>
+            <ProductShowcase liveData={liveData} />
+          </div>
         </div>
-        <ProductShowcase liveData={liveData} />
+
         <p className={styles.heroFooter}>
           Behind every business is a living organization of people.
         </p>
@@ -356,7 +364,7 @@ export default function About() {
           </p>
           <p className={styles.lead}>
             That is why we built Ehral — to give businesses the systems they
-            need to grow, from
+            need to grow, without having to wait until they are already big.
           </p>
           <p className={styles.lead}>
             We started with the workforce, because people are at the heart of
