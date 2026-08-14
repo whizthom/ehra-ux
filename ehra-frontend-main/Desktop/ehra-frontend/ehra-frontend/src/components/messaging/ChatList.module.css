@@ -220,5 +220,11 @@
     .listPanel {
         width: 100%;
         border-right: none;
+        /* On mobile this IS the "Chats" page, not a pane docked next to a
+           chat window — it should read as a plain screen (the app's page
+           background) rather than a card sitting on top of one. Desktop
+           keeps the panel look (var(--bg-surface) above) since there it's
+           genuinely one pane beside another. */
+        background: var(--bg-page);
     }
 }

@@ -9,20 +9,44 @@ import {
   markRead as apiMarkRead,
 } from "../api/messagingApi";
 import { subscribeToConversation } from "../services/messagingSocket";
+import {
+  getCachedMessagesSync,
+  hydrateMessagesFromDisk,
+  setCachedMessages,
+} from "../services/messagingCache";
 
 const PAGE_SIZE = 30;
+
+// Merges a cached copy of a thread with a fresh page from the server:
+// the server's copy of any message id always wins (it's the source of
+// truth for edits/deletes/reactions/status), but older cached messages
+// the fresh page doesn't reach back far enough to include are kept, so
+// reopening a chat doesn't visually "forget" history it already had on
+// screen a moment ago while the reconciliation call is in flight.
+function mergeMessages(cached, fresh) {
+  const byId = new Map();
+  for (const m of cached) if (typeof m.id === "number") byId.set(m.id, m);
+  for (const m of fresh) byId.set(m.id, m);
+  return Array.from(byId.values()).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+}
 
 // Drives one open conversation: history + cursor-based pagination (section
 // 23) loaded once over REST, then kept live purely by WebSocket events —
 // no re-fetch of the whole thread on every new message (section 28's
 // "don't reload the entire chat when one message arrives").
+//
+// Renders from messagingCache's last-known copy of THIS conversation
+// immediately on mount/switch — no spinner for a chat that's been opened
+// before, even across a page reload — and reconciles with the server in
+// the background (see mergeMessages above and messagingCache.js's doc).
 export default function useConversationMessages(conversationId, viewerIdentityIdRaw) {
   // Defensive second line of defence against the string-vs-number
   // identityId mismatch documented in MessagingHub.jsx — every comparison
   // below assumes a number.
   const viewerIdentityId = viewerIdentityIdRaw != null ? Number(viewerIdentityIdRaw) : null;
-  const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const initialCached = conversationId ? getCachedMessagesSync(conversationId) : null;
+  const [messages, setMessages] = useState(initialCached || []);
+  const [loading, setLoading] = useState(!initialCached);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [typingUsers, setTypingUsers] = useState([]);
@@ -40,18 +64,55 @@ export default function useConversationMessages(conversationId, viewerIdentityId
     });
   }, []);
 
+  // Every change to `messages` gets mirrored into the cache (memory
+  // immediately, disk debounced) so the NEXT time this conversation opens
+  // — even after a full page reload — it's already there.
   useEffect(() => {
     if (!conversationId) return;
+    const confirmed = messages.filter((m) => typeof m.id === "number");
+    if (confirmed.length > 0) setCachedMessages(conversationId, confirmed);
+  }, [conversationId, messages]);
+
+  useEffect(() => {
+    if (!conversationId) return undefined;
     let cancelled = false;
-    setLoading(true);
-    setMessages([]);
-    setHasMore(true);
-    getMessages(conversationId, { limit: PAGE_SIZE }).then(({ data }) => {
-      if (cancelled) return;
-      setMessages(data);
-      setHasMore(data.length === PAGE_SIZE);
+
+    const cachedNow = getCachedMessagesSync(conversationId);
+    if (cachedNow) {
+      setMessages(cachedNow);
+      setHasMore(true);
       setLoading(false);
-    });
+    } else {
+      setMessages([]);
+      setHasMore(true);
+      setLoading(true);
+    }
+
+    const reconcile = (baseline) => {
+      getMessages(conversationId, { limit: PAGE_SIZE }).then(({ data }) => {
+        if (cancelled) return;
+        setMessages((prev) => mergeMessages(baseline ?? prev, data));
+        setHasMore(data.length === PAGE_SIZE);
+        setLoading(false);
+      });
+    };
+
+    if (cachedNow) {
+      reconcile(cachedNow);
+    } else {
+      // Nothing in memory (first open since a page refresh) — check disk
+      // before falling back to a bare network fetch, so a hard reload
+      // still paints instantly whenever IndexedDB has this thread cached.
+      hydrateMessagesFromDisk(conversationId).then((disk) => {
+        if (cancelled) return;
+        if (disk) {
+          setMessages(disk);
+          setLoading(false);
+        }
+        reconcile(disk);
+      });
+    }
+
     return () => {
       cancelled = true;
     };

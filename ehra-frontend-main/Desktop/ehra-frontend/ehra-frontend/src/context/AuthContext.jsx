@@ -10,6 +10,8 @@ import {
 } from "../api/authApi";
 import { completeProfile as apiCompleteProfile } from "../api/businessApi";
 import { addBusiness as apiAddBusiness } from "../api/businessApi";
+import { clearMessagingCache } from "../services/messagingCache";
+import { disconnect as disconnectMessagingSocket } from "../services/messagingSocket";
 
 const AuthContext = createContext(null);
 
@@ -88,11 +90,18 @@ export function AuthProvider({ children }) {
   const logout = useCallback(async () => {
     await apiLogout();
     setUser(null);
+    // Nothing about this person's inbox — the WebSocket connection or the
+    // local message cache — should survive them signing out, especially
+    // on a shared/kiosk device.
+    disconnectMessagingSocket();
+    clearMessagingCache();
   }, []);
 
   const forceLogout = useCallback(() => {
     clearTokens();
     setUser(null);
+    disconnectMessagingSocket();
+    clearMessagingCache();
   }, []);
 
   return (
