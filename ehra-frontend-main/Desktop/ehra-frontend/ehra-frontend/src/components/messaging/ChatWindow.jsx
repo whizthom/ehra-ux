@@ -1,0 +1,226 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Avatar from "./Avatar";
+import MessageBubble from "./MessageBubble";
+import DateSeparator from "./DateSeparator";
+import TypingIndicator from "./TypingIndicator";
+import MessageComposer from "./MessageComposer";
+import GroupInfoModal from "./GroupInfoModal";
+import useConversationMessages from "../../hooks/useConversationMessages";
+import useTypingBroadcast from "../../hooks/useTypingBroadcast";
+import { formatDayLabel } from "../../utils/messagingFormat";
+import styles from "./ChatWindow.module.css";
+
+export default function ChatWindow({
+  conversation,
+  myIdentityId,
+  onBack,
+  onConversationChanged,
+}) {
+  const {
+    messages,
+    loading,
+    loadingOlder,
+    hasMore,
+    loadOlder,
+    typingUsers,
+    send,
+    retry,
+    edit,
+    remove,
+    react,
+    unreact,
+  } = useConversationMessages(conversation.id, myIdentityId);
+  const { onKeystroke, stop: stopTyping } = useTypingBroadcast(conversation.id);
+
+  const [replyTo, setReplyTo] = useState(null);
+  const [editingMessage, setEditingMessage] = useState(null);
+  const [showGroupInfo, setShowGroupInfo] = useState(false);
+  const scrollRef = useRef(null);
+  const bottomAnchorRef = useRef(null);
+  const isNearBottomRef = useRef(true);
+  const prevScrollHeightRef = useRef(0);
+
+  const isGroup = conversation.type === "GROUP";
+  const other = !isGroup ? conversation.participants?.[0] : null;
+
+  const groupMembers = isGroup ? conversation.participants : undefined;
+
+  // Auto-scroll to bottom on first load and on new messages, but only if
+  // the person was already near the bottom — never yank them away from
+  // history they scrolled up to read (section 28's "avoid unnecessary
+  // re-renders/jumps").
+  useEffect(() => {
+    if (loading) return;
+    if (isNearBottomRef.current) {
+      bottomAnchorRef.current?.scrollIntoView({ block: "end" });
+    }
+  }, [messages, loading]);
+
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    isNearBottomRef.current =
+      el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+    if (el.scrollTop < 80 && hasMore && !loadingOlder) {
+      prevScrollHeightRef.current = el.scrollHeight;
+      loadOlder().then(() => {
+        requestAnimationFrame(() => {
+          if (scrollRef.current) {
+            scrollRef.current.scrollTop =
+              scrollRef.current.scrollHeight - prevScrollHeightRef.current;
+          }
+        });
+      });
+    }
+  }, [hasMore, loadingOlder, loadOlder]);
+
+  const grouped = useMemo(() => {
+    const groups = [];
+    let lastLabel = null;
+    for (const m of messages) {
+      const label = formatDayLabel(m.createdAt);
+      if (label !== lastLabel) {
+        groups.push({ type: "date", label, key: `d-${m.id}` });
+        lastLabel = label;
+      }
+      groups.push({ type: "message", message: m });
+    }
+    return groups;
+  }, [messages]);
+
+  const scrollToMessage = (messageId) => {
+    const el = document.getElementById(`msg-${messageId}`);
+    if (el) {
+      el.scrollIntoView({ block: "center", behavior: "smooth" });
+      el.classList.add(styles.highlight);
+      setTimeout(() => el.classList.remove(styles.highlight), 1200);
+    }
+  };
+
+  const handleSend = async (payload) => {
+    setReplyTo(null);
+    await send(payload);
+  };
+
+  return (
+    <div className={styles.window}>
+      <div className={styles.header}>
+        {onBack && (
+          <button className={styles.backBtn} onClick={onBack}>
+            <i className="ti ti-arrow-left" />
+          </button>
+        )}
+        <button
+          className={styles.headerIdentity}
+          onClick={() => isGroup && setShowGroupInfo(true)}
+          disabled={!isGroup}
+        >
+          <Avatar
+            name={conversation.name}
+            src={conversation.avatarUrl}
+            showPresence={!isGroup}
+            online={conversation.online}
+          />
+          <div className={styles.headerText}>
+            <span className={styles.headerName}>{conversation.name}</span>
+            <span className={styles.headerStatus}>
+              {typingUsers.length > 0
+                ? "typing…"
+                : isGroup
+                  ? `${conversation.participants?.length || 0} members`
+                  : conversation.online
+                    ? "Online"
+                    : other?.lastSeenAt
+                      ? `Last seen ${new Date(other.lastSeenAt).toLocaleString()}`
+                      : "Offline"}
+            </span>
+          </div>
+        </button>
+        {isGroup && (
+          <button
+            className={styles.headerAction}
+            onClick={() => setShowGroupInfo(true)}
+          >
+            <i className="ti ti-info-circle" />
+          </button>
+        )}
+      </div>
+
+      <div className={styles.messages} ref={scrollRef} onScroll={handleScroll}>
+        {loadingOlder && (
+          <div className={styles.loadingOlder}>Loading earlier messages…</div>
+        )}
+        {loading ? (
+          <div className={styles.centerState}>Loading conversation…</div>
+        ) : messages.length === 0 ? (
+          <div className={styles.centerState}>
+            <div className={styles.emptyIcon}>
+              <i className="ti ti-message-circle-2" />
+            </div>
+            <h3>Start the conversation</h3>
+            <p>Send a message to get started.</p>
+          </div>
+        ) : (
+          grouped.map((item) =>
+            item.type === "date" ? (
+              <DateSeparator
+                key={item.key}
+                date={item.message?.createdAt || item.label}
+              />
+            ) : (
+              <div id={`msg-${item.message.id}`} key={item.message.id}>
+                <MessageBubble
+                  message={item.message}
+                  isOwn={item.message.senderIdentityId === myIdentityId}
+                  isGroup={isGroup}
+                  canDeleteForEveryone={
+                    item.message.senderIdentityId === myIdentityId ||
+                    conversation.participants?.find(
+                      (p) => p.identityId === myIdentityId,
+                    )?.roleLabel === "Employer"
+                  }
+                  onReply={setReplyTo}
+                  onEdit={setEditingMessage}
+                  onDeleteForMe={(id) => remove(id, false)}
+                  onDeleteForEveryone={(id) => remove(id, true)}
+                  onReact={react}
+                  onUnreact={unreact}
+                  onScrollToReply={scrollToMessage}
+                  onRetry={retry}
+                  myIdentityId={myIdentityId}
+                />
+              </div>
+            ),
+          )
+        )}
+        <div ref={bottomAnchorRef} />
+      </div>
+
+      <TypingIndicator users={typingUsers} />
+
+      <MessageComposer
+        replyTo={replyTo}
+        onCancelReply={() => setReplyTo(null)}
+        onSend={handleSend}
+        onTypingKeystroke={onKeystroke}
+        onStopTyping={stopTyping}
+        groupMembers={groupMembers}
+        editingMessage={editingMessage}
+        onCancelEdit={() => setEditingMessage(null)}
+        onSaveEdit={async (id, body) => {
+          await edit(id, body);
+          setEditingMessage(null);
+        }}
+      />
+
+      {showGroupInfo && (
+        <GroupInfoModal
+          conversation={conversation}
+          myIdentityId={myIdentityId}
+          onClose={() => setShowGroupInfo(false)}
+          onChanged={onConversationChanged}
+        />
+      )}
+    </div>
+  );
+}

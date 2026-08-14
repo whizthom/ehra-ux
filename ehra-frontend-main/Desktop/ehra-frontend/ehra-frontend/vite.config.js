@@ -180,6 +180,16 @@ export default defineConfig({
         target: "http://localhost:8080",
         changeOrigin: true,
       },
+      // Real-time messaging (STOMP over SockJS) — SockJS negotiates its
+      // transport over plain HTTP first (an XHR "info" request, polling,
+      // etc.) and only upgrades to a real WebSocket when possible, so this
+      // needs `ws: true` for the upgrade case AND to be reachable as a
+      // normal proxied path for the others.
+      "/ws-messaging": {
+        target: "http://localhost:8080",
+        changeOrigin: true,
+        ws: true,
+      },
     },
   },
 });

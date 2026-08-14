@@ -10,7 +10,12 @@ import {
 } from "../api/leaveApi";
 import { getTodayAttendance } from "../api/attendanceApi";
 import { softDeleteEmployee } from "../api/workforceApi";
-import { getChatUnreadCount } from "../api/chatApi";
+// Real-time messaging (V1 rebuild) — replaces the old SSE-based chat's
+// getChatUnreadCount for the sidebar/topbar "Messages" badge. The old
+// chatApi.js/ChatPanel/MessagesHub files are left in place untouched but
+// unused, in case anything else still imports them.
+import { getMessagingUnreadCount } from "../api/messagingApi";
+import useMessagingBadgeSync from "../hooks/useMessagingBadgeSync";
 import useMessageStream from "../hooks/useMessageStream";
 import styles from "./Dashboard.module.css";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
@@ -22,7 +27,7 @@ import BusinessReportModal from "../components/BusinessReportModal";
 import AttendanceSection from "../components/AttendanceSection";
 import QrCodeTab from "../components/QrcodeTab";
 import WorkforceTab from "../components/WorkforceTab";
-import MessagesHub from "../components/MessagesHub";
+import MessagingHub from "../components/messaging/MessagingHub";
 import LeavesTab from "../components/LeavesTab";
 import DepartmentsTab from "../components/DepartmentsTab";
 import ProfileEditApprovalPanel from "../components/ProfileEditApprovalPanel";
@@ -446,7 +451,7 @@ export default function Dashboard() {
 
   const fetchMessagesUnread = useCallback(async () => {
     try {
-      const { data } = await getChatUnreadCount();
+      const { data } = await getMessagingUnreadCount();
       setMessagesUnread(data.count || 0);
     } catch (err) {
       console.error("Failed to load unread message count:", err);
@@ -708,11 +713,13 @@ export default function Dashboard() {
       }
     },
 
-    // Keeps the topbar/sidebar message badge live without needing the
-    // Messages tab mounted — mirrors MessagesHub's own badge refresh.
-    onNewChatMessage: () => fetchMessagesUnread(),
-    onChatRead: () => fetchMessagesUnread(),
+    // NOTE: onNewChatMessage/onChatRead above are wired to the OLD SSE
+    // chat stream and no longer fire for real messaging traffic — the new
+    // messaging system's badge live-update is the WebSocket subscription
+    // below instead (see useMessagingBadgeSync).
   });
+
+  useMessagingBadgeSync(fetchMessagesUnread);
 
   // Refresh notifications whenever the full-page Notifications tab is opened
   useEffect(() => {
@@ -1487,11 +1494,7 @@ export default function Dashboard() {
           ) : activeNav === "Workforce" ? (
             <WorkforceTab departments={departments} />
           ) : activeNav === "Messages" ? (
-            <MessagesHub
-              viewer="admin"
-              employees={employees}
-              onThreadOpenChange={setChatThreadOpen}
-            />
+            <MessagingHub onThreadOpenChange={setChatThreadOpen} />
           ) : activeNav === "Leave" ? (
             <LeavesTab onSectionChange={setLeavesSection} />
           ) : activeNav === "Attendance" ? (

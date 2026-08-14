@@ -273,9 +273,9 @@ export default function About() {
               Why we built Ehral
               <i className="ti ti-arrow-narrow-right" aria-hidden="true" />
             </a>
-            <span className={`${styles.eyebrow} js-reveal`}>
+            {/* <span className={`${styles.eyebrow} js-reveal`}>
               FOR EVERY BUSINESS
-            </span>
+            </span> */}
             <h1 className={`${styles.h1} js-reveal`}>
               Every business starts small.
               <br />
