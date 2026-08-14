@@ -2192,13 +2192,14 @@ export default function Dashboard() {
               specifically on the Leave > Policies sub-section (removed
               on request) — everywhere else, including the other three
               Leave sub-tabs (Requests/On Leave/Balances), keeps it. */}
-          {!(activeNav === "Leave" && leavesSection === "policies") && (
-            <div
-              className={`${styles.dashboardFooter} ${chatThreadOpen ? styles.hiddenOnMobileChat : ""}`}
-            >
-              <Logo variant="horizontal" size={48} />
-            </div>
-          )}
+          {!(activeNav === "Leave" && leavesSection === "policies") &&
+            activeNav !== "Messages" && (
+              <div
+                className={`${styles.dashboardFooter} ${chatThreadOpen ? styles.hiddenOnMobileChat : ""}`}
+              >
+                <Logo variant="horizontal" size={48} />
+              </div>
+            )}
         </div>
       </div>
 

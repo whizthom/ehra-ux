@@ -16,7 +16,11 @@ const PAGE_SIZE = 30;
 // 23) loaded once over REST, then kept live purely by WebSocket events —
 // no re-fetch of the whole thread on every new message (section 28's
 // "don't reload the entire chat when one message arrives").
-export default function useConversationMessages(conversationId, viewerIdentityId) {
+export default function useConversationMessages(conversationId, viewerIdentityIdRaw) {
+  // Defensive second line of defence against the string-vs-number
+  // identityId mismatch documented in MessagingHub.jsx — every comparison
+  // below assumes a number.
+  const viewerIdentityId = viewerIdentityIdRaw != null ? Number(viewerIdentityIdRaw) : null;
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingOlder, setLoadingOlder] = useState(false);

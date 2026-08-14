@@ -553,10 +553,13 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: min(1280px, calc(100% - 48px));
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 96px 24px 100px;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    /* Same 48px side padding as .nav, so the story content's left edge
+       lines up with the logo instead of being centered in a narrower
+       1280px box. */
+    padding: 96px 48px 100px;
     scroll-margin-top: 96px;
 }
 
@@ -1446,38 +1449,48 @@
     }
 }
 
-/* On wider screens, place story text left and visual to the right */
+/* On wider screens, the story text no longer shares the row with a visual
+   (the animation now lives in its own section below), so let it use a much
+   wider share of the content area instead of the old fixed 720px column,
+   which was leaving a large unused gap on the right. */
 @media (min-width: 980px) {
-    .storySection {
-        display: grid;
-        grid-template-columns: 1fr 420px;
-        grid-template-areas:
-            "header visual"
-            "text visual";
-        gap: 20px;
-        align-items: start;
+
+    /* Give .storyLeft a DEFINITE width (not just a max-width) so that the
+       "100%" widths on its children below resolve reliably against it.
+       Without this, .storyLeft is sized by flex fit-content (because
+       .storySection uses align-items: center), which is not a definite
+       width — and percentage children resolving against an indefinite
+       container is exactly what was causing .storyHeader (short content)
+       to shrink to its own content and then get centered by its
+       `margin: 0 auto`, while .storyText (long paragraphs) stayed full
+       width — the misaligned heading you saw.
+       No max-width cap here anymore: the story content now fills the
+       full width of .storySection (edge-to-edge minus the 48px gutter),
+       so paragraphs wrap at the full screen width instead of a narrower
+       reading column. */
+    .storyLeft {
+        width: 100%;
+        max-width: none;
     }
 
     .storyHeader {
-        grid-area: header;
         align-items: flex-start;
         text-align: left;
-        padding-right: 8px;
+        width: 100%;
+        max-width: none;
+        margin: 0 0 12px;
     }
 
     .storyText {
-        grid-area: text;
+        width: 100%;
+        max-width: none;
+        margin: 0;
         padding-left: 0;
         border-left: none;
-        margin-right: 8px;
     }
 
-    .storyVisual {
-        grid-area: visual;
-        margin: 0;
-        align-self: start;
-        padding: 20px;
-        border-radius: 18px;
+    .storyPullQuote {
+        max-width: none;
     }
 }
 
@@ -1487,7 +1500,7 @@
         font-size: 16px;
         line-height: 1.65;
         color: var(--text-secondary, #4d635c);
-        max-width: 640px;
+        max-width: none;
         margin: 0 0 14px;
     }
 }

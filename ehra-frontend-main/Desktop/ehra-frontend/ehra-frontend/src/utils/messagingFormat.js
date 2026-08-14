@@ -14,8 +14,19 @@ export function formatDayLabel(dateLike) {
   const now = new Date();
   const startOfDay = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate());
   const diffDays = Math.round((startOfDay(now) - startOfDay(d)) / 86400000);
+
   if (diffDays === 0) return "TODAY";
   if (diffDays === 1) return "YESTERDAY";
+  // This week: just the weekday name reads more naturally than a date
+  // ("MONDAY" vs "AUGUST 11") once it's still fresh in memory.
+  if (diffDays >= 2 && diffDays <= 6) {
+    return d.toLocaleDateString([], { weekday: "long" }).toUpperCase();
+  }
+  // The week before that: "LAST MONDAY" keeps the same at-a-glance feel
+  // without it being confusable with the current week's Monday.
+  if (diffDays >= 7 && diffDays <= 13) {
+    return `LAST ${d.toLocaleDateString([], { weekday: "long" }).toUpperCase()}`;
+  }
   const sameYear = d.getFullYear() === now.getFullYear();
   return d
     .toLocaleDateString([], {

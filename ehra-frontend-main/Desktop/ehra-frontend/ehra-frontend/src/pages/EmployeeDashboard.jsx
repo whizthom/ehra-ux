@@ -1522,12 +1522,15 @@ export default function Dashboard() {
 
           {/* Brand footer — last thing in the scrollable content, same
               spot for every tab. Matches Dashboard.jsx's employer-side
-              footer. */}
-          <div
-            className={`${styles.dashboardFooter} ${chatThreadOpen ? styles.hiddenOnMobileChat : ""}`}
-          >
-            <Logo variant="horizontal" size={48} />
-          </div>
+              footer. Hidden entirely on the Messages tab, which wants the
+              full content height for the chat UI instead. */}
+          {activeNav !== "Messages" && (
+            <div
+              className={`${styles.dashboardFooter} ${chatThreadOpen ? styles.hiddenOnMobileChat : ""}`}
+            >
+              <Logo variant="horizontal" size={48} />
+            </div>
+          )}
         </div>
       </div>
 

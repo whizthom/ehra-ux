@@ -598,19 +598,22 @@
 }
 
 /* Messages tab only. It renders its own WhatsApp-style two-pane layout
-   (ChatPanel/MessagesHub) which needs to reach the true edges of the
-   screen on a phone — unlike Attendance/Departments/etc, which still want
-   a narrow gutter around a table and stay on .contentFullNarrow above. */
+   (MessagingHub) which needs to reach the true edges of the content area
+   on EVERY device — not just fill the mobile-fullscreen case — so unlike
+   Attendance/Departments/etc. (.contentFullNarrow, still want a narrow
+   gutter around a table), this has zero padding unconditionally and
+   fills the full available height via flex:1/min-height:0 below. */
 .contentMessages {
     flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    padding: 20px 10px;
+    padding: 0;
     min-height: 0;
     min-width: 0;
+    height: 100%;
 }
+
 
 /* Applied to .topbar / .dashboardFooter / .bottomNav while a chat thread
    is open, so opening a chat on mobile takes over the whole screen —

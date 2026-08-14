@@ -35,14 +35,21 @@
 }
 
 .ownBubble {
-    background: var(--bg-soft-accent);
-    color: var(--text-primary);
+    background: var(--accent);
+    color: #fff;
     border-bottom-right-radius: 4px;
 }
 
+.ownBubble .textContent a,
+.ownBubble a {
+    color: #fff;
+    text-decoration-color: rgba(255, 255, 255, 0.6);
+}
+
 .otherBubble {
-    background: var(--bg-surface-alt);
+    background: var(--bg-surface);
     color: var(--text-primary);
+    border: 0.5px solid var(--border-color);
     border-bottom-left-radius: 4px;
 }
 
@@ -87,6 +94,61 @@
 .tickRead {
     font-size: 14px;
     color: #34b7f1;
+}
+
+/* Own bubble sits on a solid accent background now (see .ownBubble), so
+   every secondary-text element inside it needs a white-based palette
+   instead of the default var(--text-secondary), or it goes invisible. */
+.ownBubble .time,
+.ownBubble .editedTag {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.ownBubble .tickSent {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.ownBubble .tickRead {
+    color: #bef0ff;
+}
+
+.ownBubble .replyPreview {
+    background: rgba(255, 255, 255, 0.18);
+    border-left-color: #fff;
+}
+
+.ownBubble .replyName {
+    color: #fff;
+}
+
+.ownBubble .replySnippet {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.ownBubble .documentRow,
+.ownBubble .locationRow {
+    color: #fff;
+}
+
+.ownBubble .documentMeta {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.ownBubble .voiceDuration {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.ownBubble .voiceWave {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.ownBubble .voiceWaveFill {
+    background: #fff;
+}
+
+.ownBubble .voicePlayBtn {
+    background: #fff;
+    color: var(--accent);
 }
 
 .retryBtn {

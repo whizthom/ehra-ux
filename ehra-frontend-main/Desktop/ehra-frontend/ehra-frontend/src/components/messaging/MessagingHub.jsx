@@ -21,6 +21,16 @@ import styles from "./MessagingHub.module.css";
 // open" state.
 export default function MessagingHub({ onThreadOpenChange }) {
   const { user } = useAuth();
+  // user.identityId comes from localStorage (readSession in authApi.js) and
+  // is always a STRING, while every identityId the backend sends over
+  // REST/WebSocket is a JSON number. Comparing them with === anywhere
+  // downstream (isOwn checks, delivery/read/typing matching) would always
+  // be false — every message would render as "received", on the wrong
+  // side, in the wrong color. Coercing once here, at the single place this
+  // value enters the messaging feature, is what fixes that for every
+  // consumer below.
+  const myIdentityId =
+    user?.identityId != null ? Number(user.identityId) : null;
   useMessagingConnection();
 
   const { conversations, loading, refresh } = useConversations();
@@ -81,7 +91,7 @@ export default function MessagingHub({ onThreadOpenChange }) {
           <ChatWindow
             key={active.id}
             conversation={active}
-            myIdentityId={user?.identityId}
+            myIdentityId={myIdentityId}
             onBack={handleBack}
             onConversationChanged={refresh}
           />

@@ -22,6 +22,7 @@ export default function MessageComposer({
 }) {
   const [text, setText] = useState(editingMessage?.body || "");
   const [showEmoji, setShowEmoji] = useState(false);
+  const [showAttachMenu, setShowAttachMenu] = useState(false);
   const [recording, setRecording] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
@@ -109,6 +110,7 @@ export default function MessageComposer({
 
   const handleFilePicked = async (file, kind) => {
     if (!file) return;
+    setShowAttachMenu(false);
     setUploading(true);
     setUploadError(null);
     try {
@@ -160,6 +162,7 @@ export default function MessageComposer({
   };
 
   const handleShareLocation = () => {
+    setShowAttachMenu(false);
     if (!navigator.geolocation) {
       setUploadError("Location isn't available on this device.");
       return;
@@ -215,6 +218,52 @@ export default function MessageComposer({
       {uploadError && <div className={styles.uploadError}>{uploadError}</div>}
 
       <div className={styles.inputRow}>
+        {!isEditing && (
+          <button
+            className={`${styles.iconBtn} ${showAttachMenu ? styles.iconBtnActive : ""}`}
+            onClick={() => setShowAttachMenu((v) => !v)}
+            title="Attach"
+            disabled={uploading}
+          >
+            <i className={showAttachMenu ? "ti ti-x" : "ti ti-plus"} />
+          </button>
+        )}
+
+        {showAttachMenu && (
+          <div
+            className={styles.attachMenuPanel}
+            onMouseLeave={() => setShowAttachMenu(false)}
+          >
+            <button onClick={() => imageInputRef.current?.click()}>
+              <span
+                className={styles.attachIconWrap}
+                style={{ background: "#8e44ad" }}
+              >
+                <i className="ti ti-photo" />
+              </span>
+              Photo
+            </button>
+            <button onClick={() => docInputRef.current?.click()}>
+              <span
+                className={styles.attachIconWrap}
+                style={{ background: "#2980b9" }}
+              >
+                <i className="ti ti-paperclip" />
+              </span>
+              Document
+            </button>
+            <button onClick={handleShareLocation}>
+              <span
+                className={styles.attachIconWrap}
+                style={{ background: "#27ae60" }}
+              >
+                <i className="ti ti-map-pin" />
+              </span>
+              Location
+            </button>
+          </div>
+        )}
+
         <button
           className={styles.iconBtn}
           onClick={() => setShowEmoji((v) => !v)}
@@ -236,30 +285,6 @@ export default function MessageComposer({
 
         {!isEditing && (
           <>
-            <button
-              className={styles.iconBtn}
-              onClick={() => imageInputRef.current?.click()}
-              title="Photo"
-              disabled={uploading}
-            >
-              <i className="ti ti-photo" />
-            </button>
-            <button
-              className={styles.iconBtn}
-              onClick={() => docInputRef.current?.click()}
-              title="Document"
-              disabled={uploading}
-            >
-              <i className="ti ti-paperclip" />
-            </button>
-            <button
-              className={styles.iconBtn}
-              onClick={handleShareLocation}
-              title="Location"
-              disabled={uploading}
-            >
-              <i className="ti ti-map-pin" />
-            </button>
             <input
               ref={imageInputRef}
               type="file"
