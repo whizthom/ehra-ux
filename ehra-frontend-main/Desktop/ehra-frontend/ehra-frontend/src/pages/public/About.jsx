@@ -272,18 +272,21 @@ export default function About() {
           <i className="ti ti-arrow-narrow-right" aria-hidden="true" />
         </a>
         <span className={`${styles.eyebrow} js-reveal`}>
-          Africa is building
+          FOR EVERY BUSINESS
         </span>
         <h1 className={`${styles.h1} js-reveal`}>
-          Africa is building.
+          Every business starts small.
           <br />
-          <span className={styles.h1Accent}>We&rsquo;re building with it.</span>
+          <span className={styles.h1Accent}>
+            The right tools shouldn&rsquo;nt come later.
+          </span>
         </h1>
         <p className={styles.heroDesc}>
-          Every day, businesses across Africa begin with an idea, a few people
-          and the determination to make something work. Ehral exists to help
-          those businesses grow — by bringing their people, operations and
-          relationships into one connected platform.
+          Most business software is built for companies that have already grown.
+          Ehral was built differently, to give growing businesses access to the
+          tools they need from the very beginning — Manage your people,
+          streamline daily operations, and grow with confidence using one
+          simple,connected platform.
         </p>
         <div className={styles.heroCtas}>
           <Link to="/" className={styles.btnGold}>
@@ -325,14 +328,15 @@ export default function About() {
         </div>
         <div className={styles.storyText}>
           <p className={styles.lead}>
-            Ehral started with a simple observation: businesses can grow faster
-            than the systems around them.
+            Ehral started with a question: Why should business have to become
+            big before it gets access to the tools that can help it grow?
           </p>
           <p className={styles.lead}>
-            A business begins with a few people and a simple way of doing
-            things. Then it grows — more employees, more responsibilities, more
-            decisions, more information to keep track of. And the simple systems
-            that worked at the start begin to strain.
+            A business can begin with a few people and a simple way of working,
+            and a lot of ambition. But as it grows, everything around it grows
+            too — more employees, more responsibilities, more decisions, more
+            information to keep track of. And the simple systems that worked at
+            the start begin to strain.
           </p>
           <p className={styles.lead}>
             Employee information ends up in spreadsheets. Attendance lives in a
@@ -351,6 +355,10 @@ export default function About() {
             is today, and grow with it tomorrow.
           </p>
           <p className={styles.lead}>
+            That is why we built Ehral — to give businesses the systems they
+            need to grow, from
+          </p>
+          <p className={styles.lead}>
             We started with the workforce, because people are at the heart of
             every business. That is where Ehral begins — but it doesn&rsquo;t
             have to end there. Over time, we believe Ehral can connect
@@ -358,8 +366,16 @@ export default function About() {
             growing ecosystem.
           </p>
           <p className={`${styles.storyPullQuote} js-reveal`}>
-            Today, we&rsquo;re focused on helping businesses manage their people
-            and operations better. Tomorrow, we want to help them connect.
+            But our ambition goes beyond workforce management.
+          </p>
+          <p className={styles.lead}>
+            Over time, we want Ehral to become a broader business ecosystem —
+            connecting businesses,employees, customers and other businesses
+            through one growing platform.
+          </p>
+          <p className={`${styles.storyPullQuote} js-reveal`}>
+            Today, we help businesses run better. Tomorrow, we want to help them
+            connect.
           </p>
         </div>
         <div className={styles.storyVisual}>
