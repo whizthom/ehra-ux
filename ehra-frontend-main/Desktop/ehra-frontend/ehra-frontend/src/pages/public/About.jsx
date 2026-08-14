@@ -8,6 +8,7 @@ import DashboardPreview from "../../components/about/DashboardPreview";
 import MobileProductPreview from "../../components/about/MobileProductPreview";
 import FeatureVisual from "../../components/about/FeatureVisual";
 import WorkflowDiagram from "../../components/about/WorkflowDiagram";
+import OrbitAnimation from "../../components/about/OrbitAnimation";
 import QRCodeAttendanceDemo from "../../components/about/QRCodeAttendanceDemo";
 import LeaveWorkflow from "../../components/about/LeaveWorkflow";
 import EcosystemDiagram from "../../components/about/EcosystemDiagram";
@@ -330,64 +331,72 @@ export default function About() {
            underneath in a single editorial column with a "spine" rail
            and the two key lines pulled out as standalone statements. ── */}
       <section className={styles.storySection} id="story">
-        <div className={styles.storyHeader}>
-          <span className={`${styles.eyebrowDark} js-reveal`}>Our story</span>
-          <h2 className={`${styles.h2} js-reveal`}>The story behind Ehral.</h2>
+        <div className={styles.storyLeft}>
+          <div className={styles.storyHeader}>
+            <span className={`${styles.eyebrowDark} js-reveal`}>Our story</span>
+            <h2 className={`${styles.h2} js-reveal`}>
+              The story behind Ehral.
+            </h2>
+          </div>
+          <div className={styles.storyText}>
+            <p className={styles.lead}>
+              Ehral started with a question: Why should business have to become
+              big before it gets access to the tools that can help it grow?
+            </p>
+            <p className={styles.lead}>
+              A business can begin with a few people and a simple way of
+              working, and a lot of ambition. But as it grows, everything around
+              it grows too — more employees, more responsibilities, more
+              decisions, more information to keep track of. And the simple
+              systems that worked at the start begin to strain.
+            </p>
+            <p className={styles.lead}>
+              Employee information ends up in spreadsheets. Attendance lives in
+              a notebook. Leave requests happen over WhatsApp. Announcements
+              disappear inside group chats. The owner becomes the person holding
+              it all together.
+            </p>
+            <p className={`${styles.storyPullQuote} js-reveal`}>
+              The business is growing. But the systems supporting it are
+              struggling to grow with it.
+            </p>
+            <p className={styles.lead}>
+              Ehral was created around a simple belief: businesses
+              shouldn&rsquo;t have to become large before they can have the
+              right systems around them. We wanted to build something that could
+              start where a business is today, and grow with it tomorrow.
+            </p>
+            <p className={styles.lead}>
+              That is why we built Ehral — to give businesses the systems they
+              need to grow, without having to wait until they are already big.
+            </p>
+            <p className={styles.lead}>
+              We started with the workforce, because people are at the heart of
+              every business. That is where Ehral begins — but it doesn&rsquo;t
+              have to end there. Over time, we believe Ehral can connect
+              businesses, employees and customers through one identity and one
+              growing ecosystem.
+            </p>
+            <p className={`${styles.storyPullQuote} js-reveal`}>
+              But our ambition goes beyond workforce management.
+            </p>
+            <p className={styles.lead}>
+              Over time, we want Ehral to become a broader business ecosystem —
+              connecting businesses,employees, customers and other businesses
+              through one growing platform.
+            </p>
+            <p className={`${styles.storyPullQuote} js-reveal`}>
+              Today, we help businesses run better. Tomorrow, we want to help
+              them connect.
+            </p>
+          </div>
         </div>
-        <div className={styles.storyText}>
-          <p className={styles.lead}>
-            Ehral started with a question: Why should business have to become
-            big before it gets access to the tools that can help it grow?
-          </p>
-          <p className={styles.lead}>
-            A business can begin with a few people and a simple way of working,
-            and a lot of ambition. But as it grows, everything around it grows
-            too — more employees, more responsibilities, more decisions, more
-            information to keep track of. And the simple systems that worked at
-            the start begin to strain.
-          </p>
-          <p className={styles.lead}>
-            Employee information ends up in spreadsheets. Attendance lives in a
-            notebook. Leave requests happen over WhatsApp. Announcements
-            disappear inside group chats. The owner becomes the person holding
-            it all together.
-          </p>
-          <p className={`${styles.storyPullQuote} js-reveal`}>
-            The business is growing. But the systems supporting it are
-            struggling to grow with it.
-          </p>
-          <p className={styles.lead}>
-            Ehral was created around a simple belief: businesses shouldn&rsquo;t
-            have to become large before they can have the right systems around
-            them. We wanted to build something that could start where a business
-            is today, and grow with it tomorrow.
-          </p>
-          <p className={styles.lead}>
-            That is why we built Ehral — to give businesses the systems they
-            need to grow, without having to wait until they are already big.
-          </p>
-          <p className={styles.lead}>
-            We started with the workforce, because people are at the heart of
-            every business. That is where Ehral begins — but it doesn&rsquo;t
-            have to end there. Over time, we believe Ehral can connect
-            businesses, employees and customers through one identity and one
-            growing ecosystem.
-          </p>
-          <p className={`${styles.storyPullQuote} js-reveal`}>
-            But our ambition goes beyond workforce management.
-          </p>
-          <p className={styles.lead}>
-            Over time, we want Ehral to become a broader business ecosystem —
-            connecting businesses,employees, customers and other businesses
-            through one growing platform.
-          </p>
-          <p className={`${styles.storyPullQuote} js-reveal`}>
-            Today, we help businesses run better. Tomorrow, we want to help them
-            connect.
-          </p>
-        </div>
+      </section>
+
+      {/* ── Story animation — separate section beneath the story text ── */}
+      <section className={styles.storyAnimationSection} aria-hidden="true">
         <div className={styles.storyVisual}>
-          <WorkflowDiagram endGlow steps={STORY_STEPS} />
+          <OrbitAnimation />
         </div>
       </section>
 

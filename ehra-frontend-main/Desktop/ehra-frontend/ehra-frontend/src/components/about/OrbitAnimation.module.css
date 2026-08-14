@@ -1,0 +1,45 @@
+.stage{display:flex;align-items:center;justify-content:center;padding:12px;min-height:100%}
+.orbitWrap{display:flex;align-items:center;justify-content:center;width:100%;min-height:500px}
+.orbitContainer{position:relative;width:100%;max-width:720px;height:480px;margin:0 auto;display:flex;align-items:center;justify-content:center;align-self:center}
+.center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:6}
+.orbit{position:absolute;inset:0;display:block;pointer-events:none;animation:spin 12s linear infinite}
+.orbitRing{position:absolute;left:50%;top:50%;width:360px;height:360px;border-radius:9999px;transform:translate(-50%,-50%);border:2px dashed rgba(11,31,26,0.06);z-index:4}
+.orbitItem{position:absolute;left:50%;top:50%;width:0;height:0;transform:translate(-50%,-50%) rotate(var(--angle)) translateX(var(--r));transform-origin:center center}
+.orbitItem .node{position:absolute;left:0;top:0;transform:translate(-50%,-50%);}
+.orbitItem .nodeDot{width:56px;height:56px;border-radius:999px;background:var(--accent);box-shadow:0 14px 36px rgba(11,31,26,0.12);display:flex;align-items:center;justify-content:center;color:#12322d;border:1px solid rgba(18,50,45,0.08)}
+.orbitItem .nodeIcon{width:22px;height:22px;display:block}
+.orbitItem .nodeLabel{position:absolute;top:66px;left:50%;transform:translateX(-50%);font-size:13px;color:var(--text-secondary);white-space:nowrap}
+/* visually-hidden for screen readers */
+.srOnly{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* all nodes share the same exact radius and walk the same circle */
+.orbitItem{--r:180px}
+
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+/* subtle pulsing for dots */
+.orbitItem .nodeDot{animation:pulse 3.6s ease-in-out infinite}
+@keyframes pulse{0%{transform:scale(0.98)}50%{transform:scale(1.04)}100%{transform:scale(0.98)}}
+
+/* respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .orbitItem{animation:none}
+  .orbitItem .nodeDot{animation:none}
+}
+
+/* hover/ focus emphasis for accessibility */
+.orbitItem .node{transition:transform 220ms ease, filter 220ms ease}
+.orbitItem:hover .node, .orbitItem:focus-within .node{transform:scale(1.06)}
+
+@media (min-width: 1024px){
+  .orbitWrap{justify-content:center;align-items:center}
+  .orbitContainer{margin:0 auto}
+}
+
+@media (max-width:640px){
+  .stage{padding:0}
+  .orbitWrap{display:flex;align-items:center;justify-content:center}
+  .orbitContainer{max-width:320px;height:260px}
+  .orbitItem .nodeDot{width:40px;height:40px}
+  .orbitItem .nodeIcon{width:18px;height:18px}
+}
