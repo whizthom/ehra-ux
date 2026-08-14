@@ -1,25 +1,19 @@
+import styles from "./ReactionPicker.module.css";
+
+const QUICK_REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
+
 export default function ReactionPicker({ onPick, onClose }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        gap: 6,
-        padding: 6,
-        background: "var(--bg-card,#fff)",
-        borderRadius: 8,
-      }}
-    >
-      {["👍", "❤️", "👏", "😂", "😮"].map((e) => (
+    <div className={styles.wrap} onMouseLeave={onClose}>
+      {QUICK_REACTIONS.map((emoji) => (
         <button
-          key={e}
-          onClick={() => {
-            onPick(e);
-          }}
+          key={emoji}
+          className={styles.emojiBtn}
+          onClick={() => onPick(emoji)}
         >
-          {e}
+          {emoji}
         </button>
       ))}
-      <button onClick={onClose}>x</button>
     </div>
   );
 }

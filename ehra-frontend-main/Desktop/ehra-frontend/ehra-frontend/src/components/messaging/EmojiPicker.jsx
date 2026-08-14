@@ -1,15 +1,48 @@
-export default function EmojiPicker({ onSelect }) {
+import styles from "./MessageComposer.module.css";
+
+const EMOJI_GRID = [
+  "😀",
+  "😁",
+  "😂",
+  "🤣",
+  "😊",
+  "😍",
+  "😘",
+  "😉",
+  "😎",
+  "🤔",
+  "😢",
+  "😭",
+  "😡",
+  "😱",
+  "🙏",
+  "👍",
+  "👎",
+  "👏",
+  "🙌",
+  "💪",
+  "❤️",
+  "🎉",
+  "🔥",
+  "✅",
+  "❌",
+  "⚠️",
+  "📌",
+  "📎",
+  "💯",
+  "🤝",
+];
+
+export default function EmojiPicker({ onPick, onClose }) {
   return (
-    <div style={{ padding: 8 }}>
-      <button type="button" onClick={() => onSelect("👍")}>
-        👍
-      </button>
-      <button type="button" onClick={() => onSelect("😂")}>
-        😂
-      </button>
-      <button type="button" onClick={() => onSelect("🎉")}>
-        🎉
-      </button>
+    <div className={styles.emojiPickerPanel} onMouseLeave={onClose}>
+      <div className={styles.emojiGrid}>
+        {EMOJI_GRID.map((e) => (
+          <button key={e} type="button" onClick={() => onPick(e)}>
+            {e}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

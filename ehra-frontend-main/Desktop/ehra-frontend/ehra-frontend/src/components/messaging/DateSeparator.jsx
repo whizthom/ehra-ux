@@ -1,14 +1,10 @@
-export default function DateSeparator({ label }) {
+import styles from "./ChatWindow.module.css";
+import { formatDayLabel } from "../../utils/messagingFormat";
+
+export default function DateSeparator({ date }) {
   return (
-    <div
-      style={{
-        textAlign: "center",
-        margin: "18px 0",
-        color: "var(--text-secondary,#6f8b81)",
-        fontSize: 12,
-      }}
-    >
-      {label}
+    <div className={styles.dateSeparator}>
+      <span>{formatDayLabel(date)}</span>
     </div>
   );
 }

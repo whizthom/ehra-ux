@@ -1,19 +1,33 @@
 import styles from "./Avatar.module.css";
 
-export default function Avatar({ name, src, size = 40 }) {
-  const initials = name
-    ? name
-        .split(" ")
-        .map((n) => n[0])
-        .slice(0, 2)
-        .join("")
-    : "U";
+function initialsOf(name) {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  const first = parts[0]?.[0] || "";
+  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
+  return (first + last).toUpperCase();
+}
+
+export default function Avatar({
+  name,
+  src,
+  size = 44,
+  online,
+  showPresence = false,
+}) {
   return (
-    <div className={styles.avatar} style={{ width: size, height: size }}>
+    <div className={styles.wrap} style={{ width: size, height: size }}>
       {src ? (
-        <img src={src} alt={name || "avatar"} className={styles.img} />
+        <img src={src} alt="" className={styles.img} />
       ) : (
-        <span className={styles.initials}>{initials}</span>
+        <div className={styles.fallback} style={{ fontSize: size * 0.4 }}>
+          {initialsOf(name)}
+        </div>
+      )}
+      {showPresence && (
+        <span
+          className={`${styles.presenceDot} ${online ? styles.online : styles.offline}`}
+        />
       )}
     </div>
   );
