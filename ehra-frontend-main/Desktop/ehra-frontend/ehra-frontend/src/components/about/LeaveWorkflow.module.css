@@ -1,9 +1,11 @@
 .lane {
     display: flex;
     align-items: flex-start;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 8px;
     flex-wrap: wrap;
+    max-width: 980px;
+    margin: 0;
 }
 
 .stop {

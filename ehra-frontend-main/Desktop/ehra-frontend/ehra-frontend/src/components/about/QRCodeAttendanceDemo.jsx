@@ -7,6 +7,12 @@ const CELLS = Array.from({ length: 64 }, (_, i) => {
   return n > 46;
 });
 
+const STATS = [
+  { value: "< 3 sec", label: "Average check-in time" },
+  { value: "100%", label: "Digital, no paper trail" },
+  { value: "Optional", label: "GPS location verification" },
+];
+
 const STEPS = [
   {
     icon: "ti-device-tv",
@@ -67,6 +73,15 @@ export default function QRCodeAttendanceDemo() {
             {i < STEPS.length - 1 && (
               <span className={styles.flowLine} aria-hidden="true" />
             )}
+          </div>
+        ))}
+      </div>
+
+      <div className={styles.statsRow}>
+        {STATS.map((stat) => (
+          <div className={styles.statCell} key={stat.label}>
+            <span className={styles.statValue}>{stat.value}</span>
+            <span className={styles.statLabel}>{stat.label}</span>
           </div>
         ))}
       </div>

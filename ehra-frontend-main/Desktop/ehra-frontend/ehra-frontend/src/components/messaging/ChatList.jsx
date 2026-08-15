@@ -12,6 +12,8 @@ const TABS = [
 export default function ChatList({
   conversations,
   loading,
+  error,
+  onRetry,
   activeId,
   onSelect,
   onNewGroup,
@@ -95,7 +97,18 @@ export default function ChatList({
       )}
 
       <div className={styles.list}>
-        {loading ? (
+        {error && conversations.length === 0 ? (
+          <div className={styles.errorState}>
+            <i className="ti ti-alert-triangle" />
+            <p>
+              {error?.response?.status === 403 ||
+              error?.response?.status === 401
+                ? "Couldn't load conversations — your session may need refreshing."
+                : "Couldn't load conversations. Check your connection and try again."}
+            </p>
+            <button onClick={onRetry}>Retry</button>
+          </div>
+        ) : loading ? (
           <div className={styles.loadingState}>Loading conversations…</div>
         ) : filtered.length === 0 ? (
           <div className={styles.emptyState}>{emptyMessage()}</div>

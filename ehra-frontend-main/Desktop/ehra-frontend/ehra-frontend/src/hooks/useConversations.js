@@ -24,6 +24,11 @@ export default function useConversations() {
   const cachedInitial = getCachedConversationsSync();
   const [conversations, setConversations] = useState(cachedInitial || []);
   const [loading, setLoading] = useState(!cachedInitial);
+  // Surfaced so the UI can tell "genuinely zero conversations" apart from
+  // "the request failed and we just don't know yet" — before this, any
+  // error here (401/403 from a stale token, a 500, a network blip) was
+  // swallowed silently and looked identical to an empty list.
+  const [error, setError] = useState(null);
   const conversationsRef = useRef(conversations);
   conversationsRef.current = conversations;
 
@@ -42,7 +47,12 @@ export default function useConversations() {
     if (conversationsRef.current.length === 0) setLoading(true);
     try {
       const { data } = await listConversations();
+      setError(null);
       sortAndSet(data);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("[messaging] Failed to load conversations:", err?.response?.status, err?.response?.data || err);
+      setError(err);
     } finally {
       setLoading(false);
     }
@@ -111,5 +121,5 @@ export default function useConversations() {
     return unsubscribe;
   }, [sortAndSet]);
 
-  return { conversations, loading, refresh };
+  return { conversations, loading, error, refresh };
 }

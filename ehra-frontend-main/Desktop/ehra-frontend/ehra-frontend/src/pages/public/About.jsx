@@ -697,18 +697,27 @@ export default function About() {
 
       {/* ── 12. Founder story — a face, not the hero ── */}
       <section className={styles.founderSection} id="founder">
-        <div className={styles.founderPortrait}>
-          <img
-            src={founderPhoto}
-            alt="Emmanuel Oluwabamise, Founder of Ehral Systems"
-            className={styles.founderImage}
-          />
+        <span className={styles.founderQuoteMark} aria-hidden="true">
+          &rdquo;
+        </span>
+        <div className={`${styles.founderPortrait} js-reveal`}>
+          <div className={styles.founderImageFrame}>
+            <img
+              src={founderPhoto}
+              alt="Emmanuel Oluwabamise, Founder of Ehral Systems"
+              className={styles.founderImage}
+            />
+            <span className={styles.founderBadge}>
+              <i className="ti ti-hexagon-letter-e" aria-hidden="true" />
+              Founder
+            </span>
+          </div>
         </div>
         <div className={styles.founderText}>
           <span className={`${styles.eyebrowDark} js-reveal`}>
             Why I started Ehral
           </span>
-          <h2 className={`${styles.h2} js-reveal`}>
+          <h2 className={`${styles.h2} ${styles.founderQuote} js-reveal`}>
             &ldquo;I kept seeing the same challenge.&rdquo;
           </h2>
           <p className={styles.lead}>
@@ -731,8 +740,13 @@ export default function About() {
             customers connect within one ecosystem.
           </p>
           <div className={styles.founderSignature}>
-            <strong>Emmanuel Oluwabamise</strong>
-            <span>Founder, Ehral Systems</span>
+            <span className={styles.founderInitials} aria-hidden="true">
+              EO
+            </span>
+            <div className={styles.founderSignatureText}>
+              <strong>Emmanuel Oluwabamise</strong>
+              <span>Founder, Ehral Systems</span>
+            </div>
           </div>
         </div>
       </section>
@@ -793,9 +807,14 @@ export default function About() {
         <div className={styles.whyGrid}>
           {WHY_POINTS.map((p, i) => (
             <div className={`${styles.whyCell} js-reveal`} key={p.title}>
-              <span className={styles.whyNum}>
-                {String(i + 1).padStart(2, "0")}
-              </span>
+              <div className={styles.whyCellTop}>
+                <span className={styles.whyIcon}>
+                  <i className={`ti ${p.icon}`} aria-hidden="true" />
+                </span>
+                <span className={styles.whyNum}>
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+              </div>
               <h3 className={styles.whyTitle}>{p.title}</h3>
               <p className={styles.whyDesc}>{p.description}</p>
             </div>
@@ -831,7 +850,7 @@ export default function About() {
       <footer className={styles.footer}>
         <div className={styles.footerTop}>
           <div className={styles.footerBrand}>
-            <Logo variant="horizontal" size={36} />
+            <Logo variant="horizontal" size={36} tone="sidebar" />
             <p>
               Powerful enough for where you're going. Simple enough for where
               you are.
@@ -848,6 +867,20 @@ export default function About() {
                 ))}
               </div>
             ))}
+            <div className={styles.footerCol}>
+              <span className={styles.footerColHeading}>Contact</span>
+              <a
+                href="mailto:contact@ehralsystems"
+                className={styles.footerContactLink}
+              >
+                <i className="ti ti-mail" aria-hidden="true" />
+                contact@ehralsystems
+              </a>
+              <a href="tel:+2349077746757" className={styles.footerContactLink}>
+                <i className="ti ti-phone" aria-hidden="true" />
+                0907 774 6757
+              </a>
+            </div>
           </div>
         </div>
         <div className={styles.footerBottom}>

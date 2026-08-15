@@ -33,7 +33,7 @@ export default function MessagingHub({ onThreadOpenChange }) {
     user?.identityId != null ? Number(user.identityId) : null;
   useMessagingConnection();
 
-  const { conversations, loading, refresh } = useConversations();
+  const { conversations, loading, error, refresh } = useConversations();
   const [activeId, setActiveId] = useState(null);
   const [showNewChat, setShowNewChat] = useState(false);
   const [mobileShowList, setMobileShowList] = useState(true);
@@ -75,6 +75,8 @@ export default function MessagingHub({ onThreadOpenChange }) {
         <ChatList
           conversations={conversations}
           loading={loading}
+          error={error}
+          onRetry={refresh}
           activeId={activeId}
           onSelect={handleSelect}
           onNewGroup={() => setShowNewChat(true)}
