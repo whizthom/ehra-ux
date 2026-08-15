@@ -14,9 +14,10 @@ export default function FeatureVisual({
   title,
   description,
   status = "today",
+  className = "",
 }) {
   return (
-    <div className={styles.card}>
+    <div className={`${styles.card} ${className}`.trim()}>
       <div className={styles.iconWrap}>
         <i className={`ti ${icon}`} aria-hidden="true" />
       </div>

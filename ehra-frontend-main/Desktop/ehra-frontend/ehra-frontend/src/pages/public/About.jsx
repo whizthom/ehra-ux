@@ -428,7 +428,9 @@ export default function About() {
             </Link>
           </div>
           <div className={styles.growVisual}>
-            <OrbitAnimation />
+            <div className="js-reveal">
+              <OrbitAnimation />
+            </div>
           </div>
         </div>
       </section>
@@ -590,7 +592,9 @@ export default function About() {
         </p>
         <div className={styles.grid3}>
           {WORKFORCE_FEATURES.map((f) => (
-            <FeatureVisual key={f.title} {...f} status={undefined} />
+            <div className="js-reveal" key={f.title}>
+              <FeatureVisual {...f} status={undefined} />
+            </div>
           ))}
         </div>
       </section>
@@ -609,7 +613,9 @@ export default function About() {
           location verification, giving employees a simple way to clock in while
           giving managers a clear view of attendance.
         </p>
-        <QRCodeAttendanceDemo />
+        <div className="js-reveal">
+          <QRCodeAttendanceDemo />
+        </div>
       </section>
 
       {/* ── 8. Leave management ── */}
@@ -626,7 +632,9 @@ export default function About() {
           managers a structured process to review, approve, and keep track of
           it.
         </p>
-        <LeaveWorkflow />
+        <div className="js-reveal">
+          <LeaveWorkflow />
+        </div>
       </section>
 
       {/* ── 9. Business management ── */}
@@ -643,7 +651,9 @@ export default function About() {
         </p>
         <div className={styles.grid3}>
           {BUSINESS_FEATURES.map((f) => (
-            <FeatureVisual key={f.title} {...f} status={f.status} />
+            <div className="js-reveal" key={f.title}>
+              <FeatureVisual {...f} status={f.status} />
+            </div>
           ))}
         </div>
       </section>
@@ -663,14 +673,26 @@ export default function About() {
         <DeviceFrame
           variant="browser"
           label="app.ehral.com/reports"
-          className={styles.centerFrame}
+          className={`${styles.centerFrame} js-reveal`}
         >
           <DashboardPreview screen="reports" liveData={liveData} />
         </DeviceFrame>
         <div className={styles.phoneRow}>
-          <MobileProductPreview screen="attendance" liveData={liveData} />
-          <MobileProductPreview screen="leave" liveData={liveData} />
-          <MobileProductPreview screen="chat" liveData={liveData} />
+          <MobileProductPreview
+            screen="attendance"
+            liveData={liveData}
+            className="js-reveal"
+          />
+          <MobileProductPreview
+            screen="leave"
+            liveData={liveData}
+            className="js-reveal"
+          />
+          <MobileProductPreview
+            screen="chat"
+            liveData={liveData}
+            className="js-reveal"
+          />
         </div>
       </section>
 
@@ -734,26 +756,34 @@ export default function About() {
           We envision a future where businesses, employees and customers can
           discover, connect and interact through one connected ecosystem.
         </p>
-        <EcosystemDiagram />
+        <div className="js-reveal">
+          <EcosystemDiagram />
+        </div>
         <div className={styles.visionGrid}>
-          <FeatureVisual
-            icon="ti-map"
-            title="Business discovery"
-            description="Businesses finding one another, and being found."
-            status="vision"
-          />
-          <FeatureVisual
-            icon="ti-cash"
-            title="Payments"
-            description="Customers interacting financially with the businesses they use."
-            status="vision"
-          />
-          <FeatureVisual
-            icon="ti-affiliate"
-            title="Business-to-business"
-            description="Businesses connecting, communicating and collaborating."
-            status="vision"
-          />
+          <div className="js-reveal">
+            <FeatureVisual
+              icon="ti-map"
+              title="Business discovery"
+              description="Businesses finding one another, and being found."
+              status="vision"
+            />
+          </div>
+          <div className="js-reveal">
+            <FeatureVisual
+              icon="ti-cash"
+              title="Payments"
+              description="Customers interacting financially with the businesses they use."
+              status="vision"
+            />
+          </div>
+          <div className="js-reveal">
+            <FeatureVisual
+              icon="ti-affiliate"
+              title="Business-to-business"
+              description="Businesses connecting, communicating and collaborating."
+              status="vision"
+            />
+          </div>
         </div>
         <p className={styles.visionNote}>
           Some of these capabilities are part of our long-term vision and are
@@ -789,7 +819,9 @@ export default function About() {
       {/* ── 17. Final CTA — mission, not a feature pitch ── */}
       <section className={styles.section}>
         <div className={styles.ctaBanner}>
-          <span className={`${styles.tagVisionLight} js-reveal`}>
+          <span
+            className={`${styles.tagVisionLight} ${styles.ctaTag} js-reveal`}
+          >
             Every great business starts somewhere
           </span>
           <h2 className={`${styles.h2Light} js-reveal`}>
@@ -799,7 +831,7 @@ export default function About() {
               Give it the systems to grow with it.
             </span>
           </h2>
-          <div className={styles.heroCtas}>
+          <div className={`${styles.heroCtas} ${styles.ctaBannerCtas}`}>
             <Link to="/" className={styles.btnGold}>
               Get started with Ehral
               <i className="ti ti-arrow-narrow-right" aria-hidden="true" />
