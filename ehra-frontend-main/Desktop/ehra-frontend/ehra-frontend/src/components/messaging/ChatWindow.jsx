@@ -41,9 +41,32 @@ export default function ChatWindow({
   const prevScrollHeightRef = useRef(0);
 
   const isGroup = conversation.type === "GROUP";
-  const other = !isGroup ? conversation.participants?.[0] : null;
+  const isAnnouncement = conversation.type === "ANNOUNCEMENT";
+  // Both GROUP and ANNOUNCEMENT have more than one possible sender, so
+  // bubbles need the sender-name label and the header needs a member
+  // count instead of a single person's presence — GroupInfoModal
+  // (membership management) stays GROUP-only, since "leave"/"remove
+  // member" don't really make sense for a company-wide channel everyone's
+  // auto-enrolled in.
+  const isMultiParty = isGroup || isAnnouncement;
+  const other = !isMultiParty ? conversation.participants?.[0] : null;
 
-  const groupMembers = isGroup ? conversation.participants : undefined;
+  const groupMembers = isMultiParty ? conversation.participants : undefined;
+
+  const myParticipant = conversation.participants?.find(
+    (p) => p.identityId === myIdentityId,
+  );
+  // Mirrors the backend's actual rule (MsgMessagingServiceImpl#sendMessage
+  // checks the caller's MsgConversationMember role, ADMIN-only for
+  // ANNOUNCEMENT) via the same signal already available client-side: an
+  // Employer/HOD's org-level roleLabel. This is a UI convenience, not the
+  // enforcement — the server rejects the POST regardless of what this
+  // computes, so getting it wrong here can only ever over-hide the
+  // composer, never let someone post who isn't allowed to.
+  const canPostHere =
+    !isAnnouncement ||
+    myParticipant?.roleLabel === "Employer" ||
+    Boolean(myParticipant?.roleLabel?.startsWith("HOD"));
 
   // Auto-scroll to bottom on first load and on new messages, but only if
   // the person was already near the bottom — never yank them away from
@@ -115,18 +138,24 @@ export default function ChatWindow({
           onClick={() => isGroup && setShowGroupInfo(true)}
           disabled={!isGroup}
         >
-          <Avatar
-            name={conversation.name}
-            src={conversation.avatarUrl}
-            showPresence={!isGroup}
-            online={conversation.online}
-          />
+          {isAnnouncement ? (
+            <div className={styles.announcementAvatar}>
+              <i className="ti ti-speakerphone" />
+            </div>
+          ) : (
+            <Avatar
+              name={conversation.name}
+              src={conversation.avatarUrl}
+              showPresence={!isMultiParty}
+              online={conversation.online}
+            />
+          )}
           <div className={styles.headerText}>
             <span className={styles.headerName}>{conversation.name}</span>
             <span className={styles.headerStatus}>
               {typingUsers.length > 0
                 ? "typing…"
-                : isGroup
+                : isMultiParty
                   ? `${conversation.participants?.length || 0} members`
                   : conversation.online
                     ? "Online"
@@ -172,7 +201,7 @@ export default function ChatWindow({
                 <MessageBubble
                   message={item.message}
                   isOwn={item.message.senderIdentityId === myIdentityId}
-                  isGroup={isGroup}
+                  isGroup={isMultiParty}
                   canDeleteForEveryone={
                     item.message.senderIdentityId === myIdentityId ||
                     conversation.participants?.find(
@@ -198,20 +227,27 @@ export default function ChatWindow({
 
       <TypingIndicator users={typingUsers} />
 
-      <MessageComposer
-        replyTo={replyTo}
-        onCancelReply={() => setReplyTo(null)}
-        onSend={handleSend}
-        onTypingKeystroke={onKeystroke}
-        onStopTyping={stopTyping}
-        groupMembers={groupMembers}
-        editingMessage={editingMessage}
-        onCancelEdit={() => setEditingMessage(null)}
-        onSaveEdit={async (id, body) => {
-          await edit(id, body);
-          setEditingMessage(null);
-        }}
-      />
+      {canPostHere ? (
+        <MessageComposer
+          replyTo={replyTo}
+          onCancelReply={() => setReplyTo(null)}
+          onSend={handleSend}
+          onTypingKeystroke={onKeystroke}
+          onStopTyping={stopTyping}
+          groupMembers={groupMembers}
+          editingMessage={editingMessage}
+          onCancelEdit={() => setEditingMessage(null)}
+          onSaveEdit={async (id, body) => {
+            await edit(id, body);
+            setEditingMessage(null);
+          }}
+        />
+      ) : (
+        <div className={styles.readOnlyBar}>
+          <i className="ti ti-lock" />
+          Only Employers and HODs can post to Announcements
+        </div>
+      )}
 
       {showGroupInfo && (
         <GroupInfoModal

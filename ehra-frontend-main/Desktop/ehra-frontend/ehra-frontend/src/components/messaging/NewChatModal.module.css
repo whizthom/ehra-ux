@@ -124,10 +124,17 @@
 
 .footer {
     display: flex;
-    justify-content: flex-end;
+    align-items: center;
+    justify-content: space-between;
     gap: 10px;
     padding: 12px 16px;
     border-top: 0.5px solid var(--border-color);
+}
+
+.selectionHint {
+    font-size: 12px;
+    color: var(--text-secondary);
+    flex: 1;
 }
 
 .cancelBtn {

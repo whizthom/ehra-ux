@@ -7,10 +7,22 @@ import styles from "./WorkflowDiagram.module.css";
  * sequence (the "scattered tools → one platform" transformation, the
  * "today → tomorrow" vision shift) without needing a bespoke diagram
  * component for each one.
+ *
+ * Pass `reverseResponsive` to flip that behavior instead — vertical on
+ * desktop/large screens, horizontal on mobile/tablet — for spots (like
+ * a narrow side column) where a tall stack reads better on wide screens
+ * than a wrapped horizontal row.
  */
-export default function WorkflowDiagram({ steps, endGlow = false }) {
+export default function WorkflowDiagram({
+  steps,
+  endGlow = false,
+  reverseResponsive = false,
+  className = "",
+}) {
   return (
-    <div className={styles.row}>
+    <div
+      className={`${styles.row} ${reverseResponsive ? styles.reversedRow : ""} ${className}`}
+    >
       {steps.map((step, i) => (
         <div className={styles.stepWrap} key={step.label}>
           <div

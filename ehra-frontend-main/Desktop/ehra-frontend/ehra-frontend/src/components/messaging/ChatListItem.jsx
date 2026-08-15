@@ -9,7 +9,8 @@ export default function ChatListItem({
   onLongAction,
 }) {
   const isDirect = conversation.type === "DIRECT";
-  const other = conversation.participants?.[0];
+  const isAnnouncement = conversation.type === "ANNOUNCEMENT";
+  const isGroup = conversation.type === "GROUP";
   const online = isDirect ? conversation.online : false;
 
   const preview = conversation.lastMessagePreview || "No messages yet";
@@ -23,17 +24,29 @@ export default function ChatListItem({
         onLongAction?.(e);
       }}
     >
-      <Avatar
-        name={conversation.name}
-        src={conversation.avatarUrl}
-        showPresence={isDirect}
-        online={online}
-      />
+      {isAnnouncement ? (
+        <div className={styles.announcementIcon}>
+          <i className="ti ti-speakerphone" />
+        </div>
+      ) : (
+        <Avatar
+          name={conversation.name}
+          src={conversation.avatarUrl}
+          showPresence={isDirect}
+          online={online}
+        />
+      )}
       <div className={styles.rowBody}>
         <div className={styles.rowTop}>
           <span className={styles.rowName}>
             {conversation.pinned && (
               <i className="ti ti-pin" style={{ marginRight: 4 }} />
+            )}
+            {isGroup && (
+              <i
+                className="ti ti-users-group"
+                style={{ marginRight: 4, fontSize: 13 }}
+              />
             )}
             {conversation.name}
           </span>

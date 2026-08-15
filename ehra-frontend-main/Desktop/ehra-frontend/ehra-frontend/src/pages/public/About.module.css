@@ -243,7 +243,7 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 110px 24px 54px;
+    padding: 110px 48px 54px;
     background: #0b1f1a;
     background-image: radial-gradient(circle at 15% 10%, rgba(85, 224, 174, 0.16), transparent 45%),
         radial-gradient(circle at 90% 85%, rgba(198, 161, 91, 0.14), transparent 45%);
@@ -403,8 +403,8 @@
     grid-template-columns: minmax(0, 1.1fr) minmax(420px, 520px);
     gap: 42px;
     align-items: center;
-    width: min(1280px, calc(100% - 96px));
-    margin: 0 auto;
+    width: 100%;
+    margin: 0;
 }
 
 .heroContent {
@@ -425,9 +425,9 @@
 
 .heroFooter {
     text-align: left;
-    margin: 24px auto 0;
-    max-width: 1280px;
-    width: min(1280px, calc(100% - 96px));
+    margin: 24px 0 0;
+    max-width: none;
+    width: 100%;
     padding-top: 26px;
     color: #6f8b81;
     font-size: 13px;
@@ -436,7 +436,7 @@
 /* Larger screens: stretch hero to match nav gutters and expand visual */
 @media (min-width: 1200px) {
     .heroInner {
-        width: min(1320px, calc(100% - 120px));
+        width: 100%;
         grid-template-columns: minmax(0, 1.15fr) minmax(420px, 560px);
         gap: 48px;
     }
@@ -446,8 +446,8 @@
     }
 
     .heroFooter {
-        width: min(1320px, calc(100% - 120px));
-        max-width: 1320px;
+        width: 100%;
+        max-width: none;
         padding-top: 34px;
     }
 }
@@ -539,8 +539,9 @@
 /* ── Generic sections ── */
 .section {
     padding: 88px 48px;
-    max-width: 1140px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: none;
+    margin: 0;
     scroll-margin-top: 96px;
 }
 
@@ -563,13 +564,27 @@
     scroll-margin-top: 96px;
 }
 
+/* Give .storyLeft a DEFINITE width (not just a max-width) at every
+   breakpoint, so the "100%" widths on its children below resolve
+   reliably against it. Without this, .storyLeft is sized by flex
+   fit-content (because .storySection uses align-items: center), which
+   is not a definite width — and percentage children resolving against
+   an indefinite container is what was causing .storyHeader (short
+   content) to shrink to its own content and then get centered by its
+   `margin: auto`, while .storyText (long paragraphs) stayed full width
+   — a misaligned heading, on mobile as much as desktop. */
+.storyLeft {
+    width: 100%;
+}
+
 .storyHeader {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     text-align: left;
-    width: min(980px, 100%);
-    margin: 0 auto 12px;
+    width: 100%;
+    max-width: none;
+    margin: 0 0 12px;
 }
 
 .storyHeader .h2 {
@@ -579,26 +594,11 @@
 .storyText {
     display: flex;
     flex-direction: column;
-    width: min(980px, 100%);
-    max-width: 980px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: none;
+    margin: 0;
     padding-left: 0;
     border-left: none;
-}
-
-/* Keep stacked layout across all devices; apply editorial widths on larger screens */
-@media (min-width: 768px) {
-    .storyLeft {
-        display: flex;
-        flex-direction: column;
-        flex: 1 1 0;
-        max-width: 720px;
-    }
-
-    .storyText {
-        margin: 0;
-        max-width: 720px;
-    }
 }
 
 /* Animation section that sits below the story text */
@@ -625,6 +625,93 @@
     border-radius: 0;
 }
 
+/* ── Grow your business with Ehral — two-column section directly below
+   the story: a confident, minimal invitation (headline + CTA) on the
+   left, the orbit animation on the right. Mirrors the hero's two-column
+   proportions for visual consistency with the rest of the page. ── */
+.growSection {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 60px 48px 120px;
+}
+
+.growInner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 480px);
+    gap: 56px;
+    align-items: center;
+    width: min(1180px, 100%);
+}
+
+.growContent {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+}
+
+.growHeadline {
+    font-family: "Fraunces", Georgia, serif;
+    font-optical-sizing: auto;
+    font-weight: 550;
+    font-size: clamp(30px, 3.6vw, 44px);
+    line-height: 1.18;
+    letter-spacing: -0.4px;
+    color: var(--text-primary, #0b1f1a);
+    max-width: 420px;
+    margin: 0 0 34px;
+}
+
+.growCta {
+    /* .btnGold already supplies color/shape; this just gives it room
+       to breathe under the headline without affecting other buttons
+       that reuse .btnGold elsewhere on the page. */
+    margin: 0;
+}
+
+.growVisual {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+@media (max-width: 900px) {
+    .growSection {
+        padding: 12px 28px 88px;
+    }
+
+    .growInner {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        text-align: center;
+    }
+
+    .growContent {
+        align-items: center;
+        text-align: center;
+    }
+
+    .growHeadline {
+        max-width: 480px;
+    }
+
+    .growVisual {
+        order: -1;
+    }
+}
+
+@media (max-width: 640px) {
+    .growSection {
+        padding: 8px 18px 72px;
+    }
+
+    .growInner {
+        gap: 32px;
+    }
+}
+
 .storyText .lead {
     max-width: none;
 }
@@ -640,7 +727,7 @@
     line-height: 1.5;
     color: var(--accent, #0f6e56);
     text-align: left;
-    max-width: 720px;
+    max-width: none;
     margin: 8px 0 32px 0;
     padding: 0;
     border: none;
@@ -699,6 +786,90 @@
 
     .storyPullQuote {
         margin: 8px 0 20px;
+    }
+}
+
+/* ── The real problem — two-column section mirroring the hero's
+   proportions: the workflow diagram on one side (vertical stack on
+   desktop, horizontal row on mobile/tablet), the problem narrative on
+   the other. Edge-aligned with the nav gutter on both sides — the left
+   edge matches the logo, the right edge matches the header's
+   "Get started" button — like every other section on this page. ── */
+.problemSection {
+    width: 100%;
+    padding: 40px 48px 120px;
+}
+
+.problemInner {
+    display: grid;
+    grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+    gap: 64px;
+    align-items: stretch;
+    width: 100%;
+}
+
+.problemVisual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+}
+
+.problemContent {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    padding: 8px 0;
+}
+
+.problemHeadline {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-size: clamp(26px, 3.2vw, 38px);
+    line-height: 1.22;
+    letter-spacing: -0.3px;
+    color: var(--text-primary, #0b1f1a);
+    max-width: 560px;
+    margin: 0 0 26px;
+}
+
+.problemContent .lead {
+    max-width: 560px;
+}
+
+/* The two turning points in the narrative — set apart from the
+   surrounding paragraphs the same way the story section's pull-quotes
+   are, so they land as beats rather than more body copy. */
+.problemStatement {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-style: italic;
+    font-size: clamp(19px, 2.2vw, 23px);
+    line-height: 1.5;
+    color: var(--accent, #0f6e56);
+    max-width: 560px;
+    margin: 4px 0 28px;
+}
+
+@media (max-width: 980px) {
+    .problemSection {
+        padding: 8px 28px 88px;
+    }
+
+    .problemInner {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+
+    .problemVisual {
+        order: -1;
+    }
+}
+
+@media (max-width: 640px) {
+    .problemSection {
+        padding: 4px 18px 72px;
     }
 }
 
@@ -837,6 +1008,133 @@
     border-radius: 20px;
     padding: 40px 28px;
     border: 1px solid var(--border, #e1e8e5);
+}
+
+/* ── "Every business starts somewhere" — a quiet, premium editorial
+   panel in a deep green (distinct from both the light story section
+   above it and the near-black sections used elsewhere on the page),
+   built for one idea to land: a business can start small without
+   thinking small. No cards, no icons, generous vertical rhythm. The
+   emphasized line gets its own visual beat via .originStatement. ── */
+.originSection {
+    background: #0e3626;
+    background-image: radial-gradient(circle at 20% 15%, rgba(85, 224, 174, 0.1), transparent 50%),
+        radial-gradient(circle at 85% 90%, rgba(155, 238, 193, 0.08), transparent 50%);
+    display: flex;
+    justify-content: center;
+    padding: 140px 32px;
+}
+
+.originInner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    max-width: 760px;
+}
+
+.originEyebrow {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #7fd9ae;
+    margin-bottom: 26px;
+}
+
+.originHeadline {
+    font-family: "Fraunces", Georgia, serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-size: clamp(30px, 4.4vw, 46px);
+    line-height: 1.18;
+    letter-spacing: -0.4px;
+    color: #f4f9f6;
+    margin: 0 0 30px;
+}
+
+.originLead {
+    font-size: 17px;
+    line-height: 1.75;
+    color: #a9c4b8;
+    max-width: 560px;
+    margin: 0 auto;
+}
+
+/* The emotional core of the section — set apart from the surrounding
+   prose with its own spacing, a much larger italic serif setting and
+   the brand's light accent color, so it reads as a standalone beat
+   rather than another sentence in the paragraph flow. */
+.originStatement {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 500;
+    font-style: italic;
+    font-size: clamp(24px, 3.4vw, 34px);
+    line-height: 1.4;
+    letter-spacing: -0.2px;
+    color: #9beec1;
+    max-width: 620px;
+    margin: 56px auto 0;
+    padding-top: 40px;
+    position: relative;
+}
+
+.originStatement::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 44px;
+    height: 1px;
+    background: rgba(155, 238, 193, 0.4);
+}
+
+.originVisual {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 84px;
+}
+
+@media (max-width: 900px) {
+    .originSection {
+        padding: 96px 24px;
+    }
+
+    .originHeadline {
+        margin-bottom: 22px;
+    }
+
+    .originStatement {
+        margin-top: 44px;
+        padding-top: 32px;
+    }
+
+    .originVisual {
+        margin-top: 56px;
+    }
+}
+
+@media (max-width: 640px) {
+    .originSection {
+        padding: 80px 18px;
+    }
+
+    .originLead {
+        font-size: 15.5px;
+    }
+
+    .originStatement {
+        margin-top: 36px;
+        padding-top: 28px;
+    }
+
+    .originVisual {
+        margin-top: 44px;
+    }
 }
 
 .visionGrid {
@@ -1035,8 +1333,9 @@
     grid-template-columns: 300px 1fr;
     gap: 56px;
     align-items: center;
-    max-width: 1080px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: none;
+    margin: 0;
     padding: 88px 48px;
     scroll-margin-top: 96px;
 }
@@ -1446,61 +1745,5 @@
         animation-duration: 0.001ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.001ms !important;
-    }
-}
-
-/* On wider screens, the story text no longer shares the row with a visual
-   (the animation now lives in its own section below), so let it use a much
-   wider share of the content area instead of the old fixed 720px column,
-   which was leaving a large unused gap on the right. */
-@media (min-width: 980px) {
-
-    /* Give .storyLeft a DEFINITE width (not just a max-width) so that the
-       "100%" widths on its children below resolve reliably against it.
-       Without this, .storyLeft is sized by flex fit-content (because
-       .storySection uses align-items: center), which is not a definite
-       width — and percentage children resolving against an indefinite
-       container is exactly what was causing .storyHeader (short content)
-       to shrink to its own content and then get centered by its
-       `margin: 0 auto`, while .storyText (long paragraphs) stayed full
-       width — the misaligned heading you saw.
-       No max-width cap here anymore: the story content now fills the
-       full width of .storySection (edge-to-edge minus the 48px gutter),
-       so paragraphs wrap at the full screen width instead of a narrower
-       reading column. */
-    .storyLeft {
-        width: 100%;
-        max-width: none;
-    }
-
-    .storyHeader {
-        align-items: flex-start;
-        text-align: left;
-        width: 100%;
-        max-width: none;
-        margin: 0 0 12px;
-    }
-
-    .storyText {
-        width: 100%;
-        max-width: none;
-        margin: 0;
-        padding-left: 0;
-        border-left: none;
-    }
-
-    .storyPullQuote {
-        max-width: none;
-    }
-}
-
-/* Keep story body typography consistent with other `.lead` rules */
-@media (min-width: 980px) {
-    .storyText .lead {
-        font-size: 16px;
-        line-height: 1.65;
-        color: var(--text-secondary, #4d635c);
-        max-width: none;
-        margin: 0 0 14px;
     }
 }

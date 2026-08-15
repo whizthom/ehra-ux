@@ -393,79 +393,101 @@ export default function About() {
         </div>
       </section>
 
-      {/* ── Story animation — separate section beneath the story text ── */}
-      <section className={styles.storyAnimationSection} aria-hidden="true">
-        <div className={styles.storyVisual}>
-          <OrbitAnimation />
+      {/* ── Grow your business with Ehral — two-column section right
+           below the story: a short, confident invitation to act on the
+           left, the orbit animation (Ehral at the center of Employees,
+           Customers, Business and Other businesses) on the right. ── */}
+      <section className={styles.growSection}>
+        <div className={styles.growInner}>
+          <div className={styles.growContent}>
+            <h2 className={`${styles.growHeadline} js-reveal`}>
+              Grow your business with Ehral
+            </h2>
+            <Link to="/" className={`${styles.btnGold} ${styles.growCta}`}>
+              Get started
+              <i className="ti ti-arrow-narrow-right" aria-hidden="true" />
+            </Link>
+          </div>
+          <div className={styles.growVisual}>
+            <OrbitAnimation />
+          </div>
         </div>
       </section>
 
-      {/* ── 2. Every business starts somewhere ── */}
-      <section className={styles.section}>
-        <h2 className={`${styles.h2} js-reveal`}>
-          Every great business starts somewhere.
-        </h2>
-        <p className={styles.lead}>
-          A classroom. A salon chair. A restaurant table. A shop. A small
-          office. A kitchen. A few people who decided to build something of
-          their own.
-        </p>
-        <p className={styles.leadStrong}>
-          The business may be small. The ambition rarely is.
-        </p>
-        <div className={styles.transformCard}>
-          <WorkflowDiagram
-            endGlow
-            steps={[
-              { icon: "ti-user", label: "One person" },
-              { icon: "ti-bulb", label: "One idea" },
-              { icon: "ti-building-store", label: "One business" },
-              { icon: "ti-users", label: "A team" },
-              { icon: "ti-trending-up", label: "Growth" },
-            ]}
-          />
-        </div>
-      </section>
-
-      {/* ── 3. The real problem ── */}
-      <section className={styles.section} id="problem">
-        <span className={`${styles.eyebrowDark} js-reveal`}>
-          The real problem
-        </span>
-        <h2 className={`${styles.h2} js-reveal`}>
-          When the business grows, everything around it grows too.
-        </h2>
-        <p className={styles.lead}>
-          More people. More locations. More decisions. More responsibilities.
-          More information.
-        </p>
-        <p className={styles.lead}>
-          An employee&rsquo;s information may be in a spreadsheet. Attendance
-          may live in a notebook. Leave requests may arrive through WhatsApp.
-          Important announcements may disappear inside group chats. Payments may
-          be written down somewhere else. And the owner becomes the system
-          connecting everything together.
-        </p>
-        <p className={styles.leadStrong}>
-          The business is growing.
-          <br />
-          But the systems holding it together are struggling to grow with it.
-        </p>
-        <div className={styles.transformCard}>
-          <WorkflowDiagram
-            endGlow
-            steps={[
-              { icon: "ti-table", label: "Spreadsheets" },
-              { icon: "ti-brand-whatsapp", label: "WhatsApp" },
-              { icon: "ti-notebook", label: "Paper records" },
-              { icon: "ti-apps", label: "Separate tools" },
-              {
-                icon: "ti-hexagon-letter-e",
-                label: "Ehral",
-                sublabel: "One connected platform",
-              },
-            ]}
-          />
+      {/* ── 3. The real problem — two-column, mirroring the hero's
+           proportions: the scattered-tools-to-one-platform diagram on
+           the left (a tall vertical stack on desktop, a horizontal row
+           once the layout stacks on mobile/tablet), the problem
+           narrative on the right. ── */}
+      <section className={styles.problemSection} id="problem">
+        <div className={styles.problemInner}>
+          <div className={styles.problemVisual}>
+            <WorkflowDiagram
+              endGlow
+              reverseResponsive
+              steps={[
+                { icon: "ti-table", label: "Spreadsheets" },
+                { icon: "ti-brand-whatsapp", label: "WhatsApp" },
+                { icon: "ti-notebook", label: "Paper records" },
+                { icon: "ti-apps", label: "Separate tools" },
+                {
+                  icon: "ti-hexagon-letter-e",
+                  label: "Ehral",
+                  sublabel: "One connected platform",
+                },
+              ]}
+            />
+          </div>
+          <div className={styles.problemContent}>
+            <span className={`${styles.eyebrowDark} js-reveal`}>
+              The real problem
+            </span>
+            <h2 className={`${styles.problemHeadline} js-reveal`}>
+              Most growing businesses don&rsquo;t have access to the technology
+              they need.
+            </h2>
+            <p className={styles.lead}>
+              Many businesses start without dedicated systems for managing their
+              people and operations.
+            </p>
+            <p className={styles.lead}>
+              They rely on spreadsheets, notebooks, WhatsApp, separate tools,
+              and manual processes because those are what they can access easily
+              and affordably.
+            </p>
+            <p className={styles.lead}>
+              As the business grows, those methods become harder to maintain.
+            </p>
+            <p className={styles.lead}>
+              But moving to proper business software can feel like another
+              problem altogether. The tools available may be designed for larger
+              companies, require complicated setup and integrations, demand
+              significant investment, or simply feel too overwhelming for a
+              business that is still finding its feet.
+            </p>
+            <p className={styles.lead}>So businesses wait.</p>
+            <p className={styles.lead}>
+              They tell themselves they&rsquo;ll adopt better technology when
+              they are bigger, when they have more employees, or when they can
+              afford it.
+            </p>
+            <p className={styles.lead}>
+              And in the meantime, the business grows around inefficient
+              systems.
+            </p>
+            <p className={`${styles.problemStatement} js-reveal`}>
+              That&rsquo;s the actual problem.
+            </p>
+            <p className={`${styles.problemStatement} js-reveal`}>
+              Businesses shouldn&rsquo;t have to outgrow their way of working
+              before they can access better ways to work.
+            </p>
+            <p className={styles.lead}>
+              Ehral exists to close that gap — making powerful business
+              technology accessible early, simple to adopt, and capable of
+              growing alongside the business.
+            </p>
+          </div>
         </div>
       </section>
 

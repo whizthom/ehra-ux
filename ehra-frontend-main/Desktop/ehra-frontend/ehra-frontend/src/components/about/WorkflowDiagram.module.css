@@ -75,3 +75,35 @@
         transform: rotate(90deg);
     }
 }
+
+/* Reversed variant: vertical stack on desktop/large screens (a tall
+   narrow column reads better there than a wrapped horizontal row),
+   flipping to a horizontal row on mobile/tablet once the layout it
+   sits in has already stacked to a single column. */
+.reversedRow.row {
+    flex-direction: column;
+    flex-wrap: nowrap;
+}
+
+.reversedRow .stepWrap {
+    flex-direction: column;
+}
+
+.reversedRow .arrow {
+    transform: rotate(90deg);
+}
+
+@media (max-width: 980px) {
+    .reversedRow.row {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .reversedRow .stepWrap {
+        flex-direction: row;
+    }
+
+    .reversedRow .arrow {
+        transform: none;
+    }
+}

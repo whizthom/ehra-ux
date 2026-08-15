@@ -2,42 +2,67 @@ import { useMemo, useState } from "react";
 import ChatListItem from "./ChatListItem";
 import styles from "./ChatList.module.css";
 
+const TABS = [
+  { key: "all", label: "All" },
+  { key: "group", label: "Group" },
+  { key: "announcement", label: "Announcement" },
+  { key: "archived", label: "Archived" },
+];
+
 export default function ChatList({
   conversations,
   loading,
   activeId,
   onSelect,
-  onNewChat,
+  onNewGroup,
   onTogglePin,
   onToggleMute,
   onToggleArchive,
 }) {
   const [query, setQuery] = useState("");
   const [menuFor, setMenuFor] = useState(null);
-  const [showArchived, setShowArchived] = useState(false);
+  const [tab, setTab] = useState("all");
 
   const filtered = useMemo(() => {
-    const base = conversations.filter(
-      (c) => Boolean(c.archived) === showArchived,
-    );
+    let base;
+    switch (tab) {
+      case "group":
+        base = conversations.filter((c) => !c.archived && c.type === "GROUP");
+        break;
+      case "announcement":
+        base = conversations.filter(
+          (c) => !c.archived && c.type === "ANNOUNCEMENT",
+        );
+        break;
+      case "archived":
+        base = conversations.filter((c) => c.archived);
+        break;
+      case "all":
+      default:
+        base = conversations.filter((c) => !c.archived);
+        break;
+    }
     if (!query.trim()) return base;
     const q = query.trim().toLowerCase();
     return base.filter((c) => (c.name || "").toLowerCase().includes(q));
-  }, [conversations, query, showArchived]);
+  }, [conversations, query, tab]);
+
+  const emptyMessage = () => {
+    if (query) return "No conversations match your search.";
+    switch (tab) {
+      case "group":
+        return "No groups yet — start one below.";
+      case "announcement":
+        return "No announcements yet.";
+      case "archived":
+        return "No archived chats.";
+      default:
+        return "No conversations yet.";
+    }
+  };
 
   return (
     <div className={styles.listPanel}>
-      <div className={styles.header}>
-        <h2 className={styles.title}>Chats</h2>
-        <button
-          className={styles.newChatBtn}
-          onClick={onNewChat}
-          title="New conversation"
-        >
-          <i className="ti ti-edit" />
-        </button>
-      </div>
-
       <div className={styles.searchWrap}>
         <i className="ti ti-search" />
         <input
@@ -48,32 +73,32 @@ export default function ChatList({
         />
       </div>
 
-      <div className={styles.archiveToggleRow}>
-        <button
-          className={`${styles.archiveToggle} ${!showArchived ? styles.archiveToggleActive : ""}`}
-          onClick={() => setShowArchived(false)}
-        >
-          All
-        </button>
-        <button
-          className={`${styles.archiveToggle} ${showArchived ? styles.archiveToggleActive : ""}`}
-          onClick={() => setShowArchived(true)}
-        >
-          Archived
-        </button>
+      <div className={styles.tabRow}>
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            className={`${styles.tabBtn} ${tab === t.key ? styles.tabBtnActive : ""}`}
+            onClick={() => setTab(t.key)}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
+
+      {tab === "group" && (
+        <button className={styles.newGroupBtn} onClick={onNewGroup}>
+          <span className={styles.newGroupIcon}>
+            <i className="ti ti-users-group" />
+          </span>
+          New group
+        </button>
+      )}
 
       <div className={styles.list}>
         {loading ? (
           <div className={styles.loadingState}>Loading conversations…</div>
         ) : filtered.length === 0 ? (
-          <div className={styles.emptyState}>
-            {query
-              ? "No conversations match your search."
-              : showArchived
-                ? "No archived chats."
-                : "No conversations yet."}
-          </div>
+          <div className={styles.emptyState}>{emptyMessage()}</div>
         ) : (
           filtered.map((c) => (
             <div key={c.id} className={styles.rowWrap}>

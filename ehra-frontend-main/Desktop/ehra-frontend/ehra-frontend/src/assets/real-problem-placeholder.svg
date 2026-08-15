@@ -1,0 +1,64 @@
+<svg width="900" height="1100" viewBox="0 0 900 1100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder illustration of a shop owner using the Ehral app">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#123d31"/>
+      <stop offset="100%" stop-color="#0b1f1a"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#55e0ae" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#55e0ae" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="900" height="1100" fill="url(#bg)"/>
+  <circle cx="700" cy="180" r="340" fill="url(#glow)"/>
+
+  <!-- shop shelf backdrop -->
+  <g opacity="0.5" stroke="#2c5347" stroke-width="2">
+    <line x1="0" y1="260" x2="900" y2="260"/>
+    <line x1="0" y1="420" x2="900" y2="420"/>
+    <rect x="60" y="150" width="90" height="100" rx="6" fill="none"/>
+    <rect x="170" y="150" width="90" height="100" rx="6" fill="none"/>
+    <rect x="640" y="150" width="90" height="100" rx="6" fill="none"/>
+    <rect x="750" y="150" width="90" height="100" rx="6" fill="none"/>
+    <rect x="60" y="310" width="90" height="100" rx="6" fill="none"/>
+    <rect x="750" y="310" width="90" height="100" rx="6" fill="none"/>
+  </g>
+
+  <!-- ground -->
+  <rect x="0" y="980" width="900" height="120" fill="#0e2e25"/>
+
+  <!-- figure: simple, friendly, abstract silhouette (not a real person) -->
+  <g>
+    <!-- shadow -->
+    <ellipse cx="450" cy="985" rx="150" ry="22" fill="#081713"/>
+
+    <!-- body -->
+    <path d="M320 980 C 310 760 340 640 450 620 C 560 640 590 760 580 980 Z" fill="#9beec1"/>
+
+    <!-- head -->
+    <circle cx="450" cy="520" r="92" fill="#f3d9b1"/>
+
+    <!-- hair -->
+    <path d="M358 500 C 350 420 400 370 450 370 C 500 370 550 420 542 500 C 542 470 520 450 490 452 C 470 454 460 470 450 470 C 440 470 430 454 410 452 C 380 450 358 470 358 500 Z" fill="#2a1c14"/>
+
+    <!-- smile -->
+    <path d="M415 545 Q 450 570 485 545" stroke="#5b3a26" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <circle cx="415" cy="515" r="7" fill="#2a1c14"/>
+    <circle cx="485" cy="515" r="7" fill="#2a1c14"/>
+
+    <!-- arm holding phone -->
+    <path d="M420 660 C 380 700 360 740 372 790" stroke="#f3d9b1" stroke-width="34" fill="none" stroke-linecap="round"/>
+
+    <!-- phone -->
+    <rect x="336" y="770" width="72" height="128" rx="14" fill="#0b1f1a" stroke="#55e0ae" stroke-width="3"/>
+    <rect x="348" y="788" width="48" height="80" rx="4" fill="#f0f4f3"/>
+    <circle cx="372" cy="812" r="10" fill="#0f6e56"/>
+    <rect x="356" y="828" width="32" height="6" rx="3" fill="#c9d8d1"/>
+    <rect x="356" y="840" width="24" height="6" rx="3" fill="#c9d8d1"/>
+  </g>
+
+  <text x="450" y="1050" text-anchor="middle" font-family="Inter, sans-serif" font-size="18" fill="#5f8172">
+    Placeholder — replace with real photography
+  </text>
+</svg>

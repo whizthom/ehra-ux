@@ -77,7 +77,7 @@ export default function MessagingHub({ onThreadOpenChange }) {
           loading={loading}
           activeId={activeId}
           onSelect={handleSelect}
-          onNewChat={() => setShowNewChat(true)}
+          onNewGroup={() => setShowNewChat(true)}
           onTogglePin={togglePin}
           onToggleMute={toggleMute}
           onToggleArchive={toggleArchive}
