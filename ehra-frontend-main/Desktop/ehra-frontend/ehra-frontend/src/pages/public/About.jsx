@@ -389,6 +389,26 @@ export default function About() {
               them connect.
             </p>
           </div>
+
+          <div className={`${styles.founderCredit} js-reveal`} id="founder">
+            <img
+              src={founderPhoto}
+              alt="Emmanuel Oluwabamise, Founder of Ehral Systems"
+              className={styles.founderCreditPhoto}
+            />
+            <div className={styles.founderCreditText}>
+              <p className={styles.founderCreditQuote}>
+                &ldquo;I kept seeing the same challenge — so I built the thing I
+                wished existed.&rdquo;
+              </p>
+              <span className={styles.founderCreditName}>
+                Emmanuel Oluwabamise
+                <span className={styles.founderCreditRole}>
+                  Founder, Ehral Systems
+                </span>
+              </span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -694,62 +714,6 @@ export default function About() {
           </div>
         </div>
       </section> */}
-
-      {/* ── 12. Founder story — a face, not the hero ── */}
-      <section className={styles.founderSection} id="founder">
-        <span className={styles.founderQuoteMark} aria-hidden="true">
-          &rdquo;
-        </span>
-        <div className={`${styles.founderPortrait} js-reveal`}>
-          <div className={styles.founderImageFrame}>
-            <img
-              src={founderPhoto}
-              alt="Emmanuel Oluwabamise, Founder of Ehral Systems"
-              className={styles.founderImage}
-            />
-            <span className={styles.founderBadge}>
-              <i className="ti ti-hexagon-letter-e" aria-hidden="true" />
-              Founder
-            </span>
-          </div>
-        </div>
-        <div className={styles.founderText}>
-          <span className={`${styles.eyebrowDark} js-reveal`}>
-            Why I started Ehral
-          </span>
-          <h2 className={`${styles.h2} ${styles.founderQuote} js-reveal`}>
-            &ldquo;I kept seeing the same challenge.&rdquo;
-          </h2>
-          <p className={styles.lead}>
-            I started Ehral because I kept seeing the same challenge: businesses
-            trying to grow while important parts of their operations remained
-            scattered across spreadsheets, paper, phones and conversations.
-          </p>
-          <p className={styles.lead}>
-            I believe African businesses shouldn&rsquo;t have to become large
-            corporations before they can have access to powerful technology.
-            Ehral is my attempt to build something different — technology
-            designed around the realities of the businesses and people it is
-            meant to serve.
-          </p>
-          <p className={styles.lead}>
-            We are starting with the workforce because people are at the heart
-            of every business. But the ambition is much bigger. I want Ehral to
-            grow alongside African businesses — from helping them manage their
-            day-to-day work to eventually helping businesses, employees and
-            customers connect within one ecosystem.
-          </p>
-          <div className={styles.founderSignature}>
-            <span className={styles.founderInitials} aria-hidden="true">
-              EO
-            </span>
-            <div className={styles.founderSignatureText}>
-              <strong>Emmanuel Oluwabamise</strong>
-              <span>Founder, Ehral Systems</span>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* ── 13. The bigger ambition + connected ecosystem ── */}
       <section

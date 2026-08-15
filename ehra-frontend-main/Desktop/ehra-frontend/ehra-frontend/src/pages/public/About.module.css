@@ -1478,156 +1478,63 @@
     margin: 0;
 }
 
-/* ── Founder — a contained "signature card" rather than a plain
-   photo + text pair: soft gradient card, an oversized decorative
-   quote mark bleeding out of the corner, a framed portrait with a
-   floating role badge, and a styled pull-quote leading the copy. ── */
-.founderSection {
-    position: relative;
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 64px;
-    align-items: center;
-    width: 100%;
-    max-width: 1140px;
-    margin: 0 auto;
-    padding: 80px 64px;
-    background:
-        radial-gradient(circle at 88% 8%, rgba(15, 110, 86, 0.08), transparent 55%),
-        var(--bg-card, #fff);
-    border: 1px solid var(--border, #e1e8e5);
-    border-radius: 32px;
-    overflow: hidden;
-    scroll-margin-top: 96px;
-}
-
-.founderQuoteMark {
-    position: absolute;
-    top: -46px;
-    right: 24px;
-    font-family: "Fraunces", Georgia, serif;
-    font-weight: 550;
-    font-size: 260px;
-    line-height: 1;
-    color: var(--accent, #0f6e56);
-    opacity: 0.06;
-    pointer-events: none;
-    user-select: none;
-}
-
-.founderPortrait {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-}
-
-.founderPortrait::before {
-    content: "";
-    position: absolute;
-    inset: -14px;
-    border: 1.5px solid var(--accent, #0f6e56);
-    border-radius: 30px;
-    opacity: 0.25;
-}
-
-.founderImageFrame {
-    position: relative;
-    width: 240px;
-    height: 240px;
-}
-
-.founderImage {
-    width: 240px;
-    height: 240px;
-    border-radius: 24px;
-    object-fit: cover;
-    object-position: 50% 20%;
-    box-shadow: 0 24px 50px -18px rgba(11, 31, 26, 0.4);
-}
-
-.founderBadge {
-    position: absolute;
-    left: 50%;
-    bottom: -16px;
-    transform: translateX(-50%);
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    white-space: nowrap;
-    background: var(--text-primary, #0b1f1a);
-    color: #fff;
-    font-size: 11.5px;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    text-transform: uppercase;
-    padding: 8px 16px;
-    border-radius: 999px;
-    box-shadow: 0 12px 24px -10px rgba(11, 31, 26, 0.5);
-}
-
-.founderBadge i {
-    color: var(--accent-light, #9beec1);
-    font-size: 13px;
-}
-
-.founderText {
-    display: flex;
-    flex-direction: column;
-}
-
-.founderQuote {
-    position: relative;
-    font-family: "Fraunces", Georgia, serif;
-    font-style: italic;
-    font-weight: 500;
-}
-
-.founderText .lead:last-of-type {
-    margin-bottom: 22px;
-}
-
-.founderSignature {
+/* ── Founder credit — a small, quiet coda at the end of the Story
+   section rather than a full standalone section: the origin story is
+   already told in full above, so this is just a face and a name
+   attached to it, not a second retelling. ── */
+.founderCredit {
     display: flex;
     align-items: center;
-    gap: 14px;
-    margin-top: 4px;
-    padding-top: 22px;
+    gap: 20px;
+    max-width: 640px;
+    margin-top: 8px;
+    padding-top: 28px;
     border-top: 1px solid var(--border, #e1e8e5);
 }
 
-.founderInitials {
+.founderCreditPhoto {
     flex-shrink: 0;
-    width: 44px;
-    height: 44px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: "Fraunces", Georgia, serif;
-    font-weight: 550;
-    font-size: 15px;
-    color: #fff;
-    background: linear-gradient(135deg, var(--accent, #0f6e56), var(--text-primary, #0b1f1a));
+    object-fit: cover;
+    object-position: 50% 20%;
+    box-shadow: 0 10px 24px -12px rgba(11, 31, 26, 0.35);
 }
 
-.founderSignatureText {
+.founderCreditText {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 5px;
 }
 
-.founderSignature strong {
+.founderCreditQuote {
     font-family: "Fraunces", Georgia, serif;
-    font-weight: 550;
-    font-size: 16px;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--text-primary, #0b1f1a);
+    margin: 0;
+}
+
+.founderCreditName {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
     color: var(--text-primary, #0b1f1a);
 }
 
-.founderSignature span {
-    font-size: 13px;
+.founderCreditRole {
+    font-weight: 500;
     color: var(--text-secondary, #6f8b81);
+}
+
+.founderCreditRole::before {
+    content: "— ";
 }
 
 /* ── Final CTA banner — a rounded, contained dark card (not full-bleed)
@@ -1757,8 +1664,7 @@
     display: flex;
     justify-content: space-between;
     gap: 48px;
-    max-width: 1140px;
-    margin: 0 auto;
+    width: 100%;
     padding-bottom: 40px;
     flex-wrap: wrap;
 }
@@ -1822,8 +1728,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    max-width: 1140px;
-    margin: 0 auto;
+    width: 100%;
     padding-top: 24px;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     font-size: 12.5px;
@@ -1858,28 +1763,8 @@
         padding-left: 20px;
     }
 
-    .founderSection {
-        grid-template-columns: 1fr;
-        text-align: center;
-        padding: 64px 28px;
-        gap: 40px;
-        max-width: calc(100% - 40px);
-    }
-
-    .founderPortrait {
-        order: -1;
-    }
-
-    .founderQuoteMark {
-        top: -20px;
-        right: 50%;
-        transform: translateX(50%);
-        font-size: 160px;
-    }
-
-    .founderSignature {
-        flex-direction: column;
-        align-items: center;
+    .founderCredit {
+        max-width: 100%;
     }
 
     .nav {
@@ -1982,16 +1867,10 @@
         padding: 10px 16px;
     }
 
-    .founderSection {
-        padding: 52px 18px;
-        border-radius: 24px;
-        max-width: calc(100% - 24px);
-    }
-
-    .founderImageFrame,
-    .founderImage {
-        width: 160px;
-        height: 160px;
+    .founderCredit {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
     }
 
     .identityWrap {

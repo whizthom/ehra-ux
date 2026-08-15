@@ -2,14 +2,14 @@ import { useMemo, useState } from "react";
 import ChatListItem from "./ChatListItem";
 import styles from "./ChatList.module.css";
 
-const TABS = [
-  { key: "all", label: "All" },
-  { key: "group", label: "Group" },
-  { key: "announcement", label: "Announcement" },
-  { key: "archived", label: "Archived" },
-];
-
+// The tab bar itself (All / Group / Announcement / Archived) now lives one
+// level up, in MessagingHub — "Announcement" isn't a filter over
+// conversations at all, it swaps the whole pane for Ehral's existing
+// Announcements feature (see MessagingHub.jsx's doc). This component only
+// ever renders for the "all" / "group" / "archived" tabs; `tab` is a prop,
+// not local state.
 export default function ChatList({
+  tab,
   conversations,
   loading,
   error,
@@ -23,18 +23,12 @@ export default function ChatList({
 }) {
   const [query, setQuery] = useState("");
   const [menuFor, setMenuFor] = useState(null);
-  const [tab, setTab] = useState("all");
 
   const filtered = useMemo(() => {
     let base;
     switch (tab) {
       case "group":
         base = conversations.filter((c) => !c.archived && c.type === "GROUP");
-        break;
-      case "announcement":
-        base = conversations.filter(
-          (c) => !c.archived && c.type === "ANNOUNCEMENT",
-        );
         break;
       case "archived":
         base = conversations.filter((c) => c.archived);
@@ -54,8 +48,6 @@ export default function ChatList({
     switch (tab) {
       case "group":
         return "No groups yet — start one below.";
-      case "announcement":
-        return "No announcements yet.";
       case "archived":
         return "No archived chats.";
       default:
@@ -73,18 +65,6 @@ export default function ChatList({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-      </div>
-
-      <div className={styles.tabRow}>
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            className={`${styles.tabBtn} ${tab === t.key ? styles.tabBtnActive : ""}`}
-            onClick={() => setTab(t.key)}
-          >
-            {t.label}
-          </button>
-        ))}
       </div>
 
       {tab === "group" && (

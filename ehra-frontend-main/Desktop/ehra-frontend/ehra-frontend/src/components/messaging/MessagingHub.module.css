@@ -1,7 +1,66 @@
+.hubOuter {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    background: var(--bg-surface);
+}
+
+.tabRow {
+    display: flex;
+    gap: 6px;
+    padding: 10px 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex-shrink: 0;
+    border-bottom: 0.5px solid var(--border-color);
+    background: var(--bg-surface);
+}
+
+.tabRow::-webkit-scrollbar {
+    display: none;
+}
+
+.tabBtn {
+    border: none;
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.tabBtnActive {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* Hidden once something's full-screen on mobile — a chat thread, or one
+   open announcement — same as the old MessagesHub's switcher pills did
+   via its own `detailOpen` mirror. Has no effect on desktop, where
+   there's always room for the tab row alongside whatever's below it. */
+@media (max-width: 860px) {
+    .tabRowHiddenMobile {
+        display: none;
+    }
+}
+
+.announcementsPane {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
 .hub {
     display: flex;
     width: 100%;
-    height: 100%;
+    flex: 1;
     min-height: 0;
     background: var(--bg-surface);
 }
@@ -49,6 +108,10 @@
 }
 
 @media (max-width: 860px) {
+    .hubOuter {
+        background: var(--bg-page);
+    }
+
     .hub {
         background: var(--bg-page);
     }
