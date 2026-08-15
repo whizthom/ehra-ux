@@ -253,3 +253,22 @@
     font-weight: 600;
     cursor: pointer;
 }
+
+.dateGroupHeader {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: 6px 12px;
+    margin: 4px 0 2px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+    background: var(--bg-surface);
+}
+
+@media (max-width: 860px) {
+    .dateGroupHeader {
+        background: var(--bg-page);
+    }
+}

@@ -3,6 +3,7 @@ import ReactionPicker from "./ReactionPicker";
 import MessageContextMenu from "./MessageContextMenu";
 import VoicePlayer from "./VoicePlayer";
 import SystemMessage from "./SystemMessage";
+import ImageLightbox from "./ImageLightbox";
 import {
   formatTime,
   splitLinks,
@@ -58,6 +59,7 @@ export default function MessageBubble({
 }) {
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [showLightbox, setShowLightbox] = useState(false);
 
   if (message.messageType === "SYSTEM") {
     return <SystemMessage message={message} />;
@@ -84,7 +86,7 @@ export default function MessageBubble({
               src={message.metadata?.url}
               alt=""
               className={styles.imageContent}
-              onClick={() => window.open(message.metadata?.url, "_blank")}
+              onClick={() => setShowLightbox(true)}
             />
             {message.body && (
               <div className={styles.caption}>
@@ -246,6 +248,14 @@ export default function MessageBubble({
           </div>
         )}
       </div>
+
+      {showLightbox && message.messageType === "IMAGE" && (
+        <ImageLightbox
+          url={message.metadata?.url}
+          caption={message.body}
+          onClose={() => setShowLightbox(false)}
+        />
+      )}
     </div>
   );
 }
