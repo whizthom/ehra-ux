@@ -10,12 +10,14 @@ export default function TypingIndicator({ users }) {
         : `${users[0].name} and ${users.length - 1} others are typing…`;
   return (
     <div className={styles.typingRow}>
-      <span className={styles.typingDots}>
-        <i />
-        <i />
-        <i />
+      <span className={styles.typingBubble}>
+        <span className={styles.typingDots}>
+          <i />
+          <i />
+          <i />
+        </span>
+        {text}
       </span>
-      {text}
     </div>
   );
 }

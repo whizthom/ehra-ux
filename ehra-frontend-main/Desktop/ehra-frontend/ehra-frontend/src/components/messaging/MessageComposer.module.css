@@ -1,10 +1,15 @@
 .composerWrap {
     position: relative;
-    border-top: 0.5px solid var(--border-color);
     background: var(--bg-surface);
-    padding: 8px 12px;
-    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    padding: 10px 12px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
     flex-shrink: 0;
+    /* Elevated above the wallpapered message area (box-shadow, not a
+       flat border) — matches the header's treatment on the opposite
+       edge, so the composer reads as its own floating layer rather than
+       a line drawn under the last message. */
+    box-shadow: 0 -1px 3px var(--shadow-color);
+    z-index: 3;
 }
 
 .replyBar {
@@ -139,7 +144,7 @@
     max-height: 160px;
     min-height: 44px;
     resize: none;
-    border: none;
+    border: 1.5px solid transparent;
     outline: none;
     background: var(--bg-surface-alt);
     color: var(--text-primary);
@@ -149,6 +154,11 @@
     line-height: 1.4;
     box-sizing: border-box;
     font-family: inherit;
+    transition: border-color 0.12s ease;
+}
+
+.textarea:focus {
+    border-color: var(--accent);
 }
 
 .sendBtn {
@@ -164,10 +174,13 @@
     cursor: pointer;
     flex-shrink: 0;
     font-size: 17px;
+    box-shadow: 0 1px 3px var(--shadow-color);
+    transition: background 0.12s ease, transform 0.1s ease;
 }
 
-.sendBtn:hover {
+.sendBtn:hover:not(:disabled) {
     background: var(--accent-hover);
+    transform: scale(1.04);
 }
 
 .sendBtn:disabled {
