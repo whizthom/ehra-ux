@@ -818,11 +818,10 @@
     margin-top: 1px;
 }
 
-/* Sticky footer save bar — mirrors the header actions so users never have
-   to scroll back up to save, especially useful on long/mobile forms. */
+/* Footer save bar — flows with the page like any other section (mirrors
+   the header actions so the choice to save/cancel is repeated at the
+   bottom of a long form), rather than being pinned to the viewport. */
 .pageFooterActions {
-    position: sticky;
-    bottom: 0;
     display: flex;
     justify-content: flex-end;
     gap: 10px;
@@ -830,7 +829,6 @@
     background: var(--bg-surface);
     border: 1px solid var(--border-color);
     border-radius: 14px;
-    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
 }
 
 /* ── Buttons ── */
