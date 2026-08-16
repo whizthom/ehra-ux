@@ -12,7 +12,7 @@ export default function MessageContextMenu({
   onClose,
 }) {
   return (
-    <div className={menuStyles.menu} onMouseLeave={onClose}>
+    <div className={menuStyles.menu}>
       <button
         onClick={() => {
           onReply();

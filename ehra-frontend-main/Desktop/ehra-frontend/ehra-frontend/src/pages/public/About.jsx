@@ -866,11 +866,11 @@ export default function About() {
             <div className={styles.footerCol}>
               <span className={styles.footerColHeading}>Contact</span>
               <a
-                href="mailto:contact@ehralsystems"
+                href="mailto:contact@ehral.com"
                 className={styles.footerContactLink}
               >
                 <i className="ti ti-mail" aria-hidden="true" />
-                contact@ehralsystems
+                contact@ehral.com
               </a>
               <a href="tel:+2349077746757" className={styles.footerContactLink}>
                 <i className="ti ti-phone" aria-hidden="true" />

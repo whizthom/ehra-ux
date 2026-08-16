@@ -28,6 +28,8 @@ import RegistrationSubmitted from "./pages/public/RegistrationSubmitted";
 import QrDisplayPage from "./pages/public/QrDisplayPage";
 import Pricing from "./pages/public/Pricing";
 import About from "./pages/public/About";
+import Terms from "./pages/public/Terms";
+import Privacy from "./pages/public/Privacy";
 
 import NotFound from "./pages/NotFound";
 
@@ -69,6 +71,11 @@ function App() {
                 nav, so it's safe to keep here alongside the other
                 pre-auth public routes. */}
             <Route path="/about" element={<About />} />
+
+            {/* Standalone legal documents — linked from About.jsx's and
+                SiteFooter's footer ("Legal" column). Public, no auth. */}
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
 
             {/* Reached from the link in the verification email — works
                 whether or not the browser tab is logged in, since the

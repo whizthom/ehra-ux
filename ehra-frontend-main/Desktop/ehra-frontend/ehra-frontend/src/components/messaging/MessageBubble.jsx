@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import ReactionPicker from "./ReactionPicker";
 import MessageContextMenu from "./MessageContextMenu";
 import VoicePlayer from "./VoicePlayer";
 import SystemMessage from "./SystemMessage";
 import ImageLightbox from "./ImageLightbox";
+import useClickOutside from "../../hooks/useClickOutside";
 import {
   formatTime,
   splitLinks,
@@ -60,6 +61,18 @@ export default function MessageBubble({
   const [showReactionPicker, setShowReactionPicker] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showLightbox, setShowLightbox] = useState(false);
+  // One ref covering the WHOLE bubble (trigger buttons + both popups
+  // together) — clicking either trigger button is "inside" this ref, so
+  // it doesn't get misread as an outside click and cause the popup to
+  // close-then-instantly-reopen on every toggle tap. Clicking literally
+  // anywhere else on screen — another message, the composer, empty
+  // space — closes whichever of these two is open.
+  const bubbleRef = useRef(null);
+  const closeAllPopovers = useCallback(() => {
+    setShowReactionPicker(false);
+    setShowMenu(false);
+  }, []);
+  useClickOutside(bubbleRef, closeAllPopovers, showReactionPicker || showMenu);
 
   if (message.messageType === "SYSTEM") {
     return <SystemMessage message={message} />;
@@ -152,6 +165,7 @@ export default function MessageBubble({
         )}
 
         <div
+          ref={bubbleRef}
           className={`${styles.bubble} ${isOwn ? styles.ownBubble : styles.otherBubble}`}
           onDoubleClick={() => setShowReactionPicker(true)}
         >

@@ -1,6 +1,7 @@
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import EmojiPicker from "./EmojiPicker";
 import VoiceRecorder from "./VoiceRecorder";
+import useClickOutside from "../../hooks/useClickOutside";
 import { uploadAttachment } from "../../api/messagingApi";
 import styles from "./MessageComposer.module.css";
 
@@ -36,6 +37,16 @@ export default function MessageComposer({
   const textareaRef = useRef(null);
   const imageInputRef = useRef(null);
   const docInputRef = useRef(null);
+  // Each popup gets its OWN ref covering its trigger button + panel
+  // together (attachGroupRef, emojiGroupRef), so tapping the trigger
+  // isn't misread as an "outside" click that would close-then-reopen it.
+  // mentionGroupRef additionally covers the textarea itself — the mention
+  // dropdown's whole purpose is to react to what's typed there, so
+  // clicking/continuing to type in the textarea must NOT count as
+  // "outside" the way it correctly does for the other two popups.
+  const attachGroupRef = useRef(null);
+  const emojiGroupRef = useRef(null);
+  const mentionGroupRef = useRef(null);
 
   const isEditing = Boolean(editingMessage);
   const showSendIcon = isEditing || composerFocused || text.trim().length > 0;
@@ -47,6 +58,18 @@ export default function MessageComposer({
       .filter((m) => m.name.toLowerCase().includes(q))
       .slice(0, 6);
   }, [mentionQuery, groupMembers]);
+
+  useClickOutside(
+    attachGroupRef,
+    () => setShowAttachMenu(false),
+    showAttachMenu,
+  );
+  useClickOutside(emojiGroupRef, () => setShowEmoji(false), showEmoji);
+  useClickOutside(
+    mentionGroupRef,
+    useCallback(() => setMentionQuery(null), []),
+    mentionCandidates.length > 0,
+  );
 
   const handleChange = (e) => {
     const value = e.target.value;
@@ -225,69 +248,69 @@ export default function MessageComposer({
 
       <div className={styles.inputRow}>
         {!isEditing && (
-          <button
-            className={`${styles.iconBtn} ${showAttachMenu ? styles.iconBtnActive : ""}`}
-            onClick={() => setShowAttachMenu((v) => !v)}
-            title="Attach"
-            disabled={uploading}
-          >
-            <i className={showAttachMenu ? "ti ti-x" : "ti ti-plus"} />
-          </button>
-        )}
+          <div className={styles.attachGroup} ref={attachGroupRef}>
+            <button
+              className={`${styles.iconBtn} ${showAttachMenu ? styles.iconBtnActive : ""}`}
+              onClick={() => setShowAttachMenu((v) => !v)}
+              title="Attach"
+              disabled={uploading}
+            >
+              <i className={showAttachMenu ? "ti ti-x" : "ti ti-plus"} />
+            </button>
 
-        {showAttachMenu && (
-          <div
-            className={styles.attachMenuPanel}
-            onMouseLeave={() => setShowAttachMenu(false)}
-          >
-            <button onClick={() => imageInputRef.current?.click()}>
-              <span
-                className={styles.attachIconWrap}
-                style={{ background: "#8e44ad" }}
-              >
-                <i className="ti ti-photo" />
-              </span>
-              Photo
-            </button>
-            <button onClick={() => docInputRef.current?.click()}>
-              <span
-                className={styles.attachIconWrap}
-                style={{ background: "#2980b9" }}
-              >
-                <i className="ti ti-paperclip" />
-              </span>
-              Document
-            </button>
-            <button onClick={handleShareLocation}>
-              <span
-                className={styles.attachIconWrap}
-                style={{ background: "#27ae60" }}
-              >
-                <i className="ti ti-map-pin" />
-              </span>
-              Location
-            </button>
+            {showAttachMenu && (
+              <div className={styles.attachMenuPanel}>
+                <button onClick={() => imageInputRef.current?.click()}>
+                  <span
+                    className={styles.attachIconWrap}
+                    style={{ background: "#8e44ad" }}
+                  >
+                    <i className="ti ti-photo" />
+                  </span>
+                  Photo
+                </button>
+                <button onClick={() => docInputRef.current?.click()}>
+                  <span
+                    className={styles.attachIconWrap}
+                    style={{ background: "#2980b9" }}
+                  >
+                    <i className="ti ti-paperclip" />
+                  </span>
+                  Document
+                </button>
+                <button onClick={handleShareLocation}>
+                  <span
+                    className={styles.attachIconWrap}
+                    style={{ background: "#27ae60" }}
+                  >
+                    <i className="ti ti-map-pin" />
+                  </span>
+                  Location
+                </button>
+              </div>
+            )}
           </div>
         )}
 
-        <button
-          className={styles.iconBtn}
-          onClick={() => setShowEmoji((v) => !v)}
-          title="Emoji"
-        >
-          <i className="ti ti-mood-smile" />
-        </button>
+        <div className={styles.emojiGroup} ref={emojiGroupRef}>
+          <button
+            className={styles.iconBtn}
+            onClick={() => setShowEmoji((v) => !v)}
+            title="Emoji"
+          >
+            <i className="ti ti-mood-smile" />
+          </button>
 
-        {showEmoji && (
-          <EmojiPicker
-            onPick={(emoji) => {
-              setText((t) => t + emoji);
-              setShowEmoji(false);
-              textareaRef.current?.focus();
-            }}
-            onClose={() => setShowEmoji(false)}
-          />
-        )}
+          {showEmoji && (
+            <EmojiPicker
+              onPick={(emoji) => {
+                setText((t) => t + emoji);
+                setShowEmoji(false);
+                textareaRef.current?.focus();
+              }}
+            />
+          )}
+        </div>
 
         {!isEditing && (
           <>
@@ -308,7 +331,7 @@ export default function MessageComposer({
           </>
         )}
 
-        <div className={styles.textareaWrap}>
+        <div className={styles.textareaWrap} ref={mentionGroupRef}>
           <textarea
             ref={textareaRef}
             className={styles.textarea}

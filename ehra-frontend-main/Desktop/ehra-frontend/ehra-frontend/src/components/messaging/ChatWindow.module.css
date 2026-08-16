@@ -165,9 +165,6 @@
     display: flex;
     justify-content: center;
     padding: 10px 0 14px;
-    position: sticky;
-    top: 0;
-    z-index: 1;
 }
 
 .dateSeparator span {

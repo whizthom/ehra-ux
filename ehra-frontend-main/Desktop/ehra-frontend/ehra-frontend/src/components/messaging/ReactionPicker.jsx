@@ -4,7 +4,7 @@ const QUICK_REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
 
 export default function ReactionPicker({ onPick, onClose }) {
   return (
-    <div className={styles.wrap} onMouseLeave={onClose}>
+    <div className={styles.wrap}>
       {QUICK_REACTIONS.map((emoji) => (
         <button
           key={emoji}

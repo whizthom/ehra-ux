@@ -1,0 +1,199 @@
+/* ── Section blocks ── */
+.section {
+    scroll-margin-top: 96px;
+    padding-top: 40px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--border, #e1e8e5);
+}
+
+.section:first-of-type {
+    padding-top: 0;
+}
+
+.section:last-of-type {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.sectionHead {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.sectionNum {
+    flex-shrink: 0;
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-size: 15px;
+    color: var(--gold-deep, #a97a1c);
+}
+
+.sectionTitle {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-size: clamp(20px, 2.6vw, 25px);
+    line-height: 1.3;
+    color: var(--text-primary, #0b1f1a);
+    margin: 0;
+}
+
+.subheading {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--text-primary, #0b1f1a);
+    margin: 22px 0 8px;
+}
+
+/* ── Body text ── */
+.p {
+    font-size: 15.5px;
+    line-height: 1.75;
+    color: #4d635c;
+    margin: 0 0 16px;
+}
+
+.p:last-child {
+    margin-bottom: 0;
+}
+
+.lead {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--text-primary, #0b1f1a);
+    margin: 0 0 16px;
+}
+
+.list {
+    list-style: none;
+    margin: 0 0 16px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.list:last-child {
+    margin-bottom: 0;
+}
+
+.list li {
+    position: relative;
+    padding-left: 22px;
+    font-size: 15.5px;
+    line-height: 1.65;
+    color: #4d635c;
+}
+
+.list li::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: 9px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent, #0f6e56);
+    opacity: 0.55;
+}
+
+.list strong,
+.p strong {
+    color: var(--text-primary, #0b1f1a);
+    font-weight: 600;
+}
+
+/* ── Callout — used sparingly for the handful of statements that
+   deserve to stand out from the surrounding legal prose (e.g. "we do
+   not sell personal data"), not for routine clauses. ── */
+.callout {
+    display: flex;
+    gap: 12px;
+    background: #f3f9d6;
+    background: rgba(85, 224, 174, 0.1);
+    border: 1px solid rgba(15, 110, 86, 0.18);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin: 4px 0 18px;
+}
+
+.callout i {
+    flex-shrink: 0;
+    font-size: 18px;
+    color: var(--accent, #0f6e56);
+    margin-top: 1px;
+}
+
+.callout p {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--text-primary, #0b1f1a);
+    margin: 0;
+}
+
+.calloutAmber {
+    background: rgba(255, 194, 75, 0.12);
+    border-color: rgba(169, 122, 28, 0.25);
+}
+
+.calloutAmber i {
+    color: var(--gold-deep, #a97a1c);
+}
+
+/* ── Contact card — closing section of both documents ── */
+.contactCard {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #0b1f1a;
+    color: #b8ccc5;
+    border-radius: 18px;
+    padding: 28px 30px;
+    margin-top: 8px;
+}
+
+.contactCard strong {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-size: 17px;
+    color: #fff;
+}
+
+.contactRow {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 14px;
+}
+
+.contactRow i {
+    font-size: 15px;
+    color: #55e0ae;
+}
+
+.contactRow a {
+    color: #b8ccc5;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.contactRow a:hover {
+    color: #fff;
+}
+
+.placeholder {
+    font-style: italic;
+    color: #7f9a92;
+}
+
+@media (max-width: 640px) {
+    .section {
+        padding-top: 32px;
+        padding-bottom: 32px;
+    }
+
+    .contactCard {
+        padding: 24px 22px;
+    }
+}
