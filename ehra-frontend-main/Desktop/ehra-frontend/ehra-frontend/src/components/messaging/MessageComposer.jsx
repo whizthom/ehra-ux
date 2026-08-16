@@ -27,11 +27,18 @@ export default function MessageComposer({
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
   const [mentionQuery, setMentionQuery] = useState(null);
+  // Tracks "has the person tapped into the message field", independent of
+  // whether they've typed anything yet — the mic->send icon swap fires on
+  // this, not just on non-empty text (see the send/mic button render
+  // below), per the explicit request that focusing the composer alone
+  // should switch it.
+  const [composerFocused, setComposerFocused] = useState(false);
   const textareaRef = useRef(null);
   const imageInputRef = useRef(null);
   const docInputRef = useRef(null);
 
   const isEditing = Boolean(editingMessage);
+  const showSendIcon = isEditing || composerFocused || text.trim().length > 0;
 
   const mentionCandidates = useMemo(() => {
     if (mentionQuery === null || !groupMembers) return [];
@@ -101,12 +108,11 @@ export default function MessageComposer({
     resetAfterSend();
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey && !mentionCandidates.length) {
-      e.preventDefault();
-      submitText();
-    }
-  };
+  // Enter key is intentionally NOT wired to send anymore — it does
+  // whatever a plain <textarea> already does with Enter/Shift+Enter by
+  // default (insert a newline), matching the explicit requirement that
+  // Enter should only ever create a new line. Sending happens exclusively
+  // via the send icon button below (submitText).
 
   const handleFilePicked = async (file, kind) => {
     if (!file) return;
@@ -310,8 +316,11 @@ export default function MessageComposer({
             rows={1}
             value={text}
             onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            onBlur={onStopTyping}
+            onFocus={() => setComposerFocused(true)}
+            onBlur={() => {
+              setComposerFocused(false);
+              onStopTyping();
+            }}
           />
           {mentionCandidates.length > 0 && (
             <div className={styles.mentionDropdown}>
@@ -324,16 +333,12 @@ export default function MessageComposer({
           )}
         </div>
 
-        {text.trim() ? (
+        {showSendIcon ? (
           <button
             className={styles.sendBtn}
             onClick={submitText}
-            disabled={uploading}
+            disabled={uploading || !text.trim()}
           >
-            <i className="ti ti-send" />
-          </button>
-        ) : isEditing ? (
-          <button className={styles.sendBtn} disabled>
             <i className="ti ti-send" />
           </button>
         ) : (

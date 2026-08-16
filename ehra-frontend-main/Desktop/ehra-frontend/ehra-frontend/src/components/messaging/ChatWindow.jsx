@@ -192,10 +192,7 @@ export default function ChatWindow({
         ) : (
           grouped.map((item) =>
             item.type === "date" ? (
-              <DateSeparator
-                key={item.key}
-                date={item.message?.createdAt || item.label}
-              />
+              <DateSeparator key={item.key} label={item.label} />
             ) : (
               <div id={`msg-${item.message.id}`} key={item.message.id}>
                 <MessageBubble

@@ -13,6 +13,7 @@
 
 .bubbleWrap {
     max-width: 68%;
+    min-width: 0;
     display: flex;
     flex-direction: column;
 }
@@ -31,6 +32,7 @@
     font-size: 14.5px;
     line-height: 1.4;
     word-break: break-word;
+    overflow-wrap: anywhere;
     box-shadow: 0 1px 1px var(--shadow-color);
 }
 
@@ -277,7 +279,9 @@
 }
 
 .imageContent {
-    max-width: 260px;
+    max-width: 100%;
+    width: 260px;
+    height: auto;
     max-height: 320px;
     border-radius: 10px;
     display: block;
@@ -296,7 +300,7 @@
     padding: 6px;
     text-decoration: none;
     color: var(--text-primary);
-    min-width: 200px;
+    min-width: 0;
 }
 
 .documentInfo {
@@ -332,7 +336,9 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    min-width: 200px;
+    min-width: 0;
+    width: 200px;
+    max-width: 100%;
 }
 
 .voicePlayBtn {
