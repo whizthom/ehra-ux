@@ -7,21 +7,43 @@ import {
   updateBranchStatus,
   deleteBranch,
 } from "../api/branchApi";
+import CustomSelect from "./CustomSelect";
 import styles from "./BranchesTab.module.css";
 
 // ── Helpers ───────────────────────────────────────────────────────────────
-
-function initials(first, last) {
-  return `${first?.[0] || ""}${last?.[0] || ""}`.toUpperCase() || "?";
-}
 
 function fullName(emp) {
   return [emp?.firstName, emp?.lastName].filter(Boolean).join(" ") || "—";
 }
 
+function empInitials(emp) {
+  return (
+    `${emp?.firstName?.[0] || ""}${emp?.lastName?.[0] || ""}`.toUpperCase() ||
+    "?"
+  );
+}
+
+function nameInitials(name) {
+  return (
+    (name || "")
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((p) => p[0])
+      .join("")
+      .toUpperCase() || "?"
+  );
+}
+
 function locationLine(b) {
   return [b.address, b.city, b.state, b.country].filter(Boolean).join(", ");
 }
+
+const STATUS_OPTIONS = [
+  { value: "", label: "All statuses", icon: "ti-list" },
+  { value: "ACTIVE", label: "Active", icon: "ti-circle-check" },
+  { value: "INACTIVE", label: "Inactive", icon: "ti-circle-minus" },
+];
 
 // ── Toast ─────────────────────────────────────────────────────────────────
 
@@ -57,7 +79,7 @@ function useToast() {
   return { toasts, push };
 }
 
-// ── Add / Edit Branch Modal ──────────────────────────────────────────────
+// ── Add / Edit Branch — full in-flow page, not a modal ───────────────────
 
 const EMPTY_FORM = {
   name: "",
@@ -72,7 +94,7 @@ const EMPTY_FORM = {
   managerId: "",
 };
 
-function BranchFormModal({ branch, employees, onClose, onSaved, toast }) {
+function BranchFormPage({ branch, employees, onCancel, onSaved, toast }) {
   const isEdit = Boolean(branch);
   const [form, setForm] = useState(
     branch
@@ -92,20 +114,30 @@ function BranchFormModal({ branch, employees, onClose, onSaved, toast }) {
   );
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const topRef = useRef(null);
 
   useEffect(() => {
-    const fn = (e) => e.key === "Escape" && onClose();
-    document.addEventListener("keydown", fn);
-    return () => document.removeEventListener("keydown", fn);
-  }, [onClose]);
+    topRef.current?.scrollIntoView({ block: "start" });
+  }, []);
 
   const setField = (key) => (e) =>
     setForm((f) => ({ ...f, [key]: e.target.value }));
 
-  const handleSubmit = async () => {
+  const managerOptions = [
+    { value: "", label: "No manager assigned", icon: "ti-user-off" },
+    ...(employees || []).map((emp) => ({
+      value: String(emp.id),
+      label: fullName(emp),
+      emp,
+    })),
+  ];
+
+  const handleSubmit = async (e) => {
+    e?.preventDefault();
     setError("");
     if (!form.name.trim()) {
       setError("Branch name is required.");
+      topRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
       return;
     }
     setSaving(true);
@@ -132,42 +164,87 @@ function BranchFormModal({ branch, employees, onClose, onSaved, toast }) {
         onSaved(data, false);
         toast(`${data.name} created.`, "success");
       }
-      onClose();
     } catch (err) {
       const msg =
         err?.response?.data?.message ||
         err?.response?.data ||
         "Something went wrong. Please try again.";
       setError(typeof msg === "string" ? msg : "Something went wrong.");
+      topRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.modalHeader}>
-          <h3>{isEdit ? "Edit branch" : "Add branch"}</h3>
-          <button
-            className={styles.closeBtn}
-            onClick={onClose}
-            aria-label="Close"
-          >
-            <i className="ti ti-x" aria-hidden="true" />
-          </button>
+    <div className={styles.pageWrap}>
+      <div ref={topRef} />
+
+      <div className={styles.pageHeader}>
+        <button type="button" className={styles.backBtn} onClick={onCancel}>
+          <i className="ti ti-arrow-left" aria-hidden="true" />
+          Back to branches
+        </button>
+
+        <div className={styles.pageHeaderRow}>
+          <div>
+            <h2 className={styles.pageTitle}>
+              {isEdit ? "Edit branch" : "Add a new branch"}
+            </h2>
+            <p className={styles.pageSubtitle}>
+              {isEdit
+                ? `Update details for ${branch.name}.`
+                : "Set up a new location for your business — you can always edit this later."}
+            </p>
+          </div>
+
+          <div className={styles.pageHeaderActions}>
+            <button
+              type="button"
+              className={styles.secondaryBtn}
+              onClick={onCancel}
+              disabled={saving}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className={styles.primaryBtn}
+              onClick={handleSubmit}
+              disabled={saving}
+            >
+              {saving && <span className={styles.btnSpinner} />}
+              {saving
+                ? isEdit
+                  ? "Saving…"
+                  : "Creating…"
+                : isEdit
+                  ? "Save changes"
+                  : "Create branch"}
+            </button>
+          </div>
         </div>
+      </div>
 
-        <div className={styles.modalBody}>
-          {error && (
-            <div className={styles.errorBox}>
-              <span>⚠</span>
-              <span>{error}</span>
+      {error && (
+        <div className={styles.errorBox}>
+          <i className="ti ti-alert-circle" aria-hidden="true" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      <form className={styles.formGrid} onSubmit={handleSubmit}>
+        <section className={styles.formCard}>
+          <div className={styles.formCardHeader}>
+            <i className="ti ti-building-store" aria-hidden="true" />
+            <div>
+              <h3>Basic information</h3>
+              <p>What this branch is called and what it does.</p>
             </div>
-          )}
+          </div>
 
-          <div className={styles.fieldRow}>
-            <div className={styles.field}>
+          <div className={styles.fieldGrid}>
+            <div className={`${styles.field} ${styles.fieldWide}`}>
               <label>Branch name *</label>
               <input
                 type="text"
@@ -188,32 +265,38 @@ function BranchFormModal({ branch, employees, onClose, onSaved, toast }) {
                 onChange={setField("code")}
               />
             </div>
+            <div className={`${styles.field} ${styles.fieldFull}`}>
+              <label>
+                Description <span className={styles.optional}>(optional)</span>
+              </label>
+              <textarea
+                placeholder="What this branch handles, notes, etc."
+                value={form.description}
+                onChange={setField("description")}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.formCard}>
+          <div className={styles.formCardHeader}>
+            <i className="ti ti-map-pin" aria-hidden="true" />
+            <div>
+              <h3>Location</h3>
+              <p>Where this branch is physically located.</p>
+            </div>
           </div>
 
-          <div className={styles.field}>
-            <label>
-              Description <span className={styles.optional}>(optional)</span>
-            </label>
-            <textarea
-              placeholder="What this branch handles, notes, etc."
-              value={form.description}
-              onChange={setField("description")}
-            />
-          </div>
-
-          <div className={styles.sectionLabel}>Location</div>
-
-          <div className={styles.field}>
-            <label>Address</label>
-            <input
-              type="text"
-              placeholder="Street address"
-              value={form.address}
-              onChange={setField("address")}
-            />
-          </div>
-
-          <div className={styles.fieldRow}>
+          <div className={styles.fieldGrid}>
+            <div className={`${styles.field} ${styles.fieldFull}`}>
+              <label>Address</label>
+              <input
+                type="text"
+                placeholder="Street address"
+                value={form.address}
+                onChange={setField("address")}
+              />
+            </div>
             <div className={styles.field}>
               <label>City</label>
               <input
@@ -230,20 +313,27 @@ function BranchFormModal({ branch, employees, onClose, onSaved, toast }) {
                 onChange={setField("state")}
               />
             </div>
+            <div className={styles.field}>
+              <label>Country</label>
+              <input
+                type="text"
+                value={form.country}
+                onChange={setField("country")}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.formCard}>
+          <div className={styles.formCardHeader}>
+            <i className="ti ti-phone" aria-hidden="true" />
+            <div>
+              <h3>Contact</h3>
+              <p>How employees and customers can reach this branch.</p>
+            </div>
           </div>
 
-          <div className={styles.field}>
-            <label>Country</label>
-            <input
-              type="text"
-              value={form.country}
-              onChange={setField("country")}
-            />
-          </div>
-
-          <div className={styles.sectionLabel}>Contact</div>
-
-          <div className={styles.fieldRow}>
+          <div className={styles.fieldGrid}>
             <div className={styles.field}>
               <label>Phone</label>
               <input
@@ -261,59 +351,90 @@ function BranchFormModal({ branch, employees, onClose, onSaved, toast }) {
               />
             </div>
           </div>
+        </section>
 
-          <div className={styles.sectionLabel}>Management</div>
-
-          <div className={styles.field}>
-            <label>
-              Branch manager <span className={styles.optional}>(optional)</span>
-            </label>
-            <select value={form.managerId} onChange={setField("managerId")}>
-              <option value="">No manager assigned</option>
-              {(employees || []).map((emp) => (
-                <option key={emp.id} value={emp.id}>
-                  {fullName(emp)}
-                </option>
-              ))}
-            </select>
+        <section className={styles.formCard}>
+          <div className={styles.formCardHeader}>
+            <i className="ti ti-user-star" aria-hidden="true" />
+            <div>
+              <h3>Branch manager</h3>
+              <p>Give one employee scoped oversight of this branch.</p>
+            </div>
           </div>
-        </div>
 
-        <div className={styles.modalFooter}>
-          <button className={styles.cancelBtn} onClick={onClose} type="button">
-            Cancel
-          </button>
-          <button
-            className={styles.primaryBtn}
-            onClick={handleSubmit}
-            disabled={saving}
-            type="button"
-          >
-            {saving && <span className={styles.btnSpinner} />}
-            {saving
-              ? isEdit
-                ? "Saving…"
-                : "Creating…"
-              : isEdit
-                ? "Save changes"
-                : "Create branch"}
-          </button>
-        </div>
+          <div className={styles.fieldGrid}>
+            <div className={`${styles.field} ${styles.fieldFull}`}>
+              <label>
+                Manager <span className={styles.optional}>(optional)</span>
+              </label>
+              <CustomSelect
+                value={form.managerId}
+                onChange={(v) => setForm((f) => ({ ...f, managerId: v || "" }))}
+                options={managerOptions}
+                placeholder="No manager assigned"
+                searchable
+                searchPlaceholder="Search employees…"
+                emptyLabel="No employees found"
+                renderOption={(opt, isSelected) => (
+                  <>
+                    {opt.emp ? (
+                      <span className={styles.optionAvatar}>
+                        {empInitials(opt.emp)}
+                      </span>
+                    ) : (
+                      <i className="ti ti-user-off" aria-hidden="true" />
+                    )}
+                    <span>{opt.label}</span>
+                    {isSelected && (
+                      <i className="ti ti-check" aria-hidden="true" />
+                    )}
+                  </>
+                )}
+              />
+            </div>
+          </div>
+        </section>
+      </form>
+
+      <div className={styles.pageFooterActions}>
+        <button
+          type="button"
+          className={styles.secondaryBtn}
+          onClick={onCancel}
+          disabled={saving}
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          className={styles.primaryBtn}
+          onClick={handleSubmit}
+          disabled={saving}
+        >
+          {saving && <span className={styles.btnSpinner} />}
+          {saving
+            ? isEdit
+              ? "Saving…"
+              : "Creating…"
+            : isEdit
+              ? "Save changes"
+              : "Create branch"}
+        </button>
       </div>
     </div>
   );
 }
 
-// ── Delete confirm modal ─────────────────────────────────────────────────
+// ── Delete confirmation — a purpose-built dialog, not a native confirm() ──
 
-function DeleteBranchModal({ branch, onClose, onDeleted, toast }) {
+function DeleteBranchDialog({ branch, onClose, onDeleted, toast }) {
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    const fn = (e) => e.key === "Escape" && onClose();
+    const fn = (e) => e.key === "Escape" && !deleting && onClose();
     document.addEventListener("keydown", fn);
     return () => document.removeEventListener("keydown", fn);
-  }, [onClose]);
+  }, [onClose, deleting]);
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -324,52 +445,50 @@ function DeleteBranchModal({ branch, onClose, onDeleted, toast }) {
       onClose();
     } catch {
       toast("Failed to delete branch. Please try again.", "error");
-    } finally {
       setDeleting(false);
     }
   };
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={styles.overlay} onClick={() => !deleting && onClose()}>
       <div
-        className={`${styles.modal} ${styles.modalSmall}`}
+        className={styles.dialog}
         onClick={(e) => e.stopPropagation()}
+        role="alertdialog"
+        aria-modal="true"
       >
-        <div className={styles.modalHeader}>
-          <h3>Delete branch</h3>
+        <div className={styles.dialogIconWrap}>
+          <i className="ti ti-trash" aria-hidden="true" />
+        </div>
+        <h3 className={styles.dialogTitle}>Delete {branch.name}?</h3>
+        <p className={styles.dialogBody}>
+          This can't be undone. The branch and its details will be permanently
+          removed.
+        </p>
+        {branch.employeeCount > 0 && (
+          <div className={styles.warnBox}>
+            <i className="ti ti-alert-triangle" aria-hidden="true" />
+            <span>
+              {branch.employeeCount} employee
+              {branch.employeeCount === 1 ? "" : "s"} currently assigned here
+              will be unassigned, not removed from the business.
+            </span>
+          </div>
+        )}
+        <div className={styles.dialogActions}>
           <button
-            className={styles.closeBtn}
+            type="button"
+            className={styles.secondaryBtn}
             onClick={onClose}
-            aria-label="Close"
+            disabled={deleting}
           >
-            <i className="ti ti-x" aria-hidden="true" />
-          </button>
-        </div>
-        <div className={styles.modalBody}>
-          <p style={{ margin: 0, fontSize: 13, color: "var(--text-primary)" }}>
-            Are you sure you want to delete <strong>{branch.name}</strong>?
-          </p>
-          {branch.employeeCount > 0 && (
-            <div className={styles.warnBox}>
-              <span>⚠</span>
-              <span>
-                {branch.employeeCount} employee
-                {branch.employeeCount === 1 ? "" : "s"} currently assigned to
-                this branch will be unassigned (set to Unassigned), not removed
-                from the business.
-              </span>
-            </div>
-          )}
-        </div>
-        <div className={styles.modalFooter}>
-          <button className={styles.cancelBtn} onClick={onClose} type="button">
             Cancel
           </button>
           <button
+            type="button"
             className={styles.dangerBtn}
             onClick={handleDelete}
             disabled={deleting}
-            type="button"
           >
             {deleting && <span className={styles.btnSpinner} />}
             {deleting ? "Deleting…" : "Delete branch"}
@@ -401,10 +520,15 @@ function BranchCard({ branch, pulsing, onEdit, onDelete, onToggleStatus }) {
     <div className={`${styles.card} ${pulsing ? styles.cardPulse : ""}`}>
       <div className={styles.cardTop}>
         <div className={styles.cardTitleRow}>
-          <h3 className={styles.cardName}>{branch.name}</h3>
-          {branch.code && (
-            <span className={styles.codeBadge}>{branch.code}</span>
-          )}
+          <span className={styles.cardIcon}>
+            <i className="ti ti-building-store" aria-hidden="true" />
+          </span>
+          <div className={styles.cardTitleText}>
+            <h3 className={styles.cardName}>{branch.name}</h3>
+            {branch.code && (
+              <span className={styles.codeBadge}>{branch.code}</span>
+            )}
+          </div>
         </div>
         <div className={styles.cardMenuWrap} ref={ref}>
           <button
@@ -460,8 +584,8 @@ function BranchCard({ branch, pulsing, onEdit, onDelete, onToggleStatus }) {
 
       <span
         className={`${styles.statusBadge} ${active ? styles.statusActive : styles.statusInactive}`}
-        style={{ alignSelf: "flex-start" }}
       >
+        <span className={styles.statusDot} />
         {active ? "Active" : "Inactive"}
       </span>
 
@@ -496,14 +620,7 @@ function BranchCard({ branch, pulsing, onEdit, onDelete, onToggleStatus }) {
         {branch.managerId ? (
           <span className={styles.managerChip}>
             <span className={styles.managerAvatar}>
-              {branch.managerName
-                ? branch.managerName
-                    .split(" ")
-                    .map((p) => p[0])
-                    .slice(0, 2)
-                    .join("")
-                    .toUpperCase()
-                : "?"}
+              {nameInitials(branch.managerName)}
             </span>
             {branch.managerName}
           </span>
@@ -526,15 +643,15 @@ function BranchCard({ branch, pulsing, onEdit, onDelete, onToggleStatus }) {
 export default function BranchesTab() {
   const { toasts, push: toast } = useToast();
 
+  const [view, setView] = useState({ mode: "list" }); // { mode: "list" } | { mode: "add" } | { mode: "edit", branch }
+
   const [branches, setBranches] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [pulseId, setPulseId] = useState(null);
-
-  const [formModal, setFormModal] = useState(null); // { branch: null|obj }
-  const [deleteModal, setDeleteModal] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const fetchAll = useCallback(async () => {
     try {
@@ -568,6 +685,7 @@ export default function BranchesTab() {
         : [...prev, branch],
     );
     pulse(branch.id);
+    setView({ mode: "list" });
   };
 
   const handleDeleted = (id) => {
@@ -589,6 +707,23 @@ export default function BranchesTab() {
     }
   };
 
+  // ── Page mode: Add / Edit ────────────────────────────────────────────
+  if (view.mode === "add" || view.mode === "edit") {
+    return (
+      <div className={styles.wrap}>
+        <Toast toasts={toasts} />
+        <BranchFormPage
+          branch={view.mode === "edit" ? view.branch : null}
+          employees={employees}
+          onCancel={() => setView({ mode: "list" })}
+          onSaved={handleSaved}
+          toast={toast}
+        />
+      </div>
+    );
+  }
+
+  // ── List mode ─────────────────────────────────────────────────────────
   const term = search.toLowerCase();
   const filtered = branches.filter((b) => {
     if (statusFilter && b.status !== statusFilter) return false;
@@ -623,49 +758,67 @@ export default function BranchesTab() {
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <h2 className={styles.title}>Branches</h2>
-          <div className={styles.headerMeta}>
-            <span className={styles.metaPill}>
-              <i className="ti ti-building-store" aria-hidden="true" />
-              {branches.length} branch{branches.length === 1 ? "" : "es"}
-            </span>
-            <span className={styles.metaPill}>
-              <i className="ti ti-circle-check" aria-hidden="true" />
-              {activeCount} active
-            </span>
-            <span className={styles.metaPill}>
-              <i className="ti ti-users" aria-hidden="true" />
-              {totalEmployeesAssigned} employee
-              {totalEmployeesAssigned === 1 ? "" : "s"} assigned
-            </span>
+          <p className={styles.titleSub}>
+            Manage your business's locations and who runs them.
+          </p>
+        </div>
+        <button
+          className={styles.addBtn}
+          type="button"
+          onClick={() => setView({ mode: "add" })}
+        >
+          <i className="ti ti-plus" aria-hidden="true" /> Add branch
+        </button>
+      </div>
+
+      <div className={styles.statsRow}>
+        <div className={styles.statCard}>
+          <span className={`${styles.statIcon} ${styles.statIconTotal}`}>
+            <i className="ti ti-building-store" aria-hidden="true" />
+          </span>
+          <div>
+            <div className={styles.statValue}>{branches.length}</div>
+            <div className={styles.statLabel}>Total branches</div>
           </div>
         </div>
-
-        <div className={styles.headerRight}>
-          <div className={styles.searchWrap}>
-            <i className="ti ti-search" aria-hidden="true" />
-            <input
-              type="text"
-              placeholder="Search branches…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+        <div className={styles.statCard}>
+          <span className={`${styles.statIcon} ${styles.statIconActive}`}>
+            <i className="ti ti-circle-check" aria-hidden="true" />
+          </span>
+          <div>
+            <div className={styles.statValue}>{activeCount}</div>
+            <div className={styles.statLabel}>Active</div>
           </div>
-          <select
-            className={styles.filterSelect}
+        </div>
+        <div className={styles.statCard}>
+          <span className={`${styles.statIcon} ${styles.statIconUsers}`}>
+            <i className="ti ti-users" aria-hidden="true" />
+          </span>
+          <div>
+            <div className={styles.statValue}>{totalEmployeesAssigned}</div>
+            <div className={styles.statLabel}>Employees assigned</div>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.toolbar}>
+        <div className={styles.searchWrap}>
+          <i className="ti ti-search" aria-hidden="true" />
+          <input
+            type="text"
+            placeholder="Search branches…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div className={styles.statusFilterWrap}>
+          <CustomSelect
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="">All statuses</option>
-            <option value="ACTIVE">Active</option>
-            <option value="INACTIVE">Inactive</option>
-          </select>
-          <button
-            className={styles.addBtn}
-            type="button"
-            onClick={() => setFormModal({ branch: null })}
-          >
-            <i className="ti ti-plus" aria-hidden="true" /> Add branch
-          </button>
+            onChange={(v) => setStatusFilter(v || "")}
+            options={STATUS_OPTIONS}
+            placeholder="All statuses"
+            align="right"
+          />
         </div>
       </div>
 
@@ -682,6 +835,15 @@ export default function BranchesTab() {
               ? "Add your first branch to start organizing employees, attendance, and reports by location."
               : "Try a different search term or clear the status filter."}
           </p>
+          {branches.length === 0 && (
+            <button
+              className={styles.addBtn}
+              type="button"
+              onClick={() => setView({ mode: "add" })}
+            >
+              <i className="ti ti-plus" aria-hidden="true" /> Add branch
+            </button>
+          )}
         </div>
       ) : (
         <div className={styles.grid}>
@@ -690,28 +852,18 @@ export default function BranchesTab() {
               key={b.id}
               branch={b}
               pulsing={pulseId === b.id}
-              onEdit={(branch) => setFormModal({ branch })}
-              onDelete={(branch) => setDeleteModal(branch)}
+              onEdit={(branch) => setView({ mode: "edit", branch })}
+              onDelete={(branch) => setDeleteTarget(branch)}
               onToggleStatus={handleToggleStatus}
             />
           ))}
         </div>
       )}
 
-      {formModal && (
-        <BranchFormModal
-          branch={formModal.branch}
-          employees={employees}
-          onClose={() => setFormModal(null)}
-          onSaved={handleSaved}
-          toast={toast}
-        />
-      )}
-
-      {deleteModal && (
-        <DeleteBranchModal
-          branch={deleteModal}
-          onClose={() => setDeleteModal(null)}
+      {deleteTarget && (
+        <DeleteBranchDialog
+          branch={deleteTarget}
+          onClose={() => setDeleteTarget(null)}
           onDeleted={handleDeleted}
           toast={toast}
         />

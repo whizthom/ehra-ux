@@ -1,5 +1,8 @@
 /* ── BranchesTab.module.css ────────────────────────────────────────────────
-   Follows the same design tokens as DepartmentsTab.module.css.
+   List view (cards + stats + toolbar) and a full in-flow page for
+   Add/Edit — no modal is used for the branch form, only for the
+   destructive delete confirmation, which is a custom dialog (not the
+   browser's native confirm()).
    ───────────────────────────────────────────────────────────────────────── */
 
 @keyframes spin {
@@ -30,10 +33,10 @@
     }
 }
 
-@keyframes modalIn {
+@keyframes dialogIn {
     from {
         opacity: 0;
-        transform: translateY(16px) scale(0.98);
+        transform: translateY(16px) scale(0.97);
     }
 
     to {
@@ -57,7 +60,7 @@
 .wrap {
     display: flex;
     flex-direction: column;
-    padding: 24px 0 40px;
+    padding: 4px 0 40px;
     box-sizing: border-box;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -134,20 +137,21 @@
     flex-shrink: 0;
 }
 
-/* ── Header ── */
+/* ── List header ── */
 .header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 16px;
-    margin-bottom: 22px;
+    margin-bottom: 18px;
     flex-wrap: wrap;
 }
 
 .headerLeft {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
+    min-width: 0;
 }
 
 .title {
@@ -158,34 +162,74 @@
     letter-spacing: -0.3px;
 }
 
-.headerMeta {
+.titleSub {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+/* ── Stat cards ── */
+.statsRow {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.statCard {
     display: flex;
     align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.metaPill {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
+    gap: 12px;
     background: var(--bg-surface);
     border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 14px 16px;
+}
+
+.statIcon {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+}
+
+.statIconTotal {
+    background: rgba(99, 102, 241, 0.12);
+    color: #6366f1;
+}
+
+.statIconActive {
+    background: rgba(29, 158, 117, 0.12);
+    color: var(--accent);
+}
+
+.statIconUsers {
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
+}
+
+.statValue {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.statLabel {
+    font-size: 12px;
     color: var(--text-secondary);
-    font-size: 12px;
-    font-weight: 500;
-    padding: 3px 10px;
-    border-radius: 20px;
 }
 
-.metaPill i {
-    font-size: 12px;
-}
-
-.headerRight {
+/* ── Toolbar ── */
+.toolbar {
     display: flex;
     align-items: center;
     gap: 10px;
+    margin-bottom: 18px;
     flex-wrap: wrap;
 }
 
@@ -193,17 +237,20 @@
     position: relative;
     display: flex;
     align-items: center;
+    flex: 1;
+    min-width: 200px;
 }
 
-.searchWrap>i:first-child {
+.searchWrap>i {
     position: absolute;
-    left: 11px;
+    left: 12px;
     color: var(--text-secondary);
     font-size: 15px;
     pointer-events: none;
 }
 
 .searchWrap input {
+    width: 100%;
     height: 38px;
     padding: 0 12px 0 34px;
     border: 1px solid var(--border-color);
@@ -212,7 +259,7 @@
     color: var(--text-primary);
     background: var(--bg-surface);
     outline: none;
-    width: 220px;
+    box-sizing: border-box;
     transition: border-color 0.15s, box-shadow 0.15s;
 }
 
@@ -221,16 +268,9 @@
     box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.1);
 }
 
-.filterSelect {
-    height: 38px;
-    padding: 0 30px 0 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    font-size: 13px;
-    color: var(--text-primary);
-    background: var(--bg-surface);
-    outline: none;
-    cursor: pointer;
+.statusFilterWrap {
+    width: 170px;
+    flex-shrink: 0;
 }
 
 .addBtn {
@@ -247,12 +287,17 @@
     font-weight: 500;
     cursor: pointer;
     font-family: inherit;
-    transition: background 0.15s;
+    transition: background 0.15s, transform 0.1s;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .addBtn:hover {
     background: var(--accent-hover);
+}
+
+.addBtn:active {
+    transform: scale(0.98);
 }
 
 /* ── Empty state ── */
@@ -283,7 +328,7 @@
 }
 
 .emptyState p {
-    margin: 0;
+    margin: 0 0 4px;
     font-size: 13px;
     max-width: 340px;
 }
@@ -291,7 +336,7 @@
 /* ── Branch grid ── */
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 16px;
 }
 
@@ -325,9 +370,29 @@
 
 .cardTitleRow {
     display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 0;
+}
+
+.cardIcon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: rgba(29, 158, 117, 0.12);
+    color: var(--accent);
+    display: flex;
     align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.cardTitleText {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
 }
 
 .cardName {
@@ -335,29 +400,44 @@
     font-size: 15px;
     font-weight: 600;
     color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .codeBadge {
-    font-size: 11px;
+    align-self: flex-start;
+    font-size: 10.5px;
     font-weight: 600;
     color: var(--text-secondary);
     background: var(--bg-surface-alt);
     border: 1px solid var(--border-color);
-    padding: 2px 7px;
+    padding: 1px 6px;
     border-radius: 6px;
     letter-spacing: 0.3px;
 }
 
 .statusBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     font-size: 11px;
     font-weight: 600;
-    padding: 3px 9px;
+    padding: 3px 9px 3px 7px;
     border-radius: 20px;
     white-space: nowrap;
+    align-self: flex-start;
+}
+
+.statusDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
 }
 
 .statusActive {
-    background: var(--accent-bg, rgba(29, 158, 117, 0.12));
+    background: rgba(29, 158, 117, 0.12);
     color: var(--accent);
 }
 
@@ -368,6 +448,7 @@
 
 .cardMenuWrap {
     position: relative;
+    flex-shrink: 0;
 }
 
 .menuBtn {
@@ -446,10 +527,19 @@
     flex-shrink: 0;
 }
 
+.cardMetaRow span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
 .cardFooter {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 8px;
     padding-top: 10px;
     border-top: 1px solid var(--border-color);
 }
@@ -460,6 +550,14 @@
     gap: 6px;
     font-size: 12.5px;
     color: var(--text-primary);
+    min-width: 0;
+}
+
+.managerChip>span:last-child,
+.managerChip {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .managerAvatar {
@@ -488,90 +586,150 @@
     font-size: 12px;
     font-weight: 500;
     color: var(--text-secondary);
-}
-
-/* ── Modal (shared by Add/Edit + Delete confirm) ── */
-.overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.45);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 20px;
-    animation: backdropIn 0.15s ease;
-}
-
-.modal {
-    background: var(--bg-surface);
-    border-radius: 14px;
-    width: 100%;
-    max-width: 520px;
-    max-height: 88vh;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-    overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    animation: modalIn 0.2s ease;
-}
-
-.modalSmall {
-    max-width: 420px;
-}
-
-.modalHeader {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 20px;
-    border-bottom: 0.5px solid var(--border-color);
     flex-shrink: 0;
 }
 
-.modalHeader h3 {
-    margin: 0;
+/* ── Add/Edit page (rendered in-flow on the main background) ── */
+.pageWrap {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 820px;
+    width: 100%;
+    margin: 0 auto;
+    animation: fadeSlideIn 0.2s ease;
+}
+
+.pageHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.backBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 6px 8px 6px 4px;
+    border-radius: 8px;
+    transition: color 0.15s, background 0.15s;
+}
+
+.backBtn:hover {
+    color: var(--text-primary);
+    background: var(--bg-surface-alt);
+}
+
+.backBtn i {
     font-size: 15px;
+}
+
+.pageHeaderRow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.pageTitle {
+    margin: 0 0 4px;
+    font-size: 21px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+}
+
+.pageSubtitle {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+    max-width: 480px;
+}
+
+.pageHeaderActions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+/* ── Form ── */
+.formGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.formCard {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.formCardHeader {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.formCardHeader>i {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(29, 158, 117, 0.1);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+}
+
+.formCardHeader h3 {
+    margin: 0 0 2px;
+    font-size: 14.5px;
     font-weight: 600;
     color: var(--text-primary);
 }
 
-.closeBtn {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    border: none;
-    background: var(--bg-surface-alt);
+.formCardHeader p {
+    margin: 0;
+    font-size: 12.5px;
     color: var(--text-secondary);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
-.closeBtn:hover {
-    color: var(--text-primary);
-}
-
-.modalBody {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    overflow-y: auto;
-}
-
-.fieldRow {
+.fieldGrid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
 }
 
 .field {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    min-width: 0;
+}
+
+.fieldWide {
+    grid-column: span 1;
+}
+
+.fieldFull {
+    grid-column: 1 / -1;
 }
 
 .field label {
@@ -586,48 +744,53 @@
 }
 
 .field input,
-.field select,
 .field textarea {
     padding: 0 12px;
-    height: 38px;
-    border: 0.5px solid var(--border-color);
-    border-radius: 8px;
+    height: 40px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
     font-size: 13px;
     font-family: inherit;
     background: var(--bg-surface);
     color: var(--text-primary);
     outline: none;
+    box-sizing: border-box;
     transition: border-color 0.15s, box-shadow 0.15s;
+    width: 100%;
 }
 
 .field textarea {
     height: auto;
     padding: 10px 12px;
-    min-height: 64px;
+    min-height: 76px;
     resize: vertical;
 }
 
 .field input:focus,
-.field select:focus,
 .field textarea:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.1);
 }
 
-.sectionLabel {
-    font-size: 11px;
+.optionAvatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 9.5px;
     font-weight: 700;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-    color: var(--text-secondary);
-    margin: 4px 0 -4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 .errorBox {
     background: var(--danger-bg);
-    border: 0.5px solid var(--danger-border);
-    border-radius: 8px;
-    padding: 10px 14px;
+    border: 1px solid var(--danger-border);
+    border-radius: 10px;
+    padding: 12px 14px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -637,56 +800,82 @@
 
 .warnBox {
     background: var(--warning-bg);
-    border: 0.5px solid var(--warning-border);
-    border-radius: 8px;
+    border: 1px solid var(--warning-border);
+    border-radius: 10px;
     padding: 10px 14px;
     display: flex;
     align-items: flex-start;
     gap: 8px;
     font-size: 12.5px;
     color: var(--warning-text);
+    text-align: left;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-.modalFooter {
-    display: flex;
-    gap: 10px;
-    padding: 16px 20px;
-    border-top: 0.5px solid var(--border-color);
+.warnBox i {
     flex-shrink: 0;
+    margin-top: 1px;
 }
 
-.cancelBtn {
+/* Sticky footer save bar — mirrors the header actions so users never have
+   to scroll back up to save, especially useful on long/mobile forms. */
+.pageFooterActions {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 16px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+}
+
+/* ── Buttons ── */
+.secondaryBtn {
     height: 38px;
     padding: 0 16px;
     background: none;
-    border: 0.5px solid var(--border-color);
-    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
     font-size: 13px;
+    font-weight: 500;
     color: var(--text-secondary);
     cursor: pointer;
     font-family: inherit;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
 }
 
-.cancelBtn:hover {
+.secondaryBtn:hover:not(:disabled) {
     background: var(--bg-surface-alt);
+    color: var(--text-primary);
+}
+
+.secondaryBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .primaryBtn {
-    flex: 1;
     height: 38px;
+    padding: 0 18px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     background: var(--accent);
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     color: #fff;
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
     font-family: inherit;
     transition: background 0.15s;
+    white-space: nowrap;
 }
 
 .primaryBtn:hover:not(:disabled) {
@@ -699,20 +888,21 @@
 }
 
 .dangerBtn {
-    flex: 1;
     height: 38px;
+    padding: 0 18px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     background: var(--danger-text);
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     color: #fff;
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
     font-family: inherit;
+    white-space: nowrap;
 }
 
 .dangerBtn:disabled {
@@ -720,48 +910,158 @@
     cursor: not-allowed;
 }
 
-/* ── Employee list inside detail modal ── */
-.employeeList {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    max-height: 220px;
-    overflow-y: auto;
-}
-
-.employeeRow {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 13px;
-    color: var(--text-primary);
-}
-
-.employeeAvatar {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: var(--bg-surface-alt);
-    color: var(--text-secondary);
-    font-size: 11px;
-    font-weight: 700;
+/* ── Delete confirmation dialog (custom — not window.confirm) ── */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(2px);
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
+    z-index: 1000;
+    padding: 20px;
+    animation: backdropIn 0.15s ease;
 }
 
-.employeeRoleTag {
-    margin-left: auto;
-    font-size: 11px;
-    color: var(--text-secondary);
+.dialog {
+    background: var(--bg-surface);
+    border-radius: 18px;
+    width: 100%;
+    max-width: 380px;
+    padding: 28px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.22);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    animation: dialogIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.emptyMini {
-    font-size: 12.5px;
+.dialogIconWrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+
+.dialogTitle {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.dialogBody {
+    margin: 0 0 4px;
+    font-size: 13px;
     color: var(--text-secondary);
-    padding: 6px 2px;
+    line-height: 1.5;
+}
+
+.dialogActions {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    margin-top: 14px;
+}
+
+.dialogActions .secondaryBtn,
+.dialogActions .dangerBtn {
+    flex: 1;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+    .statsRow {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .statCard {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .statValue {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 640px) {
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .addBtn {
+        justify-content: center;
+    }
+
+    .statsRow {
+        grid-template-columns: 1fr;
+    }
+
+    .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .statusFilterWrap {
+        width: 100%;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pageHeaderRow {
+        flex-direction: column;
+    }
+
+    .pageHeaderActions {
+        width: 100%;
+    }
+
+    .pageHeaderActions .secondaryBtn,
+    .pageHeaderActions .primaryBtn {
+        flex: 1;
+    }
+
+    .formCard {
+        padding: 16px;
+        border-radius: 14px;
+    }
+
+    .fieldGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .pageFooterActions {
+        flex-direction: column-reverse;
+    }
+
+    .pageFooterActions .secondaryBtn,
+    .pageFooterActions .primaryBtn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 420px) {
+    .dialog {
+        padding: 22px 18px 18px;
+    }
+
+    .dialogActions {
+        flex-direction: column-reverse;
+    }
 }
