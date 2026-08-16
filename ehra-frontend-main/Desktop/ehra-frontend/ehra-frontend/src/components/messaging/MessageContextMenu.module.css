@@ -1,5 +1,19 @@
 .menu {
-    position: absolute;
+    /* Deliberately NOT position:absolute. It was previously — with no
+       top/right/bottom/left values set on it — which made it fall back
+       to CSS's "static position" behavior: it rendered as if it weren't
+       absolutely positioned at all, always growing RIGHTWARD from its
+       parent's collapsed anchor point, completely ignoring the parent
+       .menuAnchor's `right: -4px` (which was meant to anchor the menu's
+       RIGHT edge to the bubble and have it extend leftward instead). For
+       an own-message bubble already sitting near the right edge of the
+       screen, growing further rightward pushed the whole menu off-screen
+       — exactly the bug reported. Leaving this as a normal (static)
+       block lets it actually size its absolutely-positioned parent
+       (.menuAnchor in MessageBubble.module.css), which is what makes
+       that parent's left/right anchoring behave correctly at all — see
+       MessageBubble.module.css's .menuAnchor for the actual positioning.
+    */
     z-index: 20;
     background: var(--bg-surface);
     border: 0.5px solid var(--border-color);

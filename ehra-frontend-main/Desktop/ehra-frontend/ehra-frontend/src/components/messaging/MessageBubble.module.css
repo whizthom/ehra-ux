@@ -201,13 +201,36 @@
 .menuAnchor {
     position: absolute;
     top: -46px;
-    right: 0;
     z-index: 15;
 }
 
 .menuAnchor {
     top: 4px;
+}
+
+/* Own-message bubbles sit near the RIGHT edge of the screen — anchoring
+   the popup's right edge to the bubble's right edge and letting it
+   extend leftward is what stays safely on-screen there. */
+.anchorRight {
+    right: 0;
+}
+
+.menuAnchor.anchorRight {
     right: -4px;
+}
+
+/* Received-message bubbles sit near the LEFT edge and can be very
+   narrow (a short one-word reply, for instance) — anchoring rightward
+   here is exactly what pushed a ~170px-wide menu off the edge of the
+   viewport before. Anchoring from the bubble's LEFT edge instead makes
+   the popup extend rightward, which stays within the row's available
+   space regardless of how narrow the bubble itself is. */
+.anchorLeft {
+    left: 0;
+}
+
+.menuAnchor.anchorLeft {
+    left: -4px;
 }
 
 .reactionsRow {

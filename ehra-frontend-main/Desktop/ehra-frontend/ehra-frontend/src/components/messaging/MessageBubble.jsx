@@ -4,11 +4,7 @@ import MessageContextMenu from "./MessageContextMenu";
 import VoicePlayer from "./VoicePlayer";
 import SystemMessage from "./SystemMessage";
 import ImageLightbox from "./ImageLightbox";
-import {
-  formatTime,
-  splitLinks,
-  formatFileSize,
-} from "../../utils/messagingFormat";
+import { formatTime, splitLinks, formatFileSize } from "../../utils/messagingFormat";
 import styles from "./MessageBubble.module.css";
 
 function LinkifiedText({ text }) {
@@ -22,23 +18,18 @@ function LinkifiedText({ text }) {
           </a>
         ) : (
           <span key={i}>{p.text}</span>
-        ),
+        )
       )}
     </>
   );
 }
 
 function StatusTicks({ status }) {
-  if (status === "SENDING")
-    return <i className={`ti ti-clock ${styles.tickPending}`} />;
-  if (status === "FAILED")
-    return <i className={`ti ti-alert-circle ${styles.tickFailed}`} />;
-  if (status === "READ")
-    return <i className={`ti ti-checks ${styles.tickRead}`} />;
-  if (status === "DELIVERED")
-    return <i className={`ti ti-checks ${styles.tickSent}`} />;
-  if (status === "SENT")
-    return <i className={`ti ti-check ${styles.tickSent}`} />;
+  if (status === "SENDING") return <i className={`ti ti-clock ${styles.tickPending}`} />;
+  if (status === "FAILED") return <i className={`ti ti-alert-circle ${styles.tickFailed}`} />;
+  if (status === "READ") return <i className={`ti ti-checks ${styles.tickRead}`} />;
+  if (status === "DELIVERED") return <i className={`ti ti-checks ${styles.tickSent}`} />;
+  if (status === "SENT") return <i className={`ti ti-check ${styles.tickSent}`} />;
   return null;
 }
 
@@ -105,9 +96,7 @@ export default function MessageBubble({
           >
             <i className="ti ti-file-text" style={{ fontSize: 26 }} />
             <div className={styles.documentInfo}>
-              <span className={styles.documentName}>
-                {message.metadata?.fileName || "Document"}
-              </span>
+              <span className={styles.documentName}>{message.metadata?.fileName || "Document"}</span>
               <span className={styles.documentMeta}>
                 {formatFileSize(message.metadata?.fileSizeBytes)}
               </span>
@@ -116,12 +105,7 @@ export default function MessageBubble({
           </a>
         );
       case "VOICE":
-        return (
-          <VoicePlayer
-            url={message.metadata?.url}
-            durationSeconds={message.metadata?.durationSeconds}
-          />
-        );
+        return <VoicePlayer url={message.metadata?.url} durationSeconds={message.metadata?.durationSeconds} />;
       case "LOCATION":
         return (
           <a
@@ -147,25 +131,16 @@ export default function MessageBubble({
   return (
     <div className={`${styles.row} ${isOwn ? styles.own : styles.other}`}>
       <div className={styles.bubbleWrap}>
-        {isGroup && !isOwn && (
-          <div className={styles.senderName}>{message.senderName}</div>
-        )}
+        {isGroup && !isOwn && <div className={styles.senderName}>{message.senderName}</div>}
 
         <div
           className={`${styles.bubble} ${isOwn ? styles.ownBubble : styles.otherBubble}`}
           onDoubleClick={() => setShowReactionPicker(true)}
         >
           {message.replyTo && (
-            <button
-              className={styles.replyPreview}
-              onClick={() => onScrollToReply(message.replyTo.messageId)}
-            >
-              <span className={styles.replyName}>
-                {message.replyTo.senderName}
-              </span>
-              <span className={styles.replySnippet}>
-                {message.replyTo.snippet}
-              </span>
+            <button className={styles.replyPreview} onClick={() => onScrollToReply(message.replyTo.messageId)}>
+              <span className={styles.replyName}>{message.replyTo.senderName}</span>
+              <span className={styles.replySnippet}>{message.replyTo.snippet}</span>
             </button>
           )}
 
@@ -178,29 +153,20 @@ export default function MessageBubble({
           </div>
 
           {message.status === "FAILED" && (
-            <button
-              className={styles.retryBtn}
-              onClick={() => onRetry(message)}
-            >
+            <button className={styles.retryBtn} onClick={() => onRetry(message)}>
               <i className="ti ti-refresh" /> Failed — tap to retry
             </button>
           )}
 
-          <button
-            className={styles.hoverActions}
-            onClick={() => setShowMenu((v) => !v)}
-          >
+          <button className={styles.hoverActions} onClick={() => setShowMenu((v) => !v)}>
             <i className="ti ti-dots" />
           </button>
-          <button
-            className={styles.hoverReact}
-            onClick={() => setShowReactionPicker((v) => !v)}
-          >
+          <button className={styles.hoverReact} onClick={() => setShowReactionPicker((v) => !v)}>
             <i className="ti ti-mood-smile" />
           </button>
 
           {showReactionPicker && (
-            <div className={styles.reactionPickerAnchor}>
+            <div className={`${styles.reactionPickerAnchor} ${isOwn ? styles.anchorRight : styles.anchorLeft}`}>
               <ReactionPicker
                 onPick={(emoji) => {
                   if (myReaction === emoji) onUnreact(message.id);
@@ -213,14 +179,12 @@ export default function MessageBubble({
           )}
 
           {showMenu && (
-            <div className={styles.menuAnchor}>
+            <div className={`${styles.menuAnchor} ${isOwn ? styles.anchorRight : styles.anchorLeft}`}>
               <MessageContextMenu
                 isOwn={isOwn}
                 canDeleteForEveryone={canDeleteForEveryone}
                 onReply={() => onReply(message)}
-                onCopy={() =>
-                  navigator.clipboard?.writeText(message.body || "")
-                }
+                onCopy={() => navigator.clipboard?.writeText(message.body || "")}
                 onEdit={() => onEdit(message)}
                 onDeleteForMe={() => onDeleteForMe(message.id)}
                 onDeleteForEveryone={() => onDeleteForEveryone(message.id)}
@@ -236,11 +200,7 @@ export default function MessageBubble({
               <button
                 key={r.reaction}
                 className={`${styles.reactionChip} ${r.reactedByMe ? styles.reactionChipMine : ""}`}
-                onClick={() =>
-                  r.reactedByMe
-                    ? onUnreact(message.id)
-                    : onReact(message.id, r.reaction)
-                }
+                onClick={() => (r.reactedByMe ? onUnreact(message.id) : onReact(message.id, r.reaction))}
               >
                 {r.reaction} {r.count > 1 ? r.count : ""}
               </button>
