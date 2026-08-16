@@ -222,9 +222,15 @@
 /* Duplicate "About Ehral" entry for the mobile layout, where .left (and
    the AboutEhralLink already inside it) is hidden below 900px in favor
    of .mobileHero. Hidden by default; the 900px media query below
-   switches it on. */
+   switches it on.
+   !important is load-bearing here: this class and AboutEhralLink's own
+   .link both set `display` at identical (0,1,0) specificity from two
+   separate stylesheets, so whichever one the bundler happens to
+   concatenate last wins the cascade. That made this rule silently lose
+   on desktop, showing a second "About Ehral" button on top of the
+   right panel. !important removes the ordering dependency. */
 .mobileOnlyAboutLink {
-    display: none;
+    display: none !important;
 }
 
 .rightHeader {
@@ -594,7 +600,7 @@
     }
 
     .mobileOnlyAboutLink {
-        display: inline-flex;
+        display: inline-flex !important;
     }
 
     .mobileDotGrid {
