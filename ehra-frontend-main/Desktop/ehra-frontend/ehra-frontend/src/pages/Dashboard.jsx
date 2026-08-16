@@ -30,6 +30,7 @@ import WorkforceTab from "../components/WorkforceTab";
 import MessagingHub from "../components/messaging/MessagingHub";
 import LeavesTab from "../components/LeavesTab";
 import DepartmentsTab from "../components/DepartmentsTab";
+import BranchesTab from "../components/BranchesTab";
 import ProfileEditApprovalPanel from "../components/ProfileEditApprovalPanel";
 import BusinessSettingsTab from "../components/BusinessSettingsTab";
 import PenaltyTab from "../components/PenaltyTab";
@@ -66,6 +67,7 @@ const NAV = [
   { icon: "ti-calendar-check", label: "Attendance", section: "main" },
   { icon: "ti-qrcode", label: "QR Code", section: "main" },
   { icon: "ti-building", label: "Departments", section: "main" },
+  { icon: "ti-building-store", label: "Branches", section: "main" },
   { icon: "ti-calendar-event", label: "Leave", section: "main" },
   { icon: "ti-user-edit", label: "Profile Edits", section: "main" },
   { icon: "ti-mail", label: "Messages", section: "main" },
@@ -1491,6 +1493,8 @@ export default function Dashboard() {
             />
           ) : activeNav === "Departments" ? (
             <DepartmentsTab />
+          ) : activeNav === "Branches" ? (
+            <BranchesTab />
           ) : activeNav === "Workforce" ? (
             <WorkforceTab departments={departments} />
           ) : activeNav === "Messages" ? (
