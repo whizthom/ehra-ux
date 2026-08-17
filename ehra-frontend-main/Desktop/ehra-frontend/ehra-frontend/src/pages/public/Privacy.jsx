@@ -46,8 +46,11 @@ export default function Privacy() {
       <p className={c.lead}>
         Ehral Systems ("Ehral", "we", "us" or "our") respects your privacy and
         is committed to handling personal data responsibly. This Policy should
-        be read together with our <a href="/terms">Terms of Service</a> and any
-        applicable business or data-processing agreement.
+        be read together with our{" "}
+        <a href="/terms" target="_blank" rel="noopener noreferrer">
+          Terms of Service
+        </a>{" "}
+        and any applicable business or data-processing agreement.
       </p>
 
       <section id="who-we-are" className={c.section}>
@@ -65,9 +68,7 @@ export default function Privacy() {
           <strong>Ehral Systems</strong>
           <span className={c.contactRow}>
             <i className="ti ti-lock" aria-hidden="true" />
-            <a href="mailto:contact@ehral.com">
-              <span className={c.placeholder}>contact@ehral.com</span>
-            </a>
+            <a href="mailto:privacy@ehral.com">privacy@ehral.com</a>
           </span>
         </div>
       </section>
@@ -506,7 +507,7 @@ export default function Privacy() {
         <div className={c.contactCard}>
           <span className={c.contactRow}>
             <i className="ti ti-lock" aria-hidden="true" />
-            <span className={c.placeholder}>[INSERT PRIVACY EMAIL]</span>
+            <a href="mailto:privacy@ehral.com">privacy@ehral.com</a>
           </span>
         </div>
         <p className={c.p} style={{ marginTop: 16 }}>
@@ -607,11 +608,11 @@ export default function Privacy() {
           </span>
           <span className={c.contactRow}>
             <i className="ti ti-lock" aria-hidden="true" />
-            <span className={c.placeholder}>[INSERT PRIVACY EMAIL]</span>
+            <a href="mailto:privacy@ehral.com">privacy@ehral.com</a>
           </span>
           <span className={c.contactRow}>
             <i className="ti ti-mail" aria-hidden="true" />
-            <span className={c.placeholder}>[INSERT GENERAL EMAIL]</span>
+            <a href="mailto:contact@ehral.com">contact@ehral.com</a>
           </span>
         </div>
       </section>

@@ -145,8 +145,8 @@ const FOOTER_LINKS = {
     { label: "Founder", href: "#founder" },
   ],
   Legal: [
-    { label: "Privacy", href: "/privacy" },
-    { label: "Terms", href: "/terms" },
+    { label: "Privacy", href: "/privacy", newTab: true },
+    { label: "Terms", href: "/terms", newTab: true },
   ],
 };
 
@@ -857,7 +857,13 @@ export default function About() {
               <div className={styles.footerCol} key={heading}>
                 <span className={styles.footerColHeading}>{heading}</span>
                 {links.map((link) => (
-                  <a key={link.label} href={link.href}>
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    {...(link.newTab
+                      ? { target: "_blank", rel: "noopener noreferrer" }
+                      : {})}
+                  >
                     {link.label}
                   </a>
                 ))}

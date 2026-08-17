@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { downloadFile } from "../../utils/fileOpen";
 import styles from "./ImageLightbox.module.css";
 
 // Full-screen in-app image viewer. Exists specifically so tapping a photo
@@ -20,26 +21,7 @@ export default function ImageLightbox({ url, caption, onClose }) {
     e.stopPropagation();
     setDownloading(true);
     try {
-      // Fetching the bytes ourselves and saving via a Blob/object URL — as
-      // opposed to a plain <a href={url} download> — is what stops the
-      // browser from just navigating to the CDN URL when it can't infer a
-      // download from cross-origin headers alone; this always saves the
-      // file rather than opening a new tab.
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const objectUrl = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = objectUrl;
-      link.download = url.split("/").pop()?.split("?")[0] || "image";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(objectUrl);
-    } catch {
-      // Last-resort fallback — still opens in-tab rather than silently
-      // doing nothing, but only if the fetch itself (likely a CORS or
-      // network issue) failed.
-      window.open(url, "_blank", "noopener,noreferrer");
+      await downloadFile(url);
     } finally {
       setDownloading(false);
     }

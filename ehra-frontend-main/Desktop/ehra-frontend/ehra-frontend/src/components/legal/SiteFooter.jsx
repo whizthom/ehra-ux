@@ -19,8 +19,8 @@ const FOOTER_LINKS = {
     { label: "Founder", href: "/about#founder" },
   ],
   Legal: [
-    { label: "Privacy", href: "/privacy" },
-    { label: "Terms", href: "/terms" },
+    { label: "Privacy", href: "/privacy", newTab: true },
+    { label: "Terms", href: "/terms", newTab: true },
   ],
 };
 
@@ -39,17 +39,28 @@ export default function SiteFooter() {
           {Object.entries(FOOTER_LINKS).map(([heading, links]) => (
             <div className={styles.footerCol} key={heading}>
               <span className={styles.footerColHeading}>{heading}</span>
-              {links.map((link) => (
-                <Link key={link.label} to={link.href}>
-                  {link.label}
-                </Link>
-              ))}
+              {links.map((link) =>
+                link.newTab ? (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {link.label}
+                  </a>
+                ) : (
+                  <Link key={link.label} to={link.href}>
+                    {link.label}
+                  </Link>
+                ),
+              )}
             </div>
           ))}
           <div className={styles.footerCol}>
             <span className={styles.footerColHeading}>Contact</span>
             <a
-              href="mailto:contact@ehralsystems"
+              href="mailto:contact@ehral.com"
               className={styles.footerContactLink}
             >
               <i className="ti ti-mail" aria-hidden="true" />

@@ -51,7 +51,7 @@
 }
 
 .intro {
-    font-size: 16.5px;
+    font-size: 18px;
     line-height: 1.65;
     color: var(--text-secondary, #6f8b81);
     max-width: 620px;
@@ -136,7 +136,7 @@
     display: flex;
     align-items: baseline;
     gap: 8px;
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.5;
     text-decoration: none;
     padding: 7px 0 7px 14px;
@@ -171,7 +171,7 @@
    only owns the shell / grid / TOC. ── */
 .article {
     min-width: 0;
-    max-width: 720px;
+    max-width: 760px;
 }
 
 /* ── Responsive ── */

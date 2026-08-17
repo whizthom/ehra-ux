@@ -316,11 +316,28 @@
 .documentRow {
     display: flex;
     align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.documentOpenArea {
+    display: flex;
+    align-items: center;
     gap: 10px;
     padding: 6px;
-    text-decoration: none;
+    border: none;
+    background: none;
+    text-align: left;
     color: var(--text-primary);
+    cursor: pointer;
     min-width: 0;
+    flex: 1;
+    border-radius: 8px;
+    transition: background 0.12s ease;
+}
+
+.documentOpenArea:hover {
+    background: color-mix(in srgb, var(--text-primary) 6%, transparent);
 }
 
 .documentInfo {
@@ -341,6 +358,32 @@
 .documentMeta {
     font-size: 12px;
     color: var(--text-secondary);
+}
+
+.documentDownloadBtn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.documentDownloadBtn:hover {
+    background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+    color: var(--accent);
+}
+
+.documentDownloadBtn:disabled {
+    opacity: 0.6;
+    cursor: default;
 }
 
 .locationRow {

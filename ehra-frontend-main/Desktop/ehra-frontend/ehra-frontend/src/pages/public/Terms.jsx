@@ -32,8 +32,8 @@ export default function Terms() {
       eyebrow="Legal"
       title="Terms of Service"
       intro="These Terms govern your access to and use of Ehral's websites, applications, software, services and related products."
-      effectiveDate="[INSERT DATE]"
-      lastUpdated="[INSERT DATE]"
+      effectiveDate="17th August 2026"
+      lastUpdated="17th August 2026"
       sections={SECTIONS}
     >
       <p className={c.lead}>
@@ -542,13 +542,11 @@ export default function Terms() {
           </span>
           <span className={c.contactRow}>
             <i className="ti ti-mail" aria-hidden="true" />
-            <span className={c.placeholder}>
-              [INSERT LEGAL/GENERAL CONTACT EMAIL]
-            </span>
+            <a href="mailto:contact@ehral.com">contact@ehral.com</a>
           </span>
           <span className={c.contactRow}>
             <i className="ti ti-lock" aria-hidden="true" />
-            <span className={c.placeholder}>[INSERT PRIVACY EMAIL]</span>
+            <a href="mailto:privacy@ehral.com">privacy@ehral.com</a>
           </span>
         </div>
       </section>
