@@ -20,6 +20,23 @@ export const updateBranchStatus = (id, status) =>
 
 export const deleteBranch = (id) => API.delete(`/branches/${id}`);
 
+// ── Branch dashboard, QR, employees ─────────────────────────────────────
+
+export const getBranchDashboard = (id) => API.get(`/branches/${id}/dashboard`);
+
+export const getBranchEmployees = (id, page = 0, size = 25) =>
+  API.get(`/branches/${id}/employees`, { params: { page, size } });
+
+export const getBranchAttendanceQr = (id) => API.get(`/branches/${id}/attendance-qr`);
+
+export const regenerateBranchAttendanceQr = (id) =>
+  API.post(`/branches/${id}/attendance-qr/regenerate`);
+
+// ── Employee branch-transfer history ────────────────────────────────────
+
+export const getEmployeeBranchHistory = (employeeId) =>
+  API.get(`/employees/${employeeId}/branch-history`);
+
 // ── Assign an employee to a branch ──────────────────────────────────────
 
 export const assignEmployeeBranch = (employeeId, branchId) =>
