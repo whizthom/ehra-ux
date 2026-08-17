@@ -882,6 +882,15 @@ export default function About() {
                 <i className="ti ti-phone" aria-hidden="true" />
                 0907 774 6757
               </a>
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=Ado-Ekiti%2C%20Nigeria"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.footerContactLink}
+              >
+                <i className="ti ti-map-pin" aria-hidden="true" />
+                Ado-Ekiti, Nigeria
+              </a>
             </div>
           </div>
         </div>
