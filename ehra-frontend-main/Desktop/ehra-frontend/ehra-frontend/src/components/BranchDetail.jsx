@@ -1,23 +1,23 @@
 import { useState, useEffect, useCallback } from "react";
-import { getBranchDashboard, getBranchEmployees } from "../api/branchApi";
+import { getBranchDashboard, getBranchEmployees, getEmployeeBranchHistory, getBranchLeave, getBranchPayroll } from "../api/branchApi";
 import BranchQrPanel from "./BranchQrPanel";
 import styles from "./BranchDetail.module.css";
 
 function nameInitials(name) {
-  return (
-    (name || "")
-      .split(" ")
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((p) => p[0])
-      .join("")
-      .toUpperCase() || "?"
-  );
+  return (name || "")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join("")
+    .toUpperCase() || "?";
 }
 
 const TABS = [
   { key: "overview", label: "Overview", icon: "ti-layout-dashboard" },
   { key: "employees", label: "Employees", icon: "ti-users" },
+  { key: "leave", label: "Leave", icon: "ti-beach" },
+  { key: "payroll", label: "Payroll", icon: "ti-cash" },
   { key: "qr", label: "Attendance QR", icon: "ti-qrcode" },
 ];
 
@@ -45,9 +45,7 @@ function OverviewTab({ branchId }) {
     setLoading(true);
     getBranchDashboard(branchId)
       .then(({ data }) => !cancelled && setSummary(data))
-      .catch(
-        () => !cancelled && setError("Couldn't load this branch's overview."),
-      )
+      .catch(() => !cancelled && setError("Couldn't load this branch's overview."))
       .finally(() => !cancelled && setLoading(false));
     return () => {
       cancelled = true;
@@ -63,9 +61,7 @@ function OverviewTab({ branchId }) {
   }
 
   if (error || !summary) {
-    return (
-      <div className={styles.tabError}>{error || "No data available."}</div>
-    );
+    return <div className={styles.tabError}>{error || "No data available."}</div>;
   }
 
   return (
@@ -139,6 +135,111 @@ function OverviewTab({ branchId }) {
   );
 }
 
+function formatDate(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }) + " · " + d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+}
+
+// Expandable row — clicking an employee reveals their branch-transfer
+// timeline inline (a custom accordion, not a native popup/dialog), fetched
+// lazily so opening the Employees tab doesn't pay for every employee's
+// history up front.
+function EmployeeHistoryRow({ emp }) {
+  const [open, setOpen] = useState(false);
+  const [history, setHistory] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const toggle = () => {
+    const next = !open;
+    setOpen(next);
+    if (next && history === null && !loading) {
+      setLoading(true);
+      getEmployeeBranchHistory(emp.id)
+        .then(({ data }) => setHistory(data))
+        .catch((err) => {
+          if (err?.response?.status === 403) {
+            setError("Only business admins can view transfer history.");
+          } else {
+            setError("Couldn't load transfer history.");
+          }
+        })
+        .finally(() => setLoading(false));
+    }
+  };
+
+  return (
+    <div className={styles.employeeRowWrap}>
+      <button
+        type="button"
+        className={styles.employeeRow}
+        onClick={toggle}
+        aria-expanded={open}
+      >
+        <span className={styles.employeeAvatar}>
+          {nameInitials(`${emp.firstName || ""} ${emp.lastName || ""}`)}
+        </span>
+        <div className={styles.employeeInfo}>
+          <span className={styles.employeeName}>
+            {emp.firstName} {emp.lastName}
+          </span>
+          <span className={styles.employeeMeta}>{emp.email}</span>
+        </div>
+        <span className={styles.employeePosition}>{emp.position || "—"}</span>
+        <i
+          className={`ti ti-chevron-down ${styles.employeeChevron} ${open ? styles.employeeChevronOpen : ""}`}
+          aria-hidden="true"
+        />
+      </button>
+
+      {open && (
+        <div className={styles.historyPanel}>
+          {loading && <div className={styles.historyLoading}>Loading transfer history…</div>}
+          {error && <div className={styles.historyError}>{error}</div>}
+          {!loading && !error && history && history.length === 0 && (
+            <div className={styles.historyEmpty}>
+              No branch transfers recorded for this employee yet.
+            </div>
+          )}
+          {!loading && !error && history && history.length > 0 && (
+            <ul className={styles.historyList}>
+              {history.map((h) => (
+                <li key={h.id} className={styles.historyItem}>
+                  <span className={styles.historyIcon}>
+                    <i className="ti ti-arrow-right" aria-hidden="true" />
+                  </span>
+                  <div className={styles.historyText}>
+                    <div className={styles.historyLine}>
+                      <span className={h.previousBranchName ? "" : styles.historyMuted}>
+                        {h.previousBranchName || "Unassigned"}
+                      </span>
+                      <i className="ti ti-arrow-narrow-right" aria-hidden="true" />
+                      <span className={h.newBranchName ? "" : styles.historyMuted}>
+                        {h.newBranchName || "Unassigned"}
+                      </span>
+                    </div>
+                    <div className={styles.historyMeta}>
+                      {formatDate(h.effectiveAt)}
+                      {h.changedByLabel && <> · by {h.changedByLabel}</>}
+                      {h.reason && <> · {h.reason}</>}
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function EmployeesTab({ branchId }) {
   const [page, setPage] = useState(0);
   const [data, setData] = useState(null);
@@ -150,10 +251,7 @@ function EmployeesTab({ branchId }) {
     setLoading(true);
     getBranchEmployees(branchId, page, 10)
       .then(({ data }) => !cancelled && setData(data))
-      .catch(
-        () =>
-          !cancelled && setError("Couldn't load employees for this branch."),
-      )
+      .catch(() => !cancelled && setError("Couldn't load employees for this branch."))
       .finally(() => !cancelled && setLoading(false));
     return () => {
       cancelled = true;
@@ -185,19 +283,227 @@ function EmployeesTab({ branchId }) {
     <div className={styles.employeesWrap}>
       <div className={styles.employeeTable}>
         {employees.map((emp) => (
-          <div key={emp.id} className={styles.employeeRow}>
+          <EmployeeHistoryRow key={emp.id} emp={emp} />
+        ))}
+      </div>
+
+      {data && data.totalPages > 1 && (
+        <div className={styles.pagination}>
+          <button
+            type="button"
+            className={styles.pageBtn}
+            disabled={page === 0}
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+          >
+            <i className="ti ti-chevron-left" aria-hidden="true" />
+          </button>
+          <span className={styles.pageInfo}>
+            Page {page + 1} of {data.totalPages}
+          </span>
+          <button
+            type="button"
+            className={styles.pageBtn}
+            disabled={page + 1 >= data.totalPages}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            <i className="ti ti-chevron-right" aria-hidden="true" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const LEAVE_STATUS_LABELS = {
+  PENDING_COVER: "Pending cover",
+  COVER_DECLINED: "Cover declined",
+  PENDING_HOD: "Pending HOD",
+  PENDING_EMPLOYER: "Pending employer",
+  APPROVED: "Approved",
+  REJECTED: "Rejected",
+  CANCELLED: "Cancelled",
+};
+
+function leaveStatusClass(status) {
+  if (status === "APPROVED") return styles.leaveStatusApproved;
+  if (status === "REJECTED" || status === "CANCELLED") return styles.leaveStatusRejected;
+  return styles.leaveStatusPending;
+}
+
+function LeaveTab({ branchId }) {
+  const [page, setPage] = useState(0);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    getBranchLeave(branchId, page, 10)
+      .then(({ data }) => !cancelled && setData(data))
+      .catch(() => !cancelled && setError("Couldn't load leave requests for this branch."))
+      .finally(() => !cancelled && setLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [branchId, page]);
+
+  if (loading && !data) {
+    return (
+      <div className={styles.tabLoading}>
+        <div className={styles.spinner} />
+      </div>
+    );
+  }
+
+  if (error) return <div className={styles.tabError}>{error}</div>;
+
+  const requests = data?.content || [];
+
+  if (requests.length === 0) {
+    return (
+      <div className={styles.emptyMini}>
+        <i className="ti ti-beach" aria-hidden="true" />
+        <p>No leave requests recorded for this branch yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.employeesWrap}>
+      <div className={styles.employeeTable}>
+        {requests.map((l) => (
+          <div key={l.id} className={styles.leaveRow}>
             <span className={styles.employeeAvatar}>
-              {nameInitials(`${emp.firstName || ""} ${emp.lastName || ""}`)}
+              {nameInitials(`${l.employeeFirstName || ""} ${l.employeeLastName || ""}`)}
             </span>
             <div className={styles.employeeInfo}>
               <span className={styles.employeeName}>
-                {emp.firstName} {emp.lastName}
+                {l.employeeFirstName} {l.employeeLastName}
               </span>
-              <span className={styles.employeeMeta}>{emp.email}</span>
+              <span className={styles.employeeMeta}>
+                {l.leaveType?.replaceAll("_", " ")} · {l.startDate} → {l.endDate} · {l.days}d
+              </span>
             </div>
-            <span className={styles.employeePosition}>
-              {emp.position || "—"}
+            <span className={`${styles.leaveStatusBadge} ${leaveStatusClass(l.status)}`}>
+              {LEAVE_STATUS_LABELS[l.status] || l.status}
             </span>
+          </div>
+        ))}
+      </div>
+
+      {data && data.totalPages > 1 && (
+        <div className={styles.pagination}>
+          <button
+            type="button"
+            className={styles.pageBtn}
+            disabled={page === 0}
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+          >
+            <i className="ti ti-chevron-left" aria-hidden="true" />
+          </button>
+          <span className={styles.pageInfo}>
+            Page {page + 1} of {data.totalPages}
+          </span>
+          <button
+            type="button"
+            className={styles.pageBtn}
+            disabled={page + 1 >= data.totalPages}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            <i className="ti ti-chevron-right" aria-hidden="true" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function formatMoney(v) {
+  if (v === null || v === undefined) return "—";
+  const n = Number(v);
+  if (Number.isNaN(n)) return "—";
+  return n.toLocaleString(undefined, { style: "currency", currency: "USD" });
+}
+
+function PayrollTab({ branchId }) {
+  const [page, setPage] = useState(0);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [forbidden, setForbidden] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    getBranchPayroll(branchId, page, 10)
+      .then(({ data }) => !cancelled && setData(data))
+      .catch((err) => {
+        if (cancelled) return;
+        if (err?.response?.status === 403) {
+          setForbidden(true);
+        } else {
+          setError("Couldn't load payroll records for this branch.");
+        }
+      })
+      .finally(() => !cancelled && setLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [branchId, page]);
+
+  if (loading && !data) {
+    return (
+      <div className={styles.tabLoading}>
+        <div className={styles.spinner} />
+      </div>
+    );
+  }
+
+  if (forbidden) {
+    return (
+      <div className={styles.emptyMini}>
+        <i className="ti ti-lock" aria-hidden="true" />
+        <p>Only business admins can view branch payroll records.</p>
+      </div>
+    );
+  }
+
+  if (error) return <div className={styles.tabError}>{error}</div>;
+
+  const records = data?.content || [];
+
+  if (records.length === 0) {
+    return (
+      <div className={styles.emptyMini}>
+        <i className="ti ti-cash-off" aria-hidden="true" />
+        <p>No payroll records finalized for this branch yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.employeesWrap}>
+      <div className={styles.employeeTable}>
+        {records.map((p, idx) => (
+          <div key={idx} className={styles.payrollRow}>
+            <span className={styles.employeeAvatar}>
+              {nameInitials(`${p.firstName || ""} ${p.lastName || ""}`)}
+            </span>
+            <div className={styles.employeeInfo}>
+              <span className={styles.employeeName}>
+                {p.firstName} {p.lastName}
+              </span>
+              <span className={styles.employeeMeta}>
+                {p.periodStart} → {p.periodEnd}
+              </span>
+            </div>
+            <div className={styles.payrollFigures}>
+              <span className={styles.payrollNet}>{formatMoney(p.netPay)}</span>
+              <span className={styles.payrollDeduction}>
+                −{formatMoney(p.totalDeduction)} deducted
+              </span>
+            </div>
           </div>
         ))}
       </div>
@@ -249,9 +555,7 @@ export default function BranchDetail({ branch, onBack, onEdit }) {
           <div>
             <div className={styles.headerNameRow}>
               <h2 className={styles.headerName}>{branch.name}</h2>
-              {branch.code && (
-                <span className={styles.codeBadge}>{branch.code}</span>
-              )}
+              {branch.code && <span className={styles.codeBadge}>{branch.code}</span>}
               <span
                 className={`${styles.statusBadge} ${branch.status === "ACTIVE" ? styles.statusActive : styles.statusInactive}`}
               >
@@ -270,11 +574,7 @@ export default function BranchDetail({ branch, onBack, onEdit }) {
             )}
           </div>
         </div>
-        <button
-          type="button"
-          className={styles.editBtn}
-          onClick={() => onEdit(branch)}
-        >
+        <button type="button" className={styles.editBtn} onClick={() => onEdit(branch)}>
           <i className="ti ti-pencil" aria-hidden="true" /> Edit branch
         </button>
       </div>
@@ -296,9 +596,9 @@ export default function BranchDetail({ branch, onBack, onEdit }) {
       <div className={styles.tabContent}>
         {tab === "overview" && <OverviewTab branchId={branch.id} />}
         {tab === "employees" && <EmployeesTab branchId={branch.id} />}
-        {tab === "qr" && (
-          <BranchQrPanel branchId={branch.id} branchStatus={branch.status} />
-        )}
+        {tab === "leave" && <LeaveTab branchId={branch.id} />}
+        {tab === "payroll" && <PayrollTab branchId={branch.id} />}
+        {tab === "qr" && <BranchQrPanel branchId={branch.id} branchStatus={branch.status} />}
       </div>
     </div>
   );

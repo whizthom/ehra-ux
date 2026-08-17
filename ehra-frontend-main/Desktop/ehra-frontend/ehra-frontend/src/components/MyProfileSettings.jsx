@@ -40,10 +40,17 @@ export default function MyProfileSettings({ profile, onGoToProfileEdits }) {
           <p className={styles.meta}>
             {profile.position || "No position set"}
             {profile.departmentName ? ` · ${profile.departmentName}` : ""}
+            {profile.branchName && profile.branchName !== "Unassigned"
+              ? ` · ${profile.branchName}`
+              : ""}
             {profile.isHod ? " · Head of Department" : ""}
           </p>
         </div>
-        <button type="button" className={styles.editBtn} onClick={onGoToProfileEdits}>
+        <button
+          type="button"
+          className={styles.editBtn}
+          onClick={onGoToProfileEdits}
+        >
           <i className="ti ti-edit" /> Request a change
         </button>
       </div>
@@ -71,6 +78,8 @@ export default function MyProfileSettings({ profile, onGoToProfileEdits }) {
         <Row label="Status" value={profile.status} />
         <Row label="Business" value={profile.businessName} />
         <Row label="Head of department" value={profile.hodName} />
+        <Row label="Branch" value={profile.branchName} />
+        <Row label="Branch manager" value={profile.branchManagerName} />
       </div>
     </div>
   );

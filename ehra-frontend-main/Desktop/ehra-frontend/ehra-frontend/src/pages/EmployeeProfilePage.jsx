@@ -410,6 +410,16 @@ export default function EmployeeProfilePage() {
                     />
                     {profile.departmentName || "Unassigned"}
                   </span>
+                  {profile.branchName && profile.branchName !== "Unassigned" && (
+                    <span className={styles.deptBadge}>
+                      <i
+                        className="ti ti-building-store"
+                        style={{ fontSize: 11 }}
+                        aria-hidden="true"
+                      />
+                      {profile.branchName}
+                    </span>
+                  )}
                   {profile.hodName && (
                     <span className={styles.hodBadge}>
                       <i
@@ -577,6 +587,24 @@ export default function EmployeeProfilePage() {
                       <span className={styles.infoLabel}>Head of dept</span>
                       <span className={styles.infoValue}>
                         {profile.hodName || "Not assigned"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.infoCard}>
+                  <h3 className={styles.cardTitle}>Branch</h3>
+                  <div className={styles.infoRows}>
+                    <div className={styles.infoRow}>
+                      <span className={styles.infoLabel}>Branch</span>
+                      <span className={styles.infoValue}>
+                        {profile.branchName || "Unassigned"}
+                      </span>
+                    </div>
+                    <div className={styles.infoRow}>
+                      <span className={styles.infoLabel}>Branch manager</span>
+                      <span className={styles.infoValue}>
+                        {profile.branchManagerName || "Not assigned"}
                       </span>
                     </div>
                   </div>

@@ -24,8 +24,16 @@ export const deleteBranch = (id) => API.delete(`/branches/${id}`);
 
 export const getBranchDashboard = (id) => API.get(`/branches/${id}/dashboard`);
 
+export const getBusinessBranchDashboard = () => API.get(`/branches/dashboard`);
+
 export const getBranchEmployees = (id, page = 0, size = 25) =>
   API.get(`/branches/${id}/employees`, { params: { page, size } });
+
+export const getBranchLeave = (id, page = 0, size = 25) =>
+  API.get(`/branches/${id}/leave`, { params: { page, size } });
+
+export const getBranchPayroll = (id, page = 0, size = 25) =>
+  API.get(`/branches/${id}/payroll`, { params: { page, size } });
 
 export const getBranchAttendanceQr = (id) => API.get(`/branches/${id}/attendance-qr`);
 

@@ -9,6 +9,7 @@ import {
 } from "../api/branchApi";
 import CustomSelect from "./CustomSelect";
 import BranchDetail from "./BranchDetail";
+import BusinessBranchDashboard from "./BusinessBranchDashboard";
 import styles from "./BranchesTab.module.css";
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -18,17 +19,22 @@ function fullName(emp) {
 }
 
 function empInitials(emp) {
-  return `${emp?.firstName?.[0] || ""}${emp?.lastName?.[0] || ""}`.toUpperCase() || "?";
+  return (
+    `${emp?.firstName?.[0] || ""}${emp?.lastName?.[0] || ""}`.toUpperCase() ||
+    "?"
+  );
 }
 
 function nameInitials(name) {
-  return (name || "")
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0])
-    .join("")
-    .toUpperCase() || "?";
+  return (
+    (name || "")
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((p) => p[0])
+      .join("")
+      .toUpperCase() || "?"
+  );
 }
 
 function locationLine(b) {
@@ -47,7 +53,10 @@ function Toast({ toasts }) {
   return (
     <div className={styles.toastStack}>
       {toasts.map((t) => (
-        <div key={t.id} className={`${styles.toast} ${styles[`toast_${t.type}`]}`}>
+        <div
+          key={t.id}
+          className={`${styles.toast} ${styles[`toast_${t.type}`]}`}
+        >
           <i
             className={`ti ${t.type === "error" ? "ti-alert-circle" : "ti-circle-check"}`}
             aria-hidden="true"
@@ -64,7 +73,10 @@ function useToast() {
   const push = useCallback((message, type = "success") => {
     const id = Date.now() + Math.random();
     setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3500);
+    setTimeout(
+      () => setToasts((prev) => prev.filter((t) => t.id !== id)),
+      3500,
+    );
   }, []);
   return { toasts, push };
 }
@@ -289,15 +301,27 @@ function BranchFormPage({ branch, employees, onCancel, onSaved, toast }) {
             </div>
             <div className={styles.field}>
               <label>City</label>
-              <input type="text" value={form.city} onChange={setField("city")} />
+              <input
+                type="text"
+                value={form.city}
+                onChange={setField("city")}
+              />
             </div>
             <div className={styles.field}>
               <label>State</label>
-              <input type="text" value={form.state} onChange={setField("state")} />
+              <input
+                type="text"
+                value={form.state}
+                onChange={setField("state")}
+              />
             </div>
             <div className={styles.field}>
               <label>Country</label>
-              <input type="text" value={form.country} onChange={setField("country")} />
+              <input
+                type="text"
+                value={form.country}
+                onChange={setField("country")}
+              />
             </div>
           </div>
         </section>
@@ -314,11 +338,19 @@ function BranchFormPage({ branch, employees, onCancel, onSaved, toast }) {
           <div className={styles.fieldGrid}>
             <div className={styles.field}>
               <label>Phone</label>
-              <input type="tel" value={form.phone} onChange={setField("phone")} />
+              <input
+                type="tel"
+                value={form.phone}
+                onChange={setField("phone")}
+              />
             </div>
             <div className={styles.field}>
               <label>Email</label>
-              <input type="email" value={form.email} onChange={setField("email")} />
+              <input
+                type="email"
+                value={form.email}
+                onChange={setField("email")}
+              />
             </div>
           </div>
         </section>
@@ -348,12 +380,16 @@ function BranchFormPage({ branch, employees, onCancel, onSaved, toast }) {
                 renderOption={(opt, isSelected) => (
                   <>
                     {opt.emp ? (
-                      <span className={styles.optionAvatar}>{empInitials(opt.emp)}</span>
+                      <span className={styles.optionAvatar}>
+                        {empInitials(opt.emp)}
+                      </span>
                     ) : (
                       <i className="ti ti-user-off" aria-hidden="true" />
                     )}
                     <span>{opt.label}</span>
-                    {isSelected && <i className="ti ti-check" aria-hidden="true" />}
+                    {isSelected && (
+                      <i className="ti ti-check" aria-hidden="true" />
+                    )}
                   </>
                 )}
               />
@@ -428,14 +464,16 @@ function DeleteBranchDialog({ branch, onClose, onDeleted, toast }) {
         </div>
         <h3 className={styles.dialogTitle}>Delete {branch.name}?</h3>
         <p className={styles.dialogBody}>
-          This can't be undone. The branch and its details will be permanently removed.
+          This can't be undone. The branch and its details will be permanently
+          removed.
         </p>
         {branch.employeeCount > 0 && (
           <div className={styles.warnBox}>
             <i className="ti ti-alert-triangle" aria-hidden="true" />
             <span>
-              {branch.employeeCount} employee{branch.employeeCount === 1 ? "" : "s"}{" "}
-              currently assigned here will be unassigned, not removed from the business.
+              {branch.employeeCount} employee
+              {branch.employeeCount === 1 ? "" : "s"} currently assigned here
+              will be unassigned, not removed from the business.
             </span>
           </div>
         )}
@@ -465,7 +503,14 @@ function DeleteBranchDialog({ branch, onClose, onDeleted, toast }) {
 
 // ── Branch card ───────────────────────────────────────────────────────────
 
-function BranchCard({ branch, pulsing, onOpen, onEdit, onDelete, onToggleStatus }) {
+function BranchCard({
+  branch,
+  pulsing,
+  onOpen,
+  onEdit,
+  onDelete,
+  onToggleStatus,
+}) {
   const [menuOpen, setMenuOpen] = useState(false);
   const ref = useRef(null);
 
@@ -497,10 +542,16 @@ function BranchCard({ branch, pulsing, onOpen, onEdit, onDelete, onToggleStatus 
           </span>
           <div className={styles.cardTitleText}>
             <h3 className={styles.cardName}>{branch.name}</h3>
-            {branch.code && <span className={styles.codeBadge}>{branch.code}</span>}
+            {branch.code && (
+              <span className={styles.codeBadge}>{branch.code}</span>
+            )}
           </div>
         </div>
-        <div className={styles.cardMenuWrap} ref={ref} onClick={(e) => e.stopPropagation()}>
+        <div
+          className={styles.cardMenuWrap}
+          ref={ref}
+          onClick={(e) => e.stopPropagation()}
+        >
           <button
             className={styles.menuBtn}
             onClick={() => setMenuOpen((v) => !v)}
@@ -519,7 +570,8 @@ function BranchCard({ branch, pulsing, onOpen, onEdit, onDelete, onToggleStatus 
                   onOpen(branch);
                 }}
               >
-                <i className="ti ti-layout-dashboard" aria-hidden="true" /> View dashboard
+                <i className="ti ti-layout-dashboard" aria-hidden="true" /> View
+                dashboard
               </button>
               <button
                 className={styles.menuItem}
@@ -540,7 +592,9 @@ function BranchCard({ branch, pulsing, onOpen, onEdit, onDelete, onToggleStatus 
                 }}
               >
                 <i
-                  className={active ? "ti ti-toggle-left" : "ti ti-toggle-right"}
+                  className={
+                    active ? "ti ti-toggle-left" : "ti ti-toggle-right"
+                  }
                   aria-hidden="true"
                 />
                 {active ? "Deactivate" : "Activate"}
@@ -597,7 +651,9 @@ function BranchCard({ branch, pulsing, onOpen, onEdit, onDelete, onToggleStatus 
       <div className={styles.cardFooter}>
         {branch.managerId ? (
           <span className={styles.managerChip}>
-            <span className={styles.managerAvatar}>{nameInitials(branch.managerName)}</span>
+            <span className={styles.managerAvatar}>
+              {nameInitials(branch.managerName)}
+            </span>
             {branch.managerName}
           </span>
         ) : (
@@ -656,7 +712,9 @@ export default function BranchesTab() {
 
   const handleSaved = (branch, isEdit) => {
     setBranches((prev) =>
-      isEdit ? prev.map((b) => (b.id === branch.id ? branch : b)) : [...prev, branch],
+      isEdit
+        ? prev.map((b) => (b.id === branch.id ? branch : b))
+        : [...prev, branch],
     );
     pulse(branch.id);
     // If we got here from a branch's detail page, land back on that
@@ -718,7 +776,25 @@ export default function BranchesTab() {
         <BranchDetail
           branch={view.branch}
           onBack={() => setView({ mode: "list" })}
-          onEdit={(branch) => setView({ mode: "edit", branch, cameFromDetail: true })}
+          onEdit={(branch) =>
+            setView({ mode: "edit", branch, cameFromDetail: true })
+          }
+        />
+      </div>
+    );
+  }
+
+  // ── Page mode: Business-wide "All Branches" dashboard ────────────────
+  if (view.mode === "business") {
+    return (
+      <div className={styles.wrap}>
+        <Toast toasts={toasts} />
+        <BusinessBranchDashboard
+          onBack={() => setView({ mode: "list" })}
+          onOpenBranch={(branchId) => {
+            const branch = branches.find((b) => b.id === branchId);
+            if (branch) setView({ mode: "detail", branch });
+          }}
         />
       </div>
     );
@@ -738,7 +814,10 @@ export default function BranchesTab() {
   });
 
   const activeCount = branches.filter((b) => b.status === "ACTIVE").length;
-  const totalEmployeesAssigned = branches.reduce((sum, b) => sum + (b.employeeCount || 0), 0);
+  const totalEmployeesAssigned = branches.reduce(
+    (sum, b) => sum + (b.employeeCount || 0),
+    0,
+  );
 
   if (loading) {
     return (
@@ -760,13 +839,23 @@ export default function BranchesTab() {
             Manage your business's locations and who runs them.
           </p>
         </div>
-        <button
-          className={styles.addBtn}
-          type="button"
-          onClick={() => setView({ mode: "add" })}
-        >
-          <i className="ti ti-plus" aria-hidden="true" /> Add branch
-        </button>
+        <div className={styles.headerActions}>
+          <button
+            className={styles.secondaryBtn}
+            type="button"
+            onClick={() => setView({ mode: "business" })}
+          >
+            <i className="ti ti-layout-dashboard" aria-hidden="true" /> All
+            branches
+          </button>
+          <button
+            className={styles.addBtn}
+            type="button"
+            onClick={() => setView({ mode: "add" })}
+          >
+            <i className="ti ti-plus" aria-hidden="true" /> Add branch
+          </button>
+        </div>
       </div>
 
       <div className={styles.statsRow}>
@@ -823,7 +912,11 @@ export default function BranchesTab() {
       {filtered.length === 0 ? (
         <div className={styles.emptyState}>
           <i className="ti ti-building-store" aria-hidden="true" />
-          <h3>{branches.length === 0 ? "No branches yet" : "No branches match your search"}</h3>
+          <h3>
+            {branches.length === 0
+              ? "No branches yet"
+              : "No branches match your search"}
+          </h3>
           <p>
             {branches.length === 0
               ? "Add your first branch to start organizing employees, attendance, and reports by location."

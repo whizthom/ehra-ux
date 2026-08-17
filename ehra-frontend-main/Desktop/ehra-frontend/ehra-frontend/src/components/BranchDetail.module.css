@@ -326,6 +326,121 @@
     border: 1px solid var(--border-color);
     border-radius: 10px;
     background: var(--bg-surface);
+    width: 100%;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    transition: background 0.15s;
+}
+
+.employeeRow:hover {
+    background: var(--bg-surface-alt);
+}
+
+.employeeRowWrap {
+    display: flex;
+    flex-direction: column;
+}
+
+.employeeRowWrap:has(.historyPanel) .employeeRow {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.employeeChevron {
+    font-size: 15px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    transition: transform 0.18s ease;
+}
+
+.employeeChevronOpen {
+    transform: rotate(180deg);
+}
+
+/* ── Transfer history panel (inline accordion, not a popup) ── */
+.historyPanel {
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    background: var(--bg-surface-alt);
+    padding: 12px 14px;
+    animation: fadeSlideIn 0.15s ease;
+}
+
+.historyLoading,
+.historyError,
+.historyEmpty {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    padding: 4px 2px;
+}
+
+.historyError {
+    color: var(--danger-text);
+}
+
+.historyList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.historyItem {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.historyIcon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(29, 158, 117, 0.12);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.historyText {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.historyLine {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex-wrap: wrap;
+}
+
+.historyLine i {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.historyMuted {
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-style: italic;
+}
+
+.historyMeta {
+    font-size: 11.5px;
+    color: var(--text-secondary);
 }
 
 .employeeAvatar {
@@ -370,6 +485,71 @@
     font-size: 12px;
     color: var(--text-secondary);
     flex-shrink: 0;
+}
+
+/* ── Leave tab ── */
+.leaveRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-surface);
+}
+
+.leaveStatusBadge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.leaveStatusApproved {
+    background: rgba(29, 158, 117, 0.12);
+    color: var(--accent);
+}
+
+.leaveStatusRejected {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.leaveStatusPending {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+/* ── Payroll tab ── */
+.payrollRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-surface);
+}
+
+.payrollFigures {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.payrollNet {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.payrollDeduction {
+    font-size: 11px;
+    color: var(--danger-text);
 }
 
 .pagination {
