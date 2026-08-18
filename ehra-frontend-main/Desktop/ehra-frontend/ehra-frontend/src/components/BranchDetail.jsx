@@ -1,21 +1,34 @@
 import { useState, useEffect, useCallback } from "react";
-import { getBranchDashboard, getBranchEmployees, getEmployeeBranchHistory, getBranchLeave, getBranchPayroll } from "../api/branchApi";
+import API from "../api/authApi";
+import {
+  getBranchDashboard,
+  getBranchEmployees,
+  getEmployeeBranchHistory,
+  getBranchLeave,
+  getBranchPayroll,
+  getBranchAttendance,
+  assignEmployeeBranch,
+} from "../api/branchApi";
+import CustomSelect from "./CustomSelect";
 import BranchQrPanel from "./BranchQrPanel";
 import styles from "./BranchDetail.module.css";
 
 function nameInitials(name) {
-  return (name || "")
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0])
-    .join("")
-    .toUpperCase() || "?";
+  return (
+    (name || "")
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((p) => p[0])
+      .join("")
+      .toUpperCase() || "?"
+  );
 }
 
 const TABS = [
   { key: "overview", label: "Overview", icon: "ti-layout-dashboard" },
   { key: "employees", label: "Employees", icon: "ti-users" },
+  { key: "attendance", label: "Attendance", icon: "ti-calendar-check" },
   { key: "leave", label: "Leave", icon: "ti-beach" },
   { key: "payroll", label: "Payroll", icon: "ti-cash" },
   { key: "qr", label: "Attendance QR", icon: "ti-qrcode" },
@@ -45,7 +58,9 @@ function OverviewTab({ branchId }) {
     setLoading(true);
     getBranchDashboard(branchId)
       .then(({ data }) => !cancelled && setSummary(data))
-      .catch(() => !cancelled && setError("Couldn't load this branch's overview."))
+      .catch(
+        () => !cancelled && setError("Couldn't load this branch's overview."),
+      )
       .finally(() => !cancelled && setLoading(false));
     return () => {
       cancelled = true;
@@ -61,7 +76,9 @@ function OverviewTab({ branchId }) {
   }
 
   if (error || !summary) {
-    return <div className={styles.tabError}>{error || "No data available."}</div>;
+    return (
+      <div className={styles.tabError}>{error || "No data available."}</div>
+    );
   }
 
   return (
@@ -139,11 +156,15 @@ function formatDate(iso) {
   if (!iso) return "—";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }) + " · " + d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  return (
+    d.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    }) +
+    " · " +
+    d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
+  );
 }
 
 // Expandable row — clicking an employee reveals their branch-transfer
@@ -200,7 +221,11 @@ function EmployeeHistoryRow({ emp }) {
 
       {open && (
         <div className={styles.historyPanel}>
-          {loading && <div className={styles.historyLoading}>Loading transfer history…</div>}
+          {loading && (
+            <div className={styles.historyLoading}>
+              Loading transfer history…
+            </div>
+          )}
           {error && <div className={styles.historyError}>{error}</div>}
           {!loading && !error && history && history.length === 0 && (
             <div className={styles.historyEmpty}>
@@ -216,11 +241,20 @@ function EmployeeHistoryRow({ emp }) {
                   </span>
                   <div className={styles.historyText}>
                     <div className={styles.historyLine}>
-                      <span className={h.previousBranchName ? "" : styles.historyMuted}>
+                      <span
+                        className={
+                          h.previousBranchName ? "" : styles.historyMuted
+                        }
+                      >
                         {h.previousBranchName || "Unassigned"}
                       </span>
-                      <i className="ti ti-arrow-narrow-right" aria-hidden="true" />
-                      <span className={h.newBranchName ? "" : styles.historyMuted}>
+                      <i
+                        className="ti ti-arrow-narrow-right"
+                        aria-hidden="true"
+                      />
+                      <span
+                        className={h.newBranchName ? "" : styles.historyMuted}
+                      >
                         {h.newBranchName || "Unassigned"}
                       </span>
                     </div>
@@ -240,7 +274,245 @@ function EmployeeHistoryRow({ emp }) {
   );
 }
 
-function EmployeesTab({ branchId }) {
+function AddEmployeeToBranchWidget({ branchId, branchName, onAdded, toast }) {
+  const [open, setOpen] = useState(false);
+  const [allEmployees, setAllEmployees] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [assigning, setAssigning] = useState(false);
+  const [error, setError] = useState(null);
+  const [pickedId, setPickedId] = useState("");
+
+  const openPicker = () => {
+    setOpen(true);
+    if (allEmployees === null) {
+      setLoading(true);
+      API.get("/employees/directory")
+        .then(({ data }) => setAllEmployees(data.filter((e) => !e.deletedAt)))
+        .catch(() => setError("Couldn't load your employee directory."))
+        .finally(() => setLoading(false));
+    }
+  };
+
+  const handleAssign = async () => {
+    if (!pickedId) return;
+    setAssigning(true);
+    setError(null);
+    try {
+      const { data } = await assignEmployeeBranch(Number(pickedId), branchId);
+      onAdded(data);
+      toast?.(
+        `${data.firstName} ${data.lastName} added to ${branchName}.`,
+        "success",
+      );
+      setOpen(false);
+      setPickedId("");
+    } catch (err) {
+      setError(
+        err?.response?.data?.message ||
+          "Couldn't add this employee to the branch.",
+      );
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        className={styles.addEmployeeBtn}
+        onClick={openPicker}
+      >
+        <i className="ti ti-user-plus" aria-hidden="true" />
+        Add employee
+      </button>
+    );
+  }
+
+  const options = (allEmployees || [])
+    // Employees already at this branch don't need to show up as pickable —
+    // they're already visible in the list below.
+    .filter((e) => e.branchId !== branchId)
+    .map((e) => ({
+      value: String(e.id),
+      label: [e.firstName, e.lastName].filter(Boolean).join(" ") || e.email,
+      emp: e,
+    }));
+
+  return (
+    <div className={styles.addEmployeeWidget}>
+      {loading ? (
+        <span className={styles.addEmployeeLoading}>Loading employees…</span>
+      ) : (
+        <>
+          <div className={styles.addEmployeeSelectWrap}>
+            <CustomSelect
+              value={pickedId}
+              onChange={(v) => setPickedId(v || "")}
+              options={options}
+              placeholder="Search employees…"
+              searchable
+              searchPlaceholder="Search by name…"
+              emptyLabel="No other employees to add"
+              renderOption={(opt, isSelected) => (
+                <>
+                  <span className={styles.optionAvatar}>
+                    {nameInitials(opt.label)}
+                  </span>
+                  <span>{opt.label}</span>
+                  {opt.emp.branch && opt.emp.branch !== "Unassigned" && (
+                    <span className={styles.addEmployeeCurrentBranch}>
+                      from {opt.emp.branch}
+                    </span>
+                  )}
+                  {isSelected && (
+                    <i className="ti ti-check" aria-hidden="true" />
+                  )}
+                </>
+              )}
+            />
+          </div>
+          <button
+            type="button"
+            className={styles.primaryMiniBtn}
+            onClick={handleAssign}
+            disabled={!pickedId || assigning}
+          >
+            {assigning ? "Adding…" : "Add"}
+          </button>
+          <button
+            type="button"
+            className={styles.cancelMiniBtn}
+            onClick={() => {
+              setOpen(false);
+              setPickedId("");
+              setError(null);
+            }}
+            disabled={assigning}
+          >
+            Cancel
+          </button>
+        </>
+      )}
+      {error && <div className={styles.addEmployeeError}>{error}</div>}
+    </div>
+  );
+}
+
+function EmployeesTab({ branchId, branchName, toast }) {
+  const [page, setPage] = useState(0);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [refreshTick, setRefreshTick] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    getBranchEmployees(branchId, page, 10)
+      .then(({ data }) => !cancelled && setData(data))
+      .catch(
+        () =>
+          !cancelled && setError("Couldn't load employees for this branch."),
+      )
+      .finally(() => !cancelled && setLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [branchId, page, refreshTick]);
+
+  if (loading && !data) {
+    return (
+      <div className={styles.tabLoading}>
+        <div className={styles.spinner} />
+      </div>
+    );
+  }
+
+  if (error) return <div className={styles.tabError}>{error}</div>;
+
+  const employees = data?.content || [];
+
+  return (
+    <div className={styles.employeesWrap}>
+      <div className={styles.tabToolbar}>
+        <AddEmployeeToBranchWidget
+          branchId={branchId}
+          branchName={branchName}
+          toast={toast}
+          onAdded={() => {
+            setPage(0);
+            setRefreshTick((t) => t + 1);
+          }}
+        />
+      </div>
+
+      {employees.length === 0 ? (
+        <div className={styles.emptyMini}>
+          <i className="ti ti-user-off" aria-hidden="true" />
+          <p>No employees assigned to this branch yet.</p>
+        </div>
+      ) : (
+        <>
+          <div className={styles.employeeTable}>
+            {employees.map((emp) => (
+              <EmployeeHistoryRow key={emp.id} emp={emp} />
+            ))}
+          </div>
+
+          {data && data.totalPages > 1 && (
+            <div className={styles.pagination}>
+              <button
+                type="button"
+                className={styles.pageBtn}
+                disabled={page === 0}
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+              >
+                <i className="ti ti-chevron-left" aria-hidden="true" />
+              </button>
+              <span className={styles.pageInfo}>
+                Page {page + 1} of {data.totalPages}
+              </span>
+              <button
+                type="button"
+                className={styles.pageBtn}
+                disabled={page + 1 >= data.totalPages}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                <i className="ti ti-chevron-right" aria-hidden="true" />
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+const ATTENDANCE_STATUS_LABELS = {
+  PRESENT: "Present",
+  LATE: "Late",
+  EARLY_LEAVE: "Early leave",
+  ABSENT: "Absent",
+};
+
+function attendanceStatusClass(status) {
+  if (status === "PRESENT") return styles.leaveStatusApproved;
+  if (status === "ABSENT") return styles.leaveStatusRejected;
+  return styles.leaveStatusPending; // LATE, EARLY_LEAVE
+}
+
+function formatClock(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function AttendanceTab({ branchId }) {
   const [page, setPage] = useState(0);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -249,9 +521,12 @@ function EmployeesTab({ branchId }) {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    getBranchEmployees(branchId, page, 10)
+    getBranchAttendance(branchId, page, 15)
       .then(({ data }) => !cancelled && setData(data))
-      .catch(() => !cancelled && setError("Couldn't load employees for this branch."))
+      .catch(
+        () =>
+          !cancelled && setError("Couldn't load attendance for this branch."),
+      )
       .finally(() => !cancelled && setLoading(false));
     return () => {
       cancelled = true;
@@ -268,13 +543,13 @@ function EmployeesTab({ branchId }) {
 
   if (error) return <div className={styles.tabError}>{error}</div>;
 
-  const employees = data?.content || [];
+  const rows = data?.content || [];
 
-  if (employees.length === 0) {
+  if (rows.length === 0) {
     return (
       <div className={styles.emptyMini}>
-        <i className="ti ti-user-off" aria-hidden="true" />
-        <p>No employees assigned to this branch yet.</p>
+        <i className="ti ti-calendar-off" aria-hidden="true" />
+        <p>No attendance recorded for this branch yet.</p>
       </div>
     );
   }
@@ -282,8 +557,28 @@ function EmployeesTab({ branchId }) {
   return (
     <div className={styles.employeesWrap}>
       <div className={styles.employeeTable}>
-        {employees.map((emp) => (
-          <EmployeeHistoryRow key={emp.id} emp={emp} />
+        {rows.map((a) => (
+          <div key={a.id} className={styles.leaveRow}>
+            <span className={styles.employeeAvatar}>
+              {nameInitials(
+                `${a.employeeFirstName || ""} ${a.employeeLastName || ""}`,
+              )}
+            </span>
+            <div className={styles.employeeInfo}>
+              <span className={styles.employeeName}>
+                {a.employeeFirstName} {a.employeeLastName}
+              </span>
+              <span className={styles.employeeMeta}>
+                {a.date} · in {formatClock(a.clockIn)} · out{" "}
+                {formatClock(a.clockOut)}
+              </span>
+            </div>
+            <span
+              className={`${styles.leaveStatusBadge} ${attendanceStatusClass(a.status)}`}
+            >
+              {ATTENDANCE_STATUS_LABELS[a.status] || a.status}
+            </span>
+          </div>
         ))}
       </div>
 
@@ -326,7 +621,8 @@ const LEAVE_STATUS_LABELS = {
 
 function leaveStatusClass(status) {
   if (status === "APPROVED") return styles.leaveStatusApproved;
-  if (status === "REJECTED" || status === "CANCELLED") return styles.leaveStatusRejected;
+  if (status === "REJECTED" || status === "CANCELLED")
+    return styles.leaveStatusRejected;
   return styles.leaveStatusPending;
 }
 
@@ -341,7 +637,11 @@ function LeaveTab({ branchId }) {
     setLoading(true);
     getBranchLeave(branchId, page, 10)
       .then(({ data }) => !cancelled && setData(data))
-      .catch(() => !cancelled && setError("Couldn't load leave requests for this branch."))
+      .catch(
+        () =>
+          !cancelled &&
+          setError("Couldn't load leave requests for this branch."),
+      )
       .finally(() => !cancelled && setLoading(false));
     return () => {
       cancelled = true;
@@ -375,17 +675,22 @@ function LeaveTab({ branchId }) {
         {requests.map((l) => (
           <div key={l.id} className={styles.leaveRow}>
             <span className={styles.employeeAvatar}>
-              {nameInitials(`${l.employeeFirstName || ""} ${l.employeeLastName || ""}`)}
+              {nameInitials(
+                `${l.employeeFirstName || ""} ${l.employeeLastName || ""}`,
+              )}
             </span>
             <div className={styles.employeeInfo}>
               <span className={styles.employeeName}>
                 {l.employeeFirstName} {l.employeeLastName}
               </span>
               <span className={styles.employeeMeta}>
-                {l.leaveType?.replaceAll("_", " ")} · {l.startDate} → {l.endDate} · {l.days}d
+                {l.leaveType?.replaceAll("_", " ")} · {l.startDate} →{" "}
+                {l.endDate} · {l.days}d
               </span>
             </div>
-            <span className={`${styles.leaveStatusBadge} ${leaveStatusClass(l.status)}`}>
+            <span
+              className={`${styles.leaveStatusBadge} ${leaveStatusClass(l.status)}`}
+            >
               {LEAVE_STATUS_LABELS[l.status] || l.status}
             </span>
           </div>
@@ -535,7 +840,7 @@ function PayrollTab({ branchId }) {
   );
 }
 
-export default function BranchDetail({ branch, onBack, onEdit }) {
+export default function BranchDetail({ branch, onBack, onEdit, toast }) {
   const [tab, setTab] = useState("overview");
 
   if (!branch) return null;
@@ -555,7 +860,9 @@ export default function BranchDetail({ branch, onBack, onEdit }) {
           <div>
             <div className={styles.headerNameRow}>
               <h2 className={styles.headerName}>{branch.name}</h2>
-              {branch.code && <span className={styles.codeBadge}>{branch.code}</span>}
+              {branch.code && (
+                <span className={styles.codeBadge}>{branch.code}</span>
+              )}
               <span
                 className={`${styles.statusBadge} ${branch.status === "ACTIVE" ? styles.statusActive : styles.statusInactive}`}
               >
@@ -574,7 +881,11 @@ export default function BranchDetail({ branch, onBack, onEdit }) {
             )}
           </div>
         </div>
-        <button type="button" className={styles.editBtn} onClick={() => onEdit(branch)}>
+        <button
+          type="button"
+          className={styles.editBtn}
+          onClick={() => onEdit(branch)}
+        >
           <i className="ti ti-pencil" aria-hidden="true" /> Edit branch
         </button>
       </div>
@@ -595,10 +906,19 @@ export default function BranchDetail({ branch, onBack, onEdit }) {
 
       <div className={styles.tabContent}>
         {tab === "overview" && <OverviewTab branchId={branch.id} />}
-        {tab === "employees" && <EmployeesTab branchId={branch.id} />}
+        {tab === "employees" && (
+          <EmployeesTab
+            branchId={branch.id}
+            branchName={branch.name}
+            toast={toast}
+          />
+        )}
+        {tab === "attendance" && <AttendanceTab branchId={branch.id} />}
         {tab === "leave" && <LeaveTab branchId={branch.id} />}
         {tab === "payroll" && <PayrollTab branchId={branch.id} />}
-        {tab === "qr" && <BranchQrPanel branchId={branch.id} branchStatus={branch.status} />}
+        {tab === "qr" && (
+          <BranchQrPanel branchId={branch.id} branchStatus={branch.status} />
+        )}
       </div>
     </div>
   );

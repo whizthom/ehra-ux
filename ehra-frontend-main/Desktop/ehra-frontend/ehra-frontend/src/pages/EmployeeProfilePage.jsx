@@ -28,6 +28,7 @@ const ADMIN_NAV = [
   { icon: "ti-calendar-check", label: "Attendance", section: "main" },
   { icon: "ti-qrcode", label: "QR Code", section: "main" },
   { icon: "ti-building", label: "Departments", section: "main" },
+  { icon: "ti-building-store", label: "Branches", section: "main" },
   { icon: "ti-calendar-event", label: "Leave", section: "main" },
   { icon: "ti-user-edit", label: "Profile Edits", section: "main" },
   { icon: "ti-mail", label: "Messages", section: "main" },
@@ -410,7 +411,7 @@ export default function EmployeeProfilePage() {
                     />
                     {profile.departmentName || "Unassigned"}
                   </span>
-                  {profile.branchName && profile.branchName !== "Unassigned" && (
+                  {profile.branchName && (
                     <span className={styles.deptBadge}>
                       <i
                         className="ti ti-building-store"

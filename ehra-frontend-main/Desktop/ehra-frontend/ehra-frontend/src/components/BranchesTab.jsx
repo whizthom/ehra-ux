@@ -779,6 +779,7 @@ export default function BranchesTab() {
           onEdit={(branch) =>
             setView({ mode: "edit", branch, cameFromDetail: true })
           }
+          toast={toast}
         />
       </div>
     );
