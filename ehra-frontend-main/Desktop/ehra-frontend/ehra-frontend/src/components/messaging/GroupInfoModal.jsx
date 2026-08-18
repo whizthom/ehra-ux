@@ -21,10 +21,14 @@ export default function GroupInfoModal({
   const [selected, setSelected] = useState([]);
   const [busy, setBusy] = useState(false);
 
-  const myMembership = conversation.participants?.find(
-    (p) => p.identityId === myIdentityId,
-  );
-  const isAdmin = myMembership?.roleLabel === "Employer" || true; // fine-grained ADMIN role isn't in MsgParticipant; backend still enforces the real check
+  // The real per-conversation role, straight from the backend
+  // (MsgConversationSummary#myRole) — this used to be `|| true`, showing
+  // "Add members" and the remove-member (×) button to every single
+  // person in every group regardless of whether they were actually an
+  // admin. The backend was always the real enforcement either way, but
+  // showing controls that then fail on click is a bad, confusing
+  // experience — this makes the UI match what's actually allowed.
+  const isAdmin = conversation.myRole === "ADMIN";
 
   useEffect(() => {
     if (addingMode) {

@@ -303,7 +303,7 @@ export default function Register() {
           </div>
         </div>
 
-        <p className={styles.leftFooter}>© 2026 Ehra. All rights reserved.</p>
+        <p className={styles.leftFooter}>© 2026 Ehral. All rights reserved.</p>
       </div>
 
       {/* ── Right ── */}
@@ -350,27 +350,6 @@ export default function Register() {
           {/* ══ STEP 1: PHONE ══ */}
           {step === "phone" && (
             <>
-              {/* Moved up from the page footer — users were missing the
-                  sign-in link buried at the very bottom of the page.
-                  Only shown on this first step: by the time someone's
-                  verified their phone (step 2+), handleVerifyOtp has
-                  already redirected any existing account straight to
-                  /login, so nobody past this point actually needs it. */}
-              <a
-                className={styles.signinPrompt}
-                onClick={() => navigate("/login")}
-              >
-                <span className={styles.signinPromptIcon}>
-                  <i className="ti ti-login-2" />
-                </span>
-                <span className={styles.signinPromptText}>
-                  Already have an account? <strong>Sign in instead</strong>
-                </span>
-                <i
-                  className={`ti ti-arrow-right ${styles.signinPromptArrow}`}
-                />
-              </a>
-
               <div className={styles.field}>
                 <label>Phone number</label>
                 <div className={phoneStyles.phoneInputWrap}>
@@ -386,7 +365,7 @@ export default function Register() {
                   />
                 </div>
                 <span className={phoneStyles.hint}>
-                  This becomes your permanent Ehra login identity.
+                  This becomes your permanent Ehral login identity.
                 </span>
               </div>
 
@@ -407,6 +386,26 @@ export default function Register() {
                 {loading ? "Sending code…" : "Send verification code"}
                 {!loading && <i className="ti ti-arrow-right" />}
               </button>
+              {/* Moved up from the page footer — users were missing the
+                  sign-in link buried at the very bottom of the page.
+                  Only shown on this first step: by the time someone's
+                  verified their phone (step 2+), handleVerifyOtp has
+                  already redirected any existing account straight to
+                  /login, so nobody past this point actually needs it. */}
+              <a
+                className={styles.signinPrompt}
+                onClick={() => navigate("/login")}
+              >
+                <span className={styles.signinPromptIcon}>
+                  <i className="ti ti-login-2" />
+                </span>
+                <span className={styles.signinPromptText}>
+                  Already have an account? <strong>Sign in instead</strong>
+                </span>
+                <i
+                  className={`ti ti-arrow-right ${styles.signinPromptArrow}`}
+                />
+              </a>
             </>
           )}
 
