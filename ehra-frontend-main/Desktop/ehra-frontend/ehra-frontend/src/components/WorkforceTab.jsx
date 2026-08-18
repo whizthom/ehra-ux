@@ -7,6 +7,7 @@ import {
   restoreEmployee,
 } from "../api/workforceApi";
 import DepartmentCell from "./DepartmentCell";
+import BranchCell from "./BranchCell";
 import PositionCell from "./PositionCell";
 import HireDateCell from "./HireDateCell";
 import EmploymentTypeCell from "./EmploymentTypeCell";
@@ -26,7 +27,7 @@ const STATUS_STYLE = {
   SUSPENDED: { label: "Suspended", cls: "pillSuspended" },
 };
 
-export default function WorkforceTab({ departments }) {
+export default function WorkforceTab({ departments, branches = [] }) {
   const navigate = useNavigate();
 
   const [employees, setEmployees] = useState([]);
@@ -96,6 +97,12 @@ export default function WorkforceTab({ departments }) {
   };
 
   const handleDeptAssigned = (id, updated) => {
+    setEmployees((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, ...updated } : e)),
+    );
+  };
+
+  const handleBranchAssigned = (id, updated) => {
     setEmployees((prev) =>
       prev.map((e) => (e.id === id ? { ...e, ...updated } : e)),
     );
@@ -222,6 +229,19 @@ export default function WorkforceTab({ departments }) {
                           employee={emp}
                           departments={departments}
                           onAssigned={handleDeptAssigned}
+                        />
+                      </div>
+
+                      <div className={styles.deptRow}>
+                        <i
+                          className="ti ti-building-store"
+                          style={{ fontSize: 12 }}
+                          aria-hidden="true"
+                        />
+                        <BranchCell
+                          employee={emp}
+                          branches={branches}
+                          onAssigned={handleBranchAssigned}
                         />
                       </div>
 

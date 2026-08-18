@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import API from "../api/authApi";
 import { useAuth } from "../context/AuthContext";
 import { getDepartments } from "../api/departmentApi";
+import { getBranches } from "../api/branchApi";
 import {
   getPendingEmployerDecisions,
   approveLeave,
@@ -384,6 +385,7 @@ export default function Dashboard() {
   // Departments
   const [departments, setDepartments] = useState([]);
   const [loadingDepts, setLoadingDepts] = useState(true);
+  const [branches, setBranches] = useState([]);
   const [addDeptOpen, setAddDeptOpen] = useState(false);
   const [sendMsgOpen, setSendMsgOpen] = useState(false);
   const [reportSummaryOpen, setReportSummaryOpen] = useState(false);
@@ -493,6 +495,18 @@ export default function Dashboard() {
       console.error("Failed to load departments:", err);
     } finally {
       setLoadingDepts(false);
+    }
+  }, []);
+
+  // Lightweight branch list for the Workforce tab's assignment dropdown —
+  // separate from BranchesTab's own richer fetch (employee counts, etc.)
+  // since Workforce only needs id/name/status to populate BranchCell.
+  const fetchBranches = useCallback(async () => {
+    try {
+      const { data } = await getBranches();
+      setBranches(data);
+    } catch (err) {
+      console.error("Failed to load branches:", err);
     }
   }, []);
 
@@ -651,6 +665,7 @@ export default function Dashboard() {
     fetchDirectory();
     fetchPending();
     fetchDepartments();
+    fetchBranches();
     fetchPendingLeaves();
     fetchLatestAttendance();
     fetchProfileEdits();
@@ -665,6 +680,7 @@ export default function Dashboard() {
     fetchDirectory,
     fetchPending,
     fetchDepartments,
+    fetchBranches,
     fetchPendingLeaves,
     fetchLatestAttendance,
     fetchProfileEdits,
@@ -1496,7 +1512,7 @@ export default function Dashboard() {
           ) : activeNav === "Branches" ? (
             <BranchesTab />
           ) : activeNav === "Workforce" ? (
-            <WorkforceTab departments={departments} />
+            <WorkforceTab departments={departments} branches={branches} />
           ) : activeNav === "Messages" ? (
             <MessagingHub onThreadOpenChange={setChatThreadOpen} />
           ) : activeNav === "Leave" ? (
