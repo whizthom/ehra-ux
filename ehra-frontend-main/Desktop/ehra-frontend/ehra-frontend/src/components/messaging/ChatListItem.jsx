@@ -1,4 +1,5 @@
 import Avatar from "./Avatar";
+import RoleBadge from "./RoleBadge";
 import { formatRelativeListTime } from "../../utils/messagingFormat";
 import styles from "./ChatList.module.css";
 
@@ -12,6 +13,12 @@ export default function ChatListItem({
   const isAnnouncement = conversation.type === "ANNOUNCEMENT";
   const isGroup = conversation.type === "GROUP";
   const online = isDirect ? conversation.online : false;
+  // A role badge only means something for a specific person — a group or
+  // the Announcements channel has many people with different roles, not
+  // one to badge (see RoleBadge.jsx's doc).
+  const otherRoleLabel = isDirect
+    ? conversation.participants?.[0]?.roleLabel
+    : null;
 
   const preview = conversation.lastMessagePreview || "No messages yet";
 
@@ -38,17 +45,22 @@ export default function ChatListItem({
       )}
       <div className={styles.rowBody}>
         <div className={styles.rowTop}>
-          <span className={styles.rowName}>
-            {conversation.pinned && (
-              <i className="ti ti-pin" style={{ marginRight: 4 }} />
+          <span className={styles.rowNameGroup}>
+            <span className={styles.rowName}>
+              {conversation.pinned && (
+                <i className="ti ti-pin" style={{ marginRight: 4 }} />
+              )}
+              {isGroup && (
+                <i
+                  className="ti ti-users-group"
+                  style={{ marginRight: 4, fontSize: 13 }}
+                />
+              )}
+              {conversation.name}
+            </span>
+            {otherRoleLabel && (
+              <RoleBadge roleLabel={otherRoleLabel} size="sm" />
             )}
-            {isGroup && (
-              <i
-                className="ti ti-users-group"
-                style={{ marginRight: 4, fontSize: 13 }}
-              />
-            )}
-            {conversation.name}
           </span>
           <span className={styles.rowTime}>
             {formatRelativeListTime(conversation.lastMessageAt)}

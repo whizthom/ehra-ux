@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Avatar from "./Avatar";
+import RoleBadge from "./RoleBadge";
 import MessageBubble from "./MessageBubble";
 import DateSeparator from "./DateSeparator";
 import TypingIndicator from "./TypingIndicator";
@@ -151,7 +152,12 @@ export default function ChatWindow({
             />
           )}
           <div className={styles.headerText}>
-            <span className={styles.headerName}>{conversation.name}</span>
+            <span className={styles.headerNameRow}>
+              <span className={styles.headerName}>{conversation.name}</span>
+              {!isMultiParty && other?.roleLabel && (
+                <RoleBadge roleLabel={other.roleLabel} size="sm" />
+              )}
+            </span>
             <span className={styles.headerStatus}>
               {typingUsers.length > 0
                 ? "typing…"

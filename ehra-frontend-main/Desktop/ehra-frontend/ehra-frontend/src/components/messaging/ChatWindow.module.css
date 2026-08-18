@@ -66,6 +66,13 @@
     min-width: 0;
 }
 
+.headerNameRow {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+}
+
 .headerName {
     font-weight: 700;
     font-size: 15px;
@@ -73,6 +80,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    min-width: 0;
 }
 
 .headerStatus {
