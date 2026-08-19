@@ -153,9 +153,25 @@ export function playNotificationSound(notification) {
   const ctx = context();
   if (!ctx || ctx.state !== "running") return false;
   try {
-    // Peak gain per note. Kept below ~0.3 to avoid clipping when notes
-    // overlap, but noticeably louder than the original 0.055.
-    const PEAK_GAIN = 0.22;
+    // Peak gain per note. 1.0 is the loudest a note can go before the
+    // waveform itself starts clipping into distortion — this is
+    // effectively the maximum clean volume Web Audio supports.
+    const PEAK_GAIN = 1.0;
+
+    // A compressor squeezes the loud parts down and boosts the makeup
+    // gain, which raises *perceived* loudness further without letting
+    // the signal clip the way a raw gain multiplier above 1.0 would.
+    const compressor = ctx.createDynamicsCompressor();
+    compressor.threshold.setValueAtTime(-24, ctx.currentTime);
+    compressor.knee.setValueAtTime(12, ctx.currentTime);
+    compressor.ratio.setValueAtTime(12, ctx.currentTime);
+    compressor.attack.setValueAtTime(0.003, ctx.currentTime);
+    compressor.release.setValueAtTime(0.15, ctx.currentTime);
+
+    const makeupGain = ctx.createGain();
+    makeupGain.gain.setValueAtTime(2.5, ctx.currentTime);
+
+    compressor.connect(makeupGain).connect(ctx.destination);
 
     tones(category).forEach(([frequency, offset, duration, waveform]) => {
       const oscillator = ctx.createOscillator();
@@ -170,7 +186,7 @@ export function playNotificationSound(notification) {
       gain.gain.exponentialRampToValueAtTime(PEAK_GAIN, start + 0.015);
       gain.gain.exponentialRampToValueAtTime(0.0001, end);
 
-      oscillator.connect(gain).connect(ctx.destination);
+      oscillator.connect(gain).connect(compressor);
       oscillator.start(start);
       oscillator.stop(end + 0.02);
     });
