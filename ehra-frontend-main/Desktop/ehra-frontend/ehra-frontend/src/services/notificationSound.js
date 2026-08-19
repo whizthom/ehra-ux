@@ -74,19 +74,70 @@ function eventId(notification) {
     `${notification?.type || notification?.kind || "notification"}:${notification?.createdAt || notification?.title || ""}`;
 }
 
+/**
+ * Each entry: [frequency, offset, duration, waveform]
+ * - frequency: pitch in Hz
+ * - offset: seconds after the chime starts
+ * - duration: how long this note rings, in seconds
+ * - waveform: oscillator type — "sine" (soft), "triangle" (warmer, a bit
+ *   reedier), used together across notes so each chime has its own timbre
+ *   instead of every category sounding like a plain beep.
+ *
+ * These are longer (4-5 notes, ~0.6-0.9s total) and more melodically
+ * distinct per category than a simple two-note ping, so each one is
+ * recognisable by ear without looking at the screen.
+ */
 function tones(category) {
   switch (category) {
-    case "messages": return [[660, 0], [880, 0.11]];
-    case "financial": return [[523, 0], [784, 0.1], [1046, 0.2]];
-    case "important": return [[740, 0], [740, 0.16], [988, 0.32]];
-    case "employee": return [[587, 0], [740, 0.12]];
-    default: return [[659, 0], [784, 0.12]];
+    case "messages":
+      // Bright, friendly rising triplet + a soft landing note.
+      return [
+        [660, 0.00, 0.14, "triangle"],
+        [880, 0.10, 0.14, "triangle"],
+        [1108, 0.20, 0.16, "sine"],
+        [880, 0.36, 0.22, "sine"],
+      ];
+    case "financial":
+      // A confident ascending arpeggio — deliberate, "cha-ching" feel.
+      return [
+        [392, 0.00, 0.15, "triangle"],
+        [523, 0.12, 0.15, "triangle"],
+        [659, 0.24, 0.15, "triangle"],
+        [784, 0.36, 0.18, "sine"],
+        [1046, 0.50, 0.28, "sine"],
+      ];
+    case "important":
+      // Urgent double-pulse on one note, then a higher alert note — the
+      // most attention-grabbing of the set.
+      return [
+        [740, 0.00, 0.13, "sine"],
+        [740, 0.16, 0.13, "sine"],
+        [740, 0.32, 0.13, "sine"],
+        [988, 0.50, 0.32, "triangle"],
+      ];
+    case "employee":
+      // Gentle two-step up-down, gives a "checked in" feel.
+      return [
+        [587, 0.00, 0.16, "sine"],
+        [740, 0.14, 0.16, "triangle"],
+        [659, 0.30, 0.16, "sine"],
+        [880, 0.46, 0.24, "triangle"],
+      ];
+    default:
+      // General notifications — neutral but still a short melodic phrase
+      // rather than a flat beep.
+      return [
+        [659, 0.00, 0.13, "sine"],
+        [784, 0.11, 0.13, "sine"],
+        [988, 0.24, 0.20, "triangle"],
+      ];
   }
 }
 
 /**
- * Plays one subtle, category-specific chime. Repeated delivery of the same
- * event (for example from multiple SSE consumers) is ignored for 15 seconds.
+ * Plays one distinctive, category-specific chime. Repeated delivery of the
+ * same event (for example from multiple SSE consumers) is ignored for 15
+ * seconds.
  */
 export function playNotificationSound(notification) {
   const category = categoryFor(notification);
@@ -102,18 +153,26 @@ export function playNotificationSound(notification) {
   const ctx = context();
   if (!ctx || ctx.state !== "running") return false;
   try {
-    tones(category).forEach(([frequency, offset]) => {
+    // Peak gain per note. Kept below ~0.3 to avoid clipping when notes
+    // overlap, but noticeably louder than the original 0.055.
+    const PEAK_GAIN = 0.22;
+
+    tones(category).forEach(([frequency, offset, duration, waveform]) => {
       const oscillator = ctx.createOscillator();
       const gain = ctx.createGain();
       const start = ctx.currentTime + offset;
-      oscillator.type = "sine";
+      const end = start + duration;
+
+      oscillator.type = waveform || "sine";
       oscillator.frequency.setValueAtTime(frequency, start);
+
       gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(0.055, start + 0.012);
-      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.18);
+      gain.gain.exponentialRampToValueAtTime(PEAK_GAIN, start + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, end);
+
       oscillator.connect(gain).connect(ctx.destination);
       oscillator.start(start);
-      oscillator.stop(start + 0.2);
+      oscillator.stop(end + 0.02);
     });
     return true;
   } catch {
