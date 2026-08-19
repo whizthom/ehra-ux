@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { getAccessToken, getRefreshToken, refreshAccessToken, API_BASE_URL } from "../api/authApi";
+import { playNotificationSound, unlockNotificationSounds } from "../services/notificationSound";
 
 /**
  * Opens an SSE connection to /api/messages/stream and calls the
@@ -31,6 +32,18 @@ export default function useMessageStream(
   useEffect(() => {
     handlersRef.current = { onNewMessage, onReadUpdate, onNewNotification, onLeaveUpdate, onNewChatMessage, onChatRead };
   });
+
+  // A click/tap is the only reliable way to satisfy browser autoplay rules.
+  // The listener is deliberately one-shot and does not request any permission.
+  useEffect(() => {
+    const unlock = () => { unlockNotificationSounds(); };
+    window.addEventListener("pointerdown", unlock, { once: true, passive: true });
+    window.addEventListener("keydown", unlock, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("keydown", unlock);
+    };
+  }, []);
 
   useEffect(() => {
     if (!enabled) return;
@@ -64,7 +77,13 @@ export default function useMessageStream(
       }
       if (h.onNewNotification) {
         source.addEventListener("new_notification", (e) => {
-          try { handlersRef.current.onNewNotification(JSON.parse(e.data)); } catch { /* ignore */ }
+          try {
+            const payload = JSON.parse(e.data);
+            // The service deduplicates events across the existing multiple SSE
+            // consumers, so this remains safe until the stream is consolidated.
+            playNotificationSound(payload);
+            handlersRef.current.onNewNotification(payload);
+          } catch { /* ignore malformed events */ }
         });
       }
       if (h.onLeaveUpdate) {
@@ -74,7 +93,11 @@ export default function useMessageStream(
       }
       if (h.onNewChatMessage) {
         source.addEventListener("new_chat_message", (e) => {
-          try { handlersRef.current.onNewChatMessage(JSON.parse(e.data)); } catch { /* ignore */ }
+          try {
+            const payload = JSON.parse(e.data);
+            playNotificationSound({ ...payload, kind: "message", messageId: payload.id });
+            handlersRef.current.onNewChatMessage(payload);
+          } catch { /* ignore malformed events */ }
         });
       }
       if (h.onChatRead) {
