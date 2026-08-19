@@ -63,6 +63,7 @@ export default defineConfig({
       },
 
       workbox: {
+        importScripts: ["push-notifications.js"],
         // App-shell fallback: any navigation that isn't precached (e.g. a
         // deep link opened while offline, on a device that has never
         // fetched that exact route) resolves to the cached index.html so

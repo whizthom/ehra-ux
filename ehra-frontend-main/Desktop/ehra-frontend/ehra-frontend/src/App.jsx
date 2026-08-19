@@ -11,6 +11,7 @@ import InstallPrompt from "./pwa/InstallPrompt";
 import UpdateToast from "./pwa/UpdateToast";
 import OfflineBanner from "./pwa/OfflineBanner";
 import ThemeColorSync from "./theme/ThemeColorSync";
+import PushNotificationPrompt from "./pwa/PushNotificationPrompt";
 
 // Auth/public entry pages stay eagerly bundled — one of these is always
 // the very first thing an unauthenticated visitor paints, so splitting
@@ -53,6 +54,7 @@ function App() {
         <ThemeColorSync />
         <OfflineBanner />
         <UpdateToast />
+        <PushNotificationPrompt />
 
         <Suspense fallback={<RouteLoading />}>
           <Routes>
