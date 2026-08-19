@@ -11,6 +11,8 @@ import {
 } from "../api/branchApi";
 import CustomSelect from "./CustomSelect";
 import BranchQrPanel from "./BranchQrPanel";
+import BranchQrDisplayLinkPanel from "./BranchQrDisplayLinkPanel";
+import BranchAttendanceSettingsPanel from "./BranchAttendanceSettingsPanel";
 import styles from "./BranchDetail.module.css";
 
 function nameInitials(name) {
@@ -917,7 +919,14 @@ export default function BranchDetail({ branch, onBack, onEdit, toast }) {
         {tab === "leave" && <LeaveTab branchId={branch.id} />}
         {tab === "payroll" && <PayrollTab branchId={branch.id} />}
         {tab === "qr" && (
-          <BranchQrPanel branchId={branch.id} branchStatus={branch.status} />
+          <div className={styles.qrTabStack}>
+            <BranchQrPanel branchId={branch.id} branchStatus={branch.status} />
+            <BranchQrDisplayLinkPanel
+              branchId={branch.id}
+              branchStatus={branch.status}
+            />
+            <BranchAttendanceSettingsPanel branchId={branch.id} />
+          </div>
         )}
       </div>
     </div>

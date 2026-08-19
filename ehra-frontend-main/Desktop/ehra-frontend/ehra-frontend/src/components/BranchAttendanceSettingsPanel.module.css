@@ -1,0 +1,226 @@
+.panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.loading {
+    padding: 30px 0;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.desc {
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.businessDefaultBox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    background: var(--bg-surface-alt);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.businessDefaultBox i {
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.field label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.field input {
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    outline: none;
+}
+
+.field input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.1);
+}
+
+.coordRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.toggleRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toggle {
+    width: 40px;
+    height: 22px;
+    border-radius: 20px;
+    border: none;
+    background: var(--border-color);
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+
+.toggleOn {
+    background: var(--accent);
+}
+
+.toggleKnob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.15s;
+}
+
+.toggleOn .toggleKnob {
+    transform: translateX(18px);
+}
+
+.toggleLabel {
+    font-size: 12.5px;
+    color: var(--text-primary);
+}
+
+.locateBtn {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: none;
+    color: var(--text-primary);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.locateBtn:hover:not(:disabled) {
+    background: var(--bg-surface-alt);
+}
+
+.locateBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.radiusRow {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.radiusChip {
+    height: 32px;
+    padding: 0 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.radiusChip:hover {
+    background: var(--bg-surface-alt);
+}
+
+.radiusChipActive {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.toast {
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 12.5px;
+}
+
+.toastOk {
+    background: rgba(29, 158, 117, 0.12);
+    color: var(--accent);
+}
+
+.toastError {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.errorBox {
+    padding: 9px 12px;
+    border-radius: 8px;
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    font-size: 12.5px;
+}
+
+.saveBtn {
+    align-self: flex-start;
+    height: 38px;
+    padding: 0 20px;
+    border: none;
+    border-radius: 9px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.saveBtn:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+
+.saveBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

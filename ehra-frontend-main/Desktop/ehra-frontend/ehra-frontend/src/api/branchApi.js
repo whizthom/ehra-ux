@@ -43,6 +43,26 @@ export const getBranchAttendanceQr = (id) => API.get(`/branches/${id}/attendance
 export const regenerateBranchAttendanceQr = (id) =>
   API.post(`/branches/${id}/attendance-qr/regenerate`);
 
+// ── Branch QR display link (public, shareable) ──────────────────────────
+
+export const getBranchQrDisplayLink = (id) =>
+  API.get(`/branches/${id}/attendance-qr/display-link`);
+
+export const generateBranchQrDisplayLink = (id) =>
+  API.post(`/branches/${id}/attendance-qr/display-link`);
+
+export const revokeBranchQrDisplayLink = (id) =>
+  API.delete(`/branches/${id}/attendance-qr/display-link`);
+
+// ── Branch attendance-zone settings ─────────────────────────────────────
+
+export const getBranchAttendanceSettings = (id) =>
+  API.get(`/branches/${id}/attendance-settings`);
+
+export const updateBranchAttendanceSettings = (id, data) =>
+  API.put(`/branches/${id}/attendance-settings`, data);
+// data shape: { zoneEnabled: boolean | null, latitude?, longitude?, radiusMeters? }
+
 // ── Employee branch-transfer history ────────────────────────────────────
 
 export const getEmployeeBranchHistory = (employeeId) =>

@@ -196,6 +196,13 @@
     min-height: 200px;
 }
 
+.qrTabStack {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 420px;
+}
+
 .tabLoading {
     display: flex;
     align-items: center;
