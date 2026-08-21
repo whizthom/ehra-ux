@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { assignEmployeeBranch } from "../api/branchApi";
 import styles from "./DepartmentCell.module.css";
 
@@ -14,6 +15,7 @@ export default function BranchCell({ employee, branches, onAssigned }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(false);
   const ref = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -30,6 +32,17 @@ export default function BranchCell({ employee, branches, onAssigned }) {
     try {
       const { data } = await assignEmployeeBranch(employee.id, branchId);
       onAssigned(employee.id, data);
+
+      // Assigning TO a branch (not unassigning) immediately hands off to
+      // that employee's profile so the employer can decide right away
+      // whether this is their only location or one of several — see
+      // LocationsTab. Unassigning (branchId === null) doesn't need this;
+      // there's nothing to decide when removing a location.
+      if (branchId !== null) {
+        navigate(`/employees/${employee.id}`, {
+          state: { from: "Workforce", openLocationsTab: true },
+        });
+      }
     } catch (err) {
       setError(true);
       setTimeout(() => setError(false), 3000);

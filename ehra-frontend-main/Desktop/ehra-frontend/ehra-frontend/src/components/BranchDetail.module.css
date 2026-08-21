@@ -203,6 +203,157 @@
     max-width: 420px;
 }
 
+/* ── Attendance sub-tabs (Today / History / Schedule) ── */
+.subTabBar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.subTabBtn {
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.subTabBtn:hover {
+    color: var(--text-primary);
+}
+
+.subTabBtnActive {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+/* ── Branch full-time schedule ── */
+.scheduleWrap {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.scheduleDesc {
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.errorBoxInline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border-radius: 10px;
+    font-size: 12.5px;
+}
+
+.scheduleDayRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-surface);
+}
+
+.scheduleSwitch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.scheduleSwitch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.scheduleSlider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: var(--border-color);
+    border-radius: 20px;
+    transition: 0.15s;
+}
+
+.scheduleSlider::before {
+    content: "";
+    position: absolute;
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background: #fff;
+    border-radius: 50%;
+    transition: 0.15s;
+}
+
+.scheduleSwitch input:checked+.scheduleSlider {
+    background: var(--accent);
+}
+
+.scheduleSwitch input:checked+.scheduleSlider::before {
+    transform: translateX(16px);
+}
+
+.scheduleDayLabel {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    width: 84px;
+    flex-shrink: 0;
+}
+
+.scheduleTimeFields {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+}
+
+.scheduleTimeFields input {
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 7px;
+    font-size: 12.5px;
+    font-family: inherit;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+}
+
+.scheduleTimeFields input:disabled {
+    opacity: 0.5;
+    background: var(--bg-surface-alt);
+}
+
+.scheduleTimeSep {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.savingTag {
+    font-size: 11px;
+    color: var(--accent);
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
 .tabLoading {
     display: flex;
     align-items: center;

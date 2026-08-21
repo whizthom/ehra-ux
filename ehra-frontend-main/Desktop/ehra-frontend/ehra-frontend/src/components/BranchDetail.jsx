@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../api/authApi";
 import {
   getBranchDashboard,
@@ -8,6 +9,8 @@ import {
   getBranchPayroll,
   getBranchAttendance,
   assignEmployeeBranch,
+  getBranchWorkSchedule,
+  updateBranchWorkScheduleDay,
 } from "../api/branchApi";
 import CustomSelect from "./CustomSelect";
 import BranchQrPanel from "./BranchQrPanel";
@@ -283,6 +286,7 @@ function AddEmployeeToBranchWidget({ branchId, branchName, onAdded, toast }) {
   const [assigning, setAssigning] = useState(false);
   const [error, setError] = useState(null);
   const [pickedId, setPickedId] = useState("");
+  const navigate = useNavigate();
 
   const openPicker = () => {
     setOpen(true);
@@ -308,6 +312,13 @@ function AddEmployeeToBranchWidget({ branchId, branchName, onAdded, toast }) {
       );
       setOpen(false);
       setPickedId("");
+
+      // Same immediate hand-off as BranchCell (Workforce) — the employer
+      // decides right away whether this employee is liable to just this
+      // branch or several locations. See LocationsTab.
+      navigate(`/employees/${data.id}`, {
+        state: { from: "Branches", openLocationsTab: true },
+      });
     } catch (err) {
       setError(
         err?.response?.data?.message ||
@@ -514,7 +525,7 @@ function formatClock(iso) {
   });
 }
 
-function AttendanceTab({ branchId }) {
+function AttendanceHistoryTab({ branchId }) {
   const [page, setPage] = useState(0);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -606,6 +617,266 @@ function AttendanceTab({ branchId }) {
             <i className="ti ti-chevron-right" aria-hidden="true" />
           </button>
         </div>
+      )}
+    </div>
+  );
+}
+
+// "Today" — reuses the same paginated attendance endpoint as History
+// (there's no dedicated "today only" branch endpoint), filtering
+// client-side to today's date. Rows are already date-descending from the
+// server, so today's rows are always first — correct as long as the
+// fetched page covers every employee active at this branch today, which a
+// single branch realistically does.
+function TodayTab({ branchId }) {
+  const [rows, setRows] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const todayStr = new Date().toISOString().slice(0, 10);
+    setLoading(true);
+    getBranchAttendance(branchId, 0, 100)
+      .then(({ data }) => {
+        if (cancelled) return;
+        setRows((data.content || []).filter((a) => a.date === todayStr));
+      })
+      .catch(
+        () =>
+          !cancelled &&
+          setError("Couldn't load today's attendance for this branch."),
+      )
+      .finally(() => !cancelled && setLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, [branchId]);
+
+  if (loading) {
+    return (
+      <div className={styles.tabLoading}>
+        <div className={styles.spinner} />
+      </div>
+    );
+  }
+
+  if (error) return <div className={styles.tabError}>{error}</div>;
+
+  if (!rows || rows.length === 0) {
+    return (
+      <div className={styles.emptyMini}>
+        <i className="ti ti-calendar-event" aria-hidden="true" />
+        <p>No attendance recorded yet today at this branch.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.employeeTable}>
+      {rows.map((a) => (
+        <div key={a.id} className={styles.leaveRow}>
+          <span className={styles.employeeAvatar}>
+            {nameInitials(
+              `${a.employeeFirstName || ""} ${a.employeeLastName || ""}`,
+            )}
+          </span>
+          <div className={styles.employeeInfo}>
+            <span className={styles.employeeName}>
+              {a.employeeFirstName} {a.employeeLastName}
+            </span>
+            <span className={styles.employeeMeta}>
+              in {formatClock(a.clockIn)} · out {formatClock(a.clockOut)}
+            </span>
+          </div>
+          <span
+            className={`${styles.leaveStatusBadge} ${attendanceStatusClass(a.status)}`}
+          >
+            {ATTENDANCE_STATUS_LABELS[a.status] || a.status}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const SCHEDULE_DAY_LABELS = {
+  MONDAY: "Monday",
+  TUESDAY: "Tuesday",
+  WEDNESDAY: "Wednesday",
+  THURSDAY: "Thursday",
+  FRIDAY: "Friday",
+  SATURDAY: "Saturday",
+  SUNDAY: "Sunday",
+};
+const SCHEDULE_DAY_ORDER = [
+  "MONDAY",
+  "TUESDAY",
+  "WEDNESDAY",
+  "THURSDAY",
+  "FRIDAY",
+  "SATURDAY",
+  "SUNDAY",
+];
+
+function sortScheduleDays(days) {
+  return [...days].sort(
+    (a, b) =>
+      SCHEDULE_DAY_ORDER.indexOf(a.dayOfWeek) -
+      SCHEDULE_DAY_ORDER.indexOf(b.dayOfWeek),
+  );
+}
+
+// "Schedule" — this branch's own full-time working hours (Business default
+// → branch override, same hierarchy as the geofencing zone in the QR
+// tab's Settings panel). Employer or this branch's own Manager, enforced
+// server-side.
+function BranchScheduleTab({ branchId, branchName }) {
+  const [schedule, setSchedule] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [savingDay, setSavingDay] = useState(null);
+
+  const load = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const { data } = await getBranchWorkSchedule(branchId);
+      setSchedule(sortScheduleDays(data));
+    } catch {
+      setError("Couldn't load this branch's schedule.");
+    } finally {
+      setLoading(false);
+    }
+  }, [branchId]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const handleDayUpdate = async (day, patch) => {
+    const updated = { ...day, ...patch };
+    setSchedule((prev) =>
+      prev.map((d) => (d.dayOfWeek === day.dayOfWeek ? updated : d)),
+    );
+    setSavingDay(day.dayOfWeek);
+    setError("");
+    try {
+      await updateBranchWorkScheduleDay(branchId, {
+        dayOfWeek: updated.dayOfWeek,
+        clockInTime: updated.clockInTime,
+        clockOutTime: updated.clockOutTime,
+        enabled: updated.enabled,
+      });
+    } catch {
+      setError("Couldn't save that day. Reverting.");
+      load();
+    } finally {
+      setSavingDay(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className={styles.tabLoading}>
+        <div className={styles.spinner} />
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.scheduleWrap}>
+      <p className={styles.scheduleDesc}>
+        Working hours for full-time employees stationed at{" "}
+        {branchName || "this branch"}. Leave a day off to fall back to the
+        business's own hours for that day — turning any day on here gives this
+        branch its own hours instead, for every day, not just this one.
+      </p>
+
+      {error && (
+        <div className={styles.errorBoxInline}>
+          <i className="ti ti-alert-circle" aria-hidden="true" />
+          {error}
+        </div>
+      )}
+
+      <div className={styles.employeeTable}>
+        {schedule?.map((day) => (
+          <div key={day.dayOfWeek} className={styles.scheduleDayRow}>
+            <label className={styles.scheduleSwitch}>
+              <input
+                type="checkbox"
+                checked={day.enabled}
+                onChange={(e) =>
+                  handleDayUpdate(day, { enabled: e.target.checked })
+                }
+              />
+              <span className={styles.scheduleSlider} />
+            </label>
+            <span className={styles.scheduleDayLabel}>
+              {SCHEDULE_DAY_LABELS[day.dayOfWeek]}
+            </span>
+
+            <div className={styles.scheduleTimeFields}>
+              <input
+                type="time"
+                value={day.clockInTime || ""}
+                disabled={!day.enabled}
+                onChange={(e) =>
+                  handleDayUpdate(day, { clockInTime: e.target.value })
+                }
+              />
+              <span className={styles.scheduleTimeSep}>–</span>
+              <input
+                type="time"
+                value={day.clockOutTime || ""}
+                disabled={!day.enabled}
+                onChange={(e) =>
+                  handleDayUpdate(day, { clockOutTime: e.target.value })
+                }
+              />
+            </div>
+
+            {savingDay === day.dayOfWeek && (
+              <span className={styles.savingTag}>Saving…</span>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const ATTENDANCE_SUBTABS = [
+  { key: "today", label: "Today" },
+  { key: "history", label: "History" },
+  { key: "schedule", label: "Schedule settings" },
+];
+
+// Wraps Today / History / Schedule settings — mirrors the business-wide
+// AttendanceSection.jsx's own three-part structure, scoped to one branch.
+function AttendanceSectionTab({ branchId, branchName }) {
+  const [subTab, setSubTab] = useState("today");
+
+  return (
+    <div>
+      <div className={styles.subTabBar}>
+        {ATTENDANCE_SUBTABS.map((t) => (
+          <button
+            key={t.key}
+            type="button"
+            className={`${styles.subTabBtn} ${subTab === t.key ? styles.subTabBtnActive : ""}`}
+            onClick={() => setSubTab(t.key)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {subTab === "today" && <TodayTab branchId={branchId} />}
+      {subTab === "history" && <AttendanceHistoryTab branchId={branchId} />}
+      {subTab === "schedule" && (
+        <BranchScheduleTab branchId={branchId} branchName={branchName} />
       )}
     </div>
   );
@@ -915,7 +1186,9 @@ export default function BranchDetail({ branch, onBack, onEdit, toast }) {
             toast={toast}
           />
         )}
-        {tab === "attendance" && <AttendanceTab branchId={branch.id} />}
+        {tab === "attendance" && (
+          <AttendanceSectionTab branchId={branch.id} branchName={branch.name} />
+        )}
         {tab === "leave" && <LeaveTab branchId={branch.id} />}
         {tab === "payroll" && <PayrollTab branchId={branch.id} />}
         {tab === "qr" && (

@@ -5,6 +5,7 @@ import { getEmployeeProfile, sendAnnouncement } from "../api/workforceApi";
 import { getUnreadCount, getMyUnreadCount } from "../api/notificationApi";
 import { getChatUnreadCount } from "../api/chatApi";
 import EmploymentTab from "../components/EmploymentTab";
+import LocationsTab from "../components/LocationsTab";
 import PayrollTab from "../components/PayrollTab";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
 import LogoutConfirmModal from "../components/LogoutConfirmModal";
@@ -185,7 +186,9 @@ export default function EmployeeProfilePage() {
 
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState("overview");
+  const [tab, setTab] = useState(
+    location.state?.openLocationsTab ? "locations" : "overview",
+  );
   const [msgOpen, setMsgOpen] = useState(false);
   const [msgSubject, setMsgSubject] = useState("");
   const [msgBody, setMsgBody] = useState("");
@@ -496,6 +499,7 @@ export default function EmployeeProfilePage() {
               { key: "attendance", label: "Attendance" },
               { key: "leave", label: "Leave" },
               { key: "employment", label: "Employment" },
+              { key: "locations", label: "Locations" },
               { key: "payroll", label: "Payroll" },
               ...(!hodView
                 ? [{ key: "announcements", label: "Messages" }]
@@ -764,6 +768,44 @@ export default function EmployeeProfilePage() {
 
             {/* Employment type + part-time attendance schedule */}
             {tab === "employment" && <EmploymentTab employeeId={id} />}
+            {tab === "locations" && (
+              <>
+                {location.state?.openLocationsTab && (
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 10,
+                      padding: "12px 14px",
+                      marginBottom: 14,
+                      background: "rgba(29, 158, 117, 0.1)",
+                      color: "var(--accent)",
+                      borderRadius: 10,
+                      fontSize: 12.5,
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    <i
+                      className="ti ti-info-circle"
+                      aria-hidden="true"
+                      style={{ marginTop: 1, flexShrink: 0 }}
+                    />
+                    <span>
+                      <strong>{profile.firstName}</strong> was just assigned to
+                      a branch. Is this their only location, or do they also
+                      work at other branches (or the main business)? Selecting
+                      more than one location makes them part-time, with a
+                      separate schedule for each.
+                    </span>
+                  </div>
+                )}
+                <LocationsTab
+                  employeeId={id}
+                  employeeName={profile.firstName}
+                  canManage={!hodView}
+                />
+              </>
+            )}
 
             {tab === "payroll" && (
               <PayrollTab employeeId={id} canManage={!hodView} />

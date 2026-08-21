@@ -63,6 +63,31 @@ export const updateBranchAttendanceSettings = (id, data) =>
   API.put(`/branches/${id}/attendance-settings`, data);
 // data shape: { zoneEnabled: boolean | null, latitude?, longitude?, radiusMeters? }
 
+// ── Employee liable locations (multi-location / part-time-across-branches) ──
+
+export const getEmployeeLocations = (employeeId) =>
+  API.get(`/employees/${employeeId}/locations`);
+
+export const updateEmployeeLocations = (employeeId, data) =>
+  API.put(`/employees/${employeeId}/locations`, data);
+// data shape: { includeMainBusiness: boolean, branchIds: number[] }
+
+// ── Branch-wide full-time schedule ───────────────────────────────────────
+
+export const getBranchWorkSchedule = (branchId) =>
+  API.get(`/branches/${branchId}/work-schedule`);
+
+export const updateBranchWorkScheduleDay = (branchId, dayPayload) =>
+  API.put(`/branches/${branchId}/work-schedule`, dayPayload);
+
+// ── Per-employee schedule at a specific branch (part-time only) ─────────
+
+export const getEmployeeScheduleAtBranch = (branchId, employeeId) =>
+  API.get(`/branches/${branchId}/employees/${employeeId}/schedule`);
+
+export const updateEmployeeScheduleAtBranch = (branchId, employeeId, dayPayload) =>
+  API.put(`/branches/${branchId}/employees/${employeeId}/schedule`, dayPayload);
+
 // ── Employee branch-transfer history ────────────────────────────────────
 
 export const getEmployeeBranchHistory = (employeeId) =>
