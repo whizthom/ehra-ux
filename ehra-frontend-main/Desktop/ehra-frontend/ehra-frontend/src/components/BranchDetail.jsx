@@ -8,6 +8,7 @@ import {
   getBranchLeave,
   getBranchPayroll,
   getBranchAttendance,
+  getBranchAttendanceToday,
   assignEmployeeBranch,
   getBranchWorkSchedule,
   updateBranchWorkScheduleDay,
@@ -622,12 +623,11 @@ function AttendanceHistoryTab({ branchId }) {
   );
 }
 
-// "Today" — reuses the same paginated attendance endpoint as History
-// (there's no dedicated "today only" branch endpoint), filtering
-// client-side to today's date. Rows are already date-descending from the
-// server, so today's rows are always first — correct as long as the
-// fetched page covers every employee active at this branch today, which a
-// single branch realistically does.
+// "Today" — backed by a dedicated, unpaginated endpoint (every attendance
+// row for this branch today, bounded naturally by headcount rather than
+// historical volume) so this view is guaranteed complete regardless of
+// how much history the branch has accumulated — see
+// AttendanceService#getBranchAttendanceToday.
 function TodayTab({ branchId }) {
   const [rows, setRows] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -635,13 +635,9 @@ function TodayTab({ branchId }) {
 
   useEffect(() => {
     let cancelled = false;
-    const todayStr = new Date().toISOString().slice(0, 10);
     setLoading(true);
-    getBranchAttendance(branchId, 0, 100)
-      .then(({ data }) => {
-        if (cancelled) return;
-        setRows((data.content || []).filter((a) => a.date === todayStr));
-      })
+    getBranchAttendanceToday(branchId)
+      .then(({ data }) => !cancelled && setRows(data))
       .catch(
         () =>
           !cancelled &&

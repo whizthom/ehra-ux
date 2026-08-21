@@ -38,6 +38,8 @@ export const getBranchPayroll = (id, page = 0, size = 25) =>
 export const getBranchAttendance = (id, page = 0, size = 25) =>
   API.get(`/branches/${id}/attendance`, { params: { page, size } });
 
+export const getBranchAttendanceToday = (id) => API.get(`/branches/${id}/attendance/today`);
+
 export const getBranchAttendanceQr = (id) => API.get(`/branches/${id}/attendance-qr`);
 
 export const regenerateBranchAttendanceQr = (id) =>
