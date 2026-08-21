@@ -29,6 +29,7 @@ import AttendanceSection from "../components/AttendanceSection";
 import QrCodeTab from "../components/QrcodeTab";
 import WorkforceTab from "../components/WorkforceTab";
 import MessagingHub from "../components/messaging/MessagingHub";
+import MentionToastStack from "../components/notifications/MentionToastStack";
 import LeavesTab from "../components/LeavesTab";
 import DepartmentsTab from "../components/DepartmentsTab";
 import BranchesTab from "../components/BranchesTab";
@@ -296,6 +297,11 @@ export default function Dashboard() {
   // brand footer, and bottom nav on mobile so the thread reads as a real
   // full-screen view rather than a panel wedged between them.
   const [chatThreadOpen, setChatThreadOpen] = useState(false);
+  // Set when a mention toast is clicked (see MentionToastStack below) —
+  // handed to MessagingHub, which consumes it to jump straight to that
+  // conversation/message regardless of which tab was active when the
+  // mention arrived.
+  const [messagingDeepLink, setMessagingDeepLink] = useState(null);
   useEffect(() => {
     if (activeNav !== "Messages" && chatThreadOpen) setChatThreadOpen(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1117,6 +1123,12 @@ export default function Dashboard() {
   // ── Render ────────────────────────────────────────────────────────────
   return (
     <div className={styles.dash}>
+      <MentionToastStack
+        onNavigate={(conversationId, messageId) => {
+          setActiveNav("Messages");
+          setMessagingDeepLink({ conversationId, messageId });
+        }}
+      />
       {/* ── Sidebar ── */}
       <aside className={styles.sidebar}>
         <div className={styles.sbLogo}>
@@ -1514,7 +1526,11 @@ export default function Dashboard() {
           ) : activeNav === "Workforce" ? (
             <WorkforceTab departments={departments} branches={branches} />
           ) : activeNav === "Messages" ? (
-            <MessagingHub onThreadOpenChange={setChatThreadOpen} />
+            <MessagingHub
+              onThreadOpenChange={setChatThreadOpen}
+              deepLink={messagingDeepLink}
+              onDeepLinkConsumed={() => setMessagingDeepLink(null)}
+            />
           ) : activeNav === "Leave" ? (
             <LeavesTab onSectionChange={setLeavesSection} />
           ) : activeNav === "Attendance" ? (

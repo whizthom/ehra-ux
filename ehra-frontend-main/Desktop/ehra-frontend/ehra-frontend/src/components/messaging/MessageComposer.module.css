@@ -370,6 +370,10 @@
     font-weight: 600;
 }
 
+.recordingTimeWarning {
+    color: var(--danger);
+}
+
 .recordingHint {
     color: var(--text-secondary);
     font-size: 13px;

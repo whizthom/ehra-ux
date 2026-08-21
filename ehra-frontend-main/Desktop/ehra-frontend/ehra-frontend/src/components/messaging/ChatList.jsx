@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import ChatListItem from "./ChatListItem";
+import SearchResultsPanel from "./SearchResultsPanel";
 import { formatDayLabel } from "../../utils/messagingFormat";
 import styles from "./ChatList.module.css";
 
@@ -24,25 +25,25 @@ export default function ChatList({
 }) {
   const [query, setQuery] = useState("");
   const [menuFor, setMenuFor] = useState(null);
+  const isSearching = query.trim().length > 0;
 
+  // While searching, SearchResultsPanel takes over entirely (see its
+  // doc) — it's backed by the real /api/messaging/search endpoint, which
+  // covers message TEXT and document filenames, not just conversation
+  // names already loaded on screen the way a client-side filter here
+  // ever could. No point also running a local name-only filter alongside
+  // it; the backend's own conversation-name search covers that case too.
   const filtered = useMemo(() => {
-    let base;
     switch (tab) {
       case "group":
-        base = conversations.filter((c) => !c.archived && c.type === "GROUP");
-        break;
+        return conversations.filter((c) => !c.archived && c.type === "GROUP");
       case "archived":
-        base = conversations.filter((c) => c.archived);
-        break;
+        return conversations.filter((c) => c.archived);
       case "all":
       default:
-        base = conversations.filter((c) => !c.archived);
-        break;
+        return conversations.filter((c) => !c.archived);
     }
-    if (!query.trim()) return base;
-    const q = query.trim().toLowerCase();
-    return base.filter((c) => (c.name || "").toLowerCase().includes(q));
-  }, [conversations, query, tab]);
+  }, [conversations, tab]);
 
   // Groups the list the same way an open conversation's own messages are
   // grouped (formatDayLabel — TODAY / YESTERDAY / weekday / date), keyed
@@ -75,7 +76,6 @@ export default function ChatList({
   }, [filtered]);
 
   const emptyMessage = () => {
-    if (query) return "No conversations match your search.";
     switch (tab) {
       case "group":
         return "No groups yet — start one below.";
@@ -140,7 +140,7 @@ export default function ChatList({
         />
       </div>
 
-      {tab === "group" && (
+      {tab === "group" && !isSearching && (
         <button className={styles.newGroupBtn} onClick={onNewGroup}>
           <span className={styles.newGroupIcon}>
             <i className="ti ti-users-group" />
@@ -149,39 +149,46 @@ export default function ChatList({
         </button>
       )}
 
-      <div className={styles.list}>
-        {error && conversations.length === 0 ? (
-          <div className={styles.errorState}>
-            <i className="ti ti-alert-triangle" />
-            <p>
-              {error?.response?.status === 403 ||
-              error?.response?.status === 401
-                ? "Couldn't load conversations — your session may need refreshing."
-                : "Couldn't load conversations. Check your connection and try again."}
-            </p>
-            <button onClick={onRetry}>Retry</button>
-          </div>
-        ) : loading ? (
-          <div className={styles.loadingState}>Loading conversations…</div>
-        ) : filtered.length === 0 ? (
-          <div className={styles.emptyState}>{emptyMessage()}</div>
-        ) : (
-          <>
-            {pinnedList.length > 0 && (
-              <>
-                <div className={styles.dateGroupHeader}>PINNED</div>
-                {pinnedList.map(renderRow)}
-              </>
-            )}
-            {dateGroups.map((group) => (
-              <div key={group.label}>
-                <div className={styles.dateGroupHeader}>{group.label}</div>
-                {group.items.map(renderRow)}
-              </div>
-            ))}
-          </>
-        )}
-      </div>
+      {isSearching ? (
+        <SearchResultsPanel
+          query={query.trim()}
+          onSelectConversation={onSelect}
+        />
+      ) : (
+        <div className={styles.list}>
+          {error && conversations.length === 0 ? (
+            <div className={styles.errorState}>
+              <i className="ti ti-alert-triangle" />
+              <p>
+                {error?.response?.status === 403 ||
+                error?.response?.status === 401
+                  ? "Couldn't load conversations — your session may need refreshing."
+                  : "Couldn't load conversations. Check your connection and try again."}
+              </p>
+              <button onClick={onRetry}>Retry</button>
+            </div>
+          ) : loading ? (
+            <div className={styles.loadingState}>Loading conversations…</div>
+          ) : filtered.length === 0 ? (
+            <div className={styles.emptyState}>{emptyMessage()}</div>
+          ) : (
+            <>
+              {pinnedList.length > 0 && (
+                <>
+                  <div className={styles.dateGroupHeader}>PINNED</div>
+                  {pinnedList.map(renderRow)}
+                </>
+              )}
+              {dateGroups.map((group) => (
+                <div key={group.label}>
+                  <div className={styles.dateGroupHeader}>{group.label}</div>
+                  {group.items.map(renderRow)}
+                </div>
+              ))}
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

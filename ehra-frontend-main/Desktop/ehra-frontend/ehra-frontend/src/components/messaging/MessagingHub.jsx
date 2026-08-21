@@ -7,7 +7,10 @@ import EmployeeInbox from "../EmployeeMessagesInbox";
 import { useAuth } from "../../context/AuthContext";
 import useConversations from "../../hooks/useConversations";
 import useMessagingConnection from "../../hooks/useMessagingConnection";
-import { createConversation, updateConversationState } from "../../api/messagingApi";
+import {
+  createConversation,
+  updateConversationState,
+} from "../../api/messagingApi";
 import styles from "./MessagingHub.module.css";
 
 const TABS = [
@@ -36,7 +39,11 @@ const TABS = [
 // components (MessagesTab for the composer, EmployeeInbox for the
 // read-only view) instead of re-implementing a duplicate broadcast
 // mechanism inside the messaging package.
-export default function MessagingHub({ onThreadOpenChange }) {
+export default function MessagingHub({
+  onThreadOpenChange,
+  deepLink,
+  onDeepLinkConsumed,
+}) {
   const { user } = useAuth();
   // user.identityId comes from localStorage (readSession in authApi.js) and
   // is always a STRING, while every identityId the backend sends over
@@ -46,12 +53,14 @@ export default function MessagingHub({ onThreadOpenChange }) {
   // side, in the wrong color. Coercing once here, at the single place this
   // value enters the messaging feature, is what fixes that for every
   // consumer below.
-  const myIdentityId = user?.identityId != null ? Number(user.identityId) : null;
+  const myIdentityId =
+    user?.identityId != null ? Number(user.identityId) : null;
   const isEmployer = user?.contextType === "EMPLOYER";
   useMessagingConnection();
 
   const { conversations, loading, error, refresh } = useConversations();
   const [activeId, setActiveId] = useState(null);
+  const [highlightMessageId, setHighlightMessageId] = useState(null);
   const [showNewChat, setShowNewChat] = useState(false);
   const [mobileShowList, setMobileShowList] = useState(true);
   const [tab, setTab] = useState("all");
@@ -87,10 +96,24 @@ export default function MessagingHub({ onThreadOpenChange }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, mobileShowList, showingAnnouncements]);
 
-  const handleSelect = (id) => {
+  const handleSelect = (id, messageId) => {
     setActiveId(id);
+    setHighlightMessageId(messageId ?? null);
     setMobileShowList(false);
   };
+
+  // Consumes an externally-requested deep link (a clicked mention toast —
+  // see MentionToastStack.jsx, mounted at the Dashboard level since a
+  // mention needs to be actionable even from a tab other than Messages).
+  // Also makes sure the "Chats" tab (not Group/Archived, which would hide
+  // the target conversation) is what's showing before selecting it.
+  useEffect(() => {
+    if (!deepLink) return;
+    if (tab !== "all") setTab("all");
+    handleSelect(deepLink.conversationId, deepLink.messageId);
+    onDeepLinkConsumed?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deepLink]);
 
   const handleBack = () => {
     setMobileShowList(true);
@@ -104,13 +127,18 @@ export default function MessagingHub({ onThreadOpenChange }) {
     handleSelect(data.id);
   };
 
-  const togglePin = (c) => updateConversationState(c.id, { pinned: !c.pinned }).then(refresh);
-  const toggleMute = (c) => updateConversationState(c.id, { muted: !c.muted }).then(refresh);
-  const toggleArchive = (c) => updateConversationState(c.id, { archived: !c.archived }).then(refresh);
+  const togglePin = (c) =>
+    updateConversationState(c.id, { pinned: !c.pinned }).then(refresh);
+  const toggleMute = (c) =>
+    updateConversationState(c.id, { muted: !c.muted }).then(refresh);
+  const toggleArchive = (c) =>
+    updateConversationState(c.id, { archived: !c.archived }).then(refresh);
 
   return (
     <div className={styles.hubOuter}>
-      <div className={`${styles.tabRow} ${detailOpen ? styles.tabRowHiddenMobile : ""}`}>
+      <div
+        className={`${styles.tabRow} ${detailOpen ? styles.tabRowHiddenMobile : ""}`}
+      >
         {TABS.map((t) => (
           <button
             key={t.key}
@@ -127,12 +155,17 @@ export default function MessagingHub({ onThreadOpenChange }) {
           {isEmployer ? (
             <MessagesTab onDetailOpenChange={reportDetailOpen} />
           ) : (
-            <EmployeeInbox onUnreadCountChange={() => {}} onDetailOpenChange={reportDetailOpen} />
+            <EmployeeInbox
+              onUnreadCountChange={() => {}}
+              onDetailOpenChange={reportDetailOpen}
+            />
           )}
         </div>
       ) : (
         <div className={styles.hub}>
-          <div className={`${styles.listCol} ${!mobileShowList ? styles.listColHiddenMobile : ""}`}>
+          <div
+            className={`${styles.listCol} ${!mobileShowList ? styles.listColHiddenMobile : ""}`}
+          >
             <ChatList
               tab={tab}
               conversations={conversations}
@@ -148,7 +181,9 @@ export default function MessagingHub({ onThreadOpenChange }) {
             />
           </div>
 
-          <div className={`${styles.windowCol} ${mobileShowList ? styles.windowColHiddenMobile : ""}`}>
+          <div
+            className={`${styles.windowCol} ${mobileShowList ? styles.windowColHiddenMobile : ""}`}
+          >
             {active ? (
               <ChatWindow
                 key={active.id}
@@ -156,6 +191,7 @@ export default function MessagingHub({ onThreadOpenChange }) {
                 myIdentityId={myIdentityId}
                 onBack={handleBack}
                 onConversationChanged={refresh}
+                highlightMessageId={highlightMessageId}
               />
             ) : (
               <div className={styles.emptyPane}>
@@ -163,14 +199,22 @@ export default function MessagingHub({ onThreadOpenChange }) {
                   <i className="ti ti-message-2" />
                 </div>
                 <h2>Your messages</h2>
-                <p>Connect with employees, businesses and customers through Ehral.</p>
+                <p>
+                  Connect with employees, businesses and customers through
+                  Ehral.
+                </p>
               </div>
             )}
           </div>
         </div>
       )}
 
-      {showNewChat && <NewChatModal onClose={() => setShowNewChat(false)} onCreate={handleCreate} />}
+      {showNewChat && (
+        <NewChatModal
+          onClose={() => setShowNewChat(false)}
+          onCreate={handleCreate}
+        />
+      )}
     </div>
   );
 }

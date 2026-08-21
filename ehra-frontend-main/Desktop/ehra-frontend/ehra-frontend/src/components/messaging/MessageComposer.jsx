@@ -3,11 +3,24 @@ import EmojiPicker from "./EmojiPicker";
 import VoiceRecorder from "./VoiceRecorder";
 import useClickOutside from "../../hooks/useClickOutside";
 import { uploadAttachment } from "../../api/messagingApi";
+import { compressImageIfNeeded } from "../../utils/imageCompress";
+import { formatFileSize } from "../../utils/messagingFormat";
 import styles from "./MessageComposer.module.css";
 
 const MAX_ATTACHMENT_HINT = {
   IMAGE: "image/*",
   DOCUMENT: ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip",
+};
+
+// Mirrors MsgAttachmentServiceImpl's server-side limits exactly — checked
+// here BEFORE spending any time/data on an upload attempt that the
+// server would reject anyway. Failing fast and locally, especially on a
+// slow mobile connection, is a meaningfully better experience than
+// "upload for 30 seconds, then fail."
+const MAX_UPLOAD_BYTES = {
+  IMAGE: 15 * 1024 * 1024,
+  DOCUMENT: 25 * 1024 * 1024,
+  VOICE: 20 * 1024 * 1024,
 };
 
 export default function MessageComposer({
@@ -140,10 +153,27 @@ export default function MessageComposer({
   const handleFilePicked = async (file, kind) => {
     if (!file) return;
     setShowAttachMenu(false);
-    setUploading(true);
     setUploadError(null);
+
+    // Images get downscaled/re-encoded client-side FIRST (see
+    // imageCompress.js) — both so the size check right after this
+    // reflects what will actually be uploaded, and because a full-
+    // resolution phone-camera photo has no reason to travel over
+    // someone's mobile data untouched when nothing in a chat bubble
+    // displays it above a few hundred pixels wide anyway.
+    const uploadFile =
+      kind === "IMAGE" ? await compressImageIfNeeded(file) : file;
+
+    if (uploadFile.size > MAX_UPLOAD_BYTES[kind]) {
+      setUploadError(
+        `That ${kind === "IMAGE" ? "image" : "file"} is ${formatFileSize(uploadFile.size)} — the limit is ${formatFileSize(MAX_UPLOAD_BYTES[kind])}.`,
+      );
+      return;
+    }
+
+    setUploading(true);
     try {
-      const { data } = await uploadAttachment(file, kind);
+      const { data } = await uploadAttachment(uploadFile, kind);
       await onSend({
         messageType: kind,
         body: null,
@@ -168,6 +198,12 @@ export default function MessageComposer({
     const file = new File([blob], `voice-${Date.now()}.webm`, {
       type: blob.type || "audio/webm",
     });
+    if (file.size > MAX_UPLOAD_BYTES.VOICE) {
+      setUploadError(
+        `That recording is ${formatFileSize(file.size)} — the limit is ${formatFileSize(MAX_UPLOAD_BYTES.VOICE)}.`,
+      );
+      return;
+    }
     setUploading(true);
     try {
       const { data } = await uploadAttachment(file, "VOICE");

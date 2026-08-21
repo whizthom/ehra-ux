@@ -6,6 +6,9 @@ import styles from "./MessageComposer.module.css";
 // browser's native MediaRecorder — no extra dependency needed. Produces a
 // webm/opus blob on Chrome/Edge/Firefox and falls back to whatever
 // mime type the browser reports as supported (Safari uses mp4/aac).
+const MAX_DURATION_SECONDS = 300; // 5 minutes
+const WARNING_AT_SECONDS = MAX_DURATION_SECONDS - 30; // last 30s gets a visible warning
+
 export default function VoiceRecorder({ onCancel, onSend }) {
   const [seconds, setSeconds] = useState(0);
   const [error, setError] = useState(null);
@@ -88,6 +91,21 @@ export default function VoiceRecorder({ onCancel, onSend }) {
     else onCancel();
   };
 
+  // Auto-stops (and sends whatever was captured) once the cap is hit,
+  // rather than letting someone record indefinitely and then discover
+  // the failure only at upload time — MsgAttachmentServiceImpl's own
+  // 20MB voice-note limit is what this cap is really protecting against,
+  // since an unbounded recording eventually exceeds it regardless of
+  // codec/bitrate.
+  useEffect(() => {
+    if (seconds >= MAX_DURATION_SECONDS) {
+      handleSend();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seconds]);
+
+  const nearLimit = seconds >= WARNING_AT_SECONDS;
+
   if (error) {
     return (
       <div className={styles.voiceRecorderBar}>
@@ -109,8 +127,16 @@ export default function VoiceRecorder({ onCancel, onSend }) {
         <i className="ti ti-trash" />
       </button>
       <span className={styles.recordingDot} />
-      <span className={styles.recordingTime}>{formatDuration(seconds)}</span>
-      <span className={styles.recordingHint}>Recording…</span>
+      <span
+        className={`${styles.recordingTime} ${nearLimit ? styles.recordingTimeWarning : ""}`}
+      >
+        {formatDuration(seconds)}
+      </span>
+      <span className={styles.recordingHint}>
+        {nearLimit
+          ? `Max ${formatDuration(MAX_DURATION_SECONDS)} — sending soon`
+          : "Recording…"}
+      </span>
       <button className={styles.voiceSendBtn} onClick={handleSend} title="Send">
         <i className="ti ti-send" />
       </button>

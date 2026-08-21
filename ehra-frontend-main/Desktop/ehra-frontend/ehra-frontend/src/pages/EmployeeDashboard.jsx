@@ -23,6 +23,7 @@ import {
 // scoped to the HOD's own department via GET /employees/my-department.
 import HodWorkforceTab from "../components/Hodworkforcetab";
 import MessagingHub from "../components/messaging/MessagingHub";
+import MentionToastStack from "../components/notifications/MentionToastStack";
 import EmployeeLeaveTab from "../components/EmployeeLeaveTab";
 import EmployeeAttendanceTab from "../components/EmployeeAttendanceTab";
 import EmployeePenaltyTab from "../components/EmployeePenaltyTab";
@@ -222,6 +223,11 @@ export default function Dashboard() {
   // brand footer, and bottom nav on mobile so the thread reads as a real
   // full-screen view rather than a panel wedged between them.
   const [chatThreadOpen, setChatThreadOpen] = useState(false);
+  // Set when a mention toast is clicked (see MentionToastStack below) —
+  // handed to MessagingHub, which consumes it to jump straight to that
+  // conversation/message regardless of which tab was active when the
+  // mention arrived.
+  const [messagingDeepLink, setMessagingDeepLink] = useState(null);
   useEffect(() => {
     if (activeNav !== "Messages" && chatThreadOpen) setChatThreadOpen(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -733,6 +739,12 @@ export default function Dashboard() {
   // ── Render ────────────────────────────────────────────────────────────
   return (
     <div className={styles.dash}>
+      <MentionToastStack
+        onNavigate={(conversationId, messageId) => {
+          setActiveNav("Messages");
+          setMessagingDeepLink({ conversationId, messageId });
+        }}
+      />
       {/* ── Sidebar ── */}
       <aside className={styles.sidebar}>
         <div className={styles.sbLogo}>
@@ -1098,7 +1110,11 @@ export default function Dashboard() {
             myProfile?.isHod ? (
             <HodWorkforceTab />
           ) : activeNav === "Messages" ? (
-            <MessagingHub onThreadOpenChange={setChatThreadOpen} />
+            <MessagingHub
+              onThreadOpenChange={setChatThreadOpen}
+              deepLink={messagingDeepLink}
+              onDeepLinkConsumed={() => setMessagingDeepLink(null)}
+            />
           ) : activeNav === "Leave" ? (
             <EmployeeLeaveTab isHod={myProfile?.isHod} />
           ) : activeNav === "Cover Requests" ? (

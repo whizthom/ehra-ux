@@ -16,6 +16,7 @@ export default function ChatWindow({
   myIdentityId,
   onBack,
   onConversationChanged,
+  highlightMessageId,
 }) {
   const {
     messages,
@@ -120,6 +121,27 @@ export default function ChatWindow({
       setTimeout(() => el.classList.remove(styles.highlight), 1200);
     }
   };
+
+  // A search result for a MESSAGE hit (see SearchResultsPanel.jsx) opens
+  // this conversation with a specific target message id — which is very
+  // often NOT in the most-recent page useConversationMessages loads by
+  // default. Rather than silently failing to highlight anything older
+  // than the first page, this keeps calling loadOlder() (the same
+  // cursor-pagination the person would use by scrolling up manually)
+  // until the target message actually shows up in `messages`, or the
+  // conversation genuinely runs out of history (hasMore false) — turning
+  // a search hit into a real deep link to any message, not just recent
+  // ones.
+  useEffect(() => {
+    if (!highlightMessageId || loading) return;
+    if (messages.some((m) => m.id === highlightMessageId)) {
+      requestAnimationFrame(() => scrollToMessage(highlightMessageId));
+      return;
+    }
+    if (hasMore && !loadingOlder) {
+      loadOlder();
+    }
+  }, [highlightMessageId, messages, loading, hasMore, loadingOlder, loadOlder]);
 
   const handleSend = async (payload) => {
     setReplyTo(null);
