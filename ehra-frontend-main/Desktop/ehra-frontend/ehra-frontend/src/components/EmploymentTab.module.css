@@ -258,6 +258,7 @@
 
 .timeFields {
     display: flex;
+    flex-wrap: wrap;
     gap: 14px;
     flex: 1;
     min-width: 220px;
@@ -267,6 +268,8 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+    flex: 1 1 100px;
+    min-width: 100px;
 }
 
 .timeField label {
@@ -275,6 +278,7 @@
 }
 
 .timeField input {
+    width: 100%;
     height: 32px;
     padding: 0 10px;
     border: 0.5px solid var(--border-color);
@@ -284,6 +288,13 @@
     background: var(--bg-surface);
     color: var(--text-primary);
     outline: none;
+    box-sizing: border-box;
+    /* iOS Safari otherwise renders <input type="time"> narrower than its
+       box, ignoring width:100% — this keeps the field filling its column
+       on every platform instead of just desktop/Android. */
+    min-width: 0;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 .timeField input:disabled {
@@ -302,4 +313,41 @@
     font-size: 11px;
     color: var(--accent);
     flex-shrink: 0;
+}
+
+/* ── Responsive: stack fully on narrow viewports ──
+   Below this width, .dayRow's own flex-wrap alone still left the row
+   height inconsistent (a wrapped .timeFields sat flush against
+   .dayToggle with no visual separation, and the two time inputs could
+   still feel cramped side by side on very narrow phones). This makes the
+   whole row deliberately stack — toggle+label full-width on its own line,
+   then the two clock in/out boxes below, evenly split — rather than
+   relying on wrap alone to happen to land in a readable spot. */
+@media (max-width: 520px) {
+    .dayRow {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .dayToggle {
+        width: auto;
+    }
+
+    .timeFields {
+        width: 100%;
+        min-width: 0;
+        flex-wrap: nowrap;
+        gap: 10px;
+    }
+
+    .timeField {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+
+    .offTag,
+    .savingTag {
+        align-self: flex-start;
+    }
 }
