@@ -230,6 +230,7 @@ export default function BusinessReportModal({ open, onClose }) {
 
   const scrollRef = useRef(null);
   const sectionRefs = useRef({});
+  const pillRefs = useRef({});
 
   const { from, to } = useMemo(() => rangeFor(range), [range]);
 
@@ -336,6 +337,23 @@ export default function BusinessReportModal({ open, onClose }) {
     return () => observer.disconnect();
   }, [open, attendance, leave, payroll, deptHealth, workforce]);
 
+  // Keep the pill nav itself scrolled so the currently-active pill is
+  // always visible — the scrollspy above only toggled which pill LOOKS
+  // active; on a narrow screen (or with six sections in a row) the
+  // active pill could already be scrolled out of view in its own
+  // horizontal strip, with nothing moving it back into frame as the
+  // person scrolls the body. `inline: "center"` moves the nav bar
+  // horizontally only — `block: "nearest"` is there specifically to stop
+  // scrollIntoView from also nudging the page's own vertical scroll,
+  // which would fight with the person's own scrolling.
+  useEffect(() => {
+    pillRefs.current[activeSection]?.scrollIntoView({
+      behavior: "smooth",
+      inline: "center",
+      block: "nearest",
+    });
+  }, [activeSection]);
+
   if (!open) return null;
 
   const jumpTo = (id) => {
@@ -403,6 +421,7 @@ export default function BusinessReportModal({ open, onClose }) {
             <button
               key={n.id}
               type="button"
+              ref={(el) => (pillRefs.current[n.id] = el)}
               className={`${styles.pill} ${activeSection === n.id ? styles.pillActive : ""}`}
               onClick={() => jumpTo(n.id)}
             >
@@ -1031,23 +1050,30 @@ export default function BusinessReportModal({ open, onClose }) {
 
 /* ── gauge SVG (matches TodaysPulse's ring styling/tokens) ────────────── */
 function GaugeSvg({ percent }) {
-  const R = 64;
-  const STROKE = 12;
+  // R was 64 with a 160 viewBox — the ring's inner hole (2*(R-STROKE/2))
+  // came out smaller than "ATTENDANCE RATE" needs at its font size and
+  // letter-spacing, so the text visually spilled past the ring instead of
+  // sitting cleanly inside it. Bigger R (and a proportionally bigger
+  // viewBox so the ring itself doesn't run off-canvas) gives the center
+  // label real breathing room without changing anything about how the
+  // percentage itself is calculated or drawn.
+  const R = 76;
+  const STROKE = 10;
   const circumference = 2 * Math.PI * R;
   const clamped = Math.min(Math.max(percent || 0, 0), 100);
   const offset = circumference * (1 - clamped / 100);
   return (
-    <svg viewBox="0 0 160 160" className={styles.gaugeSvg}>
+    <svg viewBox="0 0 176 176" className={styles.gaugeSvg}>
       <circle
-        cx="80"
-        cy="80"
+        cx="88"
+        cy="88"
         r={R}
         className={styles.gaugeTrack}
         strokeWidth={STROKE}
       />
       <circle
-        cx="80"
-        cy="80"
+        cx="88"
+        cy="88"
         r={R}
         className={styles.gaugeProgress}
         strokeWidth={STROKE}

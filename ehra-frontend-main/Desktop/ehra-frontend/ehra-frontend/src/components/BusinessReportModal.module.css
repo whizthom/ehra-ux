@@ -267,8 +267,8 @@
 
 .gaugeWrap {
     position: relative;
-    width: 140px;
-    height: 140px;
+    width: 160px;
+    height: 160px;
 }
 
 .gaugeSvg {
@@ -286,7 +286,7 @@
     stroke: var(--accent);
     stroke-linecap: round;
     transform: rotate(-90deg);
-    transform-origin: 80px 80px;
+    transform-origin: 88px 88px;
     transition: stroke-dashoffset 0.9s ease;
 }
 
@@ -298,6 +298,12 @@
     align-items: center;
     justify-content: center;
     text-align: center;
+    /* Caps the text block to comfortably inside the ring's inner hole
+       (rather than the full gaugeWrap box) — belt-and-braces alongside
+       the bigger ring above, so "ATTENDANCE RATE" wraps to two lines
+       instead of overlapping the ring on any browser's font metrics. */
+    max-width: 106px;
+    margin: 0 auto;
 }
 
 .gaugeNum {

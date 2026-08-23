@@ -209,6 +209,11 @@
     gap: 4px;
     margin-bottom: 16px;
     border-bottom: 1px solid var(--border-color);
+    overflow-x: auto;
+    /* Same treatment as the page-level .tabBar above — "Schedule
+       settings" is the longest label of the three, so on a narrow phone
+       this scrolls horizontally instead of wrapping mid-label or forcing
+       the page itself wider than the viewport. */
 }
 
 .subTabBtn {
@@ -221,6 +226,8 @@
     font-weight: 500;
     cursor: pointer;
     font-family: inherit;
+    white-space: nowrap;
+    flex-shrink: 0;
     transition: color 0.15s, border-color 0.15s;
 }
 
@@ -266,6 +273,12 @@
     border: 1px solid var(--border-color);
     border-radius: 10px;
     background: var(--bg-surface);
+    flex-wrap: wrap;
+    /* Was a hard, unwrapped row before — switch + 84px label + two time
+       boxes all fighting for space on one line, with the clock-out box
+       specifically the first thing to get squeezed off-screen on a
+       narrow phone since it's last in source order. Wrapping lets the
+       time fields drop to their own line instead of overflowing. */
 }
 
 .scheduleSwitch {
@@ -324,9 +337,15 @@
     align-items: center;
     gap: 6px;
     flex: 1;
+    min-width: 180px;
+    /* min-width forces this whole group onto its own wrapped line as a
+       unit on narrow screens, rather than letting the two boxes get
+       squeezed down individually below a usable size. */
 }
 
 .scheduleTimeFields input {
+    flex: 1 1 0;
+    min-width: 0;
     height: 32px;
     padding: 0 8px;
     border: 1px solid var(--border-color);
@@ -335,6 +354,12 @@
     font-family: inherit;
     background: var(--bg-surface);
     color: var(--text-primary);
+    box-sizing: border-box;
+    /* iOS Safari otherwise renders <input type="time"> narrower than its
+       box regardless of width/flex — this keeps clock-out from silently
+       shrinking to an unusable sliver on iPhone specifically. */
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 .scheduleTimeFields input:disabled {
@@ -345,6 +370,7 @@
 .scheduleTimeSep {
     color: var(--text-secondary);
     font-size: 12px;
+    flex-shrink: 0;
 }
 
 .savingTag {
@@ -352,6 +378,24 @@
     color: var(--accent);
     flex-shrink: 0;
     white-space: nowrap;
+}
+
+/* On very narrow phones, drop the switch+label onto their own line too,
+   so the clock in/out pair always gets the full row width to work with
+   instead of splitting it with the label. */
+@media (max-width: 480px) {
+    .scheduleDayRow {
+        align-items: stretch;
+    }
+
+    .scheduleDayLabel {
+        width: auto;
+    }
+
+    .scheduleTimeFields {
+        width: 100%;
+        min-width: 0;
+    }
 }
 
 .tabLoading {
