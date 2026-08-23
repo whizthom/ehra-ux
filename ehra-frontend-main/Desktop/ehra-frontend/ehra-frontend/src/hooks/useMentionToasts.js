@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { subscribeToUserQueue } from "../services/messagingSocket";
+import { playNotificationSound } from "../services/notificationSound";
 
 const AUTO_DISMISS_MS = 8000;
 
@@ -16,6 +17,20 @@ export default function useMentionToasts() {
   useEffect(() => {
     const unsubscribe = subscribeToUserQueue((event) => {
       if (!event || event.type !== "MESSAGE_MENTION") return;
+      // Uses the SAME "messages" category chime as an ordinary new
+      // message (playNotificationSound with kind: "message", not a
+      // separate melody) — a mention is a kind of message notification,
+      // and it was previously the one type of message alert with no
+      // sound at all, silent while an ordinary message chimed.
+      //
+      // id MUST match the format useNewMessageToasts.js uses
+      // (`message:${messageId}`) — sending a message that also mentions
+      // someone fires BOTH NEW_MESSAGE_NOTIFICATION and MESSAGE_MENTION
+      // to that same person for the identical message. Using a
+      // differently-shaped id here would defeat playNotificationSound's
+      // own 15s duplicate-event dedupe and produce two overlapping
+      // sounds for one message instead of the intended one.
+      playNotificationSound({ kind: "message", id: `message:${event.payload.messageId}` });
       const toast = { id: `${event.payload.messageId}-${Date.now()}`, ...event.payload };
       setToasts((prev) => [...prev, toast]);
       setTimeout(() => {
