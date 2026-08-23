@@ -1,12 +1,19 @@
 import { useEffect } from "react";
 import { subscribeToUserQueue } from "../services/messagingSocket";
-import { playMessageSound } from "../services/notificationSound";
 
 // Small helper for pages that keep their own `messagesUnread` state
 // (Dashboard.jsx / EmployeeDashboard.jsx already did, for the old chat's
 // badge) rather than using useMessagingBadge's self-contained state.
 // Just re-invokes whatever refresh callback they already have whenever a
 // WebSocket event implies the count may have changed.
+//
+// Sound/toast notification for an incoming message does NOT live here
+// anymore — it moved to useNewMessageToasts.js, driven by the backend's
+// dedicated NEW_MESSAGE_NOTIFICATION event (sender name, snippet,
+// mute-aware) rather than piggybacking on CONVERSATION_UPDATED here,
+// which also fires for pin/mute/archive changes and carried no sender
+// info to show in a toast. Keeping both would have meant two sounds for
+// the same message.
 export default function useMessagingBadgeSync(onPossibleChange) {
   useEffect(() => {
     const unsubscribe = subscribeToUserQueue((event) => {
@@ -16,18 +23,6 @@ export default function useMessagingBadgeSync(onPossibleChange) {
         event.type === "CONVERSATION_CREATED" ||
         event.type === "UNREAD_COUNT_UPDATED"
       ) {
-        // A conversation summary is sent once to each participant. An unread
-        // count above zero identifies a genuinely incoming message, avoiding
-        // sounds for the sender and for a thread the recipient is reading.
-        if (
-          event.type === "CONVERSATION_UPDATED" &&
-          Number(event.payload?.unreadCount) > 0
-        ) {
-          playMessageSound({
-            id: `conversation:${event.payload.id}:${event.payload.lastMessageAt}`,
-            conversationId: event.payload.id,
-          });
-        }
         onPossibleChange();
       }
     });

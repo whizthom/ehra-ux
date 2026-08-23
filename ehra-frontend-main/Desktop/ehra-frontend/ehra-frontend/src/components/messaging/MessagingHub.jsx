@@ -6,7 +6,6 @@ import MessagesTab from "../MessagesTab";
 import EmployeeInbox from "../EmployeeMessagesInbox";
 import { useAuth } from "../../context/AuthContext";
 import useConversations from "../../hooks/useConversations";
-import useMessagingConnection from "../../hooks/useMessagingConnection";
 import {
   createConversation,
   updateConversationState,
@@ -43,6 +42,7 @@ export default function MessagingHub({
   onThreadOpenChange,
   deepLink,
   onDeepLinkConsumed,
+  onActiveConversationChange,
 }) {
   const { user } = useAuth();
   // user.identityId comes from localStorage (readSession in authApi.js) and
@@ -56,7 +56,12 @@ export default function MessagingHub({
   const myIdentityId =
     user?.identityId != null ? Number(user.identityId) : null;
   const isEmployer = user?.contextType === "EMPLOYER";
-  useMessagingConnection();
+  // The actual WebSocket connection is opened once, at the top of the
+  // dashboard (Dashboard.jsx/EmployeeDashboard.jsx), NOT here — see
+  // useMessagingConnection's own doc for why mounting it only inside this
+  // component (which only exists while the Messages tab is active) was
+  // the root cause of presence and notifications both requiring the chat
+  // list to be opened first.
 
   const { conversations, loading, error, refresh } = useConversations();
   const [activeId, setActiveId] = useState(null);
@@ -72,6 +77,18 @@ export default function MessagingHub({
 
   const active = conversations.find((c) => c.id === activeId) || null;
   const showingAnnouncements = tab === "announcement";
+
+  // Reports which conversation is currently the one on screen up to the
+  // Dashboard, which uses it to suppress a message-notification toast for
+  // whatever the person is already actively looking at (see
+  // NotificationToastStack.jsx). Reset to null on unmount so navigating
+  // away from the Messages tab entirely doesn't leave a stale
+  // conversation permanently suppressed.
+  useEffect(() => {
+    onActiveConversationChange?.(activeId);
+    return () => onActiveConversationChange?.(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeId]);
 
   const reportDetailOpen = (open) => {
     setDetailOpen(open);

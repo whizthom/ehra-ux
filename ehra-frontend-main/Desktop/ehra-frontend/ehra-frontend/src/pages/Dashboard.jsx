@@ -17,6 +17,7 @@ import { softDeleteEmployee } from "../api/workforceApi";
 // unused, in case anything else still imports them.
 import { getMessagingUnreadCount } from "../api/messagingApi";
 import useMessagingBadgeSync from "../hooks/useMessagingBadgeSync";
+import useMessagingConnection from "../hooks/useMessagingConnection";
 import useMessageStream from "../hooks/useMessageStream";
 import styles from "./Dashboard.module.css";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
@@ -29,7 +30,7 @@ import AttendanceSection from "../components/AttendanceSection";
 import QrCodeTab from "../components/QrcodeTab";
 import WorkforceTab from "../components/WorkforceTab";
 import MessagingHub from "../components/messaging/MessagingHub";
-import MentionToastStack from "../components/notifications/MentionToastStack";
+import NotificationToastStack from "../components/notifications/NotificationToastStack";
 import LeavesTab from "../components/LeavesTab";
 import DepartmentsTab from "../components/DepartmentsTab";
 import BranchesTab from "../components/BranchesTab";
@@ -261,6 +262,15 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
+  // Opens (and keeps alive) the real-time messaging WebSocket as soon as
+  // someone is logged in — deliberately mounted HERE, at the top of the
+  // whole dashboard, not inside MessagingHub (which only exists while the
+  // Messages tab is active). Presence ("is this person online") and any
+  // real-time notification both depend entirely on this connection
+  // existing; mounting it only inside MessagingHub meant neither worked
+  // until someone actively opened the chat list, which is exactly the
+  // bug this fixes.
+  useMessagingConnection();
 
   // Mobile bottom-nav "Log out" — confirmed via LogoutConfirmModal before
   // the session is actually torn down, so a stray tap on a crowded phone
@@ -297,11 +307,16 @@ export default function Dashboard() {
   // brand footer, and bottom nav on mobile so the thread reads as a real
   // full-screen view rather than a panel wedged between them.
   const [chatThreadOpen, setChatThreadOpen] = useState(false);
-  // Set when a mention toast is clicked (see MentionToastStack below) —
-  // handed to MessagingHub, which consumes it to jump straight to that
-  // conversation/message regardless of which tab was active when the
-  // mention arrived.
+  // Set when a notification toast is clicked (see NotificationToastStack
+  // below) — handed to MessagingHub, which consumes it to jump straight
+  // to that conversation/message regardless of which tab was active when
+  // the notification arrived.
   const [messagingDeepLink, setMessagingDeepLink] = useState(null);
+  // Which conversation MessagingHub currently has open, if any — reported
+  // up so NotificationToastStack can skip popping a toast for a message
+  // the person can already see arrive live on screen.
+  const [messagingActiveConversationId, setMessagingActiveConversationId] =
+    useState(null);
   useEffect(() => {
     if (activeNav !== "Messages" && chatThreadOpen) setChatThreadOpen(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1123,11 +1138,12 @@ export default function Dashboard() {
   // ── Render ────────────────────────────────────────────────────────────
   return (
     <div className={styles.dash}>
-      <MentionToastStack
+      <NotificationToastStack
         onNavigate={(conversationId, messageId) => {
           setActiveNav("Messages");
           setMessagingDeepLink({ conversationId, messageId });
         }}
+        activeConversationId={messagingActiveConversationId}
       />
       {/* ── Sidebar ── */}
       <aside className={styles.sidebar}>
@@ -1530,6 +1546,7 @@ export default function Dashboard() {
               onThreadOpenChange={setChatThreadOpen}
               deepLink={messagingDeepLink}
               onDeepLinkConsumed={() => setMessagingDeepLink(null)}
+              onActiveConversationChange={setMessagingActiveConversationId}
             />
           ) : activeNav === "Leave" ? (
             <LeavesTab onSectionChange={setLeavesSection} />
