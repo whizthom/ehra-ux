@@ -45,6 +45,7 @@ const ScanAttendance = lazy(() => import("./pages/ScanAttendance"));
 const EmployeeDashboard = lazy(() => import("./pages/EmployeeDashboard"));
 const EmployeeProfilePage = lazy(() => import("./pages/EmployeeProfilePage"));
 const MyAccountsPage = lazy(() => import("./pages/MyAccountsPage"));
+const Support = lazy(() => import("./pages/Support"));
 
 function App() {
   return (
@@ -200,6 +201,20 @@ function App() {
               element={
                 <ProtectedRoute roles={["ROLE_ADMIN", "ROLE_EMPLOYEE"]}>
                   <MyAccountsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* SUPPORT — customer-facing half of the Ehral Operations
+                Console's Support Inbox. Reachable from the "Help &
+                Support" nav item on either dashboard. No roles=
+                restriction: any authenticated identity (admin or
+                employee) can contact support. */}
+            <Route
+              path="/support"
+              element={
+                <ProtectedRoute>
+                  <Support />
                 </ProtectedRoute>
               }
             />

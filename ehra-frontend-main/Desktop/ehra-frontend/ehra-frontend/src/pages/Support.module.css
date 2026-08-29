@@ -1,0 +1,324 @@
+.page {
+    min-height: 100vh;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    height: 56px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 20px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.backLink {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 13.5px;
+    cursor: pointer;
+    padding: 6px 0;
+}
+
+.backLink:hover {
+    color: var(--accent);
+}
+
+.themeToggle {
+    margin-left: auto;
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.themeToggle:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+}
+
+.list {
+    width: 300px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border-color);
+    background: var(--bg-surface);
+    padding: 14px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.newBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 11px;
+    font-weight: 600;
+    font-size: 13.5px;
+    cursor: pointer;
+    margin-bottom: 6px;
+}
+
+.newBtn:hover {
+    filter: brightness(1.06);
+}
+
+.convItem {
+    text-align: left;
+    background: var(--bg-page);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 11px 12px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.convItem:hover {
+    border-color: var(--accent);
+}
+
+.convItemActive {
+    background: var(--bg-soft-accent);
+    border-color: var(--accent);
+}
+
+.convSubject {
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--text-primary);
+}
+
+.convMeta {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    margin-top: 3px;
+}
+
+.muted {
+    color: var(--text-secondary);
+    font-size: 13px;
+    padding: 10px 4px;
+}
+
+.errorText {
+    color: var(--danger);
+    font-size: 13px;
+    padding: 10px 4px;
+}
+
+.errorBox {
+    background: var(--danger-bg);
+    color: var(--danger-text, var(--danger));
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+    margin-bottom: 14px;
+}
+
+.main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.emptyState {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.emptyState i {
+    font-size: 36px;
+    opacity: 0.5;
+}
+
+.createForm {
+    max-width: 480px;
+    width: 100%;
+}
+
+.formTitle {
+    font-size: 19px;
+    font-weight: 700;
+    margin: 0 0 4px;
+    color: var(--text-primary);
+}
+
+.label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin: 14px 0 5px;
+}
+
+.input,
+.textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--bg-page);
+    color: var(--text-primary);
+}
+
+.input:focus,
+.textarea:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: var(--accent);
+}
+
+.textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.submitBtn {
+    margin-top: 18px;
+    padding: 11px 20px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    font-size: 13.5px;
+    cursor: pointer;
+}
+
+.submitBtn:hover {
+    filter: brightness(1.06);
+}
+
+.submitBtn:disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
+.thread {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-width: 640px;
+}
+
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 16px;
+}
+
+.bubble {
+    max-width: 78%;
+}
+
+.bubbleMine {
+    align-self: flex-end;
+}
+
+.bubbleTheirs {
+    align-self: flex-start;
+}
+
+.bubbleText {
+    padding: 10px 13px;
+    border-radius: 14px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.bubbleMine .bubbleText {
+    background: var(--bubble-sent-bg);
+    color: var(--text-primary);
+}
+
+.bubbleTheirs .bubbleText {
+    background: var(--bubble-received-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.bubbleMeta {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 3px;
+}
+
+.bubbleMine .bubbleMeta {
+    text-align: right;
+}
+
+.replyForm {
+    display: flex;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+}
+
+.replyForm .input {
+    flex: 1;
+}
+
+.replyForm .submitBtn {
+    margin-top: 0;
+    white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+    .body {
+        flex-direction: column;
+    }
+
+    .list {
+        width: 100%;
+        max-height: 40vh;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .main {
+        padding: 16px;
+    }
+}

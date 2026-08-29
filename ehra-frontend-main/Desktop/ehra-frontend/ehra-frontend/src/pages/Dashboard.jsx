@@ -92,6 +92,13 @@ const NAV = [
     isFullPage: true,
     route: "/pricing",
   },
+  {
+    icon: "ti-headset",
+    label: "Help & Support",
+    section: "account",
+    isFullPage: true,
+    route: "/support",
+  },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────

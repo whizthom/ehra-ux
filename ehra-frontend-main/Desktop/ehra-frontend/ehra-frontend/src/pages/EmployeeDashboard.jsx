@@ -68,6 +68,13 @@ const NAV = [
     section: "account",
     isFullPage: true,
   },
+  {
+    icon: "ti-headset",
+    label: "Help & Support",
+    section: "account",
+    isFullPage: true,
+    route: "/support",
+  },
 ];
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -786,7 +793,7 @@ export default function Dashboard() {
                   className={`${styles.sbItem} ${activeNav === n.label && !n.isFullPage ? styles.active : ""}`}
                   onClick={() => {
                     if (n.isFullPage) {
-                      navigate("/my-accounts", {
+                      navigate(n.route ?? "/my-accounts", {
                         state: { returnPath: "/my-dashboard", activeNav },
                       });
                       return;
@@ -1589,7 +1596,7 @@ export default function Dashboard() {
               className={`${styles.bottomNavItem} ${activeNav === n.label && !n.isFullPage ? styles.bottomNavActive : ""}`}
               onClick={() =>
                 n.isFullPage
-                  ? navigate("/my-accounts", {
+                  ? navigate(n.route ?? "/my-accounts", {
                       state: { returnPath: "/my-dashboard", activeNav },
                     })
                   : setActiveNav(n.label)
