@@ -82,7 +82,9 @@ export default function PlanExpiryReminder({ subscription }) {
   const tier = urgencyTier(subscription);
   const days = Math.max(daysUntil(subscription.expiryDate), 0);
   const copy = TIER_COPY[tier];
-  const planLabel = subscription.plan === "PREMIUM" ? "Premium" : "Pro";
+  // PREMIUM is the backend's enum value for the plan now displayed on
+  // /pricing as "Business" — see the note at the top of data/pricingPlans.js.
+  const planLabel = subscription.plan === "PREMIUM" ? "Business" : "Pro";
 
   function handleClose() {
     window.clearTimeout(dismissTimerRef.current);

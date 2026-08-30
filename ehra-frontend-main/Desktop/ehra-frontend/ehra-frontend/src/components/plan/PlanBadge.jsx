@@ -1,10 +1,15 @@
 import styles from "./planBadge.module.css";
 import { urgencyTier, daysUntil } from "./planUrgency";
 
+// NOTE: keys are the backend's PlanType enum values, not the /pricing
+// page's current display names — PREMIUM is still what the backend calls
+// the plan now shown on /pricing as "Business" (see the note at the top
+// of data/pricingPlans.js). Only the label here needs to match the new
+// name; the key must stay PREMIUM until the backend enum changes.
 const PLAN_META = {
   STARTER: { label: "Starter", className: styles.starter },
   PRO: { label: "Pro", className: styles.pro },
-  PREMIUM: { label: "Premium", className: styles.premium },
+  PREMIUM: { label: "Business", className: styles.premium },
 };
 
 /**

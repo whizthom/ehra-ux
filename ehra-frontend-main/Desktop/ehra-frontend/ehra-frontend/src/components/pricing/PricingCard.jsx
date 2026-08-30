@@ -33,6 +33,7 @@ export default function PricingCard({ plan, cycle, loading, error, onSelect }) {
   const price = plan.price[cycle];
   const savings = plan.savingsAmount[cycle];
   const isFree = price === 0;
+  const isCustom = Boolean(plan.isCustom);
 
   const cardClass = [
     styles.card,
@@ -58,9 +59,9 @@ export default function PricingCard({ plan, cycle, loading, error, onSelect }) {
 
       <div className={styles.priceRow}>
         <span className={styles.priceAmount}>
-          {isFree ? "Free" : formatNaira(price)}
+          {isCustom ? "Let's talk" : isFree ? "Free" : formatNaira(price)}
         </span>
-        {!isFree && (
+        {!isFree && !isCustom && (
           <span className={styles.priceUnit}>
             /{cycle === "YEARLY" ? "year" : "month"}
           </span>

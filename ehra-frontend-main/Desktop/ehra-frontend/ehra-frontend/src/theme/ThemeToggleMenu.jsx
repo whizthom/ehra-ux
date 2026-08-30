@@ -10,7 +10,9 @@ import { urgencyTier, daysUntil } from "../components/plan/planUrgency";
 // vanishing.
 const CLOSE_DURATION = 260;
 
-const PLAN_LABEL = { STARTER: "Starter", PRO: "Pro", PREMIUM: "Premium" };
+// PREMIUM is the backend's enum value for the plan now displayed on
+// /pricing as "Business" — see the note at the top of data/pricingPlans.js.
+const PLAN_LABEL = { STARTER: "Starter", PRO: "Pro", PREMIUM: "Business" };
 
 // ── Settings icon + dropdown ─────────────────────────────────────────────
 // Self-contained: drop <ThemeToggleMenu /> into any topbar and it Just

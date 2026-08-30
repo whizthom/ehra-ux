@@ -30,13 +30,16 @@ import VerifyEmailToUpgradeModal from "../../components/VerifyEmailToUpgradeModa
  *      returns them to the dashboard rather than sending them anywhere
  *      signup-shaped (they already have an account, that's how they got
  *      here).
- *   2. Pro/Premium, signed in but NOT in an admin/employer context (e.g.
- *      viewing as an employee): nothing to check out from here either —
- *      sends them back to the dashboard rather than attempting a request
- *      the backend would reject anyway.
- *   3. Pro/Premium, signed in as an admin: initialize a checkout on the
- *      backend. If the backend blocks it with 403 (business email not
- *      verified — see EmailVerificationService
+ *   2. Custom's "Contact Sales" (cta.action === "contact") — also nothing
+ *      to check out; sends them to /support instead, regardless of
+ *      admin/employee context.
+ *   3. Any other paid plan (Pro/Business/Elite), signed in but NOT in an
+ *      admin/employer context (e.g. viewing as an employee): nothing to
+ *      check out from here either — sends them back to the dashboard
+ *      rather than attempting a request the backend would reject anyway.
+ *   4. Any other paid plan, signed in as an admin: initialize a checkout
+ *      on the backend. If the backend blocks it with 403 (business email
+ *      not verified — see EmailVerificationService
  *      #requireVerifiedEmailForSecurity), show VerifyEmailToUpgradeModal
  *      instead of the Paystack popup; once verified (auto-detected via
  *      polling, or a manual "I've verified" click), the SAME checkout
@@ -44,6 +47,11 @@ import VerifyEmailToUpgradeModal from "../../components/VerifyEmailToUpgradeModa
  *      popup directly, then verify the transaction server-side before
  *      treating it as paid. Never trusts the popup's own success
  *      callback alone.
+ *
+ *      NOTE: Elite (PLAN_IDS.ELITE) has no backend PlanType yet — see the
+ *      comment block at the top of data/pricingPlans.js. Its checkout
+ *      call will currently fail and surface the generic "Checkout isn't
+ *      available yet" error below until the backend adds it.
  */
 export default function Pricing() {
   const [cycle, setCycle] = useState(BILLING_CYCLES.MONTHLY);
@@ -169,6 +177,14 @@ export default function Pricing() {
 
     if (plan.id === PLAN_IDS.STARTER) {
       navigate("/dashboard");
+      return;
+    }
+
+    // Custom plan has nothing to check out — every authenticated Identity
+    // (admin or employee) can reach /support, so this doesn't need the
+    // isSignedInAdmin gate below.
+    if (plan.cta.action === "contact") {
+      navigate("/support");
       return;
     }
 
