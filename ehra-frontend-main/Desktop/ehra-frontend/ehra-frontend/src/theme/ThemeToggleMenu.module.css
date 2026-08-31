@@ -72,9 +72,7 @@
     width: min(78vw, 300px);
     max-width: 300px;
     background: var(--bg-surface);
-    border-left: 0.5px solid var(--border-color);
-    border-bottom: 0.5px solid var(--border-color);
-    border-top: none;
+    border: 0.5px solid var(--border-color);
     border-right: none;
     border-radius: 0 0 0 16px;
     box-shadow: -10px 0 32px var(--shadow-color);
@@ -117,7 +115,7 @@
 
 .panelHdr {
     padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 12px;
-    border-bottom: none;
+    border-bottom: 0.5px solid var(--border-color);
     display: flex;
     align-items: center;
     justify-content: space-between;

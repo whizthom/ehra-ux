@@ -25,20 +25,37 @@ const PAGE_BG = {
   dark: "#0b141a",
 };
 
+// Android Chrome reads <meta name="theme-color"> for the status bar once
+// at page load, but doesn't reliably repaint the status bar just because
+// an existing tag's `content` attribute was mutated afterward — it only
+// reliably picks up the new color when a genuinely new theme-color meta
+// element is inserted into the document. setAttribute() on the existing
+// node (the previous approach here) left the status bar stuck on
+// whatever color it captured at launch, which is why toggling the theme
+// mid-session left it mismatched against the rest of the page even
+// though the tag's own content was, in fact, correct.
+function setMeta(name, content) {
+  const existing = document.querySelector(`meta[name="${name}"]`);
+  if (existing) existing.remove();
+
+  const meta = document.createElement("meta");
+  meta.setAttribute("name", name);
+  meta.setAttribute("content", content);
+  document.head.appendChild(meta);
+}
+
 export default function ThemeColorSync() {
   const { theme } = useTheme();
 
   useEffect(() => {
     const color = PAGE_BG[theme] || PAGE_BG.light;
 
-    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-    if (themeColorMeta) themeColorMeta.setAttribute("content", color);
+    setMeta("theme-color", color);
 
     // Not a standard meta tag (no browser reads it), but Round 1 added
     // it for consistency alongside theme-color — kept in sync here too
     // rather than left stale.
-    const bgColorMeta = document.querySelector('meta[name="background-color"]');
-    if (bgColorMeta) bgColorMeta.setAttribute("content", color);
+    setMeta("background-color", color);
   }, [theme]);
 
   return null;
