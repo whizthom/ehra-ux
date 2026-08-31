@@ -11,28 +11,16 @@
 // sent to the API (see initializeCheckout in api/subscriptionApi.js), so
 // it must stay in sync with that enum's names exactly.
 //
-// IMPORTANT — backend sync status as of this edit (frontend-only change):
-//   - STARTER: free, no checkout call is ever made — safe as-is.
-//   - PRO: backend's PlanType.PRO still charges whatever
-//     com.Ehra.util.PlanLimits.priceNaira(PRO, cycle) returns today
-//     (previously ₦5,000/mo). The checkout amount and the employee/branch
-//     limits actually ENFORCED are 100% server-side (PlanLimits.java) —
-//     this file only controls what's *displayed*. Until PlanLimits.java is
-//     updated to ₦6,000/mo · 1 business · 18 employees · 0 branches, real
-//     checkouts will still charge/enforce the OLD numbers.
-//   - id: "PREMIUM" is reused for the plan now DISPLAYED as "Business" —
-//     deliberately, since its price (₦12,000/mo) is unchanged from the old
-//     Premium tier, so no new backend enum value is needed for the price
-//     to be right. Its limits (50 employees incl. branches, 2 branches,
-//     1 business) still need a PlanLimits.java update to be enforced.
-//   - id: "ELITE" (₦30,000/mo) has NO backend PlanType yet. Clicking its
-//     "Upgrade to Elite" button will hit initializeCheckout, which the
-//     backend won't recognize, and the user will see the generic
-//     "Checkout isn't available yet — please try again shortly." error
-//     from Pricing.jsx. A backend PlanType.ELITE + PlanLimits entry is
-//     required before this tier can actually be purchased.
-//   - Custom has no `id` used for checkout — its CTA (action: "contact")
-//     sends the person to /support instead of initializeCheckout.
+// Backend sync status: fully wired up. STARTER/PRO/PREMIUM/ELITE all
+// exist as backend PlanType values with matching prices AND enforced
+// limits in PlanLimits.java (maxBusinesses, maxEmployeesPerBusiness,
+// maxBranchesPerBusiness — see PlanLimitService for where each is
+// actually checked). id: "PREMIUM" is deliberately reused for the plan
+// DISPLAYED here as "Business" — its price (₦12,000/mo) was already
+// correct under the old Premium tier, so no new enum value was needed,
+// just updated limits. Custom has no `id` used for checkout — its CTA
+// (action: "contact") sends the person to /support instead of
+// initializeCheckout.
 //
 // Yearly prices below follow the same "2 months free" convention as the
 // original Pro/Premium figures (yearly = monthly × 10) since no yearly
@@ -43,7 +31,7 @@ export const PLAN_IDS = {
   STARTER: "STARTER",
   PRO: "PRO",
   BUSINESS: "PREMIUM", // reuses the existing backend enum value — see note above
-  ELITE: "ELITE", // not yet a real backend PlanType — see note above
+  ELITE: "ELITE",
   CUSTOM: "CUSTOM", // contact-only, never sent to the checkout API
 };
 
@@ -78,7 +66,7 @@ export const PLANS = [
     cta: { label: "Start Free", action: "signup" },
     features: [
       "1 business",
-      "Up to 10 employees",
+      "Up to 5 employees",
       "Unlimited personal employee accounts",
       "Attendance management",
       "Employee management",
@@ -200,7 +188,7 @@ export const COMPARISON_ROWS = [
   {
     label: "Employees",
     values: {
-      STARTER: "10",
+      STARTER: "5",
       PRO: "18",
       PREMIUM: "Up to 50 (incl. branches)",
       ELITE: "Up to 50 per business",
@@ -285,7 +273,7 @@ export const FAQ_ITEMS = [
   {
     question: "What happens if my subscription expires?",
     answer:
-      "Your account automatically returns to the Starter plan and all your data is kept exactly as it is. Paid-only features become unavailable until you renew. If your usage is above Starter's limits — for example more than 10 employees, or more than one business — nothing is deleted; those businesses simply become read-only until you upgrade again.",
+      "Your account automatically returns to the Starter plan and all your data is kept exactly as it is. Paid-only features become unavailable until you renew. If your usage is above Starter's limits — for example more than 5 employees, or more than one business — nothing is deleted; those businesses simply become read-only until you upgrade again.",
   },
   {
     question: "What if none of these plans fit my business?",

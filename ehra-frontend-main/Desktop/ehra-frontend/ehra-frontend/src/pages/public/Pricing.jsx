@@ -47,11 +47,6 @@ import VerifyEmailToUpgradeModal from "../../components/VerifyEmailToUpgradeModa
  *      popup directly, then verify the transaction server-side before
  *      treating it as paid. Never trusts the popup's own success
  *      callback alone.
- *
- *      NOTE: Elite (PLAN_IDS.ELITE) has no backend PlanType yet — see the
- *      comment block at the top of data/pricingPlans.js. Its checkout
- *      call will currently fail and surface the generic "Checkout isn't
- *      available yet" error below until the backend adds it.
  */
 export default function Pricing() {
   const [cycle, setCycle] = useState(BILLING_CYCLES.MONTHLY);
