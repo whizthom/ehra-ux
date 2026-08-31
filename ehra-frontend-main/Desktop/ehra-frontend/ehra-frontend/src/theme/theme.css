@@ -116,7 +116,14 @@ body {
    background: var(--bg-page);
 }
 
-/* Smooth, subtle transition when switching themes */
+/* Smooth, subtle transition when switching themes.
+   `html` is included here (not just `body`) because it's what actually
+   paints the safe-area strip under the iOS status bar (viewport-fit=cover
+   — see the comment above). Without it, html's background snapped to the
+   new theme instantly while body eased in over 150ms, leaving a
+   momentary hard-edged line right at the status-bar boundary on every
+   toggle. */
+html,
 body,
 [class*="dash"],
 [class*="sidebar"],
