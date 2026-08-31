@@ -14,6 +14,7 @@ import {
   resendEmailTwoFactorCode,
 } from "../api/phoneAuthApi";
 import DevOtpCard from "../components/DevOtpCard";
+import { describeApiError } from "../utils/apiErrors";
 import styles from "./Login.module.css";
 import phoneStyles from "./PhoneAuth.module.css";
 import Logo from "../components/Logo";
@@ -172,26 +173,18 @@ export default function Login() {
 
       routeAfterLogin(data);
     } catch (err) {
-      // FIX: err.response is only ever set when the server actually
-      // answered. A timeout or dropped connection — most commonly the
-      // Render free-tier backend still waking up from being asleep —
-      // leaves it undefined, and the old code fell back to "Invalid
-      // phone number or password" for that case too. That's why login
-      // could look like it was rejecting correct credentials: the first
-      // attempt woke the server up but timed out before getting an
-      // answer, then the retry (hitting an now-awake server) succeeded
-      // — nothing was ever wrong with the password.
-      if (!err.response) {
-        setError(
-          "We couldn't reach the server — it may be waking up after being idle. Please wait a few seconds and try again.",
-        );
-      } else {
-        const msg =
-          err.response.data?.message ||
-          err.response.data ||
-          "Invalid phone number or password. Please try again.";
-        setError(typeof msg === "string" ? msg : "Login failed");
-      }
+      // describeApiError distinguishes offline / timeout / unreachable
+      // server from an actual credentials error, and — for a real
+      // err.response — trusts the backend's specific message (now
+      // "Incorrect password" vs "We couldn't find an account with that
+      // phone number" as of the hideUserNotFoundExceptions change in
+      // SecurityConfig) rather than assuming any response at all means
+      // bad credentials. See apiErrors.js for the full reasoning.
+      const message = describeApiError(
+        err,
+        "Invalid phone number or password. Please try again.",
+      );
+      if (message) setError(message);
     } finally {
       setLoading(false);
     }
@@ -216,8 +209,7 @@ export default function Login() {
     } catch (err) {
       setError(
         twoFactor.method === "EMAIL"
-          ? err?.response?.data?.message ||
-              "Couldn't resend the code. Please try again."
+          ? describeApiError(err, "Couldn't resend the code. Please try again.")
           : friendlyFirebaseError(err),
       );
     } finally {
@@ -246,12 +238,24 @@ export default function Login() {
       await refreshSession?.();
       routeAfterLogin(data);
     } catch (err) {
-      setError(
-        twoFactor.method === "EMAIL"
-          ? err?.response?.data?.message ||
-              "That code is incorrect or has expired."
-          : err?.response?.data?.message || friendlyFirebaseError(err),
-      );
+      // Both branches can throw either an axios error (verifyEmailTwoFactorLogin /
+      // verifyTwoFactorLogin) or, on the PHONE path, a Firebase SDK error
+      // (confirmPhoneOtp) — isAxiosError reliably tells them apart
+      // regardless of which method is active, so a dropped connection on
+      // the axios call never gets run through friendlyFirebaseError,
+      // which isn't built to interpret axios error shapes.
+      if (err?.isAxiosError) {
+        setError(
+          describeApiError(
+            err,
+            twoFactor.method === "EMAIL"
+              ? "That code is incorrect or has expired."
+              : "Something went wrong. Please try again.",
+          ),
+        );
+      } else {
+        setError(friendlyFirebaseError(err));
+      }
     } finally {
       setLoading(false);
     }
