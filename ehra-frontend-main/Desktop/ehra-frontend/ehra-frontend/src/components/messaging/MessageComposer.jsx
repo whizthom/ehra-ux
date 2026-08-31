@@ -33,6 +33,7 @@ export default function MessageComposer({
   editingMessage,
   onCancelEdit,
   onSaveEdit,
+  onComposerFocus,
 }) {
   const [text, setText] = useState(editingMessage?.body || "");
   const [showEmoji, setShowEmoji] = useState(false);
@@ -375,7 +376,14 @@ export default function MessageComposer({
             rows={1}
             value={text}
             onChange={handleChange}
-            onFocus={() => setComposerFocused(true)}
+            onFocus={() => {
+              setComposerFocused(true);
+              // Tapping into the composer should drop the person at the
+              // latest message, same as every other chat app — otherwise
+              // they can end up typing a reply while looking at whatever
+              // point in the history they'd scrolled to earlier.
+              onComposerFocus?.();
+            }}
             onBlur={() => {
               setComposerFocused(false);
               onStopTyping();

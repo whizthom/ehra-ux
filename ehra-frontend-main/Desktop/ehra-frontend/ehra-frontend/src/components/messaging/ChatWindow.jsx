@@ -148,6 +148,20 @@ export default function ChatWindow({
     await send(payload);
   };
 
+  // Tapping into the composer should always jump to the latest message,
+  // regardless of where the person had scrolled to. Fires on a rAF plus a
+  // short timeout, not just once: the on-screen keyboard resizes the
+  // visual viewport over ~150-300ms on mobile, and scrolling only at the
+  // moment of focus (before that resize finishes) can still leave the
+  // last message sitting partly behind the keyboard.
+  const handleComposerFocus = useCallback(() => {
+    isNearBottomRef.current = true;
+    const scroll = () =>
+      bottomAnchorRef.current?.scrollIntoView({ block: "end" });
+    requestAnimationFrame(scroll);
+    setTimeout(scroll, 300);
+  }, []);
+
   return (
     <div className={styles.window}>
       <div className={styles.header}>
@@ -259,6 +273,7 @@ export default function ChatWindow({
           onSend={handleSend}
           onTypingKeystroke={onKeystroke}
           onStopTyping={stopTyping}
+          onComposerFocus={handleComposerFocus}
           groupMembers={groupMembers}
           editingMessage={editingMessage}
           onCancelEdit={() => setEditingMessage(null)}

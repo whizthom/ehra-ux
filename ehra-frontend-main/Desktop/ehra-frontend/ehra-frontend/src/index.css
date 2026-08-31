@@ -12,8 +12,29 @@
    the page itself can't rubber-band/scroll past the shell on mobile and
    drag the "fixed" header along with it. Scoped to those pages only —
    other pages (Login, Register, ...) still rely on normal body scroll. */
-body.app-shell-lock {
+/* `position: fixed` (plus the matching `html.app-shell-lock` below) is the
+   important part here, not just belt-and-braces alongside height/overflow.
+   Mobile Safari/Chrome bring a focused input into view by scrolling the
+   page EVEN WHEN body has overflow:hidden — overflow:hidden only stops
+   scrolling caused by user drag/momentum, it doesn't stop the browser's
+   own "scroll focused element into view" behavior on focus. That's what
+   was dragging the chat header (a sibling higher up the page, not an
+   ancestor of the textarea) off-screen the moment the message composer
+   was tapped, since the whole document scrolled to keep the on-screen
+   keyboard from covering the caret. Pinning body to the viewport with
+   `position: fixed` removes the ability to scroll the document at all, so
+   that browser behavior has nothing to move — the header simply can't be
+   pushed out of view anymore. */
+html.app-shell-lock {
   height: 100%;
+  overflow: hidden;
+}
+
+body.app-shell-lock {
+  position: fixed;
+  inset: 0;
+  height: 100%;
+  width: 100%;
   overflow: hidden;
   overscroll-behavior: none;
 }

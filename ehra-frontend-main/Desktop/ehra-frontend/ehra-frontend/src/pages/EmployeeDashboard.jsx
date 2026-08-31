@@ -463,8 +463,15 @@ export default function Dashboard() {
   // mounted, so mobile browsers can't rubber-band the whole page (and
   // drag the "fixed" topbar along with it) — only .content should scroll.
   useEffect(() => {
+    // `html` is locked too (not just `body`) — see the CSS comment on
+    // `html.app-shell-lock` in index.css for why both are needed to stop
+    // mobile browsers from scrolling the page to reveal a focused input.
+    document.documentElement.classList.add("app-shell-lock");
     document.body.classList.add("app-shell-lock");
-    return () => document.body.classList.remove("app-shell-lock");
+    return () => {
+      document.documentElement.classList.remove("app-shell-lock");
+      document.body.classList.remove("app-shell-lock");
+    };
   }, []);
 
   useEffect(() => {
