@@ -149,17 +149,33 @@ export default function ChatWindow({
   };
 
   // Tapping into the composer should always jump to the latest message,
-  // regardless of where the person had scrolled to. Fires on a rAF plus a
-  // short timeout, not just once: the on-screen keyboard resizes the
-  // visual viewport over ~150-300ms on mobile, and scrolling only at the
-  // moment of focus (before that resize finishes) can still leave the
-  // last message sitting partly behind the keyboard.
+  // regardless of where the person had scrolled to.
   const handleComposerFocus = useCallback(() => {
     isNearBottomRef.current = true;
-    const scroll = () =>
-      bottomAnchorRef.current?.scrollIntoView({ block: "end" });
-    requestAnimationFrame(scroll);
-    setTimeout(scroll, 300);
+    requestAnimationFrame(() =>
+      bottomAnchorRef.current?.scrollIntoView({ block: "end" }),
+    );
+  }, []);
+
+  // The on-screen keyboard opening/closing resizes window.visualViewport
+  // over several animation frames on mobile — a single scroll right on
+  // focus (handleComposerFocus above) can fire before that finishes and
+  // leave the last message sitting partly behind the keyboard. Re-running
+  // the same scroll on every visualViewport resize, for as long as the
+  // person is near the bottom, keeps the last message pinned in view for
+  // the whole animation instead of just the first frame of it — this is
+  // also what keeps it correctly anchored if the keyboard's height itself
+  // changes (e.g. switching from the text keyboard to an emoji picker).
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const onResize = () => {
+      if (isNearBottomRef.current) {
+        bottomAnchorRef.current?.scrollIntoView({ block: "end" });
+      }
+    };
+    vv.addEventListener("resize", onResize);
+    return () => vv.removeEventListener("resize", onResize);
   }, []);
 
   return (

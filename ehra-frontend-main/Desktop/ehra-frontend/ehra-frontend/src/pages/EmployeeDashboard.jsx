@@ -40,6 +40,7 @@ import { getMyCoverRequests } from "../api/leaveApi";
 import { getMessagingUnreadCount } from "../api/messagingApi";
 import useMessagingBadgeSync from "../hooks/useMessagingBadgeSync";
 import useMessagingConnection from "../hooks/useMessagingConnection";
+import useVisualViewportHeight from "../hooks/useVisualViewportHeight";
 
 // ── Sidebar nav ────────────────────────────────────────────────────────────
 // "My Accounts" navigates to the full-page identity-level workspace
@@ -473,6 +474,12 @@ export default function Dashboard() {
       document.body.classList.remove("app-shell-lock");
     };
   }, []);
+
+  // Keeps .dash sized to the actual visible viewport, keyboard included —
+  // see useVisualViewportHeight.js. Needed alongside the lock above: that
+  // stops the page from scrolling, this makes sure .dash's own height
+  // actually shrinks for the keyboard instead of just being covered by it.
+  useVisualViewportHeight();
 
   useEffect(() => {
     // fetchPending, fetchPendingLeaves, fetchLatestAttendance, fetchDirectory,

@@ -2,6 +2,18 @@
 .dash {
     display: flex;
     height: 100vh;
+    /* dvh matches the browser's actual visible viewport on mobile — see
+       Dashboard.module.css's .dash for the full reasoning (this file was
+       previously missing both the dvh fallback and the keyboard-aware
+       var below, which is very likely why the chat header on this
+       (Employee) dashboard could still get covered/dragged off-screen
+       even after ChatWindow's own scroll-lock changes). */
+    height: 100dvh;
+    /* --app-vh (see useVisualViewportHeight.js) additionally tracks the
+       on-screen keyboard, which dvh alone doesn't reliably do on every
+       device — falls straight back to the 100dvh above on any browser
+       that doesn't support visualViewport. */
+    height: var(--app-vh, 100dvh);
     width: 100vw;
     overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;

@@ -58,6 +58,7 @@ import {
 } from "../api/businessApi";
 import { getMyProfile } from "../api/employeeApi";
 import { getMySubscription } from "../api/subscriptionApi";
+import useVisualViewportHeight from "../hooks/useVisualViewportHeight";
 
 // ── Sidebar nav ────────────────────────────────────────────────────────────
 // "My Accounts" is handled specially — clicking it navigates to the
@@ -671,6 +672,12 @@ export default function Dashboard() {
       document.body.classList.remove("app-shell-lock");
     };
   }, []);
+
+  // Keeps .dash sized to the actual visible viewport, keyboard included —
+  // see useVisualViewportHeight.js. Needed alongside the lock above: that
+  // stops the page from scrolling, this makes sure .dash's own height
+  // actually shrinks for the keyboard instead of just being covered by it.
+  useVisualViewportHeight();
 
   // Keeps the mobile "Today's Pulse" widget's "live" badge honest — it
   // isn't just decorative, today's attendance really does get re-polled
