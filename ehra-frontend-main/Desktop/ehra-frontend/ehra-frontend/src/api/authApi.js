@@ -215,6 +215,43 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
+// Every one of these hits an endpoint the backend's SecurityConfig marks
+// .permitAll() (mirror that list if it ever changes) — no access token is
+// involved in any of them, so a 401/403 from one of these can only ever
+// mean "wrong password", "wrong/expired OTP", "wrong reset token", etc.,
+// never "your session expired." Deliberately excludes
+// /auth/security/2fa — that ONE is an authenticated action (toggling 2FA
+// while logged in), where a 401 genuinely can mean an expired access
+// token, and the normal refresh-and-retry behavior below is exactly what
+// should happen for it. If the real problem there is a wrong
+// re-confirmation password instead, the retried request just fails with
+// the same 401 again and surfaces normally — nothing is masked.
+const PUBLIC_AUTH_ENDPOINTS = new Set([
+  "/auth/login",
+  "/auth/2fa/verify",
+  "/auth/2fa/email/verify",
+  "/auth/2fa/email/resend",
+  "/auth/phone/otp/send",
+  "/auth/phone/otp/verify",
+  "/auth/phone/check",
+  "/auth/phone/register",
+  "/auth/phone/forgot/verify",
+  "/auth/phone/forgot/reset",
+  "/auth/verify-email",
+  "/business/register",
+  "/business/complete-profile",
+]);
+
+function isPublicAuthEndpoint(url) {
+  if (!url) return false;
+  // Strip baseURL/origin if axios ever hands back an absolute URL here —
+  // in practice every call site passes a relative path like "/auth/login"
+  // (see authApi.js/phoneAuthApi.js), so this is defensive, not the
+  // common case.
+  const path = url.replace(/^https?:\/\/[^/]+/, "").replace(/^\/api/, "");
+  return PUBLIC_AUTH_ENDPOINTS.has(path);
+}
+
 API.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -224,6 +261,22 @@ API.interceptors.response.use(
     // ever sent, or was cancelled), there's nothing to retry — reject immediately
     // instead of falling through and potentially hanging.
     if (!original) {
+      return Promise.reject(error);
+    }
+
+    // FIX: a 401 from a public/unauthenticated endpoint (wrong login
+    // password, wrong OTP, etc.) was being treated by the branch below as
+    // "the access token expired" — since there was never a token to
+    // expire, the silent-refresh attempt failed (no refresh token, or a
+    // stale one from an unrelated session), which cleared tokens and did
+    // `window.location.href = "/login"`. On the login page itself, that's
+    // a real navigation to the same URL — a hard reload that wiped the
+    // just-shown error message and the whole form, which looked like the
+    // page "auto-refreshing on its own" right after showing the error.
+    // Skipping these endpoints here means their errors just reject
+    // normally and reach the calling code's own catch block (e.g.
+    // Login.jsx's handleSubmit), which already shows the correct message.
+    if (isPublicAuthEndpoint(original.url)) {
       return Promise.reject(error);
     }
 
