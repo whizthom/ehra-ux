@@ -191,6 +191,16 @@ export default defineConfig({
         target: "http://localhost:8080",
         changeOrigin: true,
       },
+      // Ehral Agent — a SEPARATE backend service (see
+      // ehral-agent/ARCHITECTURE.md), proxied under its own path so
+      // src/api/agentApi.js can call it with a plain relative URL in
+      // dev, exactly like "/api" above does for the main Ehra backend.
+      // Does not need `ws: true` — the Agent has no WebSocket endpoints.
+      "/agent-api": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/agent-api/, "/api/v1"),
+      },
       // Real-time messaging (STOMP over SockJS) — SockJS negotiates its
       // transport over plain HTTP first (an XHR "info" request, polling,
       // etc.) and only upgrades to a real WebSocket when possible, so this

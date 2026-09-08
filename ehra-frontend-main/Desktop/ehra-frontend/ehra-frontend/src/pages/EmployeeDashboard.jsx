@@ -23,6 +23,7 @@ import {
 // scoped to the HOD's own department via GET /employees/my-department.
 import HodWorkforceTab from "../components/Hodworkforcetab";
 import MessagingHub from "../components/messaging/MessagingHub";
+import AiAgentWidget from "../components/agent/AiAgentWidget";
 import NotificationToastStack from "../components/notifications/NotificationToastStack";
 import EmployeeLeaveTab from "../components/EmployeeLeaveTab";
 import EmployeeAttendanceTab from "../components/EmployeeAttendanceTab";
@@ -40,7 +41,6 @@ import { getMyCoverRequests } from "../api/leaveApi";
 import { getMessagingUnreadCount } from "../api/messagingApi";
 import useMessagingBadgeSync from "../hooks/useMessagingBadgeSync";
 import useMessagingConnection from "../hooks/useMessagingConnection";
-import useVisualViewportHeight from "../hooks/useVisualViewportHeight";
 
 // ── Sidebar nav ────────────────────────────────────────────────────────────
 // "My Accounts" navigates to the full-page identity-level workspace
@@ -464,22 +464,9 @@ export default function Dashboard() {
   // mounted, so mobile browsers can't rubber-band the whole page (and
   // drag the "fixed" topbar along with it) — only .content should scroll.
   useEffect(() => {
-    // `html` is locked too (not just `body`) — see the CSS comment on
-    // `html.app-shell-lock` in index.css for why both are needed to stop
-    // mobile browsers from scrolling the page to reveal a focused input.
-    document.documentElement.classList.add("app-shell-lock");
     document.body.classList.add("app-shell-lock");
-    return () => {
-      document.documentElement.classList.remove("app-shell-lock");
-      document.body.classList.remove("app-shell-lock");
-    };
+    return () => document.body.classList.remove("app-shell-lock");
   }, []);
-
-  // Keeps .dash sized to the actual visible viewport, keyboard included —
-  // see useVisualViewportHeight.js. Needed alongside the lock above: that
-  // stops the page from scrolling, this makes sure .dash's own height
-  // actually shrinks for the keyboard instead of just being covered by it.
-  useVisualViewportHeight();
 
   useEffect(() => {
     // fetchPending, fetchPendingLeaves, fetchLatestAttendance, fetchDirectory,
@@ -942,6 +929,9 @@ export default function Dashboard() {
                 </span>
               )}
             </div>
+
+            {/* ── Ehral Agent — right after the message shortcut, as requested ── */}
+            <AiAgentWidget />
 
             {/* ── Bell button + dropdown panel ── */}
             <div className={styles.notifWrapper} ref={notifRef}>
