@@ -11,8 +11,14 @@ export const AGENT_API_BASE_URL =
 
 const agentClient = axios.create({
   baseURL: AGENT_API_BASE_URL,
-  timeout: 30000, // agent turns can involve an outbound LLM/tool call —
-  // longer than the 15s used for ordinary CRUD calls.
+  // Worst case a turn stacks a business-data tool call (Ehra-api,
+  // EhralIntegration's own 15s timeout) followed by an AI provider call
+  // (AI_REQUEST_TIMEOUT_SECONDS, 30s default) — up to ~45s before the
+  // backend itself gives up, longer than the 15s used for ordinary CRUD
+  // calls. 60s gives that a safety margin instead of racing it, so a
+  // slow-but-legitimate turn doesn't surface as a misleading "check your
+  // connection" network error.
+  timeout: 60000,
 });
 
 // Every Ehral Agent request needs both an Authorization header (the
