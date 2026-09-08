@@ -23,7 +23,6 @@ import {
 // scoped to the HOD's own department via GET /employees/my-department.
 import HodWorkforceTab from "../components/Hodworkforcetab";
 import MessagingHub from "../components/messaging/MessagingHub";
-import AiAgentWidget from "../components/agent/AiAgentWidget";
 import NotificationToastStack from "../components/notifications/NotificationToastStack";
 import EmployeeLeaveTab from "../components/EmployeeLeaveTab";
 import EmployeeAttendanceTab from "../components/EmployeeAttendanceTab";
@@ -929,9 +928,6 @@ export default function Dashboard() {
                 </span>
               )}
             </div>
-
-            {/* ── Ehral Agent — right after the message shortcut, as requested ── */}
-            <AiAgentWidget />
 
             {/* ── Bell button + dropdown panel ── */}
             <div className={styles.notifWrapper} ref={notifRef}>

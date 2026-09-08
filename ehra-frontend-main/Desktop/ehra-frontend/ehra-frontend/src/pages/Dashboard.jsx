@@ -1322,7 +1322,7 @@ export default function Dashboard() {
             </div>
 
             {/* ── Ehral Agent — right after the message shortcut, as requested ── */}
-            <AiAgentWidget />
+            <AiAgentWidget onOpen={() => setActiveNav("Ehral Intelligence")} />
 
             {/* ── Bell button + dropdown panel ── */}
             <div className={styles.notifWrapper} ref={notifRef}>
@@ -1518,21 +1518,25 @@ export default function Dashboard() {
         {/* Content area */}
         <div
           className={
-            activeNav === "Attendance" ||
-            activeNav === "Departments" ||
-            activeNav === "Leave" ||
-            activeNav === "My profile" ||
-            activeNav === "QR Code" ||
-            activeNav === "Notifications"
-              ? styles.contentFullNarrow
-              : activeNav === "Messages"
-                ? `${styles.contentMessages} ${chatThreadOpen ? styles.chatFullscreenActive : ""}`
-                : activeNav === "Workforce" || activeNav === "Profile Edits"
-                  ? styles.contentFull
-                  : styles.content
+            activeNav === "Ehral Intelligence"
+              ? styles.contentAgent
+              : activeNav === "Attendance" ||
+                  activeNav === "Departments" ||
+                  activeNav === "Leave" ||
+                  activeNav === "My profile" ||
+                  activeNav === "QR Code" ||
+                  activeNav === "Notifications"
+                ? styles.contentFullNarrow
+                : activeNav === "Messages"
+                  ? `${styles.contentMessages} ${chatThreadOpen ? styles.chatFullscreenActive : ""}`
+                  : activeNav === "Workforce" || activeNav === "Profile Edits"
+                    ? styles.contentFull
+                    : styles.content
           }
         >
-          {activeNav === "Notifications" ? (
+          {activeNav === "Ehral Intelligence" ? (
+            <AiAgentWidget fullPage onClose={() => setActiveNav("Dashboard")} />
+          ) : activeNav === "Notifications" ? (
             <NotificationsPage
               notifs={notifs}
               loading={loadingNotifs}
