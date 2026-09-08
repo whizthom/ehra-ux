@@ -6,56 +6,6 @@ import {
 } from "../../api/agentApi";
 import styles from "./AiAgentWidget.module.css";
 
-const AGENT_SECTION_HEADINGS = new Set([
-  "Executive view",
-  "Business Overview",
-  "Workforce",
-  "Attendance",
-  "Leave",
-  "Branches",
-  "Financials",
-  "Operations",
-  "Performance",
-  "What stands out",
-  "Recommended attention",
-  "Recommendation",
-]);
-
-function AgentMessageContent({ content }) {
-  const blocks = String(content || "")
-    .split(/\n\s*\n/)
-    .map((block) => block.trim())
-    .filter(Boolean);
-  return (
-    <div className={styles.messageContent}>
-      {blocks.map((block, index) => {
-        const lines = block
-          .split("\n")
-          .map((line) => line.trim())
-          .filter(Boolean);
-        if (!lines.length) return null;
-        if (lines.length === 1 && AGENT_SECTION_HEADINGS.has(lines[0])) {
-          return (
-            <div key={index} className={styles.messageSectionHeading}>
-              {lines[0]}
-            </div>
-          );
-        }
-        return (
-          <p key={index} className={styles.messageParagraph}>
-            {lines.map((line, lineIndex) => (
-              <span key={lineIndex}>
-                {line}
-                {lineIndex < lines.length - 1 && <br />}
-              </span>
-            ))}
-          </p>
-        );
-      })}
-    </div>
-  );
-}
-
 const SUGGESTED_PROMPTS = [
   "How is my business doing?",
   "Show today's attendance",
@@ -79,6 +29,166 @@ const nextMessageId = () => `m${++messageIdCounter}`;
  * executeAgentAction() call below — never as a side effect of sending a
  * chat message.
  */
+
+function renderInline(text, keyPrefix = "i") {
+  const parts = String(text).split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, index) => {
+    if (/^\*\*[^*]+\*\*$/.test(part)) {
+      return <strong key={`${keyPrefix}-${index}`}>{part.slice(2, -2)}</strong>;
+    }
+    return <span key={`${keyPrefix}-${index}`}>{part}</span>;
+  });
+}
+
+function AgentRichText({ content }) {
+  const lines = String(content || "")
+    .replace(/\r\n/g, "\n")
+    .split("\n");
+  const blocks = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const raw = lines[i];
+    const line = raw.trim();
+    if (!line) {
+      i += 1;
+      continue;
+    }
+
+    const heading = line.match(/^(#{2,3})\s+(.+?)\s*$/);
+    if (heading) {
+      const level = heading[1].length === 2 ? "h2" : "h3";
+      const Tag = level;
+      blocks.push(
+        <Tag
+          key={`b-${i}`}
+          className={
+            level === "h2" ? styles.responseHeading : styles.responseSubheading
+          }
+        >
+          {renderInline(heading[2], `h-${i}`)}
+        </Tag>,
+      );
+      i += 1;
+      continue;
+    }
+
+    if (/^[-*]\s+/.test(line)) {
+      const items = [];
+      const start = i;
+      while (i < lines.length && /^[-*]\s+/.test(lines[i].trim())) {
+        items.push(lines[i].trim().replace(/^[-*]\s+/, ""));
+        i += 1;
+      }
+      blocks.push(
+        <ul key={`b-${start}`} className={styles.responseList}>
+          {items.map((item, idx) => (
+            <li key={`${start}-${idx}`}>
+              {renderInline(item, `ul-${start}-${idx}`)}
+            </li>
+          ))}
+        </ul>,
+      );
+      continue;
+    }
+
+    if (/^\d+[.)]\s+/.test(line)) {
+      const items = [];
+      const start = i;
+      while (i < lines.length && /^\d+[.)]\s+/.test(lines[i].trim())) {
+        items.push(lines[i].trim().replace(/^\d+[.)]\s+/, ""));
+        i += 1;
+      }
+      blocks.push(
+        <ol key={`b-${start}`} className={styles.responseList}>
+          {items.map((item, idx) => (
+            <li key={`${start}-${idx}`}>
+              {renderInline(item, `ol-${start}-${idx}`)}
+            </li>
+          ))}
+        </ol>,
+      );
+      continue;
+    }
+
+    // Treat a short all-caps/label-like line as a visual label only when the
+    // model omitted Markdown heading syntax. This keeps legacy responses readable.
+    if (
+      line.length <= 42 &&
+      /^(Business Snapshot|Workforce|Attendance|Leave|Financials|Operations|Assessment|Recommended Actions|Recommendations|Observations|Next Steps|Priority Actions|Key Findings|Business Identity|Contact and Verification|About Ehral|Founder Information|What Stands Out|Management Overview)$/i.test(
+        line.replace(/:$/, ""),
+      )
+    ) {
+      blocks.push(
+        <h2 key={`b-${i}`} className={styles.responseHeading}>
+          {renderInline(line.replace(/:$/, ""), `label-${i}`)}
+        </h2>,
+      );
+      i += 1;
+      continue;
+    }
+
+    const paragraph = [line];
+    const start = i;
+    i += 1;
+    while (
+      i < lines.length &&
+      lines[i].trim() &&
+      !/^#{2,3}\s+/.test(lines[i].trim()) &&
+      !/^[-*]\s+/.test(lines[i].trim()) &&
+      !/^\d+[.)]\s+/.test(lines[i].trim())
+    ) {
+      paragraph.push(lines[i].trim());
+      i += 1;
+    }
+    blocks.push(
+      <p key={`b-${start}`} className={styles.responseParagraph}>
+        {renderInline(paragraph.join(" "), `p-${start}`)}
+      </p>,
+    );
+  }
+
+  return <div className={styles.responseContent}>{blocks}</div>;
+}
+
+function getQuickActions(content) {
+  const text = String(content || "").toLowerCase();
+  if (
+    text.includes("attendance") ||
+    text.includes("absent") ||
+    text.includes("leave")
+  ) {
+    return [
+      "Show attendance details",
+      "Who is on leave?",
+      "What should I do first?",
+    ];
+  }
+  if (
+    text.includes("payroll") ||
+    text.includes("deduction") ||
+    text.includes("salary")
+  ) {
+    return [
+      "Compare payroll periods",
+      "Show the payroll breakdown",
+      "What should I do first?",
+    ];
+  }
+  if (
+    text.includes("branch") ||
+    text.includes("department") ||
+    text.includes("workforce")
+  ) {
+    return [
+      "Show the key workforce risks",
+      "Compare departments",
+      "What should I do first?",
+    ];
+  }
+  return ["What should I do first?", "What stands out?", "Tell me more"];
+}
+
 export default function AiAgentWidget() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -174,6 +284,14 @@ export default function AiAgentWidget() {
     }
     return detail || "Something went wrong. Please try again.";
   };
+
+  const handleCopy = useCallback(async (content) => {
+    try {
+      await navigator.clipboard.writeText(content);
+    } catch {
+      // Clipboard access can be unavailable in insecure contexts; the response remains readable.
+    }
+  }, []);
 
   const handleSend = useCallback(
     async (rawText) => {
@@ -345,14 +463,44 @@ export default function AiAgentWidget() {
                       : styles.bubbleAssistant
                   } ${m.isError ? styles.bubbleError : ""}`}
                 >
-                  <AgentMessageContent content={m.content} />
+                  <AgentRichText content={m.content} />
                   {m.usedBusinessData && (
                     <div className={styles.bubbleTag}>
-                      <i className="ti ti-chart-bar" aria-hidden="true" /> from
-                      your business data
+                      <i className="ti ti-chart-bar" aria-hidden="true" />{" "}
+                      Verified business data
+                    </div>
+                  )}
+                  {m.role === "assistant" && !m.isError && (
+                    <div className={styles.messageActions}>
+                      <button
+                        type="button"
+                        className={styles.messageAction}
+                        onClick={() => handleCopy(m.content)}
+                        title="Copy response"
+                        aria-label="Copy response"
+                      >
+                        <i className="ti ti-copy" aria-hidden="true" />
+                      </button>
                     </div>
                   )}
                 </div>
+                {m.role === "assistant" &&
+                  !m.isError &&
+                  messages[messages.length - 1]?.id === m.id && (
+                    <div className={styles.quickActions}>
+                      {getQuickActions(m.content).map((action) => (
+                        <button
+                          key={action}
+                          type="button"
+                          className={styles.quickAction}
+                          onClick={() => handleSend(action)}
+                          disabled={loading}
+                        >
+                          {action}
+                        </button>
+                      ))}
+                    </div>
+                  )}
               </div>
             ))}
 

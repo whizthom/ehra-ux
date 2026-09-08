@@ -322,34 +322,12 @@
 }
 
 .bubble {
-    max-width: 82%;
-    padding: 9px 12px;
+    max-width: 88%;
+    padding: 11px 13px;
     border-radius: 14px;
     font-size: 13px;
-    line-height: 1.45;
-    white-space: pre-wrap;
+    line-height: 1.5;
     word-break: break-word;
-}
-
-.messageContent {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.messageSectionHeading {
-    margin-top: 3px;
-    font-size: 11px;
-    line-height: 1.25;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--text-secondary);
-}
-
-.messageParagraph {
-    margin: 0;
-    line-height: 1.52;
 }
 
 .bubbleAssistant {
@@ -418,6 +396,131 @@
         transform: translateY(-3px);
         opacity: 0.9;
     }
+}
+
+
+
+/* ── Premium response typography ─────────────────────────────────────── */
+
+.responseContent {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    min-width: 0;
+}
+
+.responseHeading {
+    margin: 10px 0 5px;
+    font-size: 15px;
+    line-height: 1.25;
+    font-weight: 750;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+}
+
+.responseContent>.responseHeading:first-child {
+    margin-top: 0;
+}
+
+.responseSubheading {
+    margin: 9px 0 4px;
+    font-size: 13px;
+    line-height: 1.3;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.responseParagraph {
+    margin: 0 0 7px;
+    font-size: 13px;
+    line-height: 1.58;
+    color: var(--text-primary);
+}
+
+.responseParagraph:last-child {
+    margin-bottom: 0;
+}
+
+.responseContent strong {
+    font-weight: 750;
+    color: var(--text-primary);
+}
+
+.responseList {
+    margin: 1px 0 9px;
+    padding-left: 20px;
+    color: var(--text-primary);
+    font-size: 12.8px;
+    line-height: 1.52;
+}
+
+.responseList li {
+    padding-left: 3px;
+    margin: 4px 0;
+}
+
+.responseList li::marker {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.messageActions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 5px;
+}
+
+.messageAction {
+    width: 26px;
+    height: 26px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.75;
+    transition: background 0.15s, color 0.15s, opacity 0.15s;
+}
+
+.messageAction:hover {
+    background: var(--bg-surface-alt);
+    color: var(--text-primary);
+    opacity: 1;
+}
+
+.quickActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    max-width: 82%;
+    margin-top: -3px;
+}
+
+.quickAction {
+    border: 0.5px solid var(--border-color);
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    border-radius: 999px;
+    padding: 6px 9px;
+    font-size: 10.5px;
+    line-height: 1.2;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.quickAction:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--text-primary);
+    background: var(--bg-soft-accent);
+}
+
+.quickAction:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /* ── Confirmation card ───────────────────────────────────────────────── */
