@@ -6,6 +6,56 @@ import {
 } from "../../api/agentApi";
 import styles from "./AiAgentWidget.module.css";
 
+const AGENT_SECTION_HEADINGS = new Set([
+  "Executive view",
+  "Business Overview",
+  "Workforce",
+  "Attendance",
+  "Leave",
+  "Branches",
+  "Financials",
+  "Operations",
+  "Performance",
+  "What stands out",
+  "Recommended attention",
+  "Recommendation",
+]);
+
+function AgentMessageContent({ content }) {
+  const blocks = String(content || "")
+    .split(/\n\s*\n/)
+    .map((block) => block.trim())
+    .filter(Boolean);
+  return (
+    <div className={styles.messageContent}>
+      {blocks.map((block, index) => {
+        const lines = block
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean);
+        if (!lines.length) return null;
+        if (lines.length === 1 && AGENT_SECTION_HEADINGS.has(lines[0])) {
+          return (
+            <div key={index} className={styles.messageSectionHeading}>
+              {lines[0]}
+            </div>
+          );
+        }
+        return (
+          <p key={index} className={styles.messageParagraph}>
+            {lines.map((line, lineIndex) => (
+              <span key={lineIndex}>
+                {line}
+                {lineIndex < lines.length - 1 && <br />}
+              </span>
+            ))}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 const SUGGESTED_PROMPTS = [
   "How is my business doing?",
   "Show today's attendance",
@@ -295,7 +345,7 @@ export default function AiAgentWidget() {
                       : styles.bubbleAssistant
                   } ${m.isError ? styles.bubbleError : ""}`}
                 >
-                  {m.content}
+                  <AgentMessageContent content={m.content} />
                   {m.usedBusinessData && (
                     <div className={styles.bubbleTag}>
                       <i className="ti ti-chart-bar" aria-hidden="true" /> from

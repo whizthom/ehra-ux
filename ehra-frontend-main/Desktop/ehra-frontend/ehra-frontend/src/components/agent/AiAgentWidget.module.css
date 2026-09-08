@@ -331,6 +331,27 @@
     word-break: break-word;
 }
 
+.messageContent {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.messageSectionHeading {
+    margin-top: 3px;
+    font-size: 11px;
+    line-height: 1.25;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.messageParagraph {
+    margin: 0;
+    line-height: 1.52;
+}
+
 .bubbleAssistant {
     background: var(--bubble-received-bg);
     color: var(--text-primary);
