@@ -2280,3 +2280,13 @@
     flex-direction: column;
     padding: 0;
 }
+
+/* Desktop Agent workspace: remove the global Ehral brand footer so the
+   Intelligence conversation receives the full available vertical space.
+   The mobile Agent has its own fixed viewport and is intentionally left
+   unchanged. */
+@media (min-width: 901px) {
+    .contentAgent .dashboardFooter {
+        display: none;
+    }
+}
