@@ -1,99 +1,159 @@
-import axios from "axios";
 import { getAccessToken } from "./authApi";
 
-const AGENT_API_BASE_URL =
+const AGENT_BASE_URL =
   import.meta.env.VITE_AGENT_API_BASE_URL ||
   (import.meta.env.DEV
     ? "/agent-api"
     : "https://ehral-agent-production.up.railway.app/api/v1");
 
-const agentClient = axios.create({
-  baseURL: AGENT_API_BASE_URL,
-  timeout: 60000,
-});
+const getAuthToken = () => {
+  return getAccessToken() || "";
+};
 
-agentClient.interceptors.request.use((config) => {
-  const token = getAccessToken();
+const buildHeaders = () => {
+  const token = getAuthToken();
 
-  if (token) {
-    config.headers = config.headers || {};
-    config.headers.Authorization = `Bearer ${token}`;
+  return {
+    "Content-Type": "application/json",
+    "X-Application": "ehral",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+};
+
+const agentRequest = async (path, options = {}) => {
+  const response = await fetch(`${AGENT_BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      ...buildHeaders(),
+      ...(options.headers || {}),
+    },
+  });
+
+  let data = null;
+
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
   }
 
-  return config;
-});
+  if (!response.ok) {
+    const message =
+      data?.detail ||
+      data?.message ||
+      data?.error ||
+      `Ehral Intelligence request failed (${response.status})`;
 
-export async function sendAgentMessage(message, conversationId = null) {
+    const error = new Error(message);
+    error.status = response.status;
+    error.data = data;
+
+    throw error;
+  }
+
+  return data;
+};
+
+export async function sendAgentMessage(
+  message,
+  conversationId = null
+) {
+  const timezone =
+    Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+
+  const locale =
+    navigator.language || "en-US";
+
   const payload = {
     message,
+    timezone,
+    locale,
   };
 
   if (conversationId) {
     payload.conversation_id = conversationId;
   }
 
-  const response = await agentClient.post("/agent/chat", payload);
-
-  return response.data;
+  return agentRequest("/agent/chat", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }
 
-export async function fetchAgentBriefing(timezone = "UTC", locale = "en-US") {
-  const response = await agentClient.get("/agent/briefing", {
-    params: {
-      timezone,
-      locale,
-    },
+export async function executeAgentAction(token) {
+  return agentRequest("/actions/execute", {
+    method: "POST",
+    body: JSON.stringify({
+      confirmation_token: token,
+    }),
+  });
+}
+
+export async function fetchAgentBriefing() {
+  const timezone =
+    Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+
+  const locale =
+    navigator.language || "en-US";
+
+  const params = new URLSearchParams({
+    timezone,
+    locale,
   });
 
-  return response.data;
-}
-
-export async function executeAgentAction(confirmationToken) {
-  const response = await agentClient.post("/actions/execute", {
-    confirmation_token: confirmationToken,
+  return agentRequest(`/agent/briefing?${params.toString()}`, {
+    method: "GET",
   });
-
-  return response.data;
 }
 
-export async function sendAgentVoiceMessage(audioFile, conversationId = null) {
-  const formData = new FormData();
+export async function sendAgentVoice(formData) {
+  const token = getAuthToken();
 
-  formData.append("audio", audioFile);
-
-  if (conversationId) {
-    formData.append("conversation_id", conversationId);
-  }
-
-  const response = await agentClient.post("/agent/voice/chat", formData, {
+  return fetch(`${AGENT_BASE_URL}/agent/voice/chat`, {
+    method: "POST",
     headers: {
-      "Content-Type": "multipart/form-data",
+      "X-Application": "ehral",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-  });
+    body: formData,
+  }).then(async (response) => {
+    let data = null;
 
-  return response.data;
+    try {
+      data = await response.json();
+    } catch {
+      data = null;
+    }
+
+    if (!response.ok) {
+      const message =
+        data?.detail ||
+        data?.message ||
+        data?.error ||
+        `Voice request failed (${response.status})`;
+
+      const error = new Error(message);
+      error.status = response.status;
+      error.data = data;
+
+      throw error;
+    }
+
+    return data;
+  });
 }
 
-export async function sendAgentImage(imageFile, message = "", conversationId = null) {
-  const formData = new FormData();
-
-  formData.append("image", imageFile);
-
-  if (message) {
-    formData.append("message", message);
-  }
-
-  if (conversationId) {
-    formData.append("conversation_id", conversationId);
-  }
-
-  const response = await agentClient.post("/agent/image", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
+export async function generateAgentImage(payload) {
+  return agentRequest("/agent/image", {
+    method: "POST",
+    body: JSON.stringify(payload),
   });
-
-  return response.data;
 }
 
-export default agentClient;
+export default {
+  sendAgentMessage,
+  executeAgentAction,
+  fetchAgentBriefing,
+  sendAgentVoice,
+  generateAgentImage,
+};
