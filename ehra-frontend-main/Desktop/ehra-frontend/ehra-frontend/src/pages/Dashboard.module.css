@@ -1529,7 +1529,9 @@
         transition: transform .16s ease, border-color .16s ease, background .16s ease;
     }
 
-    .mobileAttentionItem:active { transform: scale(.99); }
+    .mobileAttentionItem:active {
+        transform: scale(.99);
+    }
 
     .mobileAttentionIcon {
         width: 36px;
@@ -1541,11 +1543,22 @@
         font-size: 16px;
     }
 
-    .mobileAttentionBrand { background: var(--bg-soft-accent); color: var(--accent); }
-    .mobileAttentionWarning { background: var(--warning-bg); color: var(--warning-text); }
-    .mobileAttentionDanger { background: var(--danger-bg); color: var(--danger-text); }
+    .mobileAttentionBrand {
+        background: var(--bg-soft-accent);
+        color: var(--accent);
+    }
 
-    .mobileAttentionItem > span:nth-child(2) {
+    .mobileAttentionWarning {
+        background: var(--warning-bg);
+        color: var(--warning-text);
+    }
+
+    .mobileAttentionDanger {
+        background: var(--danger-bg);
+        color: var(--danger-text);
+    }
+
+    .mobileAttentionItem>span:nth-child(2) {
         min-width: 0;
         flex: 1;
         display: flex;
@@ -1553,9 +1566,21 @@
         gap: 2px;
     }
 
-    .mobileAttentionItem strong { font-size: 12px; line-height: 1.2; }
-    .mobileAttentionItem small { color: var(--text-secondary); font-size: 10px; line-height: 1.2; }
-    .mobileAttentionItem > .ti:last-child { color: var(--text-secondary); font-size: 15px; }
+    .mobileAttentionItem strong {
+        font-size: 12px;
+        line-height: 1.2;
+    }
+
+    .mobileAttentionItem small {
+        color: var(--text-secondary);
+        font-size: 10px;
+        line-height: 1.2;
+    }
+
+    .mobileAttentionItem>.ti:last-child {
+        color: var(--text-secondary);
+        font-size: 15px;
+    }
 
     /* Quick actions loses its card chrome and title on phones so the
        pill row reads as a native top filter strip (WhatsApp-style
@@ -1684,7 +1709,9 @@
         font-weight: 600;
     }
 
-    .qaBtn:active { transform: scale(.985); }
+    .qaBtn:active {
+        transform: scale(.985);
+    }
 
     /* "Underneath line" scroll indicator — the thumb's width and position
        genuinely reflect how much content there is and how far through
