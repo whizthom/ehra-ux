@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import {
   sendAgentMessage,
   executeAgentAction,
-  fetchAgentBriefing,
+  getAgentBriefing,
 } from "../../api/agentApi";
 import Logo from "../Logo";
 import styles from "./AiAgentWidget.module.css";
@@ -280,7 +280,7 @@ function AgentWorkspace({ onClose }) {
   useEffect(() => {
     if (!briefingFetchedRef.current) {
       briefingFetchedRef.current = true;
-      fetchAgentBriefing()
+      getAgentBriefing()
         .then((data) => {
           setGreeting(data?.greeting || null);
           setBriefingInsights(
