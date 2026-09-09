@@ -891,3 +891,38 @@
         font-size: 13px;
     }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Ehral mobile polish: messaging
+   ───────────────────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .container { min-height: 0; height: 100%; }
+  .listPanel { border-radius: 0; }
+  .listHeader { padding: 10px 12px; }
+  .listTitle { font-size: 14px; }
+  .composeBtn { min-height: 40px; border-radius: 12px; }
+  .list { padding: 4px 8px 10px; gap: 4px; }
+  .listItem { border-radius: 14px; padding: 11px 10px; }
+  .listItemSubject { font-size: 11.5px; }
+  .listItemPreview { font-size: 10px; line-height: 1.4; }
+  .listItemTime { font-size: 9px; }
+  .detailHeader { padding: 10px 12px; }
+  .backBtn { min-width: 40px; min-height: 40px; border-radius: 11px; }
+  .backBtnLabel { font-size: 10px; }
+  .detailSubject { font-size: 14px; }
+  .detailMeta { padding: 10px 12px; }
+  .metaLabel { font-size: 9px; }
+  .detailBody { padding: 12px; font-size: 13px; line-height: 1.65; }
+  .composeArea { padding: 0 10px 10px; }
+  .field input, .field textarea { min-height: 44px; border-radius: 12px; font-size: 13px; }
+  .field .messageInput { min-height: 150px; }
+  .composeFooter { gap: 8px; }
+  .cancelBtn, .sendBtn { min-height: 44px; border-radius: 12px; }
+}
+@media (max-width: 480px) {
+  .listHeader { padding: 9px 10px; }
+  .listItem { padding: 10px 8px; }
+  .detailMeta { padding: 9px 10px; }
+  .detailBody { padding: 10px; }
+  .receiptsSection { margin: 0 10px 10px; }
+}

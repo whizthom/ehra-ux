@@ -36,3 +36,18 @@
 .row:last-child { border-bottom: none; }
 .rowLabel { color: var(--text-secondary); }
 .rowValue { color: var(--text-primary); font-weight: 500; text-align: right; }
+
+
+@media (max-width: 640px) {
+  .wrap { gap: 10px; }
+  .headerCard { border-radius: 18px; padding: 14px; }
+  .avatar { width: 56px; height: 56px; }
+  .name { font-size: 16px; }
+  .meta { font-size: 10.5px; }
+  .editBtn { min-height: 40px; border-radius: 11px; }
+  .panel { border-radius: 17px; padding: 13px; }
+  .panelTitle { font-size: 12px; }
+  .row { min-height: 46px; gap: 8px; }
+  .rowLabel { font-size: 10px; }
+  .rowValue { font-size: 11px; }
+}

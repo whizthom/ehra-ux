@@ -382,3 +382,20 @@
         width: 100%;
     }
 }
+@media (max-width: 640px) {
+  .pageInner { padding: 10px 12px calc(28px + env(safe-area-inset-bottom, 0px)); }
+  .tabs { overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display:none; }
+  .tab { flex: 0 0 auto; min-height: 42px; border-radius: 11px; padding: 8px 12px; font-size: 10px; }
+  .sectionCard { border-radius: 18px; padding: 13px; }
+  .grid { grid-template-columns: 1fr; gap: 8px; }
+  .item { min-height: 64px; border-radius: 15px; padding: 10px; }
+  .itemName { font-size: 12px; }
+  .itemMeta { font-size: 9px; }
+  .avatar { width: 36px; height: 36px; }
+  .createTrigger { min-height: 44px; border-radius: 12px; }
+  .formGrid { grid-template-columns: 1fr; gap: 9px; }
+  .field input { min-height: 44px; border-radius: 12px; }
+  .footer { position: sticky; bottom: 0; padding: 10px 0; background: color-mix(in srgb, var(--bg-surface) 94%, transparent); backdrop-filter: blur(12px); }
+  .cancelBtn, .createBtn { min-height: 44px; border-radius: 12px; }
+}

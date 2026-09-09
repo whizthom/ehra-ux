@@ -1154,3 +1154,40 @@
         background: var(--bg-surface);
     }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Ehral mobile polish: reports
+   ───────────────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .wrap { gap: 10px; padding: 8px 0 18px; }
+  .reportTypeTabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+  .reportTypeTabs::-webkit-scrollbar { display:none; }
+  .reportTypeTab { flex: 0 0 auto; min-height: 42px; padding: 8px 11px; border-radius: 12px; font-size: 10px; }
+  .reportTypeTab i { font-size: 13px; }
+  .header { gap: 8px; margin-bottom: 10px; }
+  .heading { font-size: 20px; letter-spacing: -.025em; }
+  .subheading { font-size: 10.5px; }
+  .exportBtns { gap: 6px; }
+  .exportBtn { min-height: 40px; border-radius: 11px; }
+  .filterBar { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: 16px; }
+  .presetGroup { width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .presetGroup::-webkit-scrollbar { display:none; }
+  .presetBtn { flex: 0 0 auto; min-height: 38px; border-radius: 10px; font-size: 9px; }
+  .periodLine { width: 100%; }
+  .reportDropdownTrigger, .dateRangeTrigger { width: 100%; min-height: 42px; border-radius: 11px; }
+  .twoColGrid { grid-template-columns: 1fr; gap: 8px; }
+  .cardsRow { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; }
+  .statCard { border-radius: 15px; padding: 11px; }
+  .statLabel { font-size: 8.5px; }
+  .statValue { font-size: 18px; }
+  .chartCard, .sectionCard { border-radius: 17px; padding: 12px; }
+  .chartHeadRow { gap: 8px; }
+  .sectionTitle { font-size: 12px; }
+  .searchBox input { min-height: 42px; border-radius: 11px; }
+  .tableWrap { border-radius: 15px; overflow-x: auto; }
+  .table { min-width: 620px; }
+  .table th { font-size: 8.5px; padding: 8px; }
+  .table td { font-size: 9.5px; padding: 9px 8px; }
+  .onLeaveGrid { grid-template-columns: 1fr; gap: 8px; }
+  .onLeaveCard { border-radius: 15px; }
+}

@@ -118,3 +118,17 @@
         max-width: 100%;
     }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Ehral mobile polish: attendance QR
+   ───────────────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .tabBar { margin: 0; }
+  .tabBtn { flex: 1 1 50%; min-height: 44px; text-align: center; padding: 10px 12px; font-size: 11px; }
+  .tabBody { padding-top: 10px; }
+  .wrap { gap: 16px; padding: 4px 0 18px; }
+  .intro { padding: 0 8px; }
+  .title { font-size: 19px; letter-spacing: -.02em; }
+  .desc { font-size: 11px; line-height: 1.55; }
+  .panelWrap, .panelWrapWide { width: 100%; }
+}

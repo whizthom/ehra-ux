@@ -322,3 +322,22 @@
         padding: 16px;
     }
 }
+@media (max-width: 640px) {
+  .page { min-height: 0; }
+  .header { padding: 10px 12px; gap: 8px; }
+  .backLink, .themeToggle, .newBtn { min-height: 40px; border-radius: 11px; }
+  .body { grid-template-columns: 1fr; gap: 8px; padding: 10px 12px calc(20px + env(safe-area-inset-bottom, 0px)); }
+  .list { max-height: none; }
+  .convItem { border-radius: 13px; padding: 10px; }
+  .convSubject { font-size: 11px; }
+  .convMeta, .muted { font-size: 9px; }
+  .main { min-height: 0; }
+  .thread { border-radius: 17px; }
+  .messages { padding: 10px; }
+  .bubble { max-width: 88%; border-radius: 14px; padding: 9px 10px; }
+  .bubbleText { font-size: 11px; line-height: 1.5; }
+  .bubbleMeta { font-size: 8px; }
+  .replyForm { padding: 8px; gap: 6px; }
+  .replyForm .input { min-height: 42px; border-radius: 12px; }
+  .replyForm .submitBtn { min-width: 42px; min-height: 42px; border-radius: 12px; }
+}

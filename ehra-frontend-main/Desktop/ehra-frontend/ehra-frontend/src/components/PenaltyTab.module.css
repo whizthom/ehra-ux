@@ -766,3 +766,39 @@
 .viewProfileBtn:hover {
     background: var(--accent-hover);
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Ehral mobile polish: attendance deductions
+   ───────────────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .wrap { padding: 8px 0 18px; }
+  .header { gap: 8px; margin-bottom: 10px; }
+  .heading { font-size: 20px; letter-spacing: -.025em; }
+  .subheading { font-size: 11px; line-height: 1.45; }
+  .settingsToggle { min-height: 42px; border-radius: 12px; }
+  .settingsCard { border-radius: 18px; padding: 14px; }
+  .settingsHeadRow { gap: 8px; }
+  .fieldsGrid { grid-template-columns: 1fr; gap: 9px; }
+  .field input { min-height: 44px; border-radius: 11px; }
+  .settingsActions { position: sticky; bottom: 0; z-index: 3; padding: 10px 0; background: color-mix(in srgb, var(--bg-surface) 94%, transparent); backdrop-filter: blur(12px); }
+  .saveBtn { min-height: 44px; border-radius: 12px; }
+  .toolbar { gap: 8px; }
+  .searchBox input { height: 44px; border-radius: 12px; }
+  .periodTrigger { min-height: 44px; border-radius: 12px; }
+  .runBtn { min-height: 44px; border-radius: 12px; }
+  .summaryStrip { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 7px; padding: 9px; border-radius: 15px; }
+  .summaryStrip>div { padding: 7px; border-radius: 10px; background: var(--bg-surface); }
+  .summaryLabel { font-size: 8.5px; }
+  .summaryValue { font-size: 14px; }
+  .tableWrap { border-radius: 16px; }
+  .table { min-width: 620px; }
+  .table th { font-size: 9px; }
+  .table td { font-size: 10px; }
+  .mobileCards { gap: 8px; }
+  .empCard { border-radius: 16px; padding: 12px; }
+  .empStatGrid { grid-template-columns: repeat(2,1fr); gap: 6px; }
+  .empStat { border-radius: 11px; padding: 8px; }
+  .empStatLabel { font-size: 8px; }
+  .empStatVal { font-size: 13px; }
+  .viewProfileBtn { min-height: 40px; border-radius: 11px; }
+}

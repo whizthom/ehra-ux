@@ -128,3 +128,21 @@
         width: 100%;
     }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Ehral mobile polish: attendance workspace
+   ───────────────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .tabBar { margin: 0 -2px; border-bottom-color: color-mix(in srgb, var(--border-color) 75%, transparent); }
+  .tabBtn { flex: 1 0 auto; min-height: 44px; padding: 10px 13px; font-size: 11px; }
+  .tabBody { padding-top: 12px; }
+  .historyFilters { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; }
+  .dateField { min-width: 0; }
+  .dateField label { font-size: 9px; }
+  .dateField input { width: 100%; min-height: 42px; border-radius: 11px; font-size: 12px; }
+  .applyBtn { grid-column: 1 / -1; min-height: 42px; border-radius: 11px; }
+}
+@media (max-width: 380px) {
+  .historyFilters { grid-template-columns: 1fr; }
+  .applyBtn { grid-column: auto; }
+}

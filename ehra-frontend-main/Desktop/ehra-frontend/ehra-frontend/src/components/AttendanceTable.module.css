@@ -129,3 +129,15 @@
     color: var(--text-secondary);
     font-size: 13px;
 }
+
+@media (max-width: 640px) {
+  .tableScroll { border-radius: 16px; border: 1px solid var(--border-color); background: var(--bg-surface); }
+  .table { min-width: 620px; }
+  .table th { font-size: 9px; padding: 9px 10px; }
+  .table td { font-size: 10.5px; padding: 10px; }
+  .empCell { gap: 8px; }
+  .avatar { width: 30px; height: 30px; }
+  .empName { font-size: 11px; }
+  .muted { font-size: 9px; }
+  .pill { font-size: 9px; padding: 4px 7px; }
+}

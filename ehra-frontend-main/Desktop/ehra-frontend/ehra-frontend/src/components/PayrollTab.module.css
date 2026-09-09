@@ -414,3 +414,38 @@
     gap: 10px;
     margin-top: 4px;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Ehral mobile polish: payroll
+   ───────────────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .wrap { gap: 10px; padding: 8px 0 18px; }
+  .card { border-radius: 18px; padding: 14px; box-shadow: 0 4px 16px rgba(15,23,22,.045); }
+  .salaryHeader { gap: 8px; }
+  .cardLabel { font-size: 9px; letter-spacing: .08em; }
+  .salaryValue { font-size: 20px; }
+  .netPayValue { font-size: 24px; }
+  .editLink { min-height: 38px; padding: 0 10px; border-radius: 10px; }
+  .salaryInput { height: 44px; border-radius: 11px; font-size: 14px; }
+  .saveBtn { min-height: 42px; border-radius: 11px; }
+  .statGrid { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 7px; }
+  .stat { border-radius: 14px; padding: 11px; }
+  .statValue { font-size: 17px; }
+  .statLabel { font-size: 9px; }
+  .periodHeader { align-items: flex-start; gap: 8px; }
+  .periodRange { font-size: 12px; }
+  .periodBadge { font-size: 9px; }
+  .eventRow { padding: 10px; border-radius: 13px; }
+  .eventMain { min-width: 0; }
+  .eventDate { font-size: 10px; }
+  .eventStatus { font-size: 9px; }
+  .eventTimes { font-size: 9px; }
+  .eventTags { gap: 4px; }
+  .tagLeave, .tagPardoned, .tagDeducted { font-size: 8px; }
+  .periodRow { grid-template-columns: 1fr; gap: 5px; padding: 11px; border-radius: 13px; }
+  .periodRowRange, .periodRowDeduction, .periodRowNet { font-size: 10px; }
+  .overlay { padding: 14px; }
+  .modal { width: 100%; border-radius: 22px; padding: 18px; }
+  .modalTextarea { min-height: 120px; border-radius: 12px; }
+  .modalActions { gap: 8px; }
+}
