@@ -194,12 +194,19 @@ body.app-shell-lock {
   }
 }
 
-/* Standalone PWA: remove the 1px seam at the top of the app shell. */
+/* PWA status-bar seam: paint the first web pixel with the current app
+   background. This removes the visible hairline at the system-status-bar
+   boundary without changing theme-color, the manifest, or theme behavior. */
 @media all and (display-mode: standalone) {
-
-  html,
-  body,
-  #root {
-    border-top: 0 !important;
+  body.app-shell-lock::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--bg-page);
+    pointer-events: none;
+    z-index: 2147483647;
   }
 }

@@ -172,8 +172,8 @@
 @media (max-width: 640px) {
     .topbar {
         background: transparent;
+        border-top: 0;
         border-bottom: none;
-        border-top: none;
         box-shadow: none;
     }
 }
