@@ -300,10 +300,78 @@ export default function Dashboard() {
   // If we arrived here via navigate(..., { state: { activeNav } }) — e.g.
   // the "Back to workforce" button on an employee's profile page — open
   // directly on that tab instead of always resetting to "Dashboard".
-  const [activeNav, setActiveNav] = useState(
-    location.state?.activeNav || "Dashboard",
-  );
+  const dashboardStateKey = `ehral:dashboardState:${user?.identityId ?? "unknown"}:${user?.businessId ?? "unknown"}`;
+  const readDashboardState = () => {
+    try {
+      return JSON.parse(sessionStorage.getItem(dashboardStateKey) || "{}");
+    } catch {
+      return {};
+    }
+  };
+  const [activeNav, setActiveNav] = useState(() => {
+    const fromNavigation = location.state?.activeNav;
+    if (fromNavigation) return fromNavigation;
+    return readDashboardState().activeNav || "Dashboard";
+  });
+  const contentRef = useRef(null);
   const isMobile = useIsMobile();
+
+  // Keep the dashboard on the exact section the user was using after a
+  // browser/PWA refresh. Navigation state still wins when another page
+  // deliberately sends us back to a specific section.
+  useEffect(() => {
+    try {
+      const state = readDashboardState();
+      sessionStorage.setItem(
+        dashboardStateKey,
+        JSON.stringify({ ...state, activeNav }),
+      );
+    } catch {
+      // Session storage can be unavailable in private browsing.
+    }
+  }, [activeNav, dashboardStateKey]);
+
+  // Restore and save the dashboard's own scroll container. The dashboard
+  // locks body scrolling, so the browser's normal scroll restoration cannot
+  // restore this position on a refresh.
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el) return undefined;
+    const state = readDashboardState();
+    const saved = state.scrollPositions?.[activeNav];
+    if (typeof saved === "number") {
+      requestAnimationFrame(() => {
+        el.scrollTop = saved;
+      });
+    }
+
+    const save = () => {
+      try {
+        const latest = readDashboardState();
+        sessionStorage.setItem(
+          dashboardStateKey,
+          JSON.stringify({
+            ...latest,
+            activeNav,
+            scrollPositions: {
+              ...(latest.scrollPositions || {}),
+              [activeNav]: el.scrollTop,
+            },
+          }),
+        );
+      } catch {
+        // Best effort only.
+      }
+    };
+
+    window.addEventListener("pagehide", save);
+    window.addEventListener("beforeunload", save);
+    return () => {
+      save();
+      window.removeEventListener("pagehide", save);
+      window.removeEventListener("beforeunload", save);
+    };
+  }, [activeNav, dashboardStateKey]);
 
   // Which sub-tab is open within the Leave tab (Requests/On Leave/
   // Policies/Balances) — reported up by LeavesTab itself via
@@ -1489,6 +1557,7 @@ export default function Dashboard() {
 
         {/* Content area */}
         <div
+          ref={contentRef}
           className={
             activeNav === "Ehral Intelligence"
               ? styles.contentAgent
@@ -1627,56 +1696,172 @@ export default function Dashboard() {
 
               {/* Mobile attention rail. This intentionally sits outside Today's Pulse,
                   which is a protected product surface and must not be modified. */}
-              {isMobile && (pendingLeaves.length > 0 || pendingProfileEdits.length > 0 || messagesUnread > 0 || pulseLate > 0 || pulseAbsent > 0) && (
-                <section className={styles.mobileAttention} aria-label="Needs attention">
-                  <div className={styles.mobileAttentionHeader}>
-                    <div>
-                      <span className={styles.mobileSectionEyebrow}>TODAY</span>
-                      <h2>Needs attention</h2>
+              {isMobile &&
+                (pendingLeaves.length > 0 ||
+                  pendingProfileEdits.length > 0 ||
+                  messagesUnread > 0 ||
+                  pulseLate > 0 ||
+                  pulseAbsent > 0) && (
+                  <section
+                    className={styles.mobileAttention}
+                    aria-label="Needs attention"
+                  >
+                    <div className={styles.mobileAttentionHeader}>
+                      <div>
+                        <span className={styles.mobileSectionEyebrow}>
+                          TODAY
+                        </span>
+                        <h2>Needs attention</h2>
+                      </div>
+                      <span className={styles.mobileAttentionCount}>
+                        {
+                          [
+                            pulseAbsent > 0,
+                            pulseLate > 0,
+                            pendingLeaves.length > 0,
+                            pendingProfileEdits.length > 0,
+                            messagesUnread > 0,
+                          ].filter(Boolean).length
+                        }
+                      </span>
                     </div>
-                    <span className={styles.mobileAttentionCount}>
-                      {[pulseAbsent > 0, pulseLate > 0, pendingLeaves.length > 0, pendingProfileEdits.length > 0, messagesUnread > 0].filter(Boolean).length}
-                    </span>
-                  </div>
-                  <div className={styles.mobileAttentionList}>
-                    {pulseAbsent > 0 && (
-                      <button type="button" onClick={() => setActiveNav("Attendance")} className={styles.mobileAttentionItem}>
-                        <span className={`${styles.mobileAttentionIcon} ${styles.mobileAttentionDanger}`}><i className="ti ti-user-x" aria-hidden="true" /></span>
-                        <span><strong>{pulseAbsent} {pulseAbsent === 1 ? "employee" : "employees"} absent</strong><small>Review attendance</small></span>
-                        <i className="ti ti-chevron-right" aria-hidden="true" />
-                      </button>
-                    )}
-                    {pulseLate > 0 && (
-                      <button type="button" onClick={() => setActiveNav("Attendance")} className={styles.mobileAttentionItem}>
-                        <span className={`${styles.mobileAttentionIcon} ${styles.mobileAttentionWarning}`}><i className="ti ti-clock" aria-hidden="true" /></span>
-                        <span><strong>{pulseLate} {pulseLate === 1 ? "late arrival" : "late arrivals"}</strong><small>Review attendance</small></span>
-                        <i className="ti ti-chevron-right" aria-hidden="true" />
-                      </button>
-                    )}
-                    {pendingLeaves.length > 0 && (
-                      <button type="button" onClick={() => setActiveNav("Leave")} className={styles.mobileAttentionItem}>
-                        <span className={`${styles.mobileAttentionIcon} ${styles.mobileAttentionBrand}`}><i className="ti ti-calendar-event" aria-hidden="true" /></span>
-                        <span><strong>{pendingLeaves.length} leave {pendingLeaves.length === 1 ? "request" : "requests"}</strong><small>Waiting for review</small></span>
-                        <i className="ti ti-chevron-right" aria-hidden="true" />
-                      </button>
-                    )}
-                    {pendingProfileEdits.length > 0 && (
-                      <button type="button" onClick={() => setActiveNav("Profile Edits")} className={styles.mobileAttentionItem}>
-                        <span className={`${styles.mobileAttentionIcon} ${styles.mobileAttentionBrand}`}><i className="ti ti-user-edit" aria-hidden="true" /></span>
-                        <span><strong>{pendingProfileEdits.length} profile {pendingProfileEdits.length === 1 ? "change" : "changes"}</strong><small>Waiting for review</small></span>
-                        <i className="ti ti-chevron-right" aria-hidden="true" />
-                      </button>
-                    )}
-                    {messagesUnread > 0 && (
-                      <button type="button" onClick={() => setActiveNav("Messages")} className={styles.mobileAttentionItem}>
-                        <span className={`${styles.mobileAttentionIcon} ${styles.mobileAttentionBrand}`}><i className="ti ti-message-circle" aria-hidden="true" /></span>
-                        <span><strong>{messagesUnread} unread {messagesUnread === 1 ? "message" : "messages"}</strong><small>Open messages</small></span>
-                        <i className="ti ti-chevron-right" aria-hidden="true" />
-                      </button>
-                    )}
-                  </div>
-                </section>
-              )}
+                    <div className={styles.mobileAttentionList}>
+                      {pulseAbsent > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setActiveNav("Attendance")}
+                          className={styles.mobileAttentionItem}
+                        >
+                          <span
+                            className={`${styles.mobileAttentionIcon} ${styles.mobileAttentionDanger}`}
+                          >
+                            <i className="ti ti-user-x" aria-hidden="true" />
+                          </span>
+                          <span>
+                            <strong>
+                              {pulseAbsent}{" "}
+                              {pulseAbsent === 1 ? "employee" : "employees"}{" "}
+                              absent
+                            </strong>
+                            <small>Review attendance</small>
+                          </span>
+                          <i
+                            className="ti ti-chevron-right"
+                            aria-hidden="true"
+                          />
+                        </button>
+                      )}
+                      {pulseLate > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setActiveNav("Attendance")}
+                          className={styles.mobileAttentionItem}
+                        >
+                          <span
+                            className={`${styles.mobileAttentionIcon} ${styles.mobileAttentionWarning}`}
+                          >
+                            <i className="ti ti-clock" aria-hidden="true" />
+                          </span>
+                          <span>
+                            <strong>
+                              {pulseLate}{" "}
+                              {pulseLate === 1
+                                ? "late arrival"
+                                : "late arrivals"}
+                            </strong>
+                            <small>Review attendance</small>
+                          </span>
+                          <i
+                            className="ti ti-chevron-right"
+                            aria-hidden="true"
+                          />
+                        </button>
+                      )}
+                      {pendingLeaves.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setActiveNav("Leave")}
+                          className={styles.mobileAttentionItem}
+                        >
+                          <span
+                            className={`${styles.mobileAttentionIcon} ${styles.mobileAttentionBrand}`}
+                          >
+                            <i
+                              className="ti ti-calendar-event"
+                              aria-hidden="true"
+                            />
+                          </span>
+                          <span>
+                            <strong>
+                              {pendingLeaves.length} leave{" "}
+                              {pendingLeaves.length === 1
+                                ? "request"
+                                : "requests"}
+                            </strong>
+                            <small>Waiting for review</small>
+                          </span>
+                          <i
+                            className="ti ti-chevron-right"
+                            aria-hidden="true"
+                          />
+                        </button>
+                      )}
+                      {pendingProfileEdits.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setActiveNav("Profile Edits")}
+                          className={styles.mobileAttentionItem}
+                        >
+                          <span
+                            className={`${styles.mobileAttentionIcon} ${styles.mobileAttentionBrand}`}
+                          >
+                            <i className="ti ti-user-edit" aria-hidden="true" />
+                          </span>
+                          <span>
+                            <strong>
+                              {pendingProfileEdits.length} profile{" "}
+                              {pendingProfileEdits.length === 1
+                                ? "change"
+                                : "changes"}
+                            </strong>
+                            <small>Waiting for review</small>
+                          </span>
+                          <i
+                            className="ti ti-chevron-right"
+                            aria-hidden="true"
+                          />
+                        </button>
+                      )}
+                      {messagesUnread > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setActiveNav("Messages")}
+                          className={styles.mobileAttentionItem}
+                        >
+                          <span
+                            className={`${styles.mobileAttentionIcon} ${styles.mobileAttentionBrand}`}
+                          >
+                            <i
+                              className="ti ti-message-circle"
+                              aria-hidden="true"
+                            />
+                          </span>
+                          <span>
+                            <strong>
+                              {messagesUnread} unread{" "}
+                              {messagesUnread === 1 ? "message" : "messages"}
+                            </strong>
+                            <small>Open messages</small>
+                          </span>
+                          <i
+                            className="ti ti-chevron-right"
+                            aria-hidden="true"
+                          />
+                        </button>
+                      )}
+                    </div>
+                  </section>
+                )}
 
               {/* Stats */}
               <div className={styles.statsGrid}>

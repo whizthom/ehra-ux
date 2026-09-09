@@ -231,9 +231,71 @@ export default function Dashboard() {
 
   // Same idea as the admin dashboard — land on the tab we came from
   // instead of resetting to "Dashboard" every time.
-  const [activeNav, setActiveNav] = useState(
-    location.state?.activeNav || "Dashboard",
-  );
+  const employeeStateKey = `ehral:employeeDashboardState:${user?.identityId ?? "unknown"}:${user?.membershipId ?? "unknown"}`;
+  const readEmployeeState = () => {
+    try {
+      return JSON.parse(sessionStorage.getItem(employeeStateKey) || "{}");
+    } catch {
+      return {};
+    }
+  };
+  const [activeNav, setActiveNav] = useState(() => {
+    const fromNavigation = location.state?.activeNav;
+    if (fromNavigation) return fromNavigation;
+    return readEmployeeState().activeNav || "Dashboard";
+  });
+  const contentRef = useRef(null);
+
+  useEffect(() => {
+    try {
+      const state = readEmployeeState();
+      sessionStorage.setItem(
+        employeeStateKey,
+        JSON.stringify({ ...state, activeNav }),
+      );
+    } catch {
+      // Best effort only.
+    }
+  }, [activeNav, employeeStateKey]);
+
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el) return undefined;
+    const state = readEmployeeState();
+    const saved = state.scrollPositions?.[activeNav];
+    if (typeof saved === "number") {
+      requestAnimationFrame(() => {
+        el.scrollTop = saved;
+      });
+    }
+
+    const save = () => {
+      try {
+        const latest = readEmployeeState();
+        sessionStorage.setItem(
+          employeeStateKey,
+          JSON.stringify({
+            ...latest,
+            activeNav,
+            scrollPositions: {
+              ...(latest.scrollPositions || {}),
+              [activeNav]: el.scrollTop,
+            },
+          }),
+        );
+      } catch {
+        // Best effort only.
+      }
+    };
+
+    window.addEventListener("pagehide", save);
+    window.addEventListener("beforeunload", save);
+    return () => {
+      save();
+      window.removeEventListener("pagehide", save);
+      window.removeEventListener("beforeunload", save);
+    };
+  }, [activeNav, employeeStateKey]);
 
   // Set while a Messages > Chats thread is open — used to hide the topbar,
   // brand footer, and bottom nav on mobile so the thread reads as a real
@@ -1078,6 +1140,7 @@ export default function Dashboard() {
 
         {/* Content area */}
         <div
+          ref={contentRef}
           className={
             activeNav === "Messages"
               ? `${styles.contentMessages} ${chatThreadOpen ? styles.chatFullscreenActive : ""}`
