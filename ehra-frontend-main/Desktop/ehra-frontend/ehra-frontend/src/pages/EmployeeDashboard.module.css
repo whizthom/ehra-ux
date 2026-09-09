@@ -172,10 +172,12 @@
 @media (max-width: 640px) {
     .topbar {
         background: transparent;
+        border-bottom: none;
         border-top: none;
         border-bottom: none;
         box-shadow: none;
     }
+
 }
 
 .pageTitle {
@@ -2164,37 +2166,147 @@
     font-size: 12px;
     flex-shrink: 0;
 }
+
 /* ─────────────────────────────────────────────────────────────────────────
    Ehral mobile polish: employee / HOD workspace
    ───────────────────────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
-  .main { min-width: 0; }
-  .topbar { min-height: 62px; padding: 9px 12px; }
-  .pageTitle { font-size: 15px; letter-spacing: -.015em; }
-  .pageSub { font-size: 10px; }
-  .topbarRight { gap: 6px; }
-  .scanBtn { min-height: 40px; border-radius: 11px; }
-  .userChip { padding: 4px 7px; border-radius: 12px; }
-  .userName { font-size: 10px; }
-  .userRole { font-size: 8px; }
-  .content { padding: 12px; padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
-  .contentFull { padding: 0 12px calc(92px + env(safe-area-inset-bottom, 0px)); }
-  .greetingCard { border-radius: 20px; padding: 16px; }
-  .greetingHi { font-size: 21px; }
-  .greetingSub { font-size: 11px; line-height: 1.45; }
-  .qaBtn { min-height: 42px; border-radius: 12px; }
-  .grid { grid-template-columns: 1fr; gap: 9px; }
-  .panel { border-radius: 17px; padding: 13px; box-shadow: 0 4px 16px rgba(15,23,22,.04); }
-  .panelHdr { gap: 8px; }
-  .panelTitle { font-size: 12px; }
-  .panelAction { min-height: 34px; border-radius: 10px; }
-  .todayStats { grid-template-columns: repeat(3, minmax(0,1fr)); gap: 6px; }
-  .todayStat { border-radius: 13px; padding: 10px 7px; }
-  .todayStatLabel { font-size: 8px; }
-  .todayStatValue { font-size: 16px; }
-  .hodCard { border-radius: 15px; padding: 12px; }
-  .leaveItem, .notifItem { border-radius: 13px; padding: 10px; }
-  .leaveReason, .leaveNote, .notifMessage { font-size: 10px; line-height: 1.45; }
-  .field input, .field textarea { min-height: 44px; border-radius: 12px; }
-  .submitBtn { min-height: 44px; border-radius: 12px; }
+    .main {
+        min-width: 0;
+    }
+
+    .topbar {
+        min-height: 62px;
+        padding: 9px 12px;
+    }
+
+    .pageTitle {
+        font-size: 15px;
+        letter-spacing: -.015em;
+    }
+
+    .pageSub {
+        font-size: 10px;
+    }
+
+    .topbarRight {
+        gap: 6px;
+    }
+
+    .scanBtn {
+        min-height: 40px;
+        border-radius: 11px;
+    }
+
+    .userChip {
+        padding: 4px 7px;
+        border-radius: 12px;
+    }
+
+    .userName {
+        font-size: 10px;
+    }
+
+    .userRole {
+        font-size: 8px;
+    }
+
+    .content {
+        padding: 12px;
+        padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .contentFull {
+        padding: 0 12px calc(92px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .greetingCard {
+        border-radius: 20px;
+        padding: 16px;
+    }
+
+    .greetingHi {
+        font-size: 21px;
+    }
+
+    .greetingSub {
+        font-size: 11px;
+        line-height: 1.45;
+    }
+
+    .qaBtn {
+        min-height: 42px;
+        border-radius: 12px;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 9px;
+    }
+
+    .panel {
+        border-radius: 17px;
+        padding: 13px;
+        box-shadow: 0 4px 16px rgba(15, 23, 22, .04);
+    }
+
+    .panelHdr {
+        gap: 8px;
+    }
+
+    .panelTitle {
+        font-size: 12px;
+    }
+
+    .panelAction {
+        min-height: 34px;
+        border-radius: 10px;
+    }
+
+    .todayStats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    .todayStat {
+        border-radius: 13px;
+        padding: 10px 7px;
+    }
+
+    .todayStatLabel {
+        font-size: 8px;
+    }
+
+    .todayStatValue {
+        font-size: 16px;
+    }
+
+    .hodCard {
+        border-radius: 15px;
+        padding: 12px;
+    }
+
+    .leaveItem,
+    .notifItem {
+        border-radius: 13px;
+        padding: 10px;
+    }
+
+    .leaveReason,
+    .leaveNote,
+    .notifMessage {
+        font-size: 10px;
+        line-height: 1.45;
+    }
+
+    .field input,
+    .field textarea {
+        min-height: 44px;
+        border-radius: 12px;
+    }
+
+    .submitBtn {
+        min-height: 44px;
+        border-radius: 12px;
+    }
 }

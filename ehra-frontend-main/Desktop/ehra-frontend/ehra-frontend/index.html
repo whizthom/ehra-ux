@@ -69,6 +69,7 @@
   <meta name="theme-color" content="#f0f4f3" />
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b141a" />
   <meta name="background-color" content="#f0f4f3" />
+  <meta name="color-scheme" content="light dark" />
 
   <!-- Sets the theme-color meta tag (and documentElement[data-theme])
        to match a saved theme preference BEFORE the page paints, so
@@ -83,6 +84,7 @@
         var theme = localStorage.getItem("ehra-theme");
         if (theme !== "dark") theme = "light";
         document.documentElement.setAttribute("data-theme", theme);
+        document.documentElement.style.colorScheme = theme;
         var meta = document.querySelector('meta[name="theme-color"]');
         if (meta) meta.setAttribute("content", theme === "dark" ? "#0b141a" : "#f0f4f3");
       } catch (e) {
