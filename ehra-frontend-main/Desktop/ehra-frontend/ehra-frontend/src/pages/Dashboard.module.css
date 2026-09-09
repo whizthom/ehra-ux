@@ -1382,20 +1382,20 @@
 
     .content {
         padding: 16px;
-        padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px) + 35vh);
+        padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
     }
 
     .contentFull {
-        padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px) + 35vh);
+        padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
     }
 
     .contentFullNarrow {
-        padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
     }
 
     .contentMessages {
         padding: 0;
-        padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
     }
 
     .contentMessages.chatFullscreenActive {
@@ -1403,13 +1403,29 @@
     }
 
     .topbar {
-        padding: 6px 16px;
-        padding-top: calc(6px + env(safe-area-inset-top, 0px));
-        min-height: 52px;
+        padding: 10px 16px;
+        padding-top: calc(10px + env(safe-area-inset-top, 0px));
+        min-height: 64px;
+        gap: 10px;
     }
 
     .topbarTitle {
-        font-size: 14px;
+        font-size: 15px;
+    }
+
+    .topbarRight {
+        gap: 6px;
+        flex-shrink: 0;
+    }
+
+    .messageShortcut {
+        display: none;
+    }
+
+    .notifBtn {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
     }
 }
 
@@ -1419,6 +1435,17 @@
    horizontally scrollable pill strip, styled like WhatsApp's Unread /
    Favourites / Groups filter row, so it reads as swipeable at a glance. */
 @media (max-width: 640px) {
+
+    .content {
+        padding-left: 14px;
+        padding-right: 14px;
+        gap: 14px;
+    }
+
+    .contentFull {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
 
     /* Totals row (Total/Active/Pending/Unread) is dropped entirely on
        phones — Today's Pulse + Quick actions + Recent activity carry
@@ -2049,7 +2076,7 @@
    rendering underneath it. */
 @media (max-width: 900px) {
     .undoBarFixed {
-        bottom: calc(86px + env(safe-area-inset-bottom, 0px));
+        bottom: calc(82px + env(safe-area-inset-bottom, 0px));
     }
 }
 

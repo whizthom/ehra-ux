@@ -29,6 +29,7 @@ import EmployeeAttendanceTab from "../components/EmployeeAttendanceTab";
 import EmployeePenaltyTab from "../components/EmployeePenaltyTab";
 import MyProfileTab from "../components/MyProfileTab";
 import Logo from "../components/Logo";
+import MobileNavHub from "../components/MobileNavHub";
 import LogoutConfirmModal from "../components/LogoutConfirmModal";
 import CoverRequestsTab from "../components/CoverRequestsTab";
 import { getMyProfile } from "../api/employeeApi";
@@ -275,30 +276,7 @@ export default function Dashboard() {
   const [messagesUnread, setMessagesUnread] = useState(0);
   const notifRef = useRef(null);
   const qaScrollRef = useRef(null);
-  const bottomNavScrollRef = useRef(null);
   const qaThumb = useScrollThumb(qaScrollRef);
-  const bottomNavThumb = useScrollThumb(bottomNavScrollRef);
-
-  // Same fix as Dashboard.jsx: "My Accounts" does a real route navigation
-  // (unlike the other bottom-nav items, which just swap the active tab),
-  // so returning from it fully remounts this component and gives
-  // bottomNavScrollRef a brand new DOM node starting at scrollLeft 0.
-  // MyAccountsPage.jsx reads/writes this same key so the strip's position
-  // stays in sync in both directions.
-  useEffect(() => {
-    const el = bottomNavScrollRef.current;
-    if (!el) return undefined;
-    const saved = sessionStorage.getItem("employeeBottomNavScrollLeft");
-    if (saved !== null) el.scrollLeft = Number(saved) || 0;
-    const onScroll = () => {
-      sessionStorage.setItem(
-        "employeeBottomNavScrollLeft",
-        String(el.scrollLeft),
-      );
-    };
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, []);
 
   const [recentActivityOpen, setRecentActivityOpen] = useState(false);
 
@@ -1572,75 +1550,21 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ── Mobile bottom navigation ──────────────────────────────────────
-          Every destination lives in one horizontally scrollable strip —
-          swipe sideways to reach items past the visible edge, same as a
-          native app's scrollable tab bar. Hidden entirely on desktop. */}
-      <nav
-        className={`${styles.bottomNav} ${chatThreadOpen ? styles.hiddenOnMobileChat : ""}`}
-        aria-label="Primary"
-      >
-        <div className={styles.bottomNavScroll} ref={bottomNavScrollRef}>
-          {NAV.filter(
-            (n) =>
-              (!n.hodOnly || myProfile?.isHod) &&
-              // Notifications and Messages stay reachable on mobile via the
-              // topbar bell icon / elsewhere, but are dropped from this
-              // strip specifically.
-              n.label !== "Notifications" &&
-              n.label !== "Messages",
-          ).map((n) => (
-            <button
-              key={n.label}
-              type="button"
-              className={`${styles.bottomNavItem} ${activeNav === n.label && !n.isFullPage ? styles.bottomNavActive : ""}`}
-              onClick={() =>
-                n.isFullPage
-                  ? navigate(n.route ?? "/my-accounts", {
-                      state: { returnPath: "/my-dashboard", activeNav },
-                    })
-                  : setActiveNav(n.label)
-              }
-            >
-              <div className={styles.bottomNavIconWrap}>
-                <i className={`ti ${n.icon}`} aria-hidden="true" />
-                {n.label === "My Profile" && pendingProfileEdits.length > 0 && (
-                  <span className={styles.bottomNavDot} />
-                )}
-                {n.label === "Cover Requests" &&
-                  coverRequestsPendingCount > 0 && (
-                    <span className={styles.bottomNavDot} />
-                  )}
-              </div>
-              <span>{n.label}</span>
-            </button>
-          ))}
-
-          {/* Logout has no sidebar/desktop equivalent in this strip — on
-              desktop it's the icon button in the sidebar footer instead.
-              This item only ever renders inside .bottomNav, which is
-              display:none above 900px, so it's mobile-only by construction. */}
-          <button
-            type="button"
-            className={styles.bottomNavItem}
-            onClick={() => setShowLogoutConfirm(true)}
-          >
-            <div className={styles.bottomNavIconWrap}>
-              <i className="ti ti-logout" aria-hidden="true" />
-            </div>
-            <span>Log out</span>
-          </button>
-        </div>
-        <div className={styles.bottomNavScrollTrack} aria-hidden="true">
-          <div
-            className={styles.bottomNavScrollThumb}
-            style={{
-              width: `${bottomNavThumb.width}%`,
-              left: `${bottomNavThumb.left}%`,
-            }}
-          />
-        </div>
-      </nav>
+      <MobileNavHub
+        role="employee"
+        activeNav={activeNav}
+        setActiveNav={setActiveNav}
+        navigate={navigate}
+        hidden={chatThreadOpen}
+        badges={{
+          Messages: messagesUnread,
+          Notifications: unreadCount,
+          "Cover Requests": coverRequestsPendingCount,
+          "My Profile": pendingProfileEdits.length,
+        }}
+        isHod={Boolean(myProfile?.isHod)}
+        onLogout={() => setShowLogoutConfirm(true)}
+      />
 
       <LogoutConfirmModal
         open={showLogoutConfirm}
