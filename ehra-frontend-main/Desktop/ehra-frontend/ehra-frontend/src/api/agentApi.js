@@ -1,160 +1,177 @@
-import api from "./authApi";
+import api from "./api";
 
-/**
- * Ehral Intelligence API
- *
- * Employer-only Agent client.
- *
- * The backend remains the final authority for authorization.
- * The frontend should never assume that hiding the Agent is sufficient
- * protection.
- */
+const AGENT_BASE_URL =
+  import.meta.env.VITE_AGENT_API_BASE_URL ||
+  "https://ehral-agent-production.up.railway.app/api/v1";
 
-const AGENT_BASE = "/agent";
+const getAuthToken = () => {
+  return (
+    localStorage.getItem("token") ||
+    localStorage.getItem("access_token") ||
+    sessionStorage.getItem("token") ||
+    sessionStorage.getItem("access_token") ||
+    ""
+  );
+};
 
-/**
- * Send a message to Ehral Intelligence.
- *
- * @param {Object} payload
- * @param {string} payload.message
- * @param {Array} [payload.history]
- * @param {string} [payload.timezone]
- * @param {string} [payload.locale]
- * @returns {Promise<Object>}
- */
-export async function sendAgentMessage({
-  message,
-  history = [],
-  timezone,
-  locale,
-}) {
-  const response = await api.post(`${AGENT_BASE}/chat`, {
-    message,
-    history,
-    timezone:
-      timezone ||
-      Intl.DateTimeFormat().resolvedOptions().timeZone ||
-      "UTC",
-    locale:
-      locale ||
-      navigator.language ||
-      "en",
+const buildHeaders = () => {
+  const token = getAuthToken();
+
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+};
+
+const agentRequest = async (path, options = {}) => {
+  const response = await fetch(`${AGENT_BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      ...buildHeaders(),
+      ...(options.headers || {}),
+    },
   });
 
-  return response.data;
-}
+  let data = null;
+
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+
+  if (!response.ok) {
+    const message =
+      data?.detail ||
+      data?.message ||
+      data?.error ||
+      `Ehral Intelligence request failed (${response.status})`;
+
+    const error = new Error(message);
+    error.status = response.status;
+    error.data = data;
+    throw error;
+  }
+
+  return data;
+};
 
 /**
- * Retrieve the employer's Agent briefing.
+ * Send a conversational message to Ehral Intelligence.
  *
- * @param {Object} [options]
- * @param {string} [options.timezone]
- * @param {string} [options.locale]
- * @returns {Promise<Object>}
+ * Compatible with:
+ *   sendAgentMessage(message, conversationId)
  */
-export async function getAgentBriefing({
-  timezone,
-  locale,
-} = {}) {
-  const params = new URLSearchParams();
+export async function sendAgentMessage(
+  message,
+  conversationId = null,
+) {
+  const timezone =
+    Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 
-  params.set(
-    "timezone",
-    timezone ||
-      Intl.DateTimeFormat().resolvedOptions().timeZone ||
-      "UTC",
-  );
+  const locale =
+    navigator.language || "en-US";
 
-  params.set(
-    "locale",
-    locale ||
-      navigator.language ||
-      "en",
-  );
+  const payload = {
+    message,
+    timezone,
+    locale,
+  };
 
-  const response = await api.get(
-    `${AGENT_BASE}/briefing?${params.toString()}`,
-  );
+  if (conversationId) {
+    payload.conversation_id = conversationId;
+  }
 
-  return response.data;
-}
+  return agentRequest("/agent/chat", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+};
 
 /**
- * Execute an approved Agent action.
- *
- * This should only be called after the UI has received an explicit
- * confirmation from the employer.
- *
- * @param {Object} action
- * @returns {Promise<Object>}
+ * Execute an Agent action after confirmation.
  */
-export async function executeAgentAction(action) {
-  const response = await api.post(
-    `${AGENT_BASE}/actions/execute`,
-    action,
-  );
-
-  return response.data;
-}
+export async function executeAgentAction(token) {
+  return agentRequest("/actions/execute", {
+    method: "POST",
+    body: JSON.stringify({
+      confirmation_token: token,
+    }),
+  });
+};
 
 /**
- * Send audio to Ehral Intelligence.
- *
- * @param {FormData} formData
- * @returns {Promise<Object>}
+ * Fetch the Agent's business briefing.
+ */
+export async function fetchAgentBriefing() {
+  const timezone =
+    Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+
+  const locale =
+    navigator.language || "en-US";
+
+  const params = new URLSearchParams({
+    timezone,
+    locale,
+  });
+
+  return agentRequest(`/agent/briefing?${params.toString()}`, {
+    method: "GET",
+  });
+};
+
+/**
+ * Send voice/transcript input through the same Agent conversation path.
  */
 export async function sendAgentVoice(formData) {
-  const response = await api.post(
-    `${AGENT_BASE}/voice/chat`,
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    },
-  );
+  const token = getAuthToken();
 
-  return response.data;
-}
+  return fetch(`${AGENT_BASE_URL}/agent/voice/chat`, {
+    method: "POST",
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: formData,
+  }).then(async (response) => {
+    let data = null;
+
+    try {
+      data = await response.json();
+    } catch {
+      data = null;
+    }
+
+    if (!response.ok) {
+      const message =
+        data?.detail ||
+        data?.message ||
+        data?.error ||
+        `Voice request failed (${response.status})`;
+
+      const error = new Error(message);
+      error.status = response.status;
+      error.data = data;
+      throw error;
+    }
+
+    return data;
+  });
+};
 
 /**
  * Generate an image through Ehral Intelligence.
- *
- * @param {Object} payload
- * @returns {Promise<Object>}
  */
 export async function generateAgentImage(payload) {
-  const response = await api.post(
-    `${AGENT_BASE}/image`,
-    payload,
-  );
+  return agentRequest("/agent/image", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+};
 
-  return response.data;
-}
-
-/**
- * Safely determine whether an API error means the current account
- * is not authorized to use Ehral Intelligence.
- *
- * @param {unknown} error
- * @returns {boolean}
- */
-export function isAgentForbiddenError(error) {
-  return error?.response?.status === 403;
-}
-
-/**
- * Safely determine whether the Agent service is temporarily unavailable.
- *
- * @param {unknown} error
- * @returns {boolean}
- */
-export function isAgentUnavailableError(error) {
-  const status = error?.response?.status;
-
-  return (
-    status === 502 ||
-    status === 503 ||
-    status === 504
-  );
-}
+export default {
+  sendAgentMessage,
+  executeAgentAction,
+  fetchAgentBriefing,
+  sendAgentVoice,
+  generateAgentImage,
+};
