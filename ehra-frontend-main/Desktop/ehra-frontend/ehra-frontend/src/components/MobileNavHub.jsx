@@ -2,19 +2,19 @@ import { useEffect, useMemo, useState } from "react";
 import styles from "./MobileNavHub.module.css";
 
 const employerPeople = [
-  { key: "Workforce", label: "Employees", icon: "ti-users", description: "View and manage your workforce." },
-  { key: "Departments", label: "Departments", icon: "ti-building", description: "Organise teams and department heads." },
-  { key: "Branches", label: "Branches", icon: "ti-building-store", description: "Manage your business locations." },
-  { key: "Profile Edits", label: "Profile Edits", icon: "ti-user-edit", description: "Review requested employee changes." },
+  { key: "Workforce", label: "Employees", icon: "ti-users", description: "Employees and roles." },
+  { key: "Departments", label: "Departments", icon: "ti-building", description: "Teams and department heads." },
+  { key: "Branches", label: "Branches", icon: "ti-building-store", description: "Locations and teams." },
+  { key: "Profile Edits", label: "Profile Edits", icon: "ti-user-edit", description: "Changes awaiting review." },
 ];
 
 const employerOperations = [
-  { key: "Attendance", label: "Attendance", icon: "ti-calendar-check", description: "See who is present, late or absent." },
-  { key: "Leave", label: "Leave", icon: "ti-calendar-event", description: "Review requests and manage time off." },
-  { key: "Payroll", label: "Payroll", icon: "ti-cash-banknote", description: "Run and review employee payroll." },
-  { key: "Penalty", label: "Penalty", icon: "ti-coins", description: "Review attendance-related deductions." },
-  { key: "Reports", label: "Reports", icon: "ti-chart-bar", description: "Turn business records into reports." },
-  { key: "QR Code", label: "QR Code", icon: "ti-qrcode", description: "Access your attendance QR tools." },
+  { key: "Attendance", label: "Attendance", icon: "ti-calendar-check", description: "Presence and attendance." },
+  { key: "Leave", label: "Leave", icon: "ti-calendar-event", description: "Requests and time off." },
+  { key: "Payroll", label: "Payroll", icon: "ti-cash-banknote", description: "Pay, review and reconcile." },
+  { key: "Penalty", label: "Penalty", icon: "ti-coins", description: "Attendance deductions." },
+  { key: "Reports", label: "Reports", icon: "ti-chart-bar", description: "Reports and insights." },
+  { key: "QR Code", label: "QR Code", icon: "ti-qrcode", description: "Attendance QR tools." },
 ];
 
 const employeePeople = [
@@ -138,9 +138,10 @@ export default function MobileNavHub({
           <>
             <div className={styles.sheetHandle} />
             <div className={styles.sheetHeader}>
-              <div>
+              <div className={styles.sheetHeaderCopy}>
                 <span className={styles.eyebrow}>{hub === "More" ? "EHRAL" : hub.toUpperCase()}</span>
                 <h2>{hub === "People" ? "People" : hub === "Operations" ? "Operations" : "More"}</h2>
+                <p>{hub === "People" ? "Keep your people organised." : hub === "Operations" ? "Run the work that matters." : "Everything else, in one place."}</p>
               </div>
               <button className={styles.closeButton} type="button" onClick={() => setHub(null)} aria-label="Close menu">
                 <i className="ti ti-x" aria-hidden="true" />
@@ -213,7 +214,7 @@ function NavButton({ icon, label, active, badge, onClick }) {
 
 function NavRow({ item, badge, active, onClick }) {
   return (
-    <button type="button" className={`${styles.itemRow} ${active ? styles.itemActive : ""}`} onClick={onClick}>
+    <button type="button" className={`${styles.itemRow} ${active ? styles.itemActive : ""}`} onClick={onClick} aria-current={active ? "page" : undefined}>
       <span className={styles.iconBox}><i className={`ti ${item.icon}`} aria-hidden="true" /></span>
       <span className={styles.itemCopy}><strong>{item.label}</strong><small>{item.description}</small></span>
       {badge > 0 && <span className={styles.rowBadge}>{badge > 99 ? "99+" : badge}</span>}

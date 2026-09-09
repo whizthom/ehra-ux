@@ -1456,8 +1456,104 @@
 
     .todaysPulseMobile {
         display: block;
-        margin-bottom: 4px;
+        margin-bottom: 2px;
     }
+
+    /* Mobile attention rail: intentionally separate from Today's Pulse.
+       It surfaces only real, actionable items and stays compact. */
+    .mobileAttention {
+        display: block;
+        padding: 2px 0 2px;
+    }
+
+    .mobileAttentionHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin: 2px 2px 8px;
+    }
+
+    .mobileSectionEyebrow {
+        display: block;
+        margin-bottom: 3px;
+        color: var(--accent);
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: .14em;
+    }
+
+    .mobileAttentionHeader h2 {
+        margin: 0;
+        color: var(--text-primary);
+        font-size: 18px;
+        line-height: 1.1;
+        letter-spacing: -.035em;
+    }
+
+    .mobileAttentionCount {
+        min-width: 26px;
+        height: 26px;
+        padding: 0 7px;
+        display: grid;
+        place-items: center;
+        border-radius: 999px;
+        background: var(--bg-soft-accent);
+        color: var(--accent);
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .mobileAttentionList {
+        display: grid;
+        gap: 7px;
+    }
+
+    .mobileAttentionItem {
+        width: 100%;
+        min-height: 58px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        background: var(--bg-surface);
+        color: var(--text-primary);
+        text-align: left;
+        font: inherit;
+        cursor: pointer;
+        box-shadow: 0 2px 10px rgba(15, 30, 25, .025);
+        transition: transform .16s ease, border-color .16s ease, background .16s ease;
+    }
+
+    .mobileAttentionItem:active { transform: scale(.99); }
+
+    .mobileAttentionIcon {
+        width: 36px;
+        height: 36px;
+        flex: 0 0 36px;
+        display: grid;
+        place-items: center;
+        border-radius: 11px;
+        font-size: 16px;
+    }
+
+    .mobileAttentionBrand { background: var(--bg-soft-accent); color: var(--accent); }
+    .mobileAttentionWarning { background: var(--warning-bg); color: var(--warning-text); }
+    .mobileAttentionDanger { background: var(--danger-bg); color: var(--danger-text); }
+
+    .mobileAttentionItem > span:nth-child(2) {
+        min-width: 0;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .mobileAttentionItem strong { font-size: 12px; line-height: 1.2; }
+    .mobileAttentionItem small { color: var(--text-secondary); font-size: 10px; line-height: 1.2; }
+    .mobileAttentionItem > .ti:last-child { color: var(--text-secondary); font-size: 15px; }
 
     /* Quick actions loses its card chrome and title on phones so the
        pill row reads as a native top filter strip (WhatsApp-style
@@ -1480,7 +1576,13 @@
     }
 
     .qaPanel .qaGrid {
-        padding: 2px 16px 4px;
+        padding: 0 0 2px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        overflow: visible;
+        -webkit-mask-image: none;
+        mask-image: none;
     }
 
     /* Notification bell already surfaces this feed on phones. */
@@ -1565,20 +1667,22 @@
     }
 
     .qaBtn {
-        flex: 0 0 auto;
-        flex-direction: row;
-        height: 42px;
-        padding: 0 16px;
-        border-radius: 999px;
+        min-width: 0;
+        width: 100%;
+        height: 52px;
+        padding: 0 10px;
+        border-radius: 15px;
         white-space: nowrap;
-        box-shadow: 0 1px 2px rgba(15, 30, 25, 0.04);
-        /* Cut the last pill short so its neighbour visibly peeks in —
-           a stronger "there's more" cue than a full-width last item. */
+        box-shadow: none;
+        justify-content: flex-start;
+        border: 1px solid var(--border-color);
+        background: var(--bg-surface);
+        color: var(--text-primary);
+        font-size: 10px;
+        font-weight: 600;
     }
 
-    .qaGrid>.qaBtn:last-child {
-        margin-right: 40px;
-    }
+    .qaBtn:active { transform: scale(.985); }
 
     /* "Underneath line" scroll indicator — the thumb's width and position
        genuinely reflect how much content there is and how far through
@@ -1586,7 +1690,7 @@
        thin, flat, muted — so it reads as a small "this scrolls" cue
        rather than competing with the pills for attention. */
     .qaScrollTrack {
-        display: block;
+        display: none;
         position: relative;
         height: 2.5px;
         margin: 8px 16px 0;

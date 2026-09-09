@@ -1625,6 +1625,59 @@ export default function Dashboard() {
                 />
               </div>
 
+              {/* Mobile attention rail. This intentionally sits outside Today's Pulse,
+                  which is a protected product surface and must not be modified. */}
+              {isMobile && (pendingLeaves.length > 0 || pendingProfileEdits.length > 0 || messagesUnread > 0 || pulseLate > 0 || pulseAbsent > 0) && (
+                <section className={styles.mobileAttention} aria-label="Needs attention">
+                  <div className={styles.mobileAttentionHeader}>
+                    <div>
+                      <span className={styles.mobileSectionEyebrow}>TODAY</span>
+                      <h2>Needs attention</h2>
+                    </div>
+                    <span className={styles.mobileAttentionCount}>
+                      {[pulseAbsent > 0, pulseLate > 0, pendingLeaves.length > 0, pendingProfileEdits.length > 0, messagesUnread > 0].filter(Boolean).length}
+                    </span>
+                  </div>
+                  <div className={styles.mobileAttentionList}>
+                    {pulseAbsent > 0 && (
+                      <button type="button" onClick={() => setActiveNav("Attendance")} className={styles.mobileAttentionItem}>
+                        <span className={`${styles.mobileAttentionIcon} ${styles.mobileAttentionDanger}`}><i className="ti ti-user-x" aria-hidden="true" /></span>
+                        <span><strong>{pulseAbsent} {pulseAbsent === 1 ? "employee" : "employees"} absent</strong><small>Review attendance</small></span>
+                        <i className="ti ti-chevron-right" aria-hidden="true" />
+                      </button>
+                    )}
+                    {pulseLate > 0 && (
+                      <button type="button" onClick={() => setActiveNav("Attendance")} className={styles.mobileAttentionItem}>
+                        <span className={`${styles.mobileAttentionIcon} ${styles.mobileAttentionWarning}`}><i className="ti ti-clock" aria-hidden="true" /></span>
+                        <span><strong>{pulseLate} {pulseLate === 1 ? "late arrival" : "late arrivals"}</strong><small>Review attendance</small></span>
+                        <i className="ti ti-chevron-right" aria-hidden="true" />
+                      </button>
+                    )}
+                    {pendingLeaves.length > 0 && (
+                      <button type="button" onClick={() => setActiveNav("Leave")} className={styles.mobileAttentionItem}>
+                        <span className={`${styles.mobileAttentionIcon} ${styles.mobileAttentionBrand}`}><i className="ti ti-calendar-event" aria-hidden="true" /></span>
+                        <span><strong>{pendingLeaves.length} leave {pendingLeaves.length === 1 ? "request" : "requests"}</strong><small>Waiting for review</small></span>
+                        <i className="ti ti-chevron-right" aria-hidden="true" />
+                      </button>
+                    )}
+                    {pendingProfileEdits.length > 0 && (
+                      <button type="button" onClick={() => setActiveNav("Profile Edits")} className={styles.mobileAttentionItem}>
+                        <span className={`${styles.mobileAttentionIcon} ${styles.mobileAttentionBrand}`}><i className="ti ti-user-edit" aria-hidden="true" /></span>
+                        <span><strong>{pendingProfileEdits.length} profile {pendingProfileEdits.length === 1 ? "change" : "changes"}</strong><small>Waiting for review</small></span>
+                        <i className="ti ti-chevron-right" aria-hidden="true" />
+                      </button>
+                    )}
+                    {messagesUnread > 0 && (
+                      <button type="button" onClick={() => setActiveNav("Messages")} className={styles.mobileAttentionItem}>
+                        <span className={`${styles.mobileAttentionIcon} ${styles.mobileAttentionBrand}`}><i className="ti ti-message-circle" aria-hidden="true" /></span>
+                        <span><strong>{messagesUnread} unread {messagesUnread === 1 ? "message" : "messages"}</strong><small>Open messages</small></span>
+                        <i className="ti ti-chevron-right" aria-hidden="true" />
+                      </button>
+                    )}
+                  </div>
+                </section>
+              )}
+
               {/* Stats */}
               <div className={styles.statsGrid}>
                 {[
