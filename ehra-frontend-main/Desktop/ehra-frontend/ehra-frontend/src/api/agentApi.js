@@ -1,107 +1,160 @@
-import axios from "axios";
-import { getAccessToken, refreshAccessToken } from "./authApi";
-
-// Same convention as authApi.js's API_BASE_URL: "/agent-api" is proxied to
-// the Ehral Agent backend in dev (see vite.config.js); a production deploy
-// sets VITE_AGENT_API_BASE_URL to wherever that service is actually
-// running (it is a SEPARATE deployment from the Ehra backend — see
-// ehral-agent/ARCHITECTURE.md).
-export const AGENT_API_BASE_URL =
-  import.meta.env.VITE_AGENT_API_BASE_URL || "/agent-api";
-
-const agentClient = axios.create({
-  baseURL: AGENT_API_BASE_URL,
-  // Worst case a turn stacks a business-data tool call (Ehra-api,
-  // EhralIntegration's own 15s timeout) followed by an AI provider call
-  // (AI_REQUEST_TIMEOUT_SECONDS, 30s default) — up to ~45s before the
-  // backend itself gives up, longer than the 15s used for ordinary CRUD
-  // calls. 60s gives that a safety margin instead of racing it, so a
-  // slow-but-legitimate turn doesn't surface as a misleading "check your
-  // connection" network error.
-  timeout: 60000,
-});
-
-// Every Ehral Agent request needs both an Authorization header (the
-// SAME access token Ehra itself issues — the Agent verifies it directly,
-// see ehral-agent's auth/jwt_verifier.py) and X-Application: "ehral" so
-// the Agent knows which connected application's secret to verify it
-// against. Read fresh on every request rather than once at import time,
-// since refreshAccessToken() may have rotated it since the last call.
-agentClient.interceptors.request.use((config) => {
-  const token = getAccessToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  config.headers["X-Application"] = "ehral";
-  return config;
-});
-
-// A single-retry-after-refresh dance, deliberately simpler than
-// authApi.js's own interceptor (no request queueing for concurrent
-// calls) — the agent panel only ever has one in-flight request at a
-// time (the send button is disabled while loading), so the added
-// complexity of a shared queue isn't needed here.
-let refreshing = null;
-
-agentClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const original = error.config;
-    if (error.response?.status === 401 && !original?._retried) {
-      original._retried = true;
-      try {
-        refreshing = refreshing || refreshAccessToken();
-        await refreshing;
-        refreshing = null;
-        return agentClient(original);
-      } catch {
-        refreshing = null;
-      }
-    }
-    return Promise.reject(error);
-  },
-);
+import api from "./api";
 
 /**
- * Sends one chat message and returns the Agent's reply. `conversationId`
- * is omitted on the first message of a session; the Agent creates one
- * and every subsequent call should pass it back to continue the same
- * thread (see ehral-agent's POST /api/v1/agent/chat contract).
+ * Ehral Intelligence API
+ *
+ * Employer-only Agent client.
+ *
+ * The backend remains the final authority for authorization.
+ * The frontend should never assume that hiding the Agent is sufficient
+ * protection.
  */
-export async function sendAgentMessage(message, conversationId) {
-  const { data } = await agentClient.post("/agent/chat", {
+
+const AGENT_BASE = "/agent";
+
+/**
+ * Send a message to Ehral Intelligence.
+ *
+ * @param {Object} payload
+ * @param {string} payload.message
+ * @param {Array} [payload.history]
+ * @param {string} [payload.timezone]
+ * @param {string} [payload.locale]
+ * @returns {Promise<Object>}
+ */
+export async function sendAgentMessage({
+  message,
+  history = [],
+  timezone,
+  locale,
+}) {
+  const response = await api.post(`${AGENT_BASE}/chat`, {
     message,
-    conversation_id: conversationId || undefined,
+    history,
+    timezone:
+      timezone ||
+      Intl.DateTimeFormat().resolvedOptions().timeZone ||
+      "UTC",
+    locale:
+      locale ||
+      navigator.language ||
+      "en",
   });
-  return data;
+
+  return response.data;
 }
 
 /**
- * Confirms and executes a pending sensitive action (e.g. approving a
- * leave request) using the token the chat response returned in
- * `pending_confirmation.token`. This is a DELIBERATELY separate call
- * from sendAgentMessage — the chat endpoint itself can never execute a
- * mutation, only describe and offer to (see ehral-agent's Phase 4 design
- * notes); only this explicit call, backed by the person tapping
- * "Confirm", can.
+ * Retrieve the employer's Agent briefing.
+ *
+ * @param {Object} [options]
+ * @param {string} [options.timezone]
+ * @param {string} [options.locale]
+ * @returns {Promise<Object>}
  */
-export async function executeAgentAction(confirmationToken) {
-  const { data } = await agentClient.post("/actions/execute", {
-    confirmation_token: confirmationToken,
-  });
-  return data;
+export async function getAgentBriefing({
+  timezone,
+  locale,
+} = {}) {
+  const params = new URLSearchParams();
+
+  params.set(
+    "timezone",
+    timezone ||
+      Intl.DateTimeFormat().resolvedOptions().timeZone ||
+      "UTC",
+  );
+
+  params.set(
+    "locale",
+    locale ||
+      navigator.language ||
+      "en",
+  );
+
+  const response = await api.get(
+    `${AGENT_BASE}/briefing?${params.toString()}`,
+  );
+
+  return response.data;
 }
 
 /**
- * Optional: today's proactive briefing (greeting + insights). Used to
- * seed the panel with something useful the first time it's opened in a
- * session, before the person has typed anything. Failure here is
- * non-fatal — the panel still works as a plain chat if this fails, so
- * callers should swallow errors rather than blocking on it.
+ * Execute an approved Agent action.
+ *
+ * This should only be called after the UI has received an explicit
+ * confirmation from the employer.
+ *
+ * @param {Object} action
+ * @returns {Promise<Object>}
  */
-export async function fetchAgentBriefing() {
-  const { data } = await agentClient.get("/agent/briefing");
-  return data;
+export async function executeAgentAction(action) {
+  const response = await api.post(
+    `${AGENT_BASE}/actions/execute`,
+    action,
+  );
+
+  return response.data;
 }
 
-export default agentClient;
+/**
+ * Send audio to Ehral Intelligence.
+ *
+ * @param {FormData} formData
+ * @returns {Promise<Object>}
+ */
+export async function sendAgentVoice(formData) {
+  const response = await api.post(
+    `${AGENT_BASE}/voice/chat`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    },
+  );
+
+  return response.data;
+}
+
+/**
+ * Generate an image through Ehral Intelligence.
+ *
+ * @param {Object} payload
+ * @returns {Promise<Object>}
+ */
+export async function generateAgentImage(payload) {
+  const response = await api.post(
+    `${AGENT_BASE}/image`,
+    payload,
+  );
+
+  return response.data;
+}
+
+/**
+ * Safely determine whether an API error means the current account
+ * is not authorized to use Ehral Intelligence.
+ *
+ * @param {unknown} error
+ * @returns {boolean}
+ */
+export function isAgentForbiddenError(error) {
+  return error?.response?.status === 403;
+}
+
+/**
+ * Safely determine whether the Agent service is temporarily unavailable.
+ *
+ * @param {unknown} error
+ * @returns {boolean}
+ */
+export function isAgentUnavailableError(error) {
+  const status = error?.response?.status;
+
+  return (
+    status === 502 ||
+    status === 503 ||
+    status === 504
+  );
+}

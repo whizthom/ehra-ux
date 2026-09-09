@@ -668,7 +668,7 @@
         inset: 0;
         z-index: 1000;
         min-height: 100dvh;
-        width: 100vw;
+        width: 100%;
     }
 
     .workspaceHeader {

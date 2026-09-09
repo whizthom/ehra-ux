@@ -45,7 +45,7 @@ function AgentRichText({ content }) {
       continue;
     }
 
-    const label = line.replace(/:$/, "");
+    const label = line.replace(/:$/, "").replace(/^\*\*(.*?)\*\*$/, "$1");
     const isLabel =
       label.length <= 52 &&
       /^(Business Snapshot|Business Identity|Contact and Verification|Workforce|Attendance|Leave|Payroll|Financials|Operations|Assessment|Recommended Actions|Recommendations|Observations|Next Steps|Priority Actions|Key Findings|Management Overview|What Stands Out|About Ehral|Founder Information|Business Pulse|Attention Required|Suggested Next Steps)$/i.test(
@@ -128,19 +128,38 @@ function getSuggestions(content) {
   if (
     text.includes("attendance") ||
     text.includes("absent") ||
-    text.includes("present")
+    text.includes("present") ||
+    text.includes("late")
   ) {
     return [
-      "Would you like me to show who is absent and why?",
-      "Would you like me to compare attendance across departments?",
-      "Would you like me to suggest the first issue to investigate?",
+      {
+        label: "Show the attendance records for these employees",
+        query: "Show the attendance records for these employees.",
+      },
+      {
+        label: "Compare attendance by department",
+        query: "Compare attendance by department.",
+      },
+      {
+        label: "Check approved leave for these employees",
+        query: "Check approved leave for these employees.",
+      },
     ];
   }
   if (text.includes("leave")) {
     return [
-      "Would you like me to show pending leave requests?",
-      "Would you like me to break leave down by department?",
-      "Would you like me to check who is expected back soon?",
+      {
+        label: "Show pending leave requests",
+        query: "Show pending leave requests.",
+      },
+      {
+        label: "Show who is currently on leave",
+        query: "Show who is currently on leave.",
+      },
+      {
+        label: "Compare leave activity by department",
+        query: "Compare leave activity by department.",
+      },
     ];
   }
   if (
@@ -149,27 +168,50 @@ function getSuggestions(content) {
     text.includes("salary")
   ) {
     return [
-      "Would you like me to compare the latest payroll period?",
-      "Would you like me to show the largest deductions?",
-      "Would you like me to explain what the payroll figures suggest?",
+      {
+        label: "Show the latest payroll figures",
+        query: "Show the latest payroll figures.",
+      },
+      {
+        label: "Show the employees with the largest deductions",
+        query: "Show the employees with the largest payroll deductions.",
+      },
+      {
+        label: "Explain what the payroll figures indicate",
+        query: "Explain what the payroll figures indicate.",
+      },
     ];
   }
   if (
-    text.includes("workforce") ||
     text.includes("employee") ||
-    text.includes("department") ||
-    text.includes("branch")
+    text.includes("staff") ||
+    text.includes("workforce")
   ) {
     return [
-      "Would you like me to identify the workforce areas needing attention?",
-      "Would you like me to compare departments or branches?",
-      "Would you like me to turn this into practical next steps?",
+      {
+        label: "Show the workforce breakdown",
+        query: "Show the workforce breakdown.",
+      },
+      {
+        label: "Compare employees by department",
+        query: "Compare employees by department.",
+      },
+      {
+        label: "Show which workforce areas need attention",
+        query: "Show which workforce areas need attention.",
+      },
     ];
   }
   return [
-    "Would you like me to go deeper into this?",
-    "Would you like me to identify what deserves your attention first?",
-    "Would you like practical next steps based on this?",
+    {
+      label: "Show the biggest operational issue",
+      query: "Show the biggest operational issue.",
+    },
+    {
+      label: "Give me the most important next action",
+      query: "Give me the most important next action.",
+    },
+    { label: "Go deeper into this", query: "Go deeper into this." },
   ];
 }
 
@@ -222,7 +264,20 @@ function AgentWorkspace({ onClose }) {
   const briefingFetchedRef = useRef(false);
 
   useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") onClose?.();
+    };
+    window.addEventListener("keydown", onKeyDown);
     inputRef.current?.focus();
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [onClose]);
+
+  useEffect(() => {
     if (!briefingFetchedRef.current) {
       briefingFetchedRef.current = true;
       fetchAgentBriefing()
@@ -302,7 +357,13 @@ function AgentWorkspace({ onClose }) {
         appendMessage(
           "assistant",
           data.message.content,
-          { usedBusinessData: data.used_business_data },
+          {
+            usedBusinessData: data.used_business_data,
+            suggestions:
+              Array.isArray(data.suggestions) && data.suggestions.length
+                ? data.suggestions
+                : getSuggestions(data.message.content),
+          },
           true,
         );
         if (data.pending_confirmation)
@@ -353,6 +414,40 @@ function AgentWorkspace({ onClose }) {
     );
     setPendingConfirmation(null);
   }, [appendMessage]);
+
+  const handleSuggestion = useCallback(
+    async (suggestion) => {
+      if (!suggestion?.query || loading || typingMessageId) return;
+      setPendingConfirmation(null);
+      setLoading(true);
+      try {
+        const data = await sendAgentMessage(
+          suggestion.query,
+          conversationIdRef.current,
+        );
+        conversationIdRef.current = data.conversation_id;
+        appendMessage(
+          "assistant",
+          data.message.content,
+          {
+            usedBusinessData: data.used_business_data,
+            suggestions:
+              Array.isArray(data.suggestions) && data.suggestions.length
+                ? data.suggestions
+                : getSuggestions(data.message.content),
+          },
+          true,
+        );
+        if (data.pending_confirmation)
+          setPendingConfirmation(data.pending_confirmation);
+      } catch (err) {
+        appendMessage("assistant", describeError(err), { isError: true }, true);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [loading, typingMessageId, appendMessage],
+  );
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -488,14 +583,26 @@ function AgentWorkspace({ onClose }) {
                               I can take this one step further
                             </span>
                             <div className={styles.suggestionList}>
-                              {getSuggestions(m.content).map((suggestion) => (
+                              {(m.suggestions?.length
+                                ? m.suggestions
+                                : getSuggestions(m.content)
+                              ).map((suggestion) => (
                                 <button
-                                  key={suggestion}
+                                  key={suggestion.label || suggestion}
                                   type="button"
-                                  onClick={() => handleSend(suggestion)}
+                                  onClick={() =>
+                                    handleSuggestion(
+                                      suggestion.label
+                                        ? suggestion
+                                        : {
+                                            label: suggestion,
+                                            query: suggestion,
+                                          },
+                                    )
+                                  }
                                   disabled={loading || typingMessageId}
                                 >
-                                  {suggestion}
+                                  <span>{suggestion.label || suggestion}</span>
                                   <i className="ti ti-arrow-right" />
                                 </button>
                               ))}
