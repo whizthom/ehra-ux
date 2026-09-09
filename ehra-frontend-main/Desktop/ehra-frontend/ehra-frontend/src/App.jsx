@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import ScrollRestoration from "./components/ScrollRestoration";
@@ -47,6 +47,18 @@ const EmployeeProfilePage = lazy(() => import("./pages/EmployeeProfilePage"));
 const MyAccountsPage = lazy(() => import("./pages/MyAccountsPage"));
 const Support = lazy(() => import("./pages/Support"));
 
+function RootEntry() {
+  const { user } = useAuth();
+
+  if (!user) return <Register />;
+  if (user.needsContextSelection)
+    return <Navigate to="/select-workspace" replace />;
+  if (user.role === "ROLE_ADMIN") return <Navigate to="/dashboard" replace />;
+  if (user.role === "ROLE_EMPLOYEE")
+    return <Navigate to="/my-dashboard" replace />;
+  return <Register />;
+}
+
 function App() {
   return (
     <AuthProvider>
@@ -61,7 +73,7 @@ function App() {
           <Routes>
             {/* PUBLIC ROUTES */}
 
-            <Route path="/" element={<Register />} />
+            <Route path="/" element={<RootEntry />} />
 
             <Route path="/complete-setup" element={<CompleteSetup />} />
 

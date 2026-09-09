@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import styles from "./UpdateToast.module.css";
+import { clearApiCache } from "./clearApiCache";
 
 /**
  * Registers the service worker and surfaces two states the rest of the
@@ -25,125 +26,55 @@ import styles from "./UpdateToast.module.css";
  * new code and not the code this deploy was meant to replace.
  */
 
-// If "a new version is available" fires again within this many ms of a
-// reload WE just triggered, treat it as noise rather than a second real
-// deploy landing within seconds of the first — see the effect below for
-// why that happens.
-const POST_RELOAD_GRACE_MS = 15000;
-const JUST_UPDATED_KEY = "ehral:justUpdatedAt";
-
 export default function UpdateToast() {
-  const registrationRef = useRef(null);
+  const updateTimerRef = useRef(null);
+
+  useEffect(() => {
+    clearApiCache();
+    return () => clearInterval(updateTimerRef.current);
+  }, []);
 
   const {
     offlineReady: [offlineReady, setOfflineReady],
     needRefresh: [needRefresh, setNeedRefresh],
+    updateServiceWorker,
   } = useRegisterSW({
     onRegisteredSW(_url, registration) {
-      registrationRef.current = registration || null;
-      // Poll for a new deployment periodically — service workers only
-      // check for updates on navigation by default, which is too rare
-      // for a long-lived, rarely-refreshed dashboard tab.
+      // Check periodically for a new deployment without changing the
+      // currently running application. The user decides when to reload.
       if (!registration) return;
-      setInterval(
+      clearInterval(updateTimerRef.current);
+      updateTimerRef.current = setInterval(
         () => {
           registration.update().catch(() => {});
         },
         60 * 60 * 1000,
-      ); // hourly is plenty; avoids hammering the CDN
+      );
     },
   });
 
-  // A full page reload destroys all component state, so if this toast
-  // shows up again right after the user clicked "Reload now", it isn't
-  // this same component instance somehow surviving — it's a fresh
-  // needRefresh=true firing moments after the fresh page loads. In
-  // practice that's almost always a stale re-detection of the very
-  // update we just applied (e.g. a CDN with multiple edge nodes each
-  // caching their own slightly-out-of-sync copy of sw.js), not a second
-  // real deploy landing within seconds of the first. sessionStorage
-  // (not a JS variable) is what lets this survive the reload itself.
-  useEffect(() => {
-    if (!needRefresh) return;
-    let justUpdatedAt;
-    try {
-      justUpdatedAt = Number(sessionStorage.getItem(JUST_UPDATED_KEY) || 0);
-    } catch {
-      return;
-    }
-    if (justUpdatedAt && Date.now() - justUpdatedAt < POST_RELOAD_GRACE_MS) {
-      try {
-        sessionStorage.removeItem(JUST_UPDATED_KEY);
-      } catch {
-        // Non-fatal — worst case the grace window is checked once more
-        // than necessary.
-      }
-      setNeedRefresh(false);
-    }
-  }, [needRefresh, setNeedRefresh]);
-
   const [reloading, setReloading] = useState(false);
-  const fallbackTimer = useRef(null);
-  const reloadedRef = useRef(false);
-
-  const doReload = () => {
-    if (reloadedRef.current) return;
-    reloadedRef.current = true;
-    clearTimeout(fallbackTimer.current);
-    window.location.reload();
-  };
-
-  // Listen for the browser's own signal that a new worker has taken
-  // control, rather than trusting a third-party helper's internal
-  // bookkeeping to still be valid by the time it fires. This is the
-  // same event the spec defines for exactly this purpose.
-  useEffect(() => {
-    if (!("serviceWorker" in navigator)) return;
-    navigator.serviceWorker.addEventListener("controllerchange", doReload);
-    return () =>
-      navigator.serviceWorker.removeEventListener("controllerchange", doReload);
-  }, []);
 
   const close = () => {
     setOfflineReady(false);
     setNeedRefresh(false);
   };
 
-  // Drives the handoff directly against the raw Service Worker API
-  // instead of going through vite-plugin-pwa's updateServiceWorker()
-  // helper — that helper's reload path depends on `registration.waiting`
-  // still pointing at a real worker AND on its own controllerchange
-  // listener still being attached by the time this fires; either one
-  // going stale between the toast appearing and the click makes it a
-  // silent no-op with no error. Doing it ourselves means there's no
-  // hidden step we can't see or account for:
-  //
-  //   1. If a waiting worker exists, tell it to activate.
-  //   2. The controllerchange listener above reloads once that
-  //      activation actually happens.
-  //   3. Regardless of either of those, force a reload after 1.5s no
-  //      matter what — the worst case is one slightly-delayed reload
-  //      instead of a button that does nothing.
   const handleReload = async () => {
     if (reloading) return;
     setReloading(true);
     try {
-      sessionStorage.setItem(JUST_UPDATED_KEY, String(Date.now()));
+      // vite-plugin-pwa's prompt workflow is designed for this exact
+      // interaction: activate the waiting worker and reload once the
+      // updated worker is ready. Crucially, nothing reloads merely because
+      // a service worker takes control during a normal app launch.
+      await updateServiceWorker(true);
     } catch {
-      // Non-fatal — worst case the post-reload grace check is skipped
-      // and a stale re-detection (if one happens) shows the toast again
-      // instead of being silently suppressed.
-    }
-    fallbackTimer.current = setTimeout(doReload, 1500);
-
-    try {
-      let registration = registrationRef.current;
-      if (!registration && "serviceWorker" in navigator) {
-        registration = await navigator.serviceWorker.getRegistration();
-      }
-      registration?.waiting?.postMessage({ type: "SKIP_WAITING" });
-    } catch {
-      // Fall through to the timer below regardless.
+      // If the worker disappears between detection and the user's click,
+      // a normal browser reload is the safest fallback.
+      window.location.reload();
+    } finally {
+      setReloading(false);
     }
   };
 

@@ -3,38 +3,36 @@ import styles from "./InstallPrompt.module.css";
 
 const DISMISSED_KEY = "ehral:installPromptDismissed";
 
-/**
- * Detects whether the app is already running as an installed PWA.
- *
- * - `display-mode: standalone` covers Android/desktop Chrome, Edge, etc.
- * - `navigator.standalone` is Safari/iOS's own (non-standards) flag —
- *   iOS never fires `beforeinstallprompt` at all, so this is the only
- *   signal we get there.
- */
 function isRunningStandalone() {
   const mql = window.matchMedia?.("(display-mode: standalone)");
   return Boolean(mql?.matches) || Boolean(window.navigator.standalone);
 }
 
+function isIOSDevice() {
+  const platform = navigator.platform || "";
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+
 /**
- * Beautiful, dismissible "Install Ehral" card. Renders nothing until the
- * browser tells us installation is actually possible (`beforeinstallprompt`),
- * and never renders again once the app is installed — checked both at
- * mount (already installed) and on `appinstalled` (installed just now).
- *
- * Dismissing the card ("Not now") remembers that choice in localStorage
- * so it doesn't nag on every visit; it resets automatically once actually
- * installed, since at that point the app removes itself from the DOM
- * anyway and won't come back on `beforeinstallprompt` again.
+ * Shows the native install prompt where Chromium exposes it and a small
+ * manual-install guide on iPhone/iPad, where beforeinstallprompt is not
+ * exposed. The prompt is always dismissible and never blocks the app.
  */
 export default function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [visible, setVisible] = useState(false);
   const [installing, setInstalling] = useState(false);
+  const [ios, setIos] = useState(false);
 
   useEffect(() => {
     if (isRunningStandalone()) return;
     if (localStorage.getItem(DISMISSED_KEY) === "1") return;
+
+    const iosDevice = isIOSDevice();
+    setIos(iosDevice);
 
     const onBeforeInstallPrompt = (e) => {
       e.preventDefault();
@@ -50,15 +48,21 @@ export default function InstallPrompt() {
 
     window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
     window.addEventListener("appinstalled", onAppInstalled);
+
+    // iOS has no beforeinstallprompt event. Show the same dismissible card
+    // with the platform's manual Add to Home Screen instructions instead.
+    if (iosDevice) setVisible(true);
+
     return () => {
       window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
       window.removeEventListener("appinstalled", onAppInstalled);
     };
   }, []);
 
-  if (!visible || !deferredPrompt) return null;
+  if (!visible) return null;
 
   const handleInstall = async () => {
+    if (!deferredPrompt) return;
     setInstalling(true);
     try {
       deferredPrompt.prompt();
@@ -66,8 +70,6 @@ export default function InstallPrompt() {
       if (outcome === "accepted") {
         setVisible(false);
       } else {
-        // They saw the native prompt and said no — respect that like a
-        // dismissal so we don't immediately show our card again.
         localStorage.setItem(DISMISSED_KEY, "1");
         setVisible(false);
       }
@@ -90,7 +92,9 @@ export default function InstallPrompt() {
       <div className={styles.body}>
         <p className={styles.title}>Install Ehral</p>
         <p className={styles.subtitle}>
-          Add it to your home screen for a faster, full-screen experience.
+          {ios
+            ? "On iPhone or iPad, tap Share, then Add to Home Screen."
+            : "Add it to your home screen for a faster, full-screen experience."}
         </p>
       </div>
       <div className={styles.actions}>
@@ -102,14 +106,16 @@ export default function InstallPrompt() {
         >
           Not now
         </button>
-        <button
-          type="button"
-          className={styles.install}
-          onClick={handleInstall}
-          disabled={installing}
-        >
-          {installing ? "Installing…" : "Install"}
-        </button>
+        {!ios && (
+          <button
+            type="button"
+            className={styles.install}
+            onClick={handleInstall}
+            disabled={installing || !deferredPrompt}
+          >
+            {installing ? "Installing…" : "Install"}
+          </button>
+        )}
       </div>
     </div>
   );
