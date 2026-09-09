@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import {
   sendAgentMessage,
   executeAgentAction,
-  getAgentBriefing,
+  fetchAgentBriefing,
 } from "../../api/agentApi";
 import Logo from "../Logo";
 import styles from "./AiAgentWidget.module.css";
@@ -216,8 +216,9 @@ function getSuggestions(content) {
 }
 
 function describeError(err) {
-  const status = err?.response?.status;
-  const detail = err?.response?.data?.detail;
+  const status = err?.status ?? err?.response?.status;
+  const detail =
+    err?.data?.detail || err?.response?.data?.detail || err?.message;
   if (status === 402)
     return (
       detail ||
@@ -280,7 +281,7 @@ function AgentWorkspace({ onClose }) {
   useEffect(() => {
     if (!briefingFetchedRef.current) {
       briefingFetchedRef.current = true;
-      getAgentBriefing()
+      fetchAgentBriefing()
         .then((data) => {
           setGreeting(data?.greeting || null);
           setBriefingInsights(
