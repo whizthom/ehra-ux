@@ -50,7 +50,6 @@ export default function ThemeColorSync() {
   useEffect(() => {
     const color = PAGE_BG[theme] || PAGE_BG.light;
 
-    document.documentElement.style.colorScheme = theme;
     setMeta("theme-color", color);
 
     // Not a standard meta tag (no browser reads it), but Round 1 added

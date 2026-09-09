@@ -12,7 +12,6 @@
 ========================================================================= */
 
 :root {
-   color-scheme: light;
    /* Page / surfaces */
    --bg-page: #f0f4f3;
    --bg-sidebar: #0f6e56;
@@ -56,7 +55,6 @@
 }
 
 [data-theme="dark"] {
-   color-scheme: dark;
    /* Page / surfaces — WhatsApp's actual dark-mode blacks, not the
        Pulse card's green-black. The Pulse card keeps its own gold/green
        palette regardless (it's a deliberate "hero" widget), so this is
