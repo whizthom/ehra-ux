@@ -1,110 +1,352 @@
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client/dist/sockjs.js";
+import {
+  getAccessToken,
+  refreshAccessToken,
+  API_BASE_URL,
+} from "../api/authApi";
 
-const SOCKET_URL =
-  import.meta.env.VITE_SOCKET_URL ||
-  `${window.location.origin}/ws`;
+// One shared STOMP connection for the whole app — every open chat window,
+// the chat list, and the sidebar unread badge all subscribe through this
+// same client rather than each opening their own socket. This is the
+// "persistent WebSocket connection" section 1 of the spec asks for, plus
+// the reconnection/backoff/offline handling section 22 asks for.
+//
+// The backend authenticates the STOMP CONNECT frame itself (see
+// StompAuthChannelInterceptor) — the access token travels as a STOMP
+// header, since a browser WebSocket/SockJS connection can't carry a real
+// "Authorization" HTTP header the way axios requests can.
 
-let stompClient = null;
+const WS_URL =
+  (API_BASE_URL.startsWith("http")
+    ? API_BASE_URL.replace(/\/api\/?$/, "")
+    : "") + "/ws-messaging";
 
-export const connectMessagingSocket = ({
-  token,
-  onConnect,
-  onMessage,
-  onError,
-} = {}) => {
-  if (stompClient?.active) {
-    return stompClient;
-  }
+let client = null;
+let connectPromise = null;
 
-  stompClient = new Client({
-    webSocketFactory: () => new SockJS(SOCKET_URL),
+const topicSubscriptions = new Map();
+// destination -> { sub, handlers: Set }
 
-    connectHeaders: token
-      ? {
-          Authorization: `Bearer ${token}`,
-        }
-      : {},
+let userQueueSub = null;
+const userQueueHandlers = new Set();
 
-    reconnectDelay: 5000,
+const connectionListeners = new Set();
 
-    onConnect: (frame) => {
-      if (typeof onConnect === "function") {
-        onConnect(frame);
-      }
+let currentStatus = "disconnected";
+// "connecting" | "connected" | "disconnected"
+
+function setStatus(status) {
+  currentStatus = status;
+
+  connectionListeners.forEach((fn) => fn(status));
+}
+
+function buildClient(token) {
+  return new Client({
+    webSocketFactory: () => new SockJS(WS_URL),
+
+    connectHeaders: {
+      Authorization: `Bearer ${token}`,
     },
 
-    onStompError: (frame) => {
-      console.error("STOMP error:", frame);
+    reconnectDelay: 0,
+    // We drive reconnection ourselves so we can refresh the token first.
 
-      if (typeof onError === "function") {
-        onError(frame);
-      }
+    heartbeatIncoming: 10000,
+    heartbeatOutgoing: 10000,
+
+    debug: () => {},
+
+    onConnect: () => {
+      setStatus("connected");
+      resubscribeAll();
     },
 
-    onWebSocketError: (error) => {
-      console.error("WebSocket error:", error);
+    onStompError: () => {
+      setStatus("disconnected");
+      scheduleReconnect();
+    },
 
-      if (typeof onError === "function") {
-        onError(error);
-      }
+    onWebSocketClose: () => {
+      setStatus("disconnected");
+      scheduleReconnect();
     },
   });
+}
 
-  if (typeof onMessage === "function") {
-    stompClient.onUnhandledMessage = onMessage;
+let reconnectTimer = null;
+let reconnectAttempt = 0;
+
+function scheduleReconnect() {
+  if (reconnectTimer) return;
+
+  const delay = Math.min(
+    1000 * 2 ** reconnectAttempt,
+    15000
+  );
+
+  reconnectTimer = setTimeout(async () => {
+    reconnectTimer = null;
+    reconnectAttempt += 1;
+
+    try {
+      await connect();
+    } catch {
+      scheduleReconnect();
+    }
+  }, delay);
+}
+
+// Re-establish every topic/user subscription a caller previously asked
+// for. This makes reconnection invisible to the rest of the app:
+// components never need to re-subscribe themselves.
+
+function resubscribeAll() {
+  reconnectAttempt = 0;
+
+  for (const [destination, entry] of topicSubscriptions) {
+    entry.sub = client.subscribe(destination, (message) => {
+      const payload = safeParse(message.body);
+
+      entry.handlers.forEach((fn) => fn(payload));
+    });
   }
 
-  stompClient.activate();
+  if (userQueueHandlers.size > 0) {
+    userQueueSub = client.subscribe(
+      "/user/queue/messaging.events",
+      (message) => {
+        const payload = safeParse(message.body);
 
-  return stompClient;
-};
-
-export const subscribeToMessagingTopic = (
-  destination,
-  callback
-) => {
-  if (!stompClient?.active) {
-    console.warn(
-      "Messaging socket is not connected. Cannot subscribe yet."
+        userQueueHandlers.forEach((fn) => fn(payload));
+      }
     );
+  }
+}
+
+function safeParse(body) {
+  try {
+    return JSON.parse(body);
+  } catch {
     return null;
   }
+}
 
-  return stompClient.subscribe(destination, (message) => {
-    try {
-      const payload = JSON.parse(message.body);
-
-      if (typeof callback === "function") {
-        callback(payload, message);
-      }
-    } catch (error) {
-      console.error(
-        "Failed to parse messaging socket message:",
-        error
-      );
-
-      if (typeof callback === "function") {
-        callback(message.body, message);
-      }
-    }
-  });
-};
-
-export const disconnectMessagingSocket = async () => {
-  if (!stompClient) {
+/**
+ * Establish the shared messaging connection.
+ */
+export async function connect() {
+  if (currentStatus === "connected") {
     return;
   }
 
-  await stompClient.deactivate();
-  stompClient = null;
-};
+  if (connectPromise) {
+    return connectPromise;
+  }
 
-export const getMessagingSocket = () => stompClient;
+  connectPromise = (async () => {
+    setStatus("connecting");
 
-export default {
-  connectMessagingSocket,
-  subscribeToMessagingTopic,
-  disconnectMessagingSocket,
-  getMessagingSocket,
-};
+    let token = getAccessToken();
+
+    try {
+      // Start with a fresh token where possible.
+      token = await refreshAccessToken();
+    } catch {
+      // Fall back to the token already in storage.
+    }
+
+    if (!token) {
+      token = getAccessToken();
+    }
+
+    if (!token) {
+      throw new Error(
+        "No access token available for messaging socket"
+      );
+    }
+
+    if (client) {
+      try {
+        client.deactivate();
+      } catch {
+        // noop
+      }
+    }
+
+    client = buildClient(token);
+
+    client.activate();
+  })();
+
+  try {
+    await connectPromise;
+  } finally {
+    connectPromise = null;
+  }
+}
+
+/**
+ * Disconnect the shared messaging socket.
+ *
+ * IMPORTANT:
+ * This is a named export because AuthContext.jsx and
+ * useMessagingConnection.js import it directly.
+ */
+export function disconnect() {
+  if (reconnectTimer) {
+    clearTimeout(reconnectTimer);
+  }
+
+  reconnectTimer = null;
+
+  if (client) {
+    client.deactivate();
+    client = null;
+  }
+
+  topicSubscriptions.clear();
+
+  userQueueHandlers.clear();
+
+  userQueueSub = null;
+
+  setStatus("disconnected");
+}
+
+/**
+ * Listen for connection status changes.
+ */
+export function onConnectionStatus(fn) {
+  connectionListeners.add(fn);
+
+  fn(currentStatus);
+
+  return () => connectionListeners.delete(fn);
+}
+
+/**
+ * Subscribe to a conversation's live event topic.
+ */
+export function subscribeToConversation(
+  conversationId,
+  handler
+) {
+  const destination =
+    `/topic/messaging.conversation.${conversationId}`;
+
+  let entry = topicSubscriptions.get(destination);
+
+  if (!entry) {
+    entry = {
+      sub: null,
+      handlers: new Set(),
+    };
+
+    topicSubscriptions.set(destination, entry);
+
+    if (client && client.connected) {
+      entry.sub = client.subscribe(
+        destination,
+        (message) => {
+          const payload = safeParse(message.body);
+
+          entry.handlers.forEach((fn) => fn(payload));
+        }
+      );
+    }
+  }
+
+  entry.handlers.add(handler);
+
+  return () => {
+    entry.handlers.delete(handler);
+
+    if (entry.handlers.size === 0) {
+      if (entry.sub) {
+        entry.sub.unsubscribe();
+      }
+
+      topicSubscriptions.delete(destination);
+    }
+  };
+}
+
+/**
+ * Subscribe to the current user's personal event queue.
+ *
+ * IMPORTANT:
+ * This is a named export because
+ * useMessagingBadgeSync.js and useConversations.js
+ * import it directly.
+ */
+export function subscribeToUserQueue(handler) {
+  userQueueHandlers.add(handler);
+
+  if (
+    client &&
+    client.connected &&
+    !userQueueSub
+  ) {
+    userQueueSub = client.subscribe(
+      "/user/queue/messaging.events",
+      (message) => {
+        const payload = safeParse(message.body);
+
+        userQueueHandlers.forEach((fn) => fn(payload));
+      }
+    );
+  }
+
+  return () => {
+    userQueueHandlers.delete(handler);
+
+    if (
+      userQueueHandlers.size === 0 &&
+      userQueueSub
+    ) {
+      userQueueSub.unsubscribe();
+      userQueueSub = null;
+    }
+  };
+}
+
+/**
+ * Publish a STOMP message.
+ */
+export function publish(destination, body) {
+  if (!client || !client.connected) {
+    return;
+  }
+
+  client.publish({
+    destination,
+    body: JSON.stringify(body),
+  });
+}
+
+/**
+ * Notify the backend that the user started typing.
+ */
+export function sendTypingStart(conversationId) {
+  publish("/app/typing.start", {
+    conversationId,
+  });
+}
+
+/**
+ * Notify the backend that the user stopped typing.
+ */
+export function sendTypingStop(conversationId) {
+  publish("/app/typing.stop", {
+    conversationId,
+  });
+}
+
+/**
+ * Return the current connection status.
+ */
+export function getStatus() {
+  return currentStatus;
+}
