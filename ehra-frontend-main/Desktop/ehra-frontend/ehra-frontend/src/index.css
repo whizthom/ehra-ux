@@ -193,3 +193,14 @@ body.app-shell-lock {
     max-width: 90%;
   }
 }
+/* Android standalone PWA shell: keep the document paint identical to the
+   dark app chrome so there is no visible color seam at the status-bar edge.
+   The system status bar itself is controlled by theme-color in index.html /
+   the PWA manifest; this rule handles the web content immediately below it. */
+@media all and (display-mode: standalone) {
+  html,
+  body,
+  #root {
+    background: #0b141a;
+  }
+}

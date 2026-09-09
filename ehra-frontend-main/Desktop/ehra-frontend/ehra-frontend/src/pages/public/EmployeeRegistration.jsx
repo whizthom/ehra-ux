@@ -83,6 +83,7 @@ export default function EmployeeRegistration() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const [form, setForm] = useState(() => ({
     ...BLANK_FORM,
@@ -226,6 +227,8 @@ export default function EmployeeRegistration() {
         return "Password must be at least 8 characters.";
       if (form.password !== form.confirmPassword)
         return "Passwords do not match.";
+      if (!termsAccepted)
+        return "Please agree to the Terms of Service and Privacy Policy before submitting your registration.";
     }
     return null;
   };
@@ -630,6 +633,23 @@ export default function EmployeeRegistration() {
                     </div>
                   ))}
                 </div>
+
+                <label className={styles.termsCheck}>
+                  <input
+                    type="checkbox"
+                    checked={termsAccepted}
+                    onChange={(e) => {
+                      setTermsAccepted(e.target.checked);
+                      if (e.target.checked) setError("");
+                    }}
+                  />
+                  <span className={styles.termsBox} aria-hidden="true">
+                    <i className="ti ti-check" />
+                  </span>
+                  <span className={styles.termsText}>
+                    I agree to Ehral's <a href="/terms" target="_blank" rel="noreferrer">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.
+                  </span>
+                </label>
               </>
             )}
           </div>

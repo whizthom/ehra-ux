@@ -42,8 +42,8 @@ export default defineConfig({
         short_name: "Ehral",
         description:
           "Ehral — workforce, attendance and business management, in your pocket.",
-        theme_color: "#f0f4f3",
-        background_color: "#f0f4f3",
+        theme_color: "#0b141a",
+        background_color: "#0b141a",
         display: "standalone",
         display_override: ["standalone", "minimal-ui"],
         orientation: "portrait",

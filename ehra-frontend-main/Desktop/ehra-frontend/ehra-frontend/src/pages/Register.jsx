@@ -61,6 +61,7 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [showConfirmPw, setShowConfirmPw] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   // ── STEP 4: Personal Information ────────────────────────────────────────
   const [firstName, setFirstName] = useState("");
@@ -184,6 +185,10 @@ export default function Register() {
   // ── STEP 4: first name, last name, email — creates the account ─────────
   const handleCreateAccount = async () => {
     setError("");
+    if (!termsAccepted) {
+      setError("Please agree to the Terms of Service and Privacy Policy before creating your account.");
+      return;
+    }
     if (!firstName.trim() || !lastName.trim()) {
       setError("First and last name are required.");
       return;
@@ -645,6 +650,23 @@ export default function Register() {
                   right away and verify whenever suits you.
                 </span>
               </div>
+
+              <label className={styles.termsCheck}>
+                <input
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={(e) => {
+                    setTermsAccepted(e.target.checked);
+                    if (e.target.checked) setError("");
+                  }}
+                />
+                <span className={styles.termsBox} aria-hidden="true">
+                  <i className="ti ti-check" />
+                </span>
+                <span className={styles.termsText}>
+                  I agree to Ehral's <a href="/terms" target="_blank" rel="noreferrer">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.
+                </span>
+              </label>
 
               <button
                 type="button"

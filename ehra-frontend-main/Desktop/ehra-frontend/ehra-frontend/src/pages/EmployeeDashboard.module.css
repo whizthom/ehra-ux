@@ -172,7 +172,9 @@
 @media (max-width: 640px) {
     .topbar {
         background: transparent;
+        border-top: none;
         border-bottom: none;
+        box-shadow: none;
     }
 }
 

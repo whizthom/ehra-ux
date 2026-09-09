@@ -182,6 +182,7 @@ const STORY_STEPS = [
 
 export default function About() {
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const liveData = useLiveWorkspaceData();
 
   useEffect(() => {
@@ -249,7 +250,12 @@ export default function About() {
         </Link>
         <nav className={styles.navLinks} aria-label="Section links">
           {NAV_LINKS.map((link) => (
-            <a key={link.href} href={link.href} className={styles.navLink}>
+            <a
+              key={link.href}
+              href={link.href}
+              className={styles.navLink}
+              onClick={() => setMobileMenuOpen(false)}
+            >
               {link.label}
             </a>
           ))}
@@ -261,7 +267,41 @@ export default function About() {
           <Link to="/" className={styles.navCta}>
             Get started
           </Link>
+          <button
+            type="button"
+            className={styles.mobileMenuButton}
+            aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={mobileMenuOpen}
+            onClick={() => setMobileMenuOpen((open) => !open)}
+          >
+            <i className={`ti ${mobileMenuOpen ? "ti-x" : "ti-menu-2"}`} aria-hidden="true" />
+          </button>
         </div>
+        {mobileMenuOpen && (
+          <div className={styles.mobileMenu} role="dialog" aria-label="About Ehral navigation">
+            <div className={styles.mobileMenuLinks}>
+              {NAV_LINKS.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className={styles.mobileMenuLink}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span>{link.label}</span>
+                  <i className="ti ti-arrow-up-right" aria-hidden="true" />
+                </a>
+              ))}
+            </div>
+            <div className={styles.mobileMenuActions}>
+              <Link to="/login" className={styles.mobileMenuSignIn} onClick={() => setMobileMenuOpen(false)}>
+                Sign in
+              </Link>
+              <Link to="/" className={styles.mobileMenuCta} onClick={() => setMobileMenuOpen(false)}>
+                Get started <i className="ti ti-arrow-right" aria-hidden="true" />
+              </Link>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* ── 1. Hero — story-first, not feature-first ── */}
@@ -381,7 +421,7 @@ export default function About() {
             </p>
             <p className={styles.lead}>
               Over time, we want Ehral to become a broader business ecosystem —
-              connecting businesses,employees, customers and other businesses
+              connecting businesses, employees, customers and other businesses
               through one growing platform.
             </p>
             <p className={`${styles.storyPullQuote} js-reveal`}>

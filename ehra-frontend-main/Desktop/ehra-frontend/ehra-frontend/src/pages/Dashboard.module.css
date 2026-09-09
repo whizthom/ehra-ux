@@ -238,6 +238,8 @@
     .topbar {
         background: transparent;
         border-bottom: none;
+        border-top: none;
+        box-shadow: none;
     }
 }
 
