@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   sendAgentMessage,
+  fetchAgentConversation,
   executeAgentAction,
   fetchAgentBriefing,
 } from "../../api/agentApi";
@@ -219,18 +221,25 @@ function describeError(err) {
   const status = err?.status ?? err?.response?.status;
   const detail =
     err?.data?.detail || err?.response?.data?.detail || err?.message;
-  if (status === 402)
-    return (
-      detail ||
-      "You've reached your monthly AI allowance. Upgrade your plan to continue."
-    );
+  if (status === 402) {
+    return {
+      message:
+        "You've exhausted your daily token. Upgrade your plan to get more access token.",
+      isQuotaExceeded: true,
+    };
+  }
   if (status === 429)
-    return "Too many requests. Please wait a moment and try again.";
+    return {
+      message: "Too many requests. Please wait a moment and try again.",
+    };
   if (status === 403)
-    return detail || "This isn't available on your current plan.";
+    return { message: detail || "This isn't available on your current plan." };
   if (!err?.response)
-    return "Couldn't reach Ehral Intelligence. Check your connection and try again.";
-  return detail || "Something went wrong. Please try again.";
+    return {
+      message:
+        "Couldn't reach Ehral Intelligence. Check your connection and try again.",
+    };
+  return { message: detail || "Something went wrong. Please try again." };
 }
 
 function TypingIndicator() {
@@ -250,6 +259,7 @@ function TypingIndicator() {
 }
 
 function AgentWorkspace({ onClose }) {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -258,6 +268,7 @@ function AgentWorkspace({ onClose }) {
   const [greeting, setGreeting] = useState(null);
   const [briefingInsights, setBriefingInsights] = useState([]);
   const [typingMessageId, setTypingMessageId] = useState(null);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
 
   const conversationIdRef = useRef(null);
   const bodyRef = useRef(null);
@@ -277,6 +288,26 @@ function AgentWorkspace({ onClose }) {
       window.removeEventListener("keydown", onKeyDown);
     };
   }, [onClose]);
+
+  useEffect(() => {
+    fetchAgentConversation()
+      .then((data) => {
+        conversationIdRef.current = data?.conversation_id || null;
+        const storedMessages = Array.isArray(data?.messages)
+          ? data.messages
+          : [];
+        setMessages(
+          storedMessages.map((message) => ({
+            id: message.id || nextMessageId(),
+            role: message.role,
+            content: message.content || "",
+            displayedContent: message.content || "",
+          })),
+        );
+      })
+      .catch(() => {})
+      .finally(() => setHistoryLoaded(true));
+  }, []);
 
   useEffect(() => {
     if (!briefingFetchedRef.current) {
@@ -370,7 +401,13 @@ function AgentWorkspace({ onClose }) {
         if (data.pending_confirmation)
           setPendingConfirmation(data.pending_confirmation);
       } catch (err) {
-        appendMessage("assistant", describeError(err), { isError: true }, true);
+        const error = describeError(err);
+        appendMessage(
+          "assistant",
+          error.message,
+          { isError: true, isQuotaExceeded: error.isQuotaExceeded },
+          true,
+        );
       } finally {
         setLoading(false);
       }
@@ -399,7 +436,13 @@ function AgentWorkspace({ onClose }) {
         );
       }
     } catch (err) {
-      appendMessage("assistant", describeError(err), { isError: true }, true);
+      const error = describeError(err);
+      appendMessage(
+        "assistant",
+        error.message,
+        { isError: true, isQuotaExceeded: error.isQuotaExceeded },
+        true,
+      );
     } finally {
       setConfirming(false);
       setPendingConfirmation(null);
@@ -442,7 +485,13 @@ function AgentWorkspace({ onClose }) {
         if (data.pending_confirmation)
           setPendingConfirmation(data.pending_confirmation);
       } catch (err) {
-        appendMessage("assistant", describeError(err), { isError: true }, true);
+        const error = describeError(err);
+        appendMessage(
+          "assistant",
+          error.message,
+          { isError: true, isQuotaExceeded: error.isQuotaExceeded },
+          true,
+        );
       } finally {
         setLoading(false);
       }
@@ -480,7 +529,11 @@ function AgentWorkspace({ onClose }) {
       </header>
 
       <div className={styles.workspaceBody} ref={bodyRef}>
-        {messages.length === 0 ? (
+        {!historyLoaded ? (
+          <div className={styles.emptyState}>
+            <TypingIndicator />
+          </div>
+        ) : messages.length === 0 ? (
           <div className={styles.emptyState}>
             <div className={styles.heroMark}>
               <Logo variant="icon" size={54} title="Ehral" />
@@ -569,6 +622,16 @@ function AgentWorkspace({ onClose }) {
                       >
                         <AgentRichText content={m.displayedContent} />
                       </div>
+                      {m.isQuotaExceeded && (
+                        <button
+                          type="button"
+                          className={styles.quotaUpgradeButton}
+                          onClick={() => navigate("/pricing")}
+                        >
+                          Upgrade your plan
+                          <i className="ti ti-arrow-right" aria-hidden="true" />
+                        </button>
+                      )}
                       {isLatestAssistant && (
                         <div className={styles.afterAnswer}>
                           <div className={styles.answerTools}>

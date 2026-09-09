@@ -375,6 +375,25 @@
     padding-left: 3px;
 }
 
+.quotaUpgradeButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 10px 15px;
+    border: 0;
+    border-radius: 10px;
+    background: #111827;
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.quotaUpgradeButton:hover {
+    opacity: 0.9;
+}
+
 .errorAnswer {
     color: var(--danger-text, #b42318);
 }

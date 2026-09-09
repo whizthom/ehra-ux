@@ -54,6 +54,12 @@ const agentRequest = async (path, options = {}) => {
   return data;
 };
 
+export async function fetchAgentConversation() {
+  return agentRequest("/agent/conversation", {
+    method: "GET",
+  });
+}
+
 export async function sendAgentMessage(
   message,
   conversationId = null
@@ -152,6 +158,7 @@ export async function generateAgentImage(payload) {
 
 export default {
   sendAgentMessage,
+  fetchAgentConversation,
   executeAgentAction,
   fetchAgentBriefing,
   sendAgentVoice,

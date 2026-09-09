@@ -30,9 +30,9 @@
 export const PLAN_IDS = {
   STARTER: "STARTER",
   PRO: "PRO",
-  BUSINESS: "PREMIUM", // reuses the existing backend enum value — see note above
+  BUSINESS: "PREMIUM",
   ELITE: "ELITE",
-  CUSTOM: "CUSTOM", // contact-only, never sent to the checkout API
+  CUSTOM: "CUSTOM",
 };
 
 export const BILLING_CYCLES = {
@@ -40,9 +40,6 @@ export const BILLING_CYCLES = {
   YEARLY: "YEARLY",
 };
 
-// Naira formatter — ₦5,000 not ₦5000. `notation: "standard"` is the
-// default but stated explicitly since it's easy to accidentally reach for
-// "compact" (which would render ₦5K) when copy-pasting formatter configs.
 const nairaFormatter = new Intl.NumberFormat("en-NG", {
   style: "currency",
   currency: "NGN",
@@ -61,9 +58,18 @@ export const PLANS = [
     tagline: "Perfect for small businesses getting started.",
     badge: null,
     theme: "light",
-    price: { MONTHLY: 0, YEARLY: 0 },
-    savingsAmount: { MONTHLY: 0, YEARLY: 0 },
-    cta: { label: "Start Free", action: "signup" },
+    price: {
+      MONTHLY: 0,
+      YEARLY: 0,
+    },
+    savingsAmount: {
+      MONTHLY: 0,
+      YEARLY: 0,
+    },
+    cta: {
+      label: "Start Free",
+      action: "signup",
+    },
     features: [
       "1 business",
       "Up to 5 employees",
@@ -78,17 +84,28 @@ export const PLANS = [
       "QR attendance (if enabled)",
       "Core business management tools",
       "Unlimited penalty deductions",
+      "Ehral AI assistant included",
     ],
   },
+
   {
     id: PLAN_IDS.PRO,
     name: "Pro",
     tagline: "For a single business ready to grow.",
     badge: null,
     theme: "light",
-    price: { MONTHLY: 6000, YEARLY: 60000 },
-    savingsAmount: { MONTHLY: 0, YEARLY: 12000 },
-    cta: { label: "Upgrade to Pro", action: "checkout" },
+    price: {
+      MONTHLY: 6000,
+      YEARLY: 60000,
+    },
+    savingsAmount: {
+      MONTHLY: 0,
+      YEARLY: 12000,
+    },
+    cta: {
+      label: "Upgrade to Pro",
+      action: "checkout",
+    },
     features: [
       "1 business",
       "Up to 18 employees",
@@ -100,8 +117,10 @@ export const PLANS = [
       "Priority support",
       "Early access to new features",
       "Every future Pro feature",
+      "Ehral AI assistant with higher daily usage",
     ],
   },
+
   {
     id: PLAN_IDS.BUSINESS,
     name: "Business",
@@ -109,9 +128,18 @@ export const PLANS = [
     badge: "MOST POPULAR",
     theme: "light",
     highlight: true,
-    price: { MONTHLY: 12000, YEARLY: 120000 },
-    savingsAmount: { MONTHLY: 0, YEARLY: 24000 },
-    cta: { label: "Upgrade to Business", action: "checkout" },
+    price: {
+      MONTHLY: 12000,
+      YEARLY: 120000,
+    },
+    savingsAmount: {
+      MONTHLY: 0,
+      YEARLY: 24000,
+    },
+    cta: {
+      label: "Upgrade to Business",
+      action: "checkout",
+    },
     features: [
       "1 business",
       "Up to 50 employees across the business and its branches",
@@ -123,17 +151,28 @@ export const PLANS = [
       "Priority support",
       "Early access to new features",
       "Every future Pro feature",
+      "Ehral AI assistant with more daily usage",
     ],
   },
+
   {
     id: PLAN_IDS.ELITE,
     name: "Elite",
     tagline: "Multiple businesses, more room to scale.",
     badge: null,
     theme: "dark",
-    price: { MONTHLY: 30000, YEARLY: 300000 },
-    savingsAmount: { MONTHLY: 0, YEARLY: 60000 },
-    cta: { label: "Upgrade to Elite", action: "checkout" },
+    price: {
+      MONTHLY: 30000,
+      YEARLY: 300000,
+    },
+    savingsAmount: {
+      MONTHLY: 0,
+      YEARLY: 60000,
+    },
+    cta: {
+      label: "Upgrade to Elite",
+      action: "checkout",
+    },
     features: [
       "Up to 2 businesses",
       "Up to 50 employees per business",
@@ -145,8 +184,10 @@ export const PLANS = [
       "Premium priority support",
       "Future payroll integrations",
       "Future accounting integrations",
+      "Ehral AI assistant with the highest usage tier",
     ],
   },
+
   {
     id: PLAN_IDS.CUSTOM,
     name: "Custom",
@@ -154,9 +195,18 @@ export const PLANS = [
     badge: null,
     theme: "light",
     isCustom: true,
-    price: { MONTHLY: null, YEARLY: null },
-    savingsAmount: { MONTHLY: 0, YEARLY: 0 },
-    cta: { label: "Contact Sales", action: "contact" },
+    price: {
+      MONTHLY: null,
+      YEARLY: null,
+    },
+    savingsAmount: {
+      MONTHLY: 0,
+      YEARLY: 0,
+    },
+    cta: {
+      label: "Contact Sales",
+      action: "contact",
+    },
     features: [
       "Tailored business & employee limits",
       "Custom branch structure",
@@ -164,6 +214,7 @@ export const PLANS = [
       "Custom integrations on request",
       "Dedicated account manager",
       "Priority support",
+      "Ehral AI assistant with tailored usage",
     ],
   },
 ];
@@ -177,14 +228,19 @@ export function priceFor(planId, cycle) {
 }
 
 // ── Comparison table ────────────────────────────────────────────────────────
-// `value` per plan is either `true`/`false` (renders a check/dash) or a
-// short string (renders as-is, e.g. "80 / business"). Keyed by plan `id`,
-// so PLAN_IDS.BUSINESS's row uses the "PREMIUM" key (see note above).
+
 export const COMPARISON_ROWS = [
   {
     label: "Businesses",
-    values: { STARTER: "1", PRO: "1", PREMIUM: "1", ELITE: "Up to 2", CUSTOM: "Custom" },
+    values: {
+      STARTER: "1",
+      PRO: "1",
+      PREMIUM: "1",
+      ELITE: "Up to 2",
+      CUSTOM: "Custom",
+    },
   },
+
   {
     label: "Employees",
     values: {
@@ -195,53 +251,137 @@ export const COMPARISON_ROWS = [
       CUSTOM: "Custom",
     },
   },
+
   {
     label: "Branches",
-    values: { STARTER: "—", PRO: "—", PREMIUM: "Up to 2", ELITE: "Up to 3 per business", CUSTOM: "Custom" },
+    values: {
+      STARTER: "—",
+      PRO: "—",
+      PREMIUM: "Up to 2",
+      ELITE: "Up to 3 per business",
+      CUSTOM: "Custom",
+    },
   },
+
   {
     label: "Personal employee accounts",
-    values: { STARTER: "Unlimited", PRO: "Unlimited", PREMIUM: "Unlimited", ELITE: "Unlimited", CUSTOM: "Unlimited" },
+    values: {
+      STARTER: "Unlimited",
+      PRO: "Unlimited",
+      PREMIUM: "Unlimited",
+      ELITE: "Unlimited",
+      CUSTOM: "Unlimited",
+    },
   },
+
   {
     label: "Attendance management",
-    values: { STARTER: true, PRO: true, PREMIUM: true, ELITE: true, CUSTOM: true },
+    values: {
+      STARTER: true,
+      PRO: true,
+      PREMIUM: true,
+      ELITE: true,
+      CUSTOM: true,
+    },
   },
+
   {
     label: "Messaging",
-    values: { STARTER: true, PRO: "Unlimited", PREMIUM: "Unlimited", ELITE: "Unlimited", CUSTOM: "Unlimited" },
+    values: {
+      STARTER: true,
+      PRO: "Unlimited",
+      PREMIUM: "Unlimited",
+      ELITE: "Unlimited",
+      CUSTOM: "Unlimited",
+    },
   },
+
   {
     label: "Business reports",
-    values: { STARTER: "Unlimited", PRO: "Unlimited", PREMIUM: "Unlimited", ELITE: "Unlimited", CUSTOM: "Unlimited" },
+    values: {
+      STARTER: "Unlimited",
+      PRO: "Unlimited",
+      PREMIUM: "Unlimited",
+      ELITE: "Unlimited",
+      CUSTOM: "Unlimited",
+    },
   },
+
   {
     label: "Leave management",
-    values: { STARTER: true, PRO: true, PREMIUM: true, ELITE: true, CUSTOM: true },
+    values: {
+      STARTER: true,
+      PRO: true,
+      PREMIUM: true,
+      ELITE: true,
+      CUSTOM: true,
+    },
   },
+
   {
     label: "Penalty deduction",
-    values: { STARTER: "Unlimited", PRO: "Unlimited", PREMIUM: "Unlimited", ELITE: "Unlimited", CUSTOM: "Unlimited" },
+    values: {
+      STARTER: "Unlimited",
+      PRO: "Unlimited",
+      PREMIUM: "Unlimited",
+      ELITE: "Unlimited",
+      CUSTOM: "Unlimited",
+    },
   },
+
   {
     label: "Priority support",
-    values: { STARTER: false, PRO: true, PREMIUM: true, ELITE: true, CUSTOM: true },
+    values: {
+      STARTER: false,
+      PRO: true,
+      PREMIUM: true,
+      ELITE: true,
+      CUSTOM: true,
+    },
   },
+
   {
-    label: "AI features",
-    values: { STARTER: false, PRO: false, PREMIUM: false, ELITE: "Future", CUSTOM: "Future" },
+    label: "Ehral AI assistant",
+    values: {
+      STARTER: "Included",
+      PRO: "Higher daily usage",
+      PREMIUM: "More daily usage",
+      ELITE: "Highest usage tier",
+      CUSTOM: "Tailored usage",
+    },
   },
+
   {
     label: "API access",
-    values: { STARTER: false, PRO: false, PREMIUM: false, ELITE: true, CUSTOM: true },
+    values: {
+      STARTER: false,
+      PRO: false,
+      PREMIUM: false,
+      ELITE: true,
+      CUSTOM: true,
+    },
   },
+
   {
     label: "Payroll integrations",
-    values: { STARTER: false, PRO: false, PREMIUM: false, ELITE: "Future", CUSTOM: "Future" },
+    values: {
+      STARTER: false,
+      PRO: false,
+      PREMIUM: false,
+      ELITE: "Future",
+      CUSTOM: "Future",
+    },
   },
+
   {
     label: "Accounting integrations",
-    values: { STARTER: false, PRO: false, PREMIUM: false, ELITE: "Future", CUSTOM: "Future" },
+    values: {
+      STARTER: false,
+      PRO: false,
+      PREMIUM: false,
+      ELITE: "Future",
+      CUSTOM: "Future",
+    },
   },
 ];
 
@@ -255,26 +395,34 @@ export const TRUST_BADGES = [
 export const FAQ_ITEMS = [
   {
     question: "Can I upgrade later?",
-    answer: "Yes. Upgrade anytime without losing your data.",
+    answer:
+      "Yes. Upgrade anytime without losing your data.",
   },
+
   {
     question: "Can I downgrade?",
-    answer: "Yes. Downgrading only affects features above your new plan's limits.",
+    answer:
+      "Yes. Downgrading only affects features above your new plan's limits.",
   },
+
   {
     question: "Will I lose my data?",
-    answer: "No. Your businesses, employees, and records stay exactly as they are, no matter which plan you're on.",
+    answer:
+      "No. Your businesses, employees, and records stay exactly as they are, no matter which plan you're on.",
   },
+
   {
     question: "Which payment methods are supported?",
     answer:
       "Paystack supports cards, bank transfer, OPay, USSD, and other supported payment channels.",
   },
+
   {
     question: "What happens if my subscription expires?",
     answer:
       "Your account automatically returns to the Starter plan and all your data is kept exactly as it is. Paid-only features become unavailable until you renew. If your usage is above Starter's limits — for example more than 5 employees, or more than one business — nothing is deleted; those businesses simply become read-only until you upgrade again.",
   },
+
   {
     question: "What if none of these plans fit my business?",
     answer:
