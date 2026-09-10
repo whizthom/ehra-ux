@@ -234,7 +234,18 @@
     z-index: 30;
 }
 
+
+/* Temporarily hidden on the employer home dashboard for mobile. The data
+   and approval logic remain intact so desktop behavior is unchanged. */
+.mobileHiddenHomePanel {
+    display: block;
+}
+
 @media (max-width: 900px) {
+    .mobileHiddenHomePanel {
+        display: none !important;
+    }
+
     .topbar {
         background: transparent;
         border-bottom: none;
@@ -1757,8 +1768,8 @@
     .attendanceTable {
         border: none;
         border-collapse: separate;
-        border-spacing: 0 10px;
-        margin-top: -10px;
+        border-spacing: 0 14px;
+        margin-top: -14px;
         min-width: 0;
     }
 

@@ -31,6 +31,7 @@ import QrCodeTab from "../components/QrcodeTab";
 import WorkforceTab from "../components/WorkforceTab";
 import MessagingHub from "../components/messaging/MessagingHub";
 import AiAgentWidget from "../components/agent/AiAgentWidget";
+import { fetchAgentConversation } from "../api/agentApi";
 import NotificationToastStack from "../components/notifications/NotificationToastStack";
 import LeavesTab from "../components/LeavesTab";
 import DepartmentsTab from "../components/DepartmentsTab";
@@ -315,6 +316,29 @@ export default function Dashboard() {
   });
   const contentRef = useRef(null);
   const isMobile = useIsMobile();
+
+  // Prime the Agent conversation cache while the employer dashboard is open.
+  // This makes the first tap on Ehral Intelligence render the existing thread
+  // immediately instead of waiting for the history request to finish. The
+  // Agent still revalidates against the backend when opened.
+  useEffect(() => {
+    const businessId = localStorage.getItem("businessId") || "business";
+    const membershipId = localStorage.getItem("membershipId") || "membership";
+    const sessionKey = `ehral-agent-history:${businessId}:${membershipId}`;
+
+    fetchAgentConversation()
+      .then((data) => {
+        if (!data) return;
+        localStorage.setItem(
+          sessionKey,
+          JSON.stringify({
+            conversation_id: data?.conversation_id || null,
+            messages: Array.isArray(data?.messages) ? data.messages : [],
+          }),
+        );
+      })
+      .catch(() => {});
+  }, []);
 
   // Keep the dashboard on the exact section the user was using after a
   // browser/PWA refresh. Navigation state still wins when another page
@@ -2060,7 +2084,9 @@ export default function Dashboard() {
               </div>
 
               {/* Pending approvals table */}
-              <div className={styles.dirPanel}>
+              <div
+                className={`${styles.dirPanel} ${styles.mobileHiddenHomePanel}`}
+              >
                 <button
                   type="button"
                   className={styles.panelHdrToggle}
@@ -2181,7 +2207,9 @@ export default function Dashboard() {
               </div>
 
               {/* Pending leave requests table */}
-              <div className={styles.dirPanel}>
+              <div
+                className={`${styles.dirPanel} ${styles.mobileHiddenHomePanel}`}
+              >
                 <button
                   type="button"
                   className={styles.panelHdrToggle}

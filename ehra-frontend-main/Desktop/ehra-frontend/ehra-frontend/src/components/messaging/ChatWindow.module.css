@@ -1,4 +1,5 @@
 .window {
+    position: relative;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -130,6 +131,28 @@
 
 .messages::-webkit-scrollbar-track {
     background: transparent;
+}
+
+.scrollBottomButton {
+    position: absolute;
+    right: 18px;
+    bottom: 74px;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    box-shadow: 0 5px 18px var(--shadow-color);
+    cursor: pointer;
+    z-index: 4;
+}
+
+.scrollBottomButton:hover {
+    color: var(--accent);
+    border-color: var(--accent);
 }
 
 .loadingOlder {

@@ -44,6 +44,7 @@
 }
 
 .workspace {
+    position: relative;
     height: 100%;
     min-height: 0;
     display: flex;
@@ -123,6 +124,7 @@
 }
 
 .workspaceBody {
+    position: relative;
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
@@ -592,6 +594,28 @@
     border-color: var(--accent);
 }
 
+.scrollBottomButton {
+    position: absolute;
+    right: 22px;
+    bottom: 88px;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    box-shadow: 0 5px 18px var(--shadow-color);
+    cursor: pointer;
+    z-index: 5;
+}
+
+.scrollBottomButton:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
 .composer {
     flex: 0 0 auto;
     padding: 13px max(24px, calc((100% - 900px) / 2));
@@ -673,6 +697,11 @@
 
     .insightGrid {
         grid-template-columns: 1fr;
+    }
+
+    .scrollBottomButton {
+        right: 16px;
+        bottom: 84px;
     }
 
     .composer {

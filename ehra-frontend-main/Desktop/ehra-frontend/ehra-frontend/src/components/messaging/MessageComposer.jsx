@@ -375,6 +375,12 @@ export default function MessageComposer({
             placeholder={isEditing ? "Edit message" : "Type a message"}
             rows={1}
             value={text}
+            inputMode="text"
+            enterKeyHint="enter"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="sentences"
+            spellCheck={false}
             onChange={handleChange}
             onFocus={() => {
               setComposerFocused(true);

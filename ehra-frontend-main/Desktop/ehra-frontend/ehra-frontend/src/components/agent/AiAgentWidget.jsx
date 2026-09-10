@@ -269,6 +269,7 @@ function AgentWorkspace({ onClose }) {
   const [briefingInsights, setBriefingInsights] = useState([]);
   const [typingMessageId, setTypingMessageId] = useState(null);
   const [historyLoaded, setHistoryLoaded] = useState(false);
+  const [showScrollBottom, setShowScrollBottom] = useState(false);
 
   const conversationIdRef = useRef(null);
   const bodyRef = useRef(null);
@@ -282,7 +283,6 @@ function AgentWorkspace({ onClose }) {
       if (event.key === "Escape") onClose?.();
     };
     window.addEventListener("keydown", onKeyDown);
-    inputRef.current?.focus();
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", onKeyDown);
@@ -290,24 +290,76 @@ function AgentWorkspace({ onClose }) {
   }, [onClose]);
 
   useEffect(() => {
+    const sessionKey =
+      typeof window !== "undefined"
+        ? `ehral-agent-history:${localStorage.getItem("businessId") || "business"}:${localStorage.getItem("membershipId") || "membership"}`
+        : "ehral-agent-history:business:membership";
+
+    const hydrate = (data) => {
+      conversationIdRef.current =
+        data?.conversation_id || conversationIdRef.current;
+      const storedMessages = Array.isArray(data?.messages) ? data.messages : [];
+      setMessages(
+        storedMessages.map((message) => ({
+          id: message.id || nextMessageId(),
+          role: message.role,
+          content: message.content || "",
+          displayedContent: message.content || "",
+          usedBusinessData: message.usedBusinessData,
+          suggestions: message.suggestions,
+        })),
+      );
+    };
+
+    // Hydrate immediately from the last successful conversation response.
+    // The network request below remains a background revalidation, so opening
+    // Ehral Intelligence does not flash a thinking state while history loads.
+    try {
+      const cached = JSON.parse(localStorage.getItem(sessionKey) || "null");
+      if (cached?.messages) {
+        hydrate(cached);
+        setHistoryLoaded(true);
+      }
+    } catch {}
+
     fetchAgentConversation()
       .then((data) => {
-        conversationIdRef.current = data?.conversation_id || null;
-        const storedMessages = Array.isArray(data?.messages)
-          ? data.messages
-          : [];
-        setMessages(
-          storedMessages.map((message) => ({
-            id: message.id || nextMessageId(),
-            role: message.role,
-            content: message.content || "",
-            displayedContent: message.content || "",
-          })),
-        );
+        hydrate(data);
+        try {
+          localStorage.setItem(
+            sessionKey,
+            JSON.stringify({
+              conversation_id: data?.conversation_id || null,
+              messages: Array.isArray(data?.messages) ? data.messages : [],
+            }),
+          );
+        } catch {}
       })
       .catch(() => {})
       .finally(() => setHistoryLoaded(true));
   }, []);
+
+  useEffect(() => {
+    if (!historyLoaded) return;
+    try {
+      const sessionKey = `ehral-agent-history:${localStorage.getItem("businessId") || "business"}:${localStorage.getItem("membershipId") || "membership"}`;
+      localStorage.setItem(
+        sessionKey,
+        JSON.stringify({
+          conversation_id: conversationIdRef.current,
+          messages: messages.map(
+            ({ id, role, content, usedBusinessData, suggestions }) => ({
+              id,
+              role,
+              content,
+              usedBusinessData,
+              suggestions,
+            }),
+          ),
+        }),
+      );
+    } catch {}
+  }, [messages, historyLoaded]);
 
   useEffect(() => {
     if (!briefingFetchedRef.current) {
@@ -323,9 +375,25 @@ function AgentWorkspace({ onClose }) {
     }
   }, []);
 
+  const handleBodyScroll = useCallback(() => {
+    const el = bodyRef.current;
+    if (!el) return;
+    setShowScrollBottom(el.scrollHeight - el.scrollTop - el.clientHeight > 120);
+  }, []);
+
+  const scrollToBottom = useCallback(() => {
+    bodyRef.current?.scrollTo({
+      top: bodyRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+    setShowScrollBottom(false);
+  }, []);
+
   useEffect(() => {
-    if (bodyRef.current)
+    if (bodyRef.current) {
       bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
+      setShowScrollBottom(false);
+    }
   }, [messages, loading, pendingConfirmation, typingMessageId]);
 
   useEffect(() => {
@@ -528,7 +596,11 @@ function AgentWorkspace({ onClose }) {
         </button>
       </header>
 
-      <div className={styles.workspaceBody} ref={bodyRef}>
+      <div
+        className={styles.workspaceBody}
+        ref={bodyRef}
+        onScroll={handleBodyScroll}
+      >
         {!historyLoaded ? (
           <div className={styles.emptyState}>
             <TypingIndicator />
@@ -718,6 +790,18 @@ function AgentWorkspace({ onClose }) {
         )}
       </div>
 
+      {showScrollBottom && (
+        <button
+          type="button"
+          className={styles.scrollBottomButton}
+          onClick={scrollToBottom}
+          aria-label="Jump to latest message"
+          title="Jump to latest message"
+        >
+          <i className="ti ti-chevron-down" aria-hidden="true" />
+        </button>
+      )}
+
       <form className={styles.composer} onSubmit={onSubmit}>
         <div className={styles.composerShell}>
           <div className={styles.composerBrand}>
@@ -730,6 +814,12 @@ function AgentWorkspace({ onClose }) {
             placeholder="Ask Ehral anything about your business..."
             disabled={loading || !!typingMessageId}
             aria-label="Ask Ehral"
+            inputMode="text"
+            enterKeyHint="send"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="sentences"
+            spellCheck={false}
           />
           <button
             type="submit"

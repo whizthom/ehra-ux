@@ -35,6 +35,7 @@ export default function ChatWindow({
   const { onKeystroke, stop: stopTyping } = useTypingBroadcast(conversation.id);
 
   const [replyTo, setReplyTo] = useState(null);
+  const [showScrollBottom, setShowScrollBottom] = useState(false);
   const [editingMessage, setEditingMessage] = useState(null);
   const [showGroupInfo, setShowGroupInfo] = useState(false);
   const scrollRef = useRef(null);
@@ -86,6 +87,7 @@ export default function ChatWindow({
     if (!el) return;
     isNearBottomRef.current =
       el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+    setShowScrollBottom(!isNearBottomRef.current);
     if (el.scrollTop < 80 && hasMore && !loadingOlder) {
       prevScrollHeightRef.current = el.scrollHeight;
       loadOlder().then(() => {
@@ -152,6 +154,7 @@ export default function ChatWindow({
   // regardless of where the person had scrolled to.
   const handleComposerFocus = useCallback(() => {
     isNearBottomRef.current = true;
+    setShowScrollBottom(false);
     requestAnimationFrame(() =>
       bottomAnchorRef.current?.scrollIntoView({ block: "end" }),
     );
@@ -279,6 +282,25 @@ export default function ChatWindow({
         )}
         <div ref={bottomAnchorRef} />
       </div>
+
+      {showScrollBottom && (
+        <button
+          type="button"
+          className={styles.scrollBottomButton}
+          onClick={() => {
+            isNearBottomRef.current = true;
+            setShowScrollBottom(false);
+            bottomAnchorRef.current?.scrollIntoView({
+              behavior: "smooth",
+              block: "end",
+            });
+          }}
+          aria-label="Jump to latest message"
+          title="Jump to latest message"
+        >
+          <i className="ti ti-chevron-down" aria-hidden="true" />
+        </button>
+      )}
 
       <TypingIndicator users={typingUsers} />
 
