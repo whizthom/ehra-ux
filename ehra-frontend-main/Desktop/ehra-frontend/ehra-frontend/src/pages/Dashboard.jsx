@@ -1250,12 +1250,12 @@ export default function Dashboard() {
   // graduate into Absent once their clock-out time passes too, so nobody is
   // ever counted in both buckets at once.
   const pulseLate = latestAttendance.filter((r) => r.status === "LATE").length;
-  // On Time can no longer be derived as clockedIn - late: since Late now
-  // also includes people with no clockIn at all, that subtraction would
-  // double-count them out of On Time. Filter directly instead — clocked in,
-  // and not flagged late.
+  // On Time is its own bucket: the employee must have clocked in and must
+  // have neither a late-arrival nor early-leave condition. Early leave is
+  // independent from the headline status, so a late employee who also leaves
+  // early must not be counted as On Time.
   const pulseOnTime = latestAttendance.filter(
-    (r) => !!r.clockIn && r.status !== "LATE",
+    (r) => !!r.clockIn && !r.lateArrival && !r.earlyLeave,
   ).length;
   // Only employees explicitly (or live-)marked ABSENT count as absent —
   // anyone who simply hasn't clocked in yet but whose shift also hasn't
@@ -1263,13 +1263,12 @@ export default function Dashboard() {
   const pulseAbsent = latestAttendance.filter(
     (r) => r.status === "ABSENT",
   ).length;
-  // Desktop stat-card figures (see statsGrid below) — distinct from
-  // pulseOnTime above, which deliberately lumps PRESENT + EARLY_LEAVE
-  // together for the mobile widget's "on time" figure. These two need to
-  // stay separate buckets instead, since the desktop cards show early-leave
-  // and present as their own distinct counts.
+  // Early leave is an independent schedule condition on AttendanceDTO.
+  // It must be counted from the explicit earlyLeave flag rather than the
+  // headline status because an employee can be both LATE and EARLY_LEAVE.
+  // In that case the headline status remains LATE while earlyLeave is true.
   const pulseEarly = latestAttendance.filter(
-    (r) => r.status === "EARLY_LEAVE",
+    (r) => r.earlyLeave === true,
   ).length;
   const pulsePresent = latestAttendance.filter(
     (r) => r.status === "PRESENT",
@@ -1792,6 +1791,7 @@ export default function Dashboard() {
                   clockedIn={pulseClockedIn}
                   onTime={pulseOnTime}
                   late={pulseLate}
+                  earlyLeave={pulseEarly}
                   absent={pulseAbsent}
                   percent={pulsePercent}
                   lastClockInLabel={pulseLastClockInLabel}

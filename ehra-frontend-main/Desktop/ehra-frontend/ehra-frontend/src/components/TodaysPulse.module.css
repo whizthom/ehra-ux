@@ -188,12 +188,12 @@
     background: var(--danger);
 }
 
-.dotAbsent {
-    background: var(--warning);
+.dotEarlyLeave {
+    background: var(--warning-text);
 }
 
-.dotEarly {
-    background: var(--info, var(--accent));
+.dotAbsent {
+    background: var(--warning);
 }
 
 .footer {

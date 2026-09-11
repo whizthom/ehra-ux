@@ -9,10 +9,10 @@ import styles from "./TodaysPulse.module.css";
 export default function TodaysPulse({
   totalStaff,
   clockedIn,
-  onTime,
-  late,
-  absent,
-  earlyLeave,
+  onTime = 0,
+  late = 0,
+  earlyLeave = 0,
+  absent = 0,
   percent,
   lastClockInLabel,
 }) {
@@ -69,12 +69,12 @@ export default function TodaysPulse({
           Late <b>{late}</b>
         </span>
         <span className={styles.legendItem}>
-          <span className={`${styles.dot} ${styles.dotAbsent}`} />
-          Absent <b>{absent}</b>
+          <span className={`${styles.dot} ${styles.dotEarlyLeave}`} />
+          Early leave <b>{earlyLeave}</b>
         </span>
         <span className={styles.legendItem}>
-          <span className={`${styles.dot} ${styles.dotEarly}`} />
-          Early leave <b>{earlyLeave}</b>
+          <span className={`${styles.dot} ${styles.dotAbsent}`} />
+          Absent <b>{absent}</b>
         </span>
       </div>
 

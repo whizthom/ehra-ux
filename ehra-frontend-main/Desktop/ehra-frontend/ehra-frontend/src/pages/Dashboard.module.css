@@ -2461,7 +2461,7 @@
 }
 
 .missingClockOutPanel {
-    border: 1px solid var(--warning-border, var(--border-color));
+    border: 0.5px solid var(--border-color);
     border-radius: 14px;
     background: var(--card-bg, var(--surface));
     margin-bottom: 16px;
