@@ -2,11 +2,13 @@ import { useRef, useState } from "react";
 import MyProfileSettings from "./MyProfileSettings";
 import EmployeeProfileEditsTab from "./EmployeeProfileEditsTab";
 import SecuritySettingsSection from "./SecuritySettingsSection";
+import AttendanceDevicePanel from "./AttendanceDevicePanel";
 import styles from "./MyProfileTab.module.css";
 
 const TABS = [
   { key: "profile", label: "Profile" },
   { key: "security", label: "Security" },
+  { key: "attendance-device", label: "Attendance device" },
 ];
 
 // Merges the previously separate "Settings" (read-only profile view) and
@@ -60,9 +62,13 @@ export default function MyProfileTab({ profile, isHod }) {
               <EmployeeProfileEditsTab isHod={isHod} profile={profile} />
             </div>
           </div>
-        ) : (
+        ) : tab === "security" ? (
           <div className={styles.securityPad}>
             <SecuritySettingsSection />
+          </div>
+        ) : (
+          <div className={styles.securityPad}>
+            <AttendanceDevicePanel />
           </div>
         )}
       </div>

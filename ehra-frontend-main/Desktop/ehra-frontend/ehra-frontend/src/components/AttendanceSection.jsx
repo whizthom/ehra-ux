@@ -3,11 +3,13 @@ import AttendanceTable from "./AttendanceTable";
 import ScheduleSettings from "./ScheduleSettings";
 import { getTodayAttendance, getAttendanceHistory } from "../api/attendanceApi";
 import styles from "./AttendanceSection.module.css";
+import AttendanceSecurityPanel from "./AttendanceSecurityPanel";
 
 const TABS = [
   { key: "today", label: "Today" },
   { key: "history", label: "History" },
   { key: "settings", label: "Schedule settings" },
+  { key: "security", label: "Attendance security" },
 ];
 
 export default function AttendanceSection() {
@@ -147,6 +149,8 @@ export default function AttendanceSection() {
         )}
 
         {tab === "settings" && <ScheduleSettings />}
+
+        {tab === "security" && <AttendanceSecurityPanel />}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import jsQR from "jsqr";
-import { submitScan } from "../api/attendanceApi";
+import { getMyAttendance, submitScanWithDeviceProof } from "../api/attendanceApi";
 import styles from "./QrScanModal.module.css";
 
 /**
@@ -62,7 +62,20 @@ export default function QrScanModal({ onClose, onSuccess }) {
 
       try {
         const coords = await getCoords();
-        const { data } = await submitScan(token, coords);
+        let action = "CLOCK_IN";
+        try {
+          const { data: attendance } = await getMyAttendance();
+          const today = attendance.find((record) => {
+            const dateValue = record.date || record.clockIn;
+            if (!dateValue) return false;
+            const date = new Date(dateValue);
+            return date.toDateString() === new Date().toDateString();
+          });
+          action = !today?.clockIn ? "CLOCK_IN" : !today?.clockOut ? "CLOCK_OUT" : "CLOCK_IN";
+        } catch (actionError) {
+          console.warn("Could not determine attendance action for device proof.", actionError);
+        }
+        const { data } = await submitScanWithDeviceProof(token, coords, action);
         setResult({
           ok: true,
           action: data.action,

@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import jsQR from "jsqr";
-import { submitScan } from "../api/attendanceApi";
+import {
+  getMyAttendance,
+  submitScan,
+  submitScanWithDeviceProof,
+  ensureAttendanceDevice,
+} from "../api/attendanceApi";
 import { getMyProfile } from "../api/employeeApi";
 import { useAuth } from "../context/AuthContext";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
@@ -147,6 +152,16 @@ export default function ScanAttendance() {
   const NAV = isAdmin ? ADMIN_NAV : EMPLOYEE_NAV;
   const bottomNavThumb = useScrollThumb(bottomNavScrollRef);
 
+  // Device enrollment is deliberately best-effort. A device setup problem
+  // must never prevent the existing attendance flow from opening or recording
+  // a scan. The server remains the authority on device trust.
+  useEffect(() => {
+    if (!user?.membershipId) return;
+    ensureAttendanceDevice().catch((err) => {
+      console.warn("Attendance device enrollment unavailable.", err);
+    });
+  }, [user?.membershipId]);
+
   // Best-effort profile fetch, purely to dress the shared shell (business
   // logo/name, avatar, HOD-gated nav items) the same way the dashboards
   // do. Never blocks the scanner if it fails or is slow.
@@ -201,7 +216,24 @@ export default function ScanAttendance() {
 
       try {
         const coords = await getCoords();
-        const { data } = await submitScan(token, coords);
+        let action = null;
+        try {
+          const { data: attendance } = await getMyAttendance();
+          const today = attendance.find((record) => {
+            const dateValue = record.date || record.clockIn;
+            if (!dateValue) return false;
+            const date = new Date(dateValue);
+            return date.toDateString() === new Date().toDateString();
+          });
+          if (!today?.clockIn) action = "CLOCK_IN";
+          else if (!today?.clockOut) action = "CLOCK_OUT";
+        } catch (actionError) {
+          console.warn("Could not determine attendance action for device proof.", actionError);
+        }
+
+        const { data } = action
+          ? await submitScanWithDeviceProof(token, coords, action)
+          : await submitScan(token, coords, {});
         setResult({
           ok: true,
           action: data.action,
