@@ -13,7 +13,9 @@ import styles from "./AttendanceDevicePanel.module.css";
 function formatDate(value) {
   if (!value) return "Not available";
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? "Not available" : date.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+  return Number.isNaN(date.getTime())
+    ? "Not available"
+    : date.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
 }
 
 function friendlyError(err, fallback) {
@@ -33,7 +35,10 @@ export default function AttendanceDevicePanel() {
       const { data } = await getMyAttendanceDevice();
       setDevice(data || null);
     } catch (err) {
-      setMessage({ type: "error", text: friendlyError(err, "Couldn't load your attendance device.") });
+      setMessage({
+        type: "error",
+        text: friendlyError(err, "Couldn't load your attendance device."),
+      });
     } finally {
       setLoading(false);
     }
@@ -44,7 +49,12 @@ export default function AttendanceDevicePanel() {
   }, [load]);
 
   const revoke = async () => {
-    if (!window.confirm("Revoke your current attendance device? You will need to register the next device before using device verification again.")) return;
+    if (
+      !window.confirm(
+        "Revoke your current attendance device? You will need to register the next device before using device verification again.",
+      )
+    )
+      return;
     setActionLoading(true);
     setMessage(null);
     try {
@@ -52,47 +62,87 @@ export default function AttendanceDevicePanel() {
       const session = readSession();
       await clearAttendanceDevice(getAttendanceDeviceContext(session));
       setDevice(null);
-      setMessage({ type: "success", text: "Your attendance device has been revoked. Register this device again when you are ready." });
+      setMessage({
+        type: "success",
+        text: "Your attendance device has been revoked. Register this device again when you are ready.",
+      });
     } catch (err) {
-      setMessage({ type: "error", text: friendlyError(err, "Couldn't revoke the attendance device.") });
+      setMessage({
+        type: "error",
+        text: friendlyError(err, "Couldn't revoke the attendance device."),
+      });
     } finally {
       setActionLoading(false);
     }
   };
 
-  if (loading) return <div className={styles.loading}>Loading your attendance device…</div>;
+  if (loading)
+    return (
+      <div className={styles.loading}>Loading your attendance device…</div>
+    );
 
   return (
     <section className={styles.wrap}>
       {message && (
-        <div className={`${styles.message} ${message.type === "error" ? styles.error : styles.success}`}>
-          <i className={`ti ${message.type === "error" ? "ti-alert-circle" : "ti-circle-check"}`} />
+        <div
+          className={`${styles.message} ${message.type === "error" ? styles.error : styles.success}`}
+        >
+          <i
+            className={`ti ${message.type === "error" ? "ti-alert-circle" : "ti-circle-check"}`}
+          />
           <span>{message.text}</span>
         </div>
       )}
 
       <div className={styles.card}>
         <div className={styles.header}>
-          <div className={styles.icon}><i className="ti ti-device-mobile" /></div>
+          <div className={styles.icon}>
+            <i className="ti ti-device-mobile" />
+          </div>
           <div>
             <h3>Attendance device</h3>
-            <p>Your registered device helps Ehral verify attendance without relying on a device name, IMEI, or other editable identifier.</p>
+            <p>
+              Your registered device helps Ehral verify attendance without
+              relying on a device name, IMEI, or other editable identifier.
+            </p>
           </div>
         </div>
 
         {device ? (
           <>
             <div className={styles.deviceGrid}>
-              <div><span>Device</span><strong>{device.deviceName || "This device"}</strong></div>
-              <div><span>Platform</span><strong>{device.platform || "Web"}</strong></div>
-              <div><span>Status</span><strong>{device.bindingStatus || device.deviceStatus || "Active"}</strong></div>
-              <div><span>Last seen</span><strong>{formatDate(device.lastSeenAt)}</strong></div>
+              <div>
+                <span>Device</span>
+                <strong>{device.deviceName || "This device"}</strong>
+              </div>
+              <div>
+                <span>Platform</span>
+                <strong>{device.platform || "Web"}</strong>
+              </div>
+              <div>
+                <span>Status</span>
+                <strong>
+                  {device.bindingStatus || device.deviceStatus || "Active"}
+                </strong>
+              </div>
+              <div>
+                <span>Last seen</span>
+                <strong>{formatDate(device.lastSeenAt)}</strong>
+              </div>
             </div>
             <div className={styles.note}>
               <i className="ti ti-info-circle" />
-              <span>Revoke your current device before enrolling a new one to avoid a security flag on your next clock-in.</span>
+              <span>
+                Revoke your current device before enrolling a new one to avoid a
+                security flag on your next clock-in.
+              </span>
             </div>
-            <button type="button" className={styles.revokeBtn} onClick={revoke} disabled={actionLoading}>
+            <button
+              type="button"
+              className={styles.revokeBtn}
+              onClick={revoke}
+              disabled={actionLoading}
+            >
               {actionLoading ? "Revoking…" : "Revoke this device"}
             </button>
           </>
@@ -101,7 +151,10 @@ export default function AttendanceDevicePanel() {
             <i className="ti ti-device-mobile-off" />
             <div>
               <strong>No registered attendance device</strong>
-              <p>Your device will be registered automatically when you open the clock-in screen and device enrollment is available.</p>
+              <p>
+                Your device will be registered automatically when you open the
+                clock-in screen and device enrollment is available.
+              </p>
             </div>
           </div>
         )}

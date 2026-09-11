@@ -15,7 +15,11 @@ import LogoutConfirmModal from "../components/LogoutConfirmModal";
 import dash from "./Dashboard.module.css";
 import styles from "./ScanAttendance.module.css";
 import { readSession } from "../api/authApi";
-import { formatAttendanceCooldown, getAttendanceCooldownRemaining, startAttendanceCooldown } from "../utils/attendanceCooldown";
+import {
+  formatAttendanceCooldown,
+  getAttendanceCooldownRemaining,
+  startAttendanceCooldown,
+} from "../utils/attendanceCooldown";
 
 // This page reuses the exact same shell (sidebar, topbar, mobile bottom
 // nav) as Dashboard.jsx / EmployeeDashboard.jsx via Dashboard.module.css,
@@ -213,8 +217,12 @@ export default function ScanAttendance() {
 
   useEffect(() => {
     const session = readSession();
-    const membershipId = session?.employeeMembershipId || session?.membershipId || session?.employee?.membershipId;
-    const refresh = () => setCooldownRemaining(getAttendanceCooldownRemaining(membershipId));
+    const membershipId =
+      session?.employeeMembershipId ||
+      session?.membershipId ||
+      session?.employee?.membershipId;
+    const refresh = () =>
+      setCooldownRemaining(getAttendanceCooldownRemaining(membershipId));
     refresh();
     const timer = window.setInterval(refresh, 1000);
     return () => window.clearInterval(timer);
@@ -241,15 +249,23 @@ export default function ScanAttendance() {
           if (!today?.clockIn) action = "CLOCK_IN";
           else if (!today?.clockOut) action = "CLOCK_OUT";
         } catch (actionError) {
-          console.warn("Could not determine attendance action for device proof.", actionError);
+          console.warn(
+            "Could not determine attendance action for device proof.",
+            actionError,
+          );
         }
 
         const { data } = action
           ? await submitScanWithDeviceProof(token, coords, action)
           : await submitScan(token, coords, {});
         const session = readSession();
-        const membershipId = session?.employeeMembershipId || session?.membershipId || session?.employee?.membershipId;
-        setCooldownRemaining(startAttendanceCooldown(membershipId, data.timestamp));
+        const membershipId =
+          session?.employeeMembershipId ||
+          session?.membershipId ||
+          session?.employee?.membershipId;
+        setCooldownRemaining(
+          startAttendanceCooldown(membershipId, data.timestamp),
+        );
         setResult({
           ok: true,
           action: data.action,
@@ -258,9 +274,17 @@ export default function ScanAttendance() {
         });
       } catch (err) {
         const msg = getAttendanceErrorMessage(err);
-        if (typeof msg === "string" && /wait.*3 minute|3 minute.*wait|three minute|attendance was just recorded/i.test(msg)) {
+        if (
+          typeof msg === "string" &&
+          /wait.*3 minute|3 minute.*wait|three minute|attendance was just recorded/i.test(
+            msg,
+          )
+        ) {
           const session = readSession();
-          const membershipId = session?.employeeMembershipId || session?.membershipId || session?.employee?.membershipId;
+          const membershipId =
+            session?.employeeMembershipId ||
+            session?.membershipId ||
+            session?.employee?.membershipId;
           setCooldownRemaining(startAttendanceCooldown(membershipId));
         }
         setResult({
@@ -303,10 +327,13 @@ export default function ScanAttendance() {
 
   const startCamera = useCallback(async () => {
     if (cooldownRemaining > 0) {
-      setResult((current) => current || {
-        ok: false,
-        message: `Attendance was just recorded. Please wait ${formatAttendanceCooldown(cooldownRemaining)} before scanning again.`,
-      });
+      setResult(
+        (current) =>
+          current || {
+            ok: false,
+            message: `Attendance was just recorded. Please wait ${formatAttendanceCooldown(cooldownRemaining)} before scanning again.`,
+          },
+      );
       setScanning(false);
       return;
     }
@@ -354,10 +381,10 @@ export default function ScanAttendance() {
         err?.message === "camera-timeout"
           ? "The camera took too long to start. Check browser permissions and try again."
           : err?.name === "NotAllowedError"
-          ? "Camera permission was denied. Please allow camera access for this site in your browser settings, then try again."
-          : err?.name === "NotFoundError"
-            ? "No camera was found on this device."
-            : "Couldn't access your camera. Please allow camera permission and try again.";
+            ? "Camera permission was denied. Please allow camera access for this site in your browser settings, then try again."
+            : err?.name === "NotFoundError"
+              ? "No camera was found on this device."
+              : "Couldn't access your camera. Please allow camera permission and try again.";
       setCameraError(message);
       setCameraState("idle");
     }
@@ -574,7 +601,10 @@ export default function ScanAttendance() {
                     </span>
                   )}
                   {cooldownRemaining > 0 && (
-                    <span className={styles.resultCooldown}>You can scan again in {formatAttendanceCooldown(cooldownRemaining)}.</span>
+                    <span className={styles.resultCooldown}>
+                      You can scan again in{" "}
+                      {formatAttendanceCooldown(cooldownRemaining)}.
+                    </span>
                   )}
                   <button
                     className={styles.scanAgainBtn}
