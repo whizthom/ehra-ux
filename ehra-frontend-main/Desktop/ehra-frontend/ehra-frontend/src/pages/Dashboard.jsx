@@ -1152,47 +1152,31 @@ export default function Dashboard() {
     pendingApprovals: 0,
   };
 
-  // Today's Pulse (mobile hero widget) — real attendance figures. "Staff"
-  // = active employees (the people expected to clock in); "clocked in" =
-  // anyone with a record in today's attendance feed at all.
-  // "Clocked in" must only count people who actually clocked in — the
-  // backend now also creates explicit ABSENT/LATE entries (no clockIn
-  // timestamp) once an employee's scheduled clock-in/clock-out time passes
-  // without them showing up, so `latestAttendance` can contain rows for
-  // people who were never actually present. Filtering on `clockIn` keeps
-  // those groups from being conflated (previously `latestAttendance.length`
-  // counted absentees as "clocked in" too).
+  // Today's Pulse: four independent attendance conditions.
+  // On Time requires an actual clock-in with neither late arrival nor early
+  // leave. Late and Early Leave are independent, so someone who arrived late
+  // and later left early appears in both buckets. Absent is the live/stored
+  // state for scheduled employees who have reached their start time without
+  // a clock-in. Once they clock in, the same record becomes LATE.
   const pulseTotalStaff = safeSummary.activeEmployees;
   const pulseClockedIn = latestAttendance.filter((r) => !!r.clockIn).length;
-  // "Late" includes both people who actually clocked in late AND people who
-  // simply haven't clocked in yet once their clock-in time has passed (a
-  // live, not-yet-persisted status the backend computes on the fly) — those
-  // graduate into Absent once their clock-out time passes too, so nobody is
-  // ever counted in both buckets at once.
-  const pulseLate = latestAttendance.filter((r) => r.status === "LATE").length;
-  // On Time can no longer be derived as clockedIn - late: since Late now
-  // also includes people with no clockIn at all, that subtraction would
-  // double-count them out of On Time. Filter directly instead — clocked in,
-  // and not flagged late.
-  const pulseOnTime = latestAttendance.filter(
-    (r) => !!r.clockIn && r.status !== "LATE",
+  const pulseLate = latestAttendance.filter(
+    (r) => !!r.clockIn && (r.lateArrival === true || r.status === "LATE"),
   ).length;
-  // Only employees explicitly (or live-)marked ABSENT count as absent —
-  // anyone who simply hasn't clocked in yet but whose shift also hasn't
-  // ended isn't "absent" yet, just not yet accounted for.
+  const pulseEarly = latestAttendance.filter(
+    (r) =>
+      !!r.clockOut && (r.earlyLeave === true || r.status === "EARLY_LEAVE"),
+  ).length;
+  const pulseOnTime = latestAttendance.filter(
+    (r) =>
+      !!r.clockIn &&
+      r.lateArrival !== true &&
+      r.earlyLeave !== true &&
+      r.status !== "LATE" &&
+      r.status !== "EARLY_LEAVE",
+  ).length;
   const pulseAbsent = latestAttendance.filter(
     (r) => r.status === "ABSENT",
-  ).length;
-  // Desktop stat-card figures (see statsGrid below) — distinct from
-  // pulseOnTime above, which deliberately lumps PRESENT + EARLY_LEAVE
-  // together for the mobile widget's "on time" figure. These two need to
-  // stay separate buckets instead, since the desktop cards show early-leave
-  // and present as their own distinct counts.
-  const pulseEarly = latestAttendance.filter(
-    (r) => r.status === "EARLY_LEAVE",
-  ).length;
-  const pulsePresent = latestAttendance.filter(
-    (r) => r.status === "PRESENT",
   ).length;
   const pulsePercent =
     pulseTotalStaff > 0
@@ -1713,6 +1697,7 @@ export default function Dashboard() {
                   onTime={pulseOnTime}
                   late={pulseLate}
                   absent={pulseAbsent}
+                  earlyLeave={pulseEarly}
                   percent={pulsePercent}
                   lastClockInLabel={pulseLastClockInLabel}
                 />

@@ -100,7 +100,7 @@
 
 .legend {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 8px 12px;
     width: 100%;
     margin-top: 14px;
@@ -190,6 +190,10 @@
 
 .dotAbsent {
     background: var(--warning);
+}
+
+.dotEarly {
+    background: var(--info, var(--accent));
 }
 
 .footer {
