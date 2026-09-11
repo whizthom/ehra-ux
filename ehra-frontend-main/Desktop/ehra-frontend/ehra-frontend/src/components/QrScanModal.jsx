@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import jsQR from "jsqr";
-import { getMyAttendance, submitScanWithDeviceProof } from "../api/attendanceApi";
+import { getMyAttendance, submitScanWithDeviceProof, getAttendanceErrorMessage } from "../api/attendanceApi";
 import styles from "./QrScanModal.module.css";
 import { readSession } from "../api/authApi";
 import { formatAttendanceCooldown, getAttendanceCooldownRemaining, startAttendanceCooldown } from "../utils/attendanceCooldown";
@@ -99,10 +99,7 @@ export default function QrScanModal({ onClose, onSuccess }) {
         });
         onSuccess?.(data);
       } catch (err) {
-        const msg =
-          err?.response?.data?.message ||
-          err?.response?.data ||
-          "Scan failed. Please try again.";
+        const msg = getAttendanceErrorMessage(err);
         if (typeof msg === "string" && /wait.*3 minute|3 minute.*wait|three minute|attendance was just recorded/i.test(msg)) {
           const session = readSession();
           const membershipId = session?.employeeMembershipId || session?.membershipId || session?.employee?.membershipId;
@@ -206,7 +203,9 @@ export default function QrScanModal({ onClose, onSuccess }) {
       rafRef.current = requestAnimationFrame(tick);
     } catch (err) {
       const message =
-        err?.name === "NotAllowedError"
+        err?.message === "camera-timeout"
+          ? "The camera took too long to start. Check browser permissions and try again."
+          : err?.name === "NotAllowedError"
           ? "Camera permission was denied. Please allow camera access for this site in your browser settings, then try again."
           : err?.name === "NotFoundError"
             ? "No camera was found on this device."

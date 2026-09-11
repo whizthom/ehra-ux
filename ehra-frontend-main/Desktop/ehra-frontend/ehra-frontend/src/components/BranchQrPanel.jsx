@@ -47,7 +47,7 @@ export default function BranchQrPanel({ branchId, branchStatus }) {
       renderToken(data);
 
       clearTimeout(refreshTimeoutRef.current);
-      refreshTimeoutRef.current = setTimeout(fetchAndRender, data.expiresInMs);
+      refreshTimeoutRef.current = setTimeout(fetchAndRender, Math.max(1000, data.expiresInMs - 5000));
     } catch (err) {
       setError(
         err?.response?.data?.message || "Couldn't load this branch's QR code.",
@@ -79,7 +79,7 @@ export default function BranchQrPanel({ branchId, branchStatus }) {
       setError(null);
       renderToken(data);
       clearTimeout(refreshTimeoutRef.current);
-      refreshTimeoutRef.current = setTimeout(fetchAndRender, data.expiresInMs);
+      refreshTimeoutRef.current = setTimeout(fetchAndRender, Math.max(1000, data.expiresInMs - 5000));
     } catch (err) {
       setError(
         err?.response?.data?.message ||

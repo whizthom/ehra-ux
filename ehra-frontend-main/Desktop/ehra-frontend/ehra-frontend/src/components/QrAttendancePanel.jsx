@@ -40,7 +40,7 @@ export default function QrAttendancePanel() {
       // Self-scheduling: ask again right around when this token expires,
       // whatever that duration is, instead of assuming a fixed interval.
       clearTimeout(refreshTimeoutRef.current);
-      refreshTimeoutRef.current = setTimeout(fetchAndRender, data.expiresInMs);
+      refreshTimeoutRef.current = setTimeout(fetchAndRender, Math.max(1000, data.expiresInMs - 5000));
     } catch (err) {
       console.error("Failed to fetch QR token:", err);
       setError(true);

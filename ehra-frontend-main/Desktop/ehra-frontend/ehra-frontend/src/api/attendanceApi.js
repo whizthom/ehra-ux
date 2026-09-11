@@ -40,7 +40,7 @@ export const submitScan = (token, coords, deviceProof = {}) =>
     latitude: coords?.latitude ?? null,
     longitude: coords?.longitude ?? null,
     ...deviceProof,
-  });
+  }, { timeout: 20000 });
 
 const enrollmentPromises = new Map();
 
@@ -176,3 +176,20 @@ export const getHolidays = () => API.get("/schedule/holidays");
 export const addHoliday = (data) => API.post("/schedule/holidays", data);
 // data shape: { date: "2025-12-25", label: "Christmas Day" }
 export const deleteHoliday = (id) => API.delete(`/schedule/holidays/${id}`);
+
+export function getAttendanceErrorMessage(error) {
+  if (axios.isAxiosError(error) && error.code === "ECONNABORTED") {
+    return "The attendance service took too long to respond. Check your connection and scan the current QR again.";
+  }
+  const data = error?.response?.data;
+  const code = data?.errors?.code;
+  if (code === "QR_EXPIRED") return "This QR code has expired. Scan the newly displayed QR code.";
+  if (code === "QR_INVALID") return "This QR code is invalid. Please scan the current QR code.";
+  if (code === "ATTENDANCE_COOLDOWN") return data?.message || "Attendance was just recorded. Please wait before scanning again.";
+  if (code === "ATTENDANCE_LOCATION_REQUIRED") return "Location access is required to check in at this workplace.";
+  if (code === "ATTENDANCE_ZONE") return "You are outside your workplace attendance zone.";
+  if (code === "NOT_SCHEDULED") return data?.message || "You are not scheduled to work today.";
+  if (code === "WRONG_BRANCH") return data?.message || "This QR code is for a different branch.";
+  if (code === "ALREADY_COMPLETED") return "You have already completed attendance for today.";
+  return data?.message || (typeof data === "string" ? data : error?.message) || "Scan failed. Please try again.";
+}
