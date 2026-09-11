@@ -12,6 +12,7 @@ const EVENT_LABELS = {
   REVOKED_DEVICE: "Revoked device",
   MULTIPLE_EMPLOYEES_SAME_DEVICE: "Multiple employees / same device",
   SUSPICIOUS_ATTENDANCE: "Suspicious attendance",
+  NEW_DEVICE_REGISTERED: "New device registered",
 };
 
 function formatDate(value) {
@@ -68,7 +69,7 @@ export default function AttendanceSecurityPanel() {
   const revoke = async (device) => {
     if (
       !window.confirm(
-        `Revoke the attendance device registered to ${device.employeeName || "this employee"}? They will need to register a new device before device verification can be used again.`,
+        `Revoke the attendance device registered to ${device.employeeName || "this employee"}? The revoked device will no longer be trusted. If the employee uses another device, Ehral can automatically add it as a new device without blocking attendance.`,
       )
     )
       return;
@@ -155,8 +156,10 @@ export default function AttendanceSecurityPanel() {
               <i className="ti ti-device-mobile-off" />
               <strong>No registered attendance devices</strong>
               <span>
-                Employees are registered when they open the attendance clock-in
-                screen.
+                A device appears here after an employee successfully completes
+                verified attendance from it. New devices are added automatically
+                and existing devices remain associated with their original
+                employee.
               </span>
             </div>
           ) : (
@@ -167,6 +170,7 @@ export default function AttendanceSecurityPanel() {
                     <th>Employee</th>
                     <th>Device</th>
                     <th>Platform</th>
+                    <th>Binding</th>
                     <th>Status</th>
                     <th>Last seen</th>
                     <th />
@@ -180,6 +184,7 @@ export default function AttendanceSecurityPanel() {
                       </td>
                       <td>{device.deviceName || "This device"}</td>
                       <td>{device.platform || "web"}</td>
+                      <td>{device.primaryBinding ? "Primary" : "Secondary"}</td>
                       <td>
                         <span
                           className={`${styles.status} ${device.bindingStatus === "ACTIVE" && device.deviceStatus === "ACTIVE" ? styles.good : styles.warn}`}

@@ -5,7 +5,6 @@ import {
   getMyAttendance,
   submitScan,
   submitScanWithDeviceProof,
-  ensureAttendanceDevice,
   getAttendanceErrorMessage,
 } from "../api/attendanceApi";
 import { getMyProfile } from "../api/employeeApi";
@@ -159,16 +158,6 @@ export default function ScanAttendance() {
   const dashboardPath = isAdmin ? "/dashboard" : "/my-dashboard";
   const NAV = isAdmin ? ADMIN_NAV : EMPLOYEE_NAV;
   const bottomNavThumb = useScrollThumb(bottomNavScrollRef);
-
-  // Device enrollment is deliberately best-effort. A device setup problem
-  // must never prevent the existing attendance flow from opening or recording
-  // a scan. The server remains the authority on device trust.
-  useEffect(() => {
-    if (!user?.membershipId) return;
-    ensureAttendanceDevice().catch((err) => {
-      console.warn("Attendance device enrollment unavailable.", err);
-    });
-  }, [user?.membershipId]);
 
   // Best-effort profile fetch, purely to dress the shared shell (business
   // logo/name, avatar, HOD-gated nav items) the same way the dashboards

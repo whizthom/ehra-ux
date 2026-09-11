@@ -8,7 +8,6 @@ import {
   updateAttendanceDeviceId,
 } from "../utils/attendanceDeviceCrypto";
 import {
-  enrollAttendanceDevice,
   requestAttendanceDeviceChallenge,
 } from "./attendanceDeviceApi";
 
@@ -43,7 +42,7 @@ export const submitScan = (token, coords, deviceProof = {}) =>
       longitude: coords?.longitude ?? null,
       ...deviceProof,
     },
-    { timeout: 20000 },
+    { timeout: 20000 }
   );
 
 const proofPromises = new Map();
@@ -70,9 +69,7 @@ export async function ensureAttendanceDevice() {
   const context = getAttendanceDeviceContext(session);
 
   if (!context.membershipId) {
-    throw new Error(
-      "No active employee membership is available.",
-    );
+    throw new Error("No active employee membership is available.");
   }
 
   const stored = await getOrCreateAttendanceKeyPair(context);
@@ -99,66 +96,48 @@ export async function buildAttendanceDeviceProof(action) {
   }
 
   const promise = (async () => {
-    const stored =
-      await getOrCreateAttendanceKeyPair(context);
+    const stored = await getOrCreateAttendanceKeyPair(context);
 
     let deviceId = stored.deviceId;
 
     /*
      * If this browser already knows its backend device identity, use it.
-     *
      * If storage was cleared, there will be no deviceId and the public key
      * path below introduces a new cryptographic device identity.
      */
     const challengePayload = {
       action,
       ...(deviceId
-        ? {
-            deviceId,
-          }
+        ? { deviceId }
         : {
             publicKey: stored.publicKeyB64,
           }),
     };
 
     const { data } =
-      await requestAttendanceDeviceChallenge(
-        challengePayload,
-      );
+      await requestAttendanceDeviceChallenge(challengePayload);
 
     /*
      * The challenge endpoint may create/resolve the backend device identity.
-     *
      * Persist the returned deviceId locally so subsequent clock-ins/outs use
      * the same backend identity without another enrollment call.
      */
-    if (
-      data.deviceId &&
-      data.deviceId !== deviceId
-    ) {
-      await updateAttendanceDeviceId(
-        context,
-        data.deviceId,
-      );
-
+    if (data.deviceId && data.deviceId !== deviceId) {
+      await updateAttendanceDeviceId(context, data.deviceId);
       deviceId = data.deviceId;
     }
 
-    const signature =
-      await signAttendanceChallenge(
-        stored.keyPair.privateKey,
-        data.challenge,
-        context.membershipId,
-        action,
-      );
+    const signature = await signAttendanceChallenge(
+      stored.keyPair.privateKey,
+      data.challenge,
+      context.membershipId,
+      action
+    );
 
     return {
-      deviceId:
-        data.deviceId || deviceId,
-      deviceChallenge:
-        data.challenge,
-      deviceSignature:
-        signature,
+      deviceId: data.deviceId || deviceId,
+      deviceChallenge: data.challenge,
+      deviceSignature: signature,
     };
   })();
 
@@ -171,81 +150,60 @@ export async function buildAttendanceDeviceProof(action) {
   }
 }
 
-export async function submitScanWithDeviceProof(
-  token,
-  coords,
-  action,
-) {
-  const requestId =
-    window.crypto?.randomUUID
-      ? window.crypto.randomUUID()
-      : `${Date.now()}-${Math.random()
-          .toString(36)
-          .slice(2)}`;
+export async function submitScanWithDeviceProof(token, coords, action) {
+  const requestId = window.crypto?.randomUUID
+    ? window.crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
   let proof = null;
 
   try {
-    proof =
-      await buildAttendanceDeviceProof(action);
+    proof = await buildAttendanceDeviceProof(action);
   } catch (err) {
-    /*
-     * Device proof is deliberately best-effort.
-     *
-     * Attendance must continue even if secure storage,
-     * challenge creation, or signing is unavailable.
-     */
+    // Device proof is deliberately best-effort. Attendance must continue
+    // even if secure storage, challenge creation, or signing is unavailable.
     console.warn(
       "Attendance device proof unavailable; submitting attendance without proof.",
-      err,
+      err
     );
   }
 
-  return submitScan(
-    token,
-    coords,
-    {
-      ...(proof || {}),
-      requestId,
-    },
-  );
+  return submitScan(token, coords, {
+    ...(proof || {}),
+    requestId,
+  });
 }
 
 // ── Attendance views ─────────────────────────────────────────────────────────
-
 export const getTodayAttendance = () =>
   API.get("/attendance/today");
 
 // from/to are optional — omit both (or pass undefined) to get the
 // business's complete attendance history, past to present, for every
 // employee. Pass both to narrow to a date range.
-export const getAttendanceHistory = (
-  from,
-  to,
-) =>
-  API.get(
-    "/attendance/history",
-    {
-      params:
-        from && to
-          ? { from, to }
-          : {},
-    },
-  );
+export const getAttendanceHistory = (from, to) =>
+  API.get("/attendance/history", {
+    params: from && to ? { from, to } : {},
+  });
 
 export const getMyAttendance = () =>
   API.get("/attendance/me");
 
-// ── Schedule (admin) ─────────────────────────────────────────────────────────
+export const getMissingClockOuts = () =>
+  API.get("/attendance/missing-clock-outs");
 
+export const resolveMissingClockOut = (attendanceId, data) =>
+  API.post(
+    `/attendance/missing-clock-outs/${attendanceId}/resolve`,
+    data
+  );
+
+// ── Schedule (admin) ─────────────────────────────────────────────────────────
 export const getWeeklySchedule = () =>
   API.get("/schedule/weekly");
 
 export const updateDaySchedule = (data) =>
-  API.put(
-    "/schedule/weekly",
-    data,
-  );
+  API.put("/schedule/weekly", data);
 
 // data shape:
 // {
@@ -259,10 +217,7 @@ export const getHolidays = () =>
   API.get("/schedule/holidays");
 
 export const addHoliday = (data) =>
-  API.post(
-    "/schedule/holidays",
-    data,
-  );
+  API.post("/schedule/holidays", data);
 
 // data shape:
 // {
@@ -271,9 +226,7 @@ export const addHoliday = (data) =>
 // }
 
 export const deleteHoliday = (id) =>
-  API.delete(
-    `/schedule/holidays/${id}`,
-  );
+  API.delete(`/schedule/holidays/${id}`);
 
 export function getAttendanceErrorMessage(error) {
   if (
@@ -283,11 +236,8 @@ export function getAttendanceErrorMessage(error) {
     return "The attendance service took too long to respond. Check your connection and scan the current QR again.";
   }
 
-  const data =
-    error?.response?.data;
-
-  const code =
-    data?.errors?.code;
+  const data = error?.response?.data;
+  const code = data?.errors?.code;
 
   if (code === "QR_EXPIRED") {
     return "This QR code has expired. Scan the newly displayed QR code.";
@@ -304,9 +254,7 @@ export function getAttendanceErrorMessage(error) {
     );
   }
 
-  if (
-    code === "ATTENDANCE_LOCATION_REQUIRED"
-  ) {
+  if (code === "ATTENDANCE_LOCATION_REQUIRED") {
     return "Location access is required to check in at this workplace.";
   }
 
@@ -315,17 +263,11 @@ export function getAttendanceErrorMessage(error) {
   }
 
   if (code === "NOT_SCHEDULED") {
-    return (
-      data?.message ||
-      "You are not scheduled to work today."
-    );
+    return data?.message || "You are not scheduled to work today.";
   }
 
   if (code === "WRONG_BRANCH") {
-    return (
-      data?.message ||
-      "This QR code is for a different branch."
-    );
+    return data?.message || "This QR code is for a different branch.";
   }
 
   if (code === "ALREADY_COMPLETED") {
@@ -334,9 +276,7 @@ export function getAttendanceErrorMessage(error) {
 
   return (
     data?.message ||
-    (typeof data === "string"
-      ? data
-      : error?.message) ||
+    (typeof data === "string" ? data : error?.message) ||
     "Scan failed. Please try again."
   );
 }

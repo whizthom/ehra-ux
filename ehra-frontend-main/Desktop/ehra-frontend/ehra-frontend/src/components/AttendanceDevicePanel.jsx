@@ -51,7 +51,7 @@ export default function AttendanceDevicePanel() {
   const revoke = async () => {
     if (
       !window.confirm(
-        "Revoke your current attendance device? You will need to register the next device before using device verification again.",
+        "Revoke your current attendance device? Ehral will stop trusting that device. You can use another device and it can be registered automatically during your next verified attendance.",
       )
     )
       return;
@@ -102,8 +102,9 @@ export default function AttendanceDevicePanel() {
           <div>
             <h3>Attendance device</h3>
             <p>
-              Your registered device helps Ehral verify attendance without
-              relying on a device name, IMEI, or other editable identifier.
+              Ehral automatically registers a cryptographic device identity
+              after successful verified attendance. Device names and IMEI values
+              are not used as the trust mechanism.
             </p>
           </div>
         </div>
@@ -133,8 +134,9 @@ export default function AttendanceDevicePanel() {
             <div className={styles.note}>
               <i className="ti ti-info-circle" />
               <span>
-                Revoke your current device before enrolling a new one to avoid a
-                security flag on your next clock-in.
+                You can use more than one device. New devices are added
+                automatically after successful verified attendance, while your
+                existing device remains registered.
               </span>
             </div>
             <button
@@ -152,8 +154,9 @@ export default function AttendanceDevicePanel() {
             <div>
               <strong>No registered attendance device</strong>
               <p>
-                Your device will be registered automatically when you open the
-                clock-in screen and device enrollment is available.
+                Your device will be registered automatically after your first
+                successful verified attendance. Opening the attendance screen
+                alone does not register a device.
               </p>
             </div>
           </div>

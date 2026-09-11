@@ -9,7 +9,11 @@ import {
   approveLeave,
   rejectLeave,
 } from "../api/leaveApi";
-import { getTodayAttendance } from "../api/attendanceApi";
+import {
+  getTodayAttendance,
+  getMissingClockOuts,
+  resolveMissingClockOut,
+} from "../api/attendanceApi";
 import { softDeleteEmployee } from "../api/workforceApi";
 // Real-time messaging (V1 rebuild) — replaces the old SSE-based chat's
 // getChatUnreadCount for the sidebar/topbar "Messages" badge. The old
@@ -173,14 +177,14 @@ const NOTIF_ICON = {
   SYSTEM: "ti-info-circle",
 };
 
-// Matches com.Ehra.Enums.AttendanceStatus exactly: PRESENT, LATE,
-// EARLY_LEAVE, ABSENT. Keys here map to the pill_* classes in
+// Matches com.Ehra.Enums.AttendanceStatus. Keys here map to the pill_* classes in
 // Dashboard.module.css.
 const ATTENDANCE_PILL = {
   PRESENT: "pill_present",
   LATE: "pill_late",
   EARLY_LEAVE: "pill_early",
   ABSENT: "pill_absent",
+  MISSING_CLOCK_OUT: "pill_missing_clock_out",
 };
 
 const ATTENDANCE_LABEL = {
@@ -188,6 +192,7 @@ const ATTENDANCE_LABEL = {
   LATE: "Late",
   EARLY_LEAVE: "Early leave",
   ABSENT: "Absent",
+  MISSING_CLOCK_OUT: "Missing clock-out",
 };
 
 // Tracks a horizontally-scrollable element and returns { left, width } as
@@ -426,6 +431,10 @@ export default function Dashboard() {
   // Latest attendance (today's clock-ins/outs, shown on the main dashboard)
   const [latestAttendance, setLatestAttendance] = useState([]);
   const [loadingLatestAttendance, setLoadingLatestAttendance] = useState(true);
+  const [missingClockOuts, setMissingClockOuts] = useState([]);
+  const [loadingMissingClockOuts, setLoadingMissingClockOuts] = useState(true);
+  const [resolvingMissingClockOutId, setResolvingMissingClockOutId] =
+    useState(null);
   const [removeConfirm, setRemoveConfirm] = useState(null); // { id, name }
   const [removingId, setRemovingId] = useState(null);
 
@@ -1132,6 +1141,77 @@ export default function Dashboard() {
     setDepartments((prev) => [...prev, newDept]);
   };
 
+  const fetchMissingClockOuts = useCallback(async () => {
+    try {
+      setLoadingMissingClockOuts(true);
+      const { data } = await getMissingClockOuts();
+      setMissingClockOuts(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Failed to load missing clock-outs:", err);
+    } finally {
+      setLoadingMissingClockOuts(false);
+    }
+  }, []);
+
+  const handleResolveMissingClockOut = useCallback(
+    async (row, resolution) => {
+      let clockOutAt = null;
+      let note = window.prompt("Optional review note:", "") || null;
+
+      if (resolution === "ADD_CLOCK_OUT") {
+        const suggested =
+          row.date && row.clockIn
+            ? (() => {
+                const d = new Date(row.clockIn);
+                const pad = (v) => String(v).padStart(2, "0");
+                return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+              })()
+            : `${row.date}T17:00`;
+        const entered = window.prompt(
+          "Enter the actual clock-out date/time (YYYY-MM-DDTHH:mm).",
+          suggested,
+        );
+        if (!entered) return;
+        clockOutAt = entered;
+      }
+
+      if (
+        !window.confirm(
+          resolution === "APPROVE_MISSING_CLOCK_OUT"
+            ? "Approve this missing clock-out without adding a timestamp?"
+            : resolution === "CLOSE_AT_SCHEDULED_END"
+              ? "Close this attendance at the scheduled end time?"
+              : "Save this clock-out time?",
+        )
+      )
+        return;
+
+      try {
+        setResolvingMissingClockOutId(row.id);
+        await resolveMissingClockOut(row.id, { resolution, clockOutAt, note });
+        await fetchMissingClockOuts();
+        await fetchLatestAttendance();
+      } catch (err) {
+        alert(
+          err?.response?.data?.message ||
+            "Unable to resolve this missing clock-out.",
+        );
+      } finally {
+        setResolvingMissingClockOutId(null);
+      }
+    },
+    [fetchMissingClockOuts, fetchLatestAttendance],
+  );
+
+  useEffect(() => {
+    fetchMissingClockOuts();
+  }, [fetchMissingClockOuts]);
+
+  useEffect(() => {
+    const interval = setInterval(fetchMissingClockOuts, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [fetchMissingClockOuts]);
+
   // ── Derived ───────────────────────────────────────────────────────────
 
   const today = new Date().toLocaleDateString("en-GB", {
@@ -1152,31 +1232,47 @@ export default function Dashboard() {
     pendingApprovals: 0,
   };
 
-  // Today's Pulse: four independent attendance conditions.
-  // On Time requires an actual clock-in with neither late arrival nor early
-  // leave. Late and Early Leave are independent, so someone who arrived late
-  // and later left early appears in both buckets. Absent is the live/stored
-  // state for scheduled employees who have reached their start time without
-  // a clock-in. Once they clock in, the same record becomes LATE.
+  // Today's Pulse (mobile hero widget) — real attendance figures. "Staff"
+  // = active employees (the people expected to clock in); "clocked in" =
+  // anyone with a record in today's attendance feed at all.
+  // "Clocked in" must only count people who actually clocked in — the
+  // backend now also creates explicit ABSENT/LATE entries (no clockIn
+  // timestamp) once an employee's scheduled clock-in/clock-out time passes
+  // without them showing up, so `latestAttendance` can contain rows for
+  // people who were never actually present. Filtering on `clockIn` keeps
+  // those groups from being conflated (previously `latestAttendance.length`
+  // counted absentees as "clocked in" too).
   const pulseTotalStaff = safeSummary.activeEmployees;
   const pulseClockedIn = latestAttendance.filter((r) => !!r.clockIn).length;
-  const pulseLate = latestAttendance.filter(
-    (r) => !!r.clockIn && (r.lateArrival === true || r.status === "LATE"),
-  ).length;
-  const pulseEarly = latestAttendance.filter(
-    (r) =>
-      !!r.clockOut && (r.earlyLeave === true || r.status === "EARLY_LEAVE"),
-  ).length;
+  // "Late" includes both people who actually clocked in late AND people who
+  // simply haven't clocked in yet once their clock-in time has passed (a
+  // live, not-yet-persisted status the backend computes on the fly) — those
+  // graduate into Absent once their clock-out time passes too, so nobody is
+  // ever counted in both buckets at once.
+  const pulseLate = latestAttendance.filter((r) => r.status === "LATE").length;
+  // On Time can no longer be derived as clockedIn - late: since Late now
+  // also includes people with no clockIn at all, that subtraction would
+  // double-count them out of On Time. Filter directly instead — clocked in,
+  // and not flagged late.
   const pulseOnTime = latestAttendance.filter(
-    (r) =>
-      !!r.clockIn &&
-      r.lateArrival !== true &&
-      r.earlyLeave !== true &&
-      r.status !== "LATE" &&
-      r.status !== "EARLY_LEAVE",
+    (r) => !!r.clockIn && r.status !== "LATE",
   ).length;
+  // Only employees explicitly (or live-)marked ABSENT count as absent —
+  // anyone who simply hasn't clocked in yet but whose shift also hasn't
+  // ended isn't "absent" yet, just not yet accounted for.
   const pulseAbsent = latestAttendance.filter(
     (r) => r.status === "ABSENT",
+  ).length;
+  // Desktop stat-card figures (see statsGrid below) — distinct from
+  // pulseOnTime above, which deliberately lumps PRESENT + EARLY_LEAVE
+  // together for the mobile widget's "on time" figure. These two need to
+  // stay separate buckets instead, since the desktop cards show early-leave
+  // and present as their own distinct counts.
+  const pulseEarly = latestAttendance.filter(
+    (r) => r.status === "EARLY_LEAVE",
+  ).length;
+  const pulsePresent = latestAttendance.filter(
+    (r) => r.status === "PRESENT",
   ).length;
   const pulsePercent =
     pulseTotalStaff > 0
@@ -1697,7 +1793,6 @@ export default function Dashboard() {
                   onTime={pulseOnTime}
                   late={pulseLate}
                   absent={pulseAbsent}
-                  earlyLeave={pulseEarly}
                   percent={pulsePercent}
                   lastClockInLabel={pulseLastClockInLabel}
                 />
@@ -1710,7 +1805,8 @@ export default function Dashboard() {
                   pendingProfileEdits.length > 0 ||
                   messagesUnread > 0 ||
                   pulseLate > 0 ||
-                  pulseAbsent > 0) && (
+                  pulseAbsent > 0 ||
+                  missingClockOuts.length > 0) && (
                   <section
                     className={styles.mobileAttention}
                     aria-label="Needs attention"
@@ -1777,6 +1873,42 @@ export default function Dashboard() {
                               {pulseLate === 1
                                 ? "late arrival"
                                 : "late arrivals"}
+                            </strong>
+                            <small>Review attendance</small>
+                          </span>
+                          <i
+                            className="ti ti-chevron-right"
+                            aria-hidden="true"
+                          />
+                        </button>
+                      )}
+                      {missingClockOuts.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const target = document.getElementById(
+                              "missing-clockout-review",
+                            );
+                            if (target)
+                              target.scrollIntoView({
+                                behavior: "smooth",
+                                block: "start",
+                              });
+                            else setActiveNav("Attendance");
+                          }}
+                          className={styles.mobileAttentionItem}
+                        >
+                          <span
+                            className={`${styles.mobileAttentionIcon} ${styles.mobileAttentionWarning}`}
+                          >
+                            <i className="ti ti-clock-off" aria-hidden="true" />
+                          </span>
+                          <span>
+                            <strong>
+                              {missingClockOuts.length} missing{" "}
+                              {missingClockOuts.length === 1
+                                ? "clock-out"
+                                : "clock-outs"}
                             </strong>
                             <small>Review attendance</small>
                           </span>
@@ -1898,7 +2030,7 @@ export default function Dashboard() {
                     color: "blue",
                     num: pulseEarly,
                     label: "Left early today",
-                    trend: `${pulseClockedIn} present`,
+                    trend: `${pulsePresent} present`,
                     trendColor: "var(--info-text)",
                   },
                   {
@@ -2327,6 +2459,130 @@ export default function Dashboard() {
                         </table>
                       </div>
                     )}
+                  </div>
+                )}
+              </div>
+
+              {/* Missing clock-outs: a deliberate review queue. The system never
+                  invents a clock-out timestamp; authorized reviewers choose how
+                  to resolve each item. */}
+              <div
+                id="missing-clockout-review"
+                className={styles.missingClockOutPanel}
+              >
+                <div className={styles.dirHdr}>
+                  <span className={styles.panelTitle}>
+                    <i className="ti ti-alert-triangle" aria-hidden="true" />
+                    Needs attention
+                    {missingClockOuts.length > 0 && (
+                      <span className={styles.missingClockOutBadge}>
+                        {missingClockOuts.length}
+                      </span>
+                    )}
+                    <span className={styles.panelSubtitle}>
+                      Missing clock-outs
+                    </span>
+                  </span>
+                  <button
+                    className={styles.panelAction}
+                    onClick={fetchMissingClockOuts}
+                  >
+                    Refresh
+                  </button>
+                </div>
+                {loadingMissingClockOuts ? (
+                  <p className={styles.emptyState}>
+                    Checking for missing clock-outs…
+                  </p>
+                ) : missingClockOuts.length === 0 ? (
+                  <p className={styles.emptyState}>
+                    No unresolved missing clock-outs.
+                  </p>
+                ) : (
+                  <div className={styles.missingClockOutList}>
+                    {missingClockOuts.map((row) => {
+                      const name =
+                        fullName(row.employeeFirstName, row.employeeLastName) ||
+                        "Employee";
+                      const busy = resolvingMissingClockOutId === row.id;
+                      return (
+                        <div className={styles.missingClockOutRow} key={row.id}>
+                          <div className={styles.missingClockOutPerson}>
+                            <div className={styles.empAv}>
+                              {row.employeeProfilePictureUrl ? (
+                                <img
+                                  src={row.employeeProfilePictureUrl}
+                                  alt=""
+                                />
+                              ) : (
+                                initials(
+                                  row.employeeFirstName,
+                                  row.employeeLastName,
+                                )
+                              )}
+                            </div>
+                            <div>
+                              <strong>{name}</strong>
+                              <span>
+                                {row.department || "Unassigned"} · {row.date}
+                              </span>
+                            </div>
+                          </div>
+                          <div className={styles.missingClockOutMeta}>
+                            <span>
+                              Clocked in{" "}
+                              {row.clockIn
+                                ? new Date(row.clockIn).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })
+                                : "—"}
+                            </span>
+                            <span className={styles.missingClockOutStatus}>
+                              Clock-out missing
+                            </span>
+                          </div>
+                          <div className={styles.missingClockOutActions}>
+                            <button
+                              className={styles.tblBtn}
+                              disabled={busy}
+                              onClick={() =>
+                                handleResolveMissingClockOut(
+                                  row,
+                                  "ADD_CLOCK_OUT",
+                                )
+                              }
+                            >
+                              Add time
+                            </button>
+                            <button
+                              className={styles.tblBtn}
+                              disabled={busy}
+                              onClick={() =>
+                                handleResolveMissingClockOut(
+                                  row,
+                                  "CLOSE_AT_SCHEDULED_END",
+                                )
+                              }
+                            >
+                              Scheduled end
+                            </button>
+                            <button
+                              className={`${styles.tblBtn} ${styles.danger}`}
+                              disabled={busy}
+                              onClick={() =>
+                                handleResolveMissingClockOut(
+                                  row,
+                                  "APPROVE_MISSING_CLOCK_OUT",
+                                )
+                              }
+                            >
+                              Approve
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>

@@ -2459,3 +2459,134 @@
         display: none;
     }
 }
+
+.missingClockOutPanel {
+    border: 1px solid var(--warning-border, var(--border-color));
+    border-radius: 14px;
+    background: var(--card-bg, var(--surface));
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.missingClockOutPanel .dirHdr {
+    padding: 15px 18px;
+}
+
+.missingClockOutPanel .panelTitle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.missingClockOutBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: var(--warning-bg);
+    color: var(--warning-text);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.missingClockOutList {
+    display: flex;
+    flex-direction: column;
+}
+
+.missingClockOutRow {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.4fr) minmax(190px, 1fr) auto;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 18px;
+    border-top: 1px solid var(--border-color);
+}
+
+.missingClockOutPerson {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+}
+
+.missingClockOutPerson>div:last-child {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.missingClockOutPerson strong {
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+.missingClockOutPerson span,
+.missingClockOutMeta span {
+    color: var(--text-secondary);
+    font-size: 11px;
+    margin-top: 2px;
+}
+
+.missingClockOutMeta {
+    display: flex;
+    flex-direction: column;
+}
+
+.missingClockOutStatus {
+    color: var(--warning-text) !important;
+    font-weight: 700;
+}
+
+.missingClockOutActions {
+    display: flex;
+    gap: 7px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.pill_missing_clock_out {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+    border-color: var(--warning-border);
+}
+
+@media (max-width: 1100px) and (min-width: 901px) {
+    .missingClockOutRow {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .missingClockOutActions {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 900px) {
+    .missingClockOutPanel {
+        margin-top: 12px;
+    }
+
+    .missingClockOutPanel .dirHdr {
+        padding: 13px 14px;
+    }
+
+    .missingClockOutRow {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 13px 14px;
+    }
+
+    .missingClockOutActions {
+        justify-content: flex-start;
+    }
+
+    .missingClockOutActions .tblBtn {
+        flex: 1;
+        min-width: 0;
+    }
+}
