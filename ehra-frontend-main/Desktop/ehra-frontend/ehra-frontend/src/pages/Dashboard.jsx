@@ -1898,7 +1898,7 @@ export default function Dashboard() {
                     color: "blue",
                     num: pulseEarly,
                     label: "Left early today",
-                    trend: `${pulsePresent} present`,
+                    trend: `${pulseClockedIn} present`,
                     trendColor: "var(--info-text)",
                   },
                   {
