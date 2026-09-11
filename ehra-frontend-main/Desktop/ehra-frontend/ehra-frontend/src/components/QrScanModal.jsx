@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import jsQR from "jsqr";
 import { getMyAttendance, submitScanWithDeviceProof } from "../api/attendanceApi";
 import styles from "./QrScanModal.module.css";
+import { readSession } from "../api/authApi";
+import { formatAttendanceCooldown, getAttendanceCooldownRemaining, startAttendanceCooldown } from "../utils/attendanceCooldown";
 
 /**
  * Full-screen overlay scanner. Reuses the same decode loop as the original
@@ -18,6 +20,7 @@ export default function QrScanModal({ onClose, onSuccess }) {
 
   const [cameraError, setCameraError] = useState("");
   const [result, setResult] = useState(null);
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
   const [scanning, setScanning] = useState(true);
   // Camera is never started automatically — see startCamera() for why.
   // "idle" = not requested yet, "starting" = request in flight.
@@ -53,9 +56,18 @@ export default function QrScanModal({ onClose, onSuccess }) {
     });
   }, []);
 
+  useEffect(() => {
+    const session = readSession();
+    const membershipId = session?.employeeMembershipId || session?.membershipId || session?.employee?.membershipId;
+    const refresh = () => setCooldownRemaining(getAttendanceCooldownRemaining(membershipId));
+    refresh();
+    const timer = window.setInterval(refresh, 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
   const handleDecoded = useCallback(
     async (token) => {
-      if (scanLockRef.current) return;
+      if (scanLockRef.current || cooldownRemaining > 0) return;
       scanLockRef.current = true;
       setScanning(false);
       stopCamera();
@@ -76,6 +88,9 @@ export default function QrScanModal({ onClose, onSuccess }) {
           console.warn("Could not determine attendance action for device proof.", actionError);
         }
         const { data } = await submitScanWithDeviceProof(token, coords, action);
+        const session = readSession();
+        const membershipId = session?.employeeMembershipId || session?.membershipId || session?.employee?.membershipId;
+        setCooldownRemaining(startAttendanceCooldown(membershipId, data.timestamp));
         setResult({
           ok: true,
           action: data.action,
@@ -88,13 +103,18 @@ export default function QrScanModal({ onClose, onSuccess }) {
           err?.response?.data?.message ||
           err?.response?.data ||
           "Scan failed. Please try again.";
+        if (typeof msg === "string" && /wait.*3 minute|3 minute.*wait|three minute|attendance was just recorded/i.test(msg)) {
+          const session = readSession();
+          const membershipId = session?.employeeMembershipId || session?.membershipId || session?.employee?.membershipId;
+          setCooldownRemaining(startAttendanceCooldown(membershipId));
+        }
         setResult({
           ok: false,
           message: typeof msg === "string" ? msg : "Scan failed.",
         });
       }
     },
-    [stopCamera, onSuccess, getCoords],
+    [stopCamera, onSuccess, getCoords, cooldownRemaining],
   );
 
   const tick = useCallback(() => {
@@ -127,6 +147,14 @@ export default function QrScanModal({ onClose, onSuccess }) {
   }, []);
 
   const startCamera = useCallback(async () => {
+    if (cooldownRemaining > 0) {
+      setResult((current) => current || {
+        ok: false,
+        message: `Attendance was just recorded. Please wait ${formatAttendanceCooldown(cooldownRemaining)} before scanning again.`,
+      });
+      setScanning(false);
+      return;
+    }
     setCameraError("");
     setCameraState("starting");
 
@@ -200,6 +228,7 @@ export default function QrScanModal({ onClose, onSuccess }) {
   }, [stopCamera]);
 
   const handleScanAgain = () => {
+    if (cooldownRemaining > 0) return;
     scanLockRef.current = false;
     setResult(null);
     setScanning(true);
@@ -307,9 +336,13 @@ export default function QrScanModal({ onClose, onSuccess }) {
                 </span>
               )}
               <div className={styles.resultActions}>
+                {cooldownRemaining > 0 && (
+                  <span className={styles.resultCooldown}>You can scan again in {formatAttendanceCooldown(cooldownRemaining)}.</span>
+                )}
                 <button
                   className={styles.scanAgainBtn}
                   onClick={handleScanAgain}
+                  disabled={cooldownRemaining > 0}
                 >
                   Scan again
                 </button>

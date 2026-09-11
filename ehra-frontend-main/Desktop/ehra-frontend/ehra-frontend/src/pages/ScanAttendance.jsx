@@ -13,6 +13,8 @@ import ThemeToggleMenu from "../theme/ThemeToggleMenu";
 import LogoutConfirmModal from "../components/LogoutConfirmModal";
 import dash from "./Dashboard.module.css";
 import styles from "./ScanAttendance.module.css";
+import { readSession } from "../api/authApi";
+import { formatAttendanceCooldown, getAttendanceCooldownRemaining, startAttendanceCooldown } from "../utils/attendanceCooldown";
 
 // This page reuses the exact same shell (sidebar, topbar, mobile bottom
 // nav) as Dashboard.jsx / EmployeeDashboard.jsx via Dashboard.module.css,
@@ -128,6 +130,7 @@ export default function ScanAttendance() {
   // Camera is never started automatically — see startCamera() below.
   const [cameraState, setCameraState] = useState("idle");
   const [result, setResult] = useState(null); // { ok, message, action, status }
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
   const [scanning, setScanning] = useState(true);
   const [profile, setProfile] = useState(null);
 
@@ -207,9 +210,18 @@ export default function ScanAttendance() {
     });
   }, []);
 
+  useEffect(() => {
+    const session = readSession();
+    const membershipId = session?.employeeMembershipId || session?.membershipId || session?.employee?.membershipId;
+    const refresh = () => setCooldownRemaining(getAttendanceCooldownRemaining(membershipId));
+    refresh();
+    const timer = window.setInterval(refresh, 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
   const handleDecoded = useCallback(
     async (token) => {
-      if (scanLockRef.current) return;
+      if (scanLockRef.current || cooldownRemaining > 0) return;
       scanLockRef.current = true;
       setScanning(false);
       stopCamera();
@@ -234,6 +246,9 @@ export default function ScanAttendance() {
         const { data } = action
           ? await submitScanWithDeviceProof(token, coords, action)
           : await submitScan(token, coords, {});
+        const session = readSession();
+        const membershipId = session?.employeeMembershipId || session?.membershipId || session?.employee?.membershipId;
+        setCooldownRemaining(startAttendanceCooldown(membershipId, data.timestamp));
         setResult({
           ok: true,
           action: data.action,
@@ -245,13 +260,18 @@ export default function ScanAttendance() {
           err?.response?.data?.message ||
           err?.response?.data ||
           "Scan failed. Please try again.";
+        if (typeof msg === "string" && /wait.*3 minute|3 minute.*wait|three minute|attendance was just recorded/i.test(msg)) {
+          const session = readSession();
+          const membershipId = session?.employeeMembershipId || session?.membershipId || session?.employee?.membershipId;
+          setCooldownRemaining(startAttendanceCooldown(membershipId));
+        }
         setResult({
           ok: false,
           message: typeof msg === "string" ? msg : "Scan failed.",
         });
       }
     },
-    [stopCamera, getCoords],
+    [stopCamera, getCoords, cooldownRemaining],
   );
 
   const tick = useCallback(() => {
@@ -284,6 +304,14 @@ export default function ScanAttendance() {
   }, []);
 
   const startCamera = useCallback(async () => {
+    if (cooldownRemaining > 0) {
+      setResult((current) => current || {
+        ok: false,
+        message: `Attendance was just recorded. Please wait ${formatAttendanceCooldown(cooldownRemaining)} before scanning again.`,
+      });
+      setScanning(false);
+      return;
+    }
     setCameraError("");
     setCameraState("starting");
 
@@ -342,6 +370,7 @@ export default function ScanAttendance() {
   }, [stopCamera]);
 
   const handleScanAgain = () => {
+    if (cooldownRemaining > 0) return;
     scanLockRef.current = false;
     setResult(null);
     setScanning(true);
@@ -544,9 +573,13 @@ export default function ScanAttendance() {
                         : "Clocked out"}
                     </span>
                   )}
+                  {cooldownRemaining > 0 && (
+                    <span className={styles.resultCooldown}>You can scan again in {formatAttendanceCooldown(cooldownRemaining)}.</span>
+                  )}
                   <button
                     className={styles.scanAgainBtn}
                     onClick={handleScanAgain}
+                    disabled={cooldownRemaining > 0}
                   >
                     Scan again
                   </button>
