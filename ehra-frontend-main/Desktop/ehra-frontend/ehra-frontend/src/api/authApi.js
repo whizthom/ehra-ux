@@ -340,19 +340,34 @@ API.interceptors.response.use(
         return Promise.reject(error);
       }
 
+      // BUGFIX: the refresh call and the retried original request used to
+      // share one try/catch. That meant ANY error response from the
+      // *retried* request — not just a failed refresh — fell into the
+      // catch block below and was treated as "the session is really
+      // over," which cleared tokens and hard-redirected to /login. In
+      // practice this fired for perfectly legitimate, non-auth 403s: e.g.
+      // a Starter-plan user hitting "create business" gets a genuine
+      // PlanLimitExceededException (403) from the backend — nothing wrong
+      // with their token — but because this was the SECOND 403 for the
+      // same request, the refresh-and-retry path above had already run,
+      // gotten a fresh token, retried, and the retried call failed with
+      // that same business-rule 403 again. That failure landed here and
+      // logged the user out instead of just showing the plan-limit error
+      // on the page. Splitting the refresh step from the retry step means
+      // only a genuine refresh failure (expired/revoked refresh token)
+      // clears the session; a business-logic 403 on the retried request
+      // just rejects normally and reaches the caller's own .catch (e.g.
+      // MyAccountsPage's handleCreate), which shows the message inline
+      // without touching auth state.
+      let accessToken;
       try {
-        const accessToken = await refreshAccessToken();
-
-        original.headers.Authorization = `Bearer ${accessToken}`;
-
-        processQueue(null, accessToken);
-
-        return await API(original);
+        accessToken = await refreshAccessToken();
       } catch (err) {
         // Ensures every request queued behind this failed refresh is
         // rejected — not left hanging — so the UI can show an error
         // instead of spinning forever.
         processQueue(err, null);
+        isRefreshing = false;
 
         // FIX: only treat this as "the session is really over" when the
         // server actually said so (a real HTTP response — e.g. 401 from
@@ -375,9 +390,18 @@ API.interceptors.response.use(
         }
 
         return Promise.reject(err);
-      } finally {
-        isRefreshing = false;
       }
+      isRefreshing = false;
+
+      original.headers.Authorization = `Bearer ${accessToken}`;
+      processQueue(null, accessToken);
+
+      // The retry itself is intentionally NOT wrapped into the refresh's
+      // catch above — see the BUGFIX comment. Whatever this returns
+      // (success or a genuine business-rule error like a plan-limit 403)
+      // just propagates to the original caller as-is; it never implies
+      // the session is invalid.
+      return API(original);
     }
 
     return Promise.reject(error);
