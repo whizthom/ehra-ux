@@ -19,6 +19,16 @@ import {
   getAttendanceCooldownRemaining,
   startAttendanceCooldown,
 } from "../utils/attendanceCooldown";
+import {
+  captureOfflineAuthorization,
+  getLocalOfflineAvailability,
+  getPendingOfflineCount,
+  nextOfflineAction,
+  recordOfflineAttendance,
+  setCachedTodayState,
+  syncPendingOfflineAttendance,
+} from "../services/offlineAttendanceService";
+import { useOnlineStatus } from "../hooks/useOnlineStatus";
 
 // This page reuses the exact same shell (sidebar, topbar, mobile bottom
 // nav) as Dashboard.jsx / EmployeeDashboard.jsx via Dashboard.module.css,
@@ -26,6 +36,25 @@ import {
 // the same chrome and can navigate anywhere else in the app without
 // getting stranded on a bare, nav-less page. Only the scanner card itself
 // (styles from ScanAttendance.module.css) is specific to this screen.
+//
+// OFFLINE ATTENDANCE — high-level shape (see the offline attendance
+// design doc for the full architecture):
+//
+//   ONLINE:  unchanged — the camera/QR flow below is exactly what it was.
+//            The one addition is that a successful scan response may
+//            carry an `offlineAuthorization`, which gets captured into
+//            the local IndexedDB journal for later offline use.
+//   OFFLINE: there is no QR to scan (the rotating token requires a live
+//            server round trip — see the design doc, section 4), so this
+//            screen skips the camera entirely and shows a direct
+//            "Clock in/out offline" action instead, or a "Device not
+//            recognized" block state if this device/employee combination
+//            has no live offline authorization.
+//
+// Reachability note: `online` below is navigator.onLine plus the browser
+// `online`/`offline` events — it is NOT a live ping of Ehral's API (spec
+// §40's fuller reachability check). That's a reasonable next step, not
+// implemented in this pass.
 
 const EMPLOYEE_NAV = [
   { icon: "ti-layout-dashboard", label: "Dashboard", section: "main" },
@@ -133,10 +162,16 @@ export default function ScanAttendance() {
   const [cameraError, setCameraError] = useState("");
   // Camera is never started automatically — see startCamera() below.
   const [cameraState, setCameraState] = useState("idle");
-  const [result, setResult] = useState(null); // { ok, message, action, status }
+  const [result, setResult] = useState(null); // { ok, message, action, status, offlinePending }
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
   const [scanning, setScanning] = useState(true);
   const [profile, setProfile] = useState(null);
+
+  // ── Offline attendance state ──────────────────────────────────────────
+  const online = useOnlineStatus();
+  const [offlineAvailability, setOfflineAvailability] = useState(null); // { available, reason, expiresAt } | null while loading
+  const [pendingOfflineCount, setPendingOfflineCount] = useState(0);
+  const [offlineSubmitting, setOfflineSubmitting] = useState(false);
 
   // Mobile bottom-nav "Log out" — confirmed via LogoutConfirmModal before
   // the session is actually torn down, so a stray tap on a crowded phone
@@ -217,6 +252,50 @@ export default function ScanAttendance() {
     return () => window.clearInterval(timer);
   }, []);
 
+  // Connectivity itself now comes from useOnlineStatus() above — shared
+  // with OfflineBanner.jsx rather than each tracking navigator.onLine
+  // separately.
+
+  // Refresh local offline eligibility + pending count on mount, and
+  // again any time connectivity is lost (about to matter for the UI).
+  useEffect(() => {
+    let cancelled = false;
+    getLocalOfflineAvailability()
+      .then((availability) => {
+        if (!cancelled) setOfflineAvailability(availability);
+      })
+      .catch(() => {
+        if (!cancelled) setOfflineAvailability({ available: false });
+      });
+    getPendingOfflineCount()
+      .then((count) => {
+        if (!cancelled) setPendingOfflineCount(count);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [online]);
+
+  // Connectivity returned — upload whatever is queued. Fire-and-forget;
+  // failures just leave the queue for the next reconnect/retry, per
+  // offlineAttendanceService's own contract.
+  useEffect(() => {
+    if (!online) return;
+    let cancelled = false;
+    syncPendingOfflineAttendance()
+      .then(() => getPendingOfflineCount())
+      .then((count) => {
+        if (!cancelled) setPendingOfflineCount(count);
+      })
+      .catch((err) => {
+        console.warn("Offline attendance sync failed; will retry later.", err);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [online]);
+
   const handleDecoded = useCallback(
     async (token) => {
       if (scanLockRef.current || cooldownRemaining > 0) return;
@@ -237,6 +316,13 @@ export default function ScanAttendance() {
           });
           if (!today?.clockIn) action = "CLOCK_IN";
           else if (!today?.clockOut) action = "CLOCK_OUT";
+          // Keep the offline "next action" cache in sync with whatever the
+          // server actually reports, since this is the one moment we know
+          // for certain (an online read) — see setCachedTodayState's doc.
+          setCachedTodayState({
+            clockedIn: Boolean(today?.clockIn),
+            clockedOut: Boolean(today?.clockOut),
+          });
         } catch (actionError) {
           console.warn(
             "Could not determine attendance action for device proof.",
@@ -247,6 +333,22 @@ export default function ScanAttendance() {
         const { data } = action
           ? await submitScanWithDeviceProof(token, coords, action)
           : await submitScan(token, coords, {});
+
+        // A successful online action may have minted/renewed an offline
+        // authorization for this device — persist it locally so it's
+        // available the next time this device goes offline.
+        captureOfflineAuthorization(data.offlineAuthorization);
+        if (data.action) {
+          setCachedTodayState(
+            data.action === "CLOCK_IN"
+              ? { clockedIn: true }
+              : { clockedOut: true },
+          );
+        }
+        getLocalOfflineAvailability()
+          .then(setOfflineAvailability)
+          .catch(() => {});
+
         const session = readSession();
         const membershipId =
           session?.employeeMembershipId ||
@@ -284,6 +386,39 @@ export default function ScanAttendance() {
     },
     [stopCamera, getCoords, cooldownRemaining],
   );
+
+  // ── Offline: direct clock in/out (no camera, no QR) ─────────────────
+  const handleOfflineAction = useCallback(async () => {
+    const action = nextOfflineAction();
+    if (!action || offlineSubmitting) return;
+
+    setOfflineSubmitting(true);
+    try {
+      const coords = await getCoords();
+      await recordOfflineAttendance(action, coords);
+      const count = await getPendingOfflineCount();
+      setPendingOfflineCount(count);
+      setResult({
+        ok: true,
+        action,
+        status: null,
+        offlinePending: true,
+        message:
+          action === "CLOCK_IN"
+            ? "Clock-in recorded offline. It will be verified when you're back online."
+            : "Clock-out recorded offline. Ehral will verify it when you're back online.",
+      });
+    } catch (err) {
+      setResult({
+        ok: false,
+        message:
+          err?.message ||
+          "Couldn't record offline attendance. Please try again.",
+      });
+    } finally {
+      setOfflineSubmitting(false);
+    }
+  }, [getCoords, offlineSubmitting]);
 
   const tick = useCallback(() => {
     const video = videoRef.current;
@@ -387,8 +522,13 @@ export default function ScanAttendance() {
 
   const handleScanAgain = () => {
     if (cooldownRemaining > 0) return;
-    scanLockRef.current = false;
     setResult(null);
+
+    // Offline: nothing to scan — just clear the result and re-show the
+    // offline action panel. Only the ONLINE path re-engages the camera.
+    if (!online) return;
+
+    scanLockRef.current = false;
     setScanning(true);
     startCamera();
   };
@@ -412,6 +552,8 @@ export default function ScanAttendance() {
     month: "long",
     year: "numeric",
   });
+
+  const offlineAction = nextOfflineAction();
 
   return (
     <div className={dash.dash}>
@@ -510,65 +652,162 @@ export default function ScanAttendance() {
 
         <div className={dash.content}>
           <div className={styles.scanCard}>
-            <h2 className={styles.title}>Scan to clock in / out</h2>
+            <div
+              className={`${styles.connectionBadge} ${
+                online ? styles.connectionOnline : styles.connectionOffline
+              }`}
+            >
+              <i
+                className={`ti ${online ? "ti-wifi" : "ti-wifi-off"}`}
+                aria-hidden="true"
+              />
+              {online ? "Connected" : "Offline"}
+              {pendingOfflineCount > 0 && (
+                <span className={styles.pendingBadge}>
+                  · {pendingOfflineCount} pending
+                </span>
+              )}
+            </div>
+
+            <h2 className={styles.title}>
+              {online ? "Scan to clock in / out" : "Clock in / out offline"}
+            </h2>
             <p className={styles.subtitle}>
-              Point your camera at the QR code on the admin's screen.
+              {online
+                ? "Point your camera at the QR code on the admin's screen."
+                : "No connection needed — this will sync automatically once you're back online."}
             </p>
 
             <div className={styles.scannerFrame}>
-              {/* Always mounted — see startCamera() above for why: it
-                  assigns the stream to videoRef.current before cameraState
-                  becomes "running", so this element must already exist in
-                  the DOM at that point or the assignment silently no-ops
-                  and the video that mounts afterwards has no stream. */}
-              <video
-                ref={videoRef}
-                className={`${styles.video} ${
-                  scanning && cameraState === "running" && !cameraError
-                    ? ""
-                    : styles.videoHidden
-                }`}
-                playsInline
-                muted
-              />
-
-              {scanning && cameraState === "running" && !cameraError && (
-                <div className={styles.scanOverlay}>
-                  <div className={styles.scanBox} />
-                </div>
-              )}
-
-              {cameraState === "idle" && !cameraError && scanning && (
-                <div className={styles.errorState}>
-                  <i
-                    className="ti ti-camera"
-                    style={{ fontSize: 32 }}
-                    aria-hidden="true"
+              {online && (
+                <>
+                  {/* Always mounted — see startCamera() above for why: it
+                      assigns the stream to videoRef.current before cameraState
+                      becomes "running", so this element must already exist in
+                      the DOM at that point or the assignment silently no-ops
+                      and the video that mounts afterwards has no stream. */}
+                  <video
+                    ref={videoRef}
+                    className={`${styles.video} ${
+                      scanning && cameraState === "running" && !cameraError
+                        ? ""
+                        : styles.videoHidden
+                    }`}
+                    playsInline
+                    muted
                   />
-                  <p>Tap below to enable your camera and scan.</p>
-                  <button className={styles.retryBtn} onClick={startCamera}>
-                    Enable camera
-                  </button>
-                </div>
+
+                  {scanning && cameraState === "running" && !cameraError && (
+                    <div className={styles.scanOverlay}>
+                      <div className={styles.scanBox} />
+                    </div>
+                  )}
+
+                  {cameraState === "idle" && !cameraError && scanning && (
+                    <div className={styles.errorState}>
+                      <i
+                        className="ti ti-camera"
+                        style={{ fontSize: 32 }}
+                        aria-hidden="true"
+                      />
+                      <p>Tap below to enable your camera and scan.</p>
+                      <button className={styles.retryBtn} onClick={startCamera}>
+                        Enable camera
+                      </button>
+                    </div>
+                  )}
+
+                  {cameraState === "starting" && !cameraError && (
+                    <div className={styles.errorState}>
+                      <p>Requesting camera access…</p>
+                    </div>
+                  )}
+
+                  {cameraError && (
+                    <div className={styles.errorState}>
+                      <i
+                        className="ti ti-camera-off"
+                        style={{ fontSize: 32 }}
+                        aria-hidden="true"
+                      />
+                      <p>{cameraError}</p>
+                      <button className={styles.retryBtn} onClick={startCamera}>
+                        Try again
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
 
-              {cameraState === "starting" && !cameraError && (
-                <div className={styles.errorState}>
-                  <p>Requesting camera access…</p>
-                </div>
-              )}
-
-              {cameraError && (
-                <div className={styles.errorState}>
-                  <i
-                    className="ti ti-camera-off"
-                    style={{ fontSize: 32 }}
-                    aria-hidden="true"
-                  />
-                  <p>{cameraError}</p>
-                  <button className={styles.retryBtn} onClick={startCamera}>
-                    Try again
-                  </button>
+              {!online && !result && (
+                <div className={styles.offlinePanel}>
+                  {offlineAvailability === null ? (
+                    <p>Checking this device…</p>
+                  ) : offlineAvailability.available ? (
+                    offlineAction ? (
+                      <>
+                        <i
+                          className="ti ti-cloud-off"
+                          style={{ fontSize: 32 }}
+                          aria-hidden="true"
+                        />
+                        <p>
+                          You're offline, but this device is authorized. Your{" "}
+                          {offlineAction === "CLOCK_OUT"
+                            ? "clock-out"
+                            : "clock-in"}{" "}
+                          will be recorded locally and verified once you're back
+                          online.
+                        </p>
+                        <button
+                          type="button"
+                          className={styles.offlineActionBtn}
+                          onClick={handleOfflineAction}
+                          disabled={offlineSubmitting}
+                        >
+                          {offlineSubmitting
+                            ? "Recording…"
+                            : offlineAction === "CLOCK_OUT"
+                              ? "Clock out offline"
+                              : "Clock in offline"}
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <i
+                          className="ti ti-circle-check"
+                          style={{ fontSize: 32 }}
+                          aria-hidden="true"
+                        />
+                        <p>You've already completed attendance for today.</p>
+                      </>
+                    )
+                  ) : (
+                    <>
+                      <i
+                        className="ti ti-device-mobile-off"
+                        style={{ fontSize: 32 }}
+                        aria-hidden="true"
+                      />
+                      <p
+                        style={{
+                          fontWeight: 500,
+                          color: "var(--text-primary)",
+                        }}
+                      >
+                        Device not recognized
+                      </p>
+                      <p>
+                        Ehral doesn't recognize this device as an authorized
+                        attendance device for your employee account. Offline
+                        attendance isn't available on this device.
+                      </p>
+                      <p>
+                        Connect to the internet to verify your device, then
+                        clock in normally.
+                      </p>
+                    </>
+                  )}
                 </div>
               )}
 
@@ -587,6 +826,7 @@ export default function ScanAttendance() {
                       {result.action === "CLOCK_IN"
                         ? "Clocked in"
                         : "Clocked out"}
+                      {result.offlinePending ? " · Pending verification" : ""}
                     </span>
                   )}
                   {cooldownRemaining > 0 && (
@@ -600,7 +840,7 @@ export default function ScanAttendance() {
                     onClick={handleScanAgain}
                     disabled={cooldownRemaining > 0}
                   >
-                    Scan again
+                    {online ? "Scan again" : "OK"}
                   </button>
                 </div>
               )}

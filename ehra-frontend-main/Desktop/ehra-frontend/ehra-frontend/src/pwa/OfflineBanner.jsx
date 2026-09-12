@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import styles from "./OfflineBanner.module.css";
+import { useOnlineStatus } from "../hooks/useOnlineStatus";
 
 /**
  * A thin "you're offline" banner rather than a full interstitial page —
@@ -11,20 +11,7 @@ import styles from "./OfflineBanner.module.css";
  * handling; this is purely an ambient "heads up" signal.
  */
 export default function OfflineBanner() {
-  const [online, setOnline] = useState(
-    typeof navigator === "undefined" ? true : navigator.onLine,
-  );
-
-  useEffect(() => {
-    const goOnline = () => setOnline(true);
-    const goOffline = () => setOnline(false);
-    window.addEventListener("online", goOnline);
-    window.addEventListener("offline", goOffline);
-    return () => {
-      window.removeEventListener("online", goOnline);
-      window.removeEventListener("offline", goOffline);
-    };
-  }, []);
+  const online = useOnlineStatus();
 
   if (online) return null;
 

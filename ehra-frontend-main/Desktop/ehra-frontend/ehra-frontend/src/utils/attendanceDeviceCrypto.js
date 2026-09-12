@@ -45,6 +45,12 @@ function keyForContext({ businessId }) {
    *
    * The employee relationship is maintained server-side by
    * AttendanceDeviceBinding.
+   *
+   * Offline attendance builds on top of this same device identity, but
+   * offline TRUST is additionally employee-bound — see
+   * OfflineAttendanceAuthorization on the backend and
+   * offlineAttendanceJournal.js on the frontend, which key by employee
+   * as well as by this device.
    */
   return businessId
     ? `business:${businessId}`
@@ -269,30 +275,8 @@ export async function exportPublicKeyBase64(
   return window.btoa(binary);
 }
 
-export async function signAttendanceChallenge(
-  privateKey,
-  challenge,
-  membershipId,
-  action
-) {
-  const message =
-    new TextEncoder().encode(
-      `${challenge}:${membershipId}:${action}`
-    );
-
-  const signature =
-    await window.crypto.subtle.sign(
-      {
-        name: "ECDSA",
-        hash: "SHA-256",
-      },
-      privateKey,
-      message
-    );
-
-  const bytes = new Uint8Array(
-    signature
-  );
+function bufferToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
 
   let binary = "";
 
@@ -314,6 +298,30 @@ export async function signAttendanceChallenge(
   return window.btoa(binary);
 }
 
+export async function signAttendanceChallenge(
+  privateKey,
+  challenge,
+  membershipId,
+  action
+) {
+  const message =
+    new TextEncoder().encode(
+      `${challenge}:${membershipId}:${action}`
+    );
+
+  const signature =
+    await window.crypto.subtle.sign(
+      {
+        name: "ECDSA",
+        hash: "SHA-256",
+      },
+      privateKey,
+      message
+    );
+
+  return bufferToBase64(signature);
+}
+
 export function getAttendanceDeviceContext(
   session
 ) {
@@ -327,4 +335,102 @@ export function getAttendanceDeviceContext(
     membershipId:
       session?.membershipId,
   };
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Offline attendance transaction signing.
+//
+// Offline transactions are NOT signed the same way as an online scan.
+// Online signs `${challenge}:${membershipId}:${action}` where `challenge`
+// is a short-lived nonce fetched from the server just before signing —
+// there is no server round trip available while offline to fetch one.
+//
+// Instead, an offline transaction signs the FULL canonical transaction
+// payload itself. Both sides must build byte-identical strings or every
+// signature/hash check will fail — see
+// OfflineAttendanceSyncService#canonicalPayload on the backend, which
+// this function mirrors field-for-field.
+// ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * Formats a Date as "yyyy-MM-ddTHH:mm:ss" using the DEVICE'S LOCAL wall
+ * clock (not UTC, no milliseconds, no timezone suffix) — deliberately NOT
+ * `date.toISOString()`, which is UTC and would silently shift every
+ * timestamp by Nigeria's UTC+1 offset relative to what the backend's
+ * BusinessClock assumes. Deliberately whole-seconds only (no
+ * milliseconds): Java's LocalDateTime formatter omits the fractional part
+ * entirely when nanoseconds are zero, but prints it when they're not — so
+ * sending milliseconds here would only match the backend's re-formatted
+ * string when they happen to be exactly 000. Dropping sub-second
+ * precision entirely (irrelevant for attendance anyway) avoids that whole
+ * class of cross-runtime formatting mismatch.
+ */
+export function toCanonicalLocalDateTime(date) {
+  const pad = (n) => String(n).padStart(2, "0");
+
+  return (
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+    `T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+  );
+}
+
+/**
+ * Builds the exact string an offline transaction is hashed and signed
+ * over. Field order, delimiter, and the literal `"null"` for an absent
+ * previousHash must match OfflineAttendanceSyncService#canonicalPayload
+ * exactly.
+ */
+export function buildOfflineCanonicalPayload({
+  transactionId,
+  businessId,
+  membershipId,
+  deviceId,
+  action,
+  clientCreatedAt,
+  sequence,
+  previousHash,
+  authorizationId,
+}) {
+  return [
+    transactionId,
+    String(businessId),
+    String(membershipId),
+    deviceId,
+    action,
+    toCanonicalLocalDateTime(clientCreatedAt),
+    String(sequence),
+    previousHash || "null",
+    authorizationId,
+  ].join("|");
+}
+
+/** Lowercase hex SHA-256 digest — matches Java's HexFormat.formatHex output. */
+export async function sha256HexDigest(text) {
+  const digest = await window.crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(text)
+  );
+
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+/**
+ * Signs the canonical offline transaction payload directly (no nonce
+ * prefix — see the section comment above). Same ECDSA P-256 /
+ * SHA256withECDSA primitive as the online challenge signature, so the
+ * backend's single `verifySignature` helper verifies both.
+ */
+export async function signOfflineTransaction(privateKey, canonicalPayload) {
+  const signature = await window.crypto.subtle.sign(
+    {
+      name: "ECDSA",
+      hash: "SHA-256",
+    },
+    privateKey,
+    new TextEncoder().encode(canonicalPayload)
+  );
+
+  return bufferToBase64(signature);
 }
