@@ -172,6 +172,7 @@ export default function AttendanceSecurityPanel() {
                     <th>Platform</th>
                     <th>Binding</th>
                     <th>Status</th>
+                    <th>Offline</th>
                     <th>Last seen</th>
                     <th />
                   </tr>
@@ -191,6 +192,18 @@ export default function AttendanceSecurityPanel() {
                         >
                           {device.bindingStatus || device.deviceStatus || "—"}
                         </span>
+                      </td>
+                      <td>
+                        {device.offlineAuthorized ? (
+                          <span className={`${styles.status} ${styles.good}`}>
+                            Authorized
+                            {device.offlineExpiresAt
+                              ? ` · Expires ${new Date(device.offlineExpiresAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`
+                              : ""}
+                          </span>
+                        ) : (
+                          <span className={styles.status}>Not authorized</span>
+                        )}
                       </td>
                       <td>{formatDate(device.lastSeenAt)}</td>
                       <td>

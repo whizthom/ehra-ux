@@ -7,6 +7,18 @@ const STATUS_STYLES = {
   ABSENT: { label: "Absent", cls: "pillAbsent" },
 };
 
+// Offline attendance reconciliation state (spec §58/§59) — a SEPARATE
+// badge from the status pill above, never merged into it. Most rows have
+// no syncStatus at all (recorded directly online), in which case nothing
+// extra renders here.
+const SYNC_STYLES = {
+  OFFLINE_PENDING: { label: "Offline · Pending verification", cls: "syncPending" },
+  SYNCING: { label: "Offline · Verifying", cls: "syncPending" },
+  SYNCED: { label: "Offline · Verified", cls: "syncVerified" },
+  FLAGGED: { label: "Offline · Needs review", cls: "syncFlagged" },
+  REJECTED: { label: "Offline · Rejected", cls: "syncRejected" },
+};
+
 function formatTime(isoString) {
   if (!isoString) return "—";
   const d = new Date(isoString);
@@ -80,6 +92,7 @@ export default function AttendanceTable({
         <tbody>
           {records.map((r) => {
             const status = STATUS_STYLES[r.status] || STATUS_STYLES.PRESENT;
+            const sync = r.syncStatus ? SYNC_STYLES[r.syncStatus] : null;
             return (
               <tr key={r.id}>
                 <td className={styles.identityCol}>
@@ -108,6 +121,11 @@ export default function AttendanceTable({
                   <span className={`${styles.pill} ${styles[status.cls]}`}>
                     {status.label}
                   </span>
+                  {sync && (
+                    <span className={`${styles.syncPill} ${styles[sync.cls]}`}>
+                      {sync.label}
+                    </span>
+                  )}
                 </td>
               </tr>
             );

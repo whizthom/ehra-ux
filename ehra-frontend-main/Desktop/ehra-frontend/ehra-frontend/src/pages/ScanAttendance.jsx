@@ -340,9 +340,7 @@ export default function ScanAttendance() {
         captureOfflineAuthorization(data.offlineAuthorization);
         if (data.action) {
           setCachedTodayState(
-            data.action === "CLOCK_IN"
-              ? { clockedIn: true }
-              : { clockedOut: true },
+            data.action === "CLOCK_IN" ? { clockedIn: true } : { clockedOut: true },
           );
         }
         getLocalOfflineAvailability()
@@ -411,9 +409,7 @@ export default function ScanAttendance() {
     } catch (err) {
       setResult({
         ok: false,
-        message:
-          err?.message ||
-          "Couldn't record offline attendance. Please try again.",
+        message: err?.message || "Couldn't record offline attendance. Please try again.",
       });
     } finally {
       setOfflineSubmitting(false);
@@ -753,9 +749,7 @@ export default function ScanAttendance() {
                         />
                         <p>
                           You're offline, but this device is authorized. Your{" "}
-                          {offlineAction === "CLOCK_OUT"
-                            ? "clock-out"
-                            : "clock-in"}{" "}
+                          {offlineAction === "CLOCK_OUT" ? "clock-out" : "clock-in"}{" "}
                           will be recorded locally and verified once you're back
                           online.
                         </p>
@@ -789,12 +783,7 @@ export default function ScanAttendance() {
                         style={{ fontSize: 32 }}
                         aria-hidden="true"
                       />
-                      <p
-                        style={{
-                          fontWeight: 500,
-                          color: "var(--text-primary)",
-                        }}
-                      >
+                      <p style={{ fontWeight: 500, color: "var(--text-primary)" }}>
                         Device not recognized
                       </p>
                       <p>
@@ -823,9 +812,7 @@ export default function ScanAttendance() {
                   <p className={styles.resultMessage}>{result.message}</p>
                   {result.ok && (
                     <span className={styles.resultAction}>
-                      {result.action === "CLOCK_IN"
-                        ? "Clocked in"
-                        : "Clocked out"}
+                      {result.action === "CLOCK_IN" ? "Clocked in" : "Clocked out"}
                       {result.offlinePending ? " · Pending verification" : ""}
                     </span>
                   )}
@@ -845,6 +832,45 @@ export default function ScanAttendance() {
                 </div>
               )}
             </div>
+
+            <details className={styles.helpDetails}>
+              <summary className={styles.helpSummary}>
+                How attendance security works
+                <i className="ti ti-chevron-down" aria-hidden="true" />
+              </summary>
+              <div className={styles.helpBody}>
+                <div>
+                  <h5>Online</h5>
+                  <ul>
+                    <li>Ehral verifies attendance in real time.</li>
+                    <li>A recognized device can clock in/out.</li>
+                    <li>A new device can be verified online.</li>
+                    <li>
+                      New or suspicious device activity may generate a
+                      security alert.
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h5>Offline</h5>
+                  <ul>
+                    <li>
+                      Only a device already recognized and authorized by
+                      Ehral can clock offline.
+                    </li>
+                    <li>New devices can't clock offline.</li>
+                    <li>
+                      Clearing browser/site storage can remove the local
+                      security credential.
+                    </li>
+                    <li>
+                      If that happens, reconnect to the internet to verify
+                      the device.
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </details>
           </div>
         </div>
       </div>

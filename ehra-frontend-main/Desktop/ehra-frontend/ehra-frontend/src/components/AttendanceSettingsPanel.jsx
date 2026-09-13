@@ -28,6 +28,11 @@ export default function AttendanceSettingsPanel() {
   const [regenerating, setRegenerating] = useState(false);
   const [business, setBusiness] = useState(null);
 
+  // ── Offline attendance policy (spec §33) ──────────────────────────────
+  const [offlineEnabled, setOfflineEnabled] = useState(true);
+  const [offlineAllowClockIn, setOfflineAllowClockIn] = useState(true);
+  const [offlineAllowClockOut, setOfflineAllowClockOut] = useState(true);
+
   const staticCanvasRef = useRef(null);
 
   const load = useCallback(async () => {
@@ -44,6 +49,9 @@ export default function AttendanceSettingsPanel() {
       setLat(settings.attendanceLatitude ?? null);
       setLng(settings.attendanceLongitude ?? null);
       setRadius(settings.attendanceRadiusMeters || 50);
+      setOfflineEnabled(settings.offlineAttendanceEnabled ?? true);
+      setOfflineAllowClockIn(settings.offlineAllowClockIn ?? true);
+      setOfflineAllowClockOut(settings.offlineAllowClockOut ?? true);
       setBusiness(biz);
     } catch (err) {
       console.error("Failed to load attendance settings:", err);
@@ -146,6 +154,9 @@ export default function AttendanceSettingsPanel() {
         attendanceLatitude: lat,
         attendanceLongitude: lng,
         attendanceRadiusMeters: radius,
+        offlineAttendanceEnabled: offlineEnabled,
+        offlineAllowClockIn: offlineAllowClockIn,
+        offlineAllowClockOut: offlineAllowClockOut,
       });
       showToast("ok", "Attendance settings saved.");
     } catch {
@@ -430,6 +441,129 @@ export default function AttendanceSettingsPanel() {
             </div>
           </div>
         )}
+      </section>
+
+      {/* ── Offline attendance ── */}
+      <section className={styles.section}>
+        <div className={styles.sectionHead}>
+          <div>
+            <h3>Offline attendance</h3>
+            <p>
+              Let employees on a device Ehral already recognizes clock in or
+              out without an internet connection. Verified automatically the
+              next time they're back online.
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={offlineEnabled}
+            className={`${styles.switch} ${offlineEnabled ? styles.switchOn : ""}`}
+            onClick={() => setOfflineEnabled((v) => !v)}
+          >
+            <span className={styles.knob} />
+          </button>
+        </div>
+
+        {offlineEnabled && (
+          <div className={styles.zoneCard}>
+            <div className={styles.subToggleRow}>
+              <span className={styles.subToggleLabel}>Allow offline clock-in</span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={offlineAllowClockIn}
+                className={`${styles.switch} ${styles.switchSmall} ${offlineAllowClockIn ? styles.switchOn : ""}`}
+                onClick={() => setOfflineAllowClockIn((v) => !v)}
+              >
+                <span className={styles.knob} />
+              </button>
+            </div>
+            <div className={styles.subToggleRow}>
+              <span className={styles.subToggleLabel}>Allow offline clock-out</span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={offlineAllowClockOut}
+                className={`${styles.switch} ${styles.switchSmall} ${offlineAllowClockOut ? styles.switchOn : ""}`}
+                onClick={() => setOfflineAllowClockOut((v) => !v)}
+              >
+                <span className={styles.knob} />
+              </button>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* ── Attendance & Device Security explanation (spec §34) ── */}
+      <section className={styles.section}>
+        <div className={styles.sectionHead}>
+          <div>
+            <h3>Attendance &amp; device security</h3>
+            <p>How Ehral decides what's trusted, online and offline.</p>
+          </div>
+        </div>
+
+        <div className={styles.policyCard}>
+          <div className={styles.policyBlock}>
+            <h4>
+              <i className="ti ti-wifi" aria-hidden="true" />
+              Online attendance
+            </h4>
+            <p>
+              Employees can record attendance while connected to the
+              internet. Ehral verifies attendance with the server in real
+              time. Recognized devices work normally. A new device can be
+              verified online and may be registered as an additional device
+              according to your business's attendance security policy. New
+              or suspicious device activity may generate a security alert.
+            </p>
+          </div>
+
+          <div className={styles.policyBlock}>
+            <h4>
+              <i className="ti ti-cloud-off" aria-hidden="true" />
+              Offline attendance
+            </h4>
+            <p>
+              Offline attendance is restricted to devices Ehral has
+              previously recognized and authorized — a new or unrecognized
+              device can't record attendance while offline, no matter how
+              the settings above are configured. Authorization is also tied
+              to the specific employee it was issued to, so handing an
+              authorized phone to a coworker doesn't let them clock offline
+              on it.
+            </p>
+          </div>
+
+          <div className={styles.policyBlock}>
+            <h4>
+              <i className="ti ti-database" aria-hidden="true" />
+              Browser storage
+            </h4>
+            <p>
+              Ehral keeps employee-device relationships on the server.
+              Clearing browser storage or site data does not remove a
+              device from Ehral's records. However, it may remove the
+              security credential stored in the browser. If that credential
+              is lost, the device can't be used for offline attendance
+              until it reconnects to the internet and is verified again.
+            </p>
+          </div>
+
+          <div className={styles.policyBlock}>
+            <h4>
+              <i className="ti ti-shield-check" aria-hidden="true" />
+              Why this matters
+            </h4>
+            <p>
+              Offline attendance can't communicate with Ehral in real time.
+              Restricting it to previously authorized devices helps prevent
+              employees from bypassing device security by switching devices
+              or clearing browser storage while disconnected.
+            </p>
+          </div>
+        </div>
       </section>
 
       <div className={styles.saveBar}>

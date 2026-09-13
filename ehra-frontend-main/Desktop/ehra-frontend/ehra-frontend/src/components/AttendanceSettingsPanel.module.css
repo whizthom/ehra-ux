@@ -607,3 +607,65 @@
         justify-content: center;
     }
 }
+/* ── Offline attendance additions ──────────────────────────────────────
+   Additive only — nothing above this line was changed. */
+
+.subToggleRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 2px;
+}
+
+.subToggleRow + .subToggleRow {
+    border-top: 0.5px solid var(--border-color);
+}
+
+.subToggleLabel {
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.switchSmall {
+    width: 34px;
+    height: 20px;
+}
+
+.switchSmall .knob {
+    width: 16px;
+    height: 16px;
+}
+
+.switchSmall.switchOn .knob {
+    transform: translateX(14px);
+}
+
+/* ── Policy explanation card (spec §34) ── */
+.policyCard {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.policyBlock h4 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 6px;
+}
+
+.policyBlock h4 i {
+    color: var(--accent);
+    font-size: 15px;
+}
+
+.policyBlock p {
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin: 0;
+}

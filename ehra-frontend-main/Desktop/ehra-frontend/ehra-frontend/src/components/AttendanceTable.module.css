@@ -141,3 +141,34 @@
   .muted { font-size: 9px; }
   .pill { font-size: 9px; padding: 4px 7px; }
 }
+
+/* ── Offline attendance sync badge (spec §58/§59) — additive only ── */
+.syncPill {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10.5px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.syncPending {
+    background: var(--info-bg);
+    color: var(--info-text);
+}
+
+.syncVerified {
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+}
+
+.syncFlagged {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.syncRejected {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
