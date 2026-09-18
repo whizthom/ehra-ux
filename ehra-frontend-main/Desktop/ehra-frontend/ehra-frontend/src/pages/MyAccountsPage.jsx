@@ -135,12 +135,9 @@ const ROLE_LABEL = {
 function roleLabel(type) {
   return ROLE_LABEL[type] || type;
 }
-// TODO: point CUSTOMER at a real customer-facing dashboard once that
-// surface exists - "/dashboard" is a placeholder for now, since nothing
-// creates CustomerMembership rows yet and there's nowhere else to send it.
 function destinationFor(contextType) {
   if (contextType === "EMPLOYEE") return "/my-dashboard";
-  if (contextType === "CUSTOMER") return "/dashboard";
+  if (contextType === "CUSTOMER") return "/customer-dashboard";
   return "/dashboard";
 }
 
@@ -275,10 +272,7 @@ export default function MyAccountsPage() {
     return byType;
   }, [accounts]);
 
-  // Nothing creates CustomerMembership rows yet (groundwork only - see
-  // CustomerMembership's backend class doc), so hide the tab entirely
-  // until someone actually has at least one, rather than showing a
-  // permanently-empty "Customer" tab to every user today.
+  // Customer memberships are created by the public storefront registration flow, so the Customer tab is shown whenever memberships exist.
   const visibleTabs = useMemo(
     () =>
       TABS.filter((t) => t.key !== "CUSTOMER" || grouped.CUSTOMER.length > 0),

@@ -31,11 +31,7 @@ function roleLabel(type) {
   return ROLE_LABEL[type] || type;
 }
 
-// Membership-type → post-switch destination. TODO: point CUSTOMER at a
-// real customer-facing dashboard once that surface exists - routing it
-// to "/dashboard" (the owner's view) for now is a deliberate placeholder,
-// not a real destination, since nothing creates CustomerMembership rows
-// yet and there's nowhere else to send it.
+// Membership-type → post-switch destination. Customer memberships route to the dedicated customer dashboard.
 function destinationFor(contextType) {
   if (contextType === "EMPLOYEE") return "/my-dashboard";
   if (contextType === "CUSTOMER") return "/customer-dashboard";

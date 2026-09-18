@@ -34,6 +34,7 @@ import LogoutConfirmModal from "../components/LogoutConfirmModal";
 import CoverRequestsTab from "../components/CoverRequestsTab";
 import { getMyProfile } from "../api/employeeApi";
 import { getMyCoverRequests } from "../api/leaveApi";
+import { getRetailContext } from "../api/retailApi";
 // Real-time messaging (V1 rebuild) - replaces the old SSE-based chat's
 // getChatUnreadCount for the sidebar/topbar "Messages" badge. The old
 // chatApi.js/ChatPanel/MessagesHub files are left in place untouched but
@@ -62,6 +63,7 @@ const NAV = [
   { icon: "ti-mail", label: "Messages", section: "main" },
   { icon: "ti-cash-banknote", label: "Penalty", section: "tools" },
   { icon: "ti-bell", label: "Notifications", section: "tools" },
+  { icon: "ti-building-store", label: "Retail Workspace", section: "main", retailOnly: true },
   { icon: "ti-user-circle", label: "My Profile", section: "account" },
   {
     icon: "ti-switch-horizontal",
@@ -359,6 +361,7 @@ export default function Dashboard() {
   // The employer's own profile (auto-created Employee row, role ADMIN) -
   // Settings tab "My Profile". Edits here save instantly, no approval.
   const [myProfile, setMyProfile] = useState(null);
+  const [retailContext, setRetailContext] = useState(null);
   const [loadingMyProfile, setLoadingMyProfile] = useState(true);
 
   // Cover requests - leaves where a colleague has nominated ME as their
@@ -478,6 +481,8 @@ export default function Dashboard() {
       setLoadingMyProfile(false);
     }
   }, []);
+
+  useEffect(() => { getRetailContext().then(({data}) => setRetailContext(data)).catch(() => setRetailContext(null)); }, []);
 
   // Quick actions row: a brief, one-time "nudge" scroll on mount so the
   // row visibly demonstrates it's scrollable at a glance, rather than
@@ -826,12 +831,13 @@ export default function Dashboard() {
               <div className={styles.sbSection}>{section}</div>
               {NAV.filter(
                 (n) =>
-                  n.section === section && (!n.hodOnly || myProfile?.isHod),
+                  n.section === section && (!n.hodOnly || myProfile?.isHod) && (!n.retailOnly || retailContext?.canWorkspace),
               ).map((n) => (
                 <div
                   key={n.label}
                   className={`${styles.sbItem} ${activeNav === n.label && !n.isFullPage ? styles.active : ""}`}
                   onClick={() => {
+                    if (n.label === "Retail Workspace") { navigate("/retail"); return; }
                     if (n.isFullPage) {
                       navigate(n.route ?? "/my-accounts", {
                         state: { returnPath: "/my-dashboard", activeNav },

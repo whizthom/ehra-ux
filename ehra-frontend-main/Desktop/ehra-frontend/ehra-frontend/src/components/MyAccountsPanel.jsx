@@ -30,11 +30,7 @@ function roleLabel(type) {
   return ROLE_LABEL[type] || type;
 }
 
-// Membership-type → post-switch destination. TODO: point CUSTOMER at a
-// real customer-facing dashboard once that surface exists - routing it
-// to "/dashboard" (the owner's view) for now is a deliberate placeholder,
-// not a real destination, since nothing creates CustomerMembership rows
-// yet and there's nowhere else to send it.
+// Membership-type → post-switch destination. Customer memberships route to the dedicated customer dashboard.
 function destinationFor(contextType) {
   if (contextType === "EMPLOYEE") return "/my-dashboard";
   if (contextType === "CUSTOMER") return "/customer-dashboard";
@@ -43,9 +39,7 @@ function destinationFor(contextType) {
 
 // The "My Accounts" nav feature - every workspace (business) the logged-in
 // Identity currently holds a membership at: as owner (EMPLOYER), as staff
-// (EMPLOYEE), or as a customer (CUSTOMER - groundwork only; nothing creates
-// these yet, but the label/routing below already handle it so this file
-// doesn't need a second pass once that role ships). Lets the person switch
+// (EMPLOYEE), or as a customer (CUSTOMER). Lets the person switch
 // between them without logging out, and start a brand-new business under
 // the same Identity (an employee going into business for themselves, or
 // an owner adding a second business). Rendered as a modal from both

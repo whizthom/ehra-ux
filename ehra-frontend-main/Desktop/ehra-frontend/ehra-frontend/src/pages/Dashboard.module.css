@@ -4,12 +4,12 @@
     height: 100vh;
     /* dvh matches the browser's actual visible viewport on mobile, where
        100vh can be taller than what's on-screen while the address bar is
-       showing - that mismatch is what let the whole app shell (topbar
+       showing — that mismatch is what let the whole app shell (topbar
        included) scroll away. Browsers without dvh support just keep the
        100vh value above. */
     height: 100dvh;
     /* --app-vh (see useVisualViewportHeight.js) tracks the on-screen
-       keyboard too, which dvh alone doesn't reliably do on every device -
+       keyboard too, which dvh alone doesn't reliably do on every device —
        falls straight back to the 100dvh above on any browser that
        doesn't support visualViewport. */
     height: var(--app-vh, 100dvh);
@@ -109,7 +109,7 @@
 /* Light mode's sidebar is the saturated brand green, where white text at
    60% opacity still reads clearly. Dark mode's sidebar is near-black
    (--bg-sidebar: #111b21), so that same 60% white reads as a dim,
-   low-contrast grey - bump it up so nav labels are actually legible. */
+   low-contrast grey — bump it up so nav labels are actually legible. */
 [data-theme="dark"] .sbItem {
     color: rgba(233, 237, 239, 0.75);
 }
@@ -124,11 +124,11 @@
 }
 
 /* --bg-soft-accent is a background-tint token (a near-transparent 14%
-   teal wash in dark mode - see theme.css), not built for use as text.
+   teal wash in dark mode — see theme.css), not built for use as text.
    Using it as the badge's number color left the count almost unreadable
    against the translucent white pill in dark mode. --accent-hover in
    dark mode is a bright, saturated light green designed to read clearly
-   against dark surfaces - same fix approach as .sbItem above. */
+   against dark surfaces — same fix approach as .sbItem above. */
 [data-theme="dark"] .sbBadge {
     color: var(--accent-hover);
 }
@@ -273,7 +273,7 @@
 }
 
 /* Mobile-only business logo + name, standing in for the plain company-name
-   text on phones - the date/time underneath stays exactly where it's
+   text on phones — the date/time underneath stays exactly where it's
    always been (.topbarSub), just like the desktop title. */
 .topbarMobileBrand {
     display: none;
@@ -332,7 +332,7 @@
 }
 
 .topbarGreeting {
-    /* superseded by .empGreeting below - kept only so nothing else in
+    /* superseded by .empGreeting below — kept only so nothing else in
        this stylesheet that might still reference it breaks. */
     display: none;
 }
@@ -464,7 +464,7 @@
 @media (max-width: 420px) {
 
     /* Tightest phones: date and workspace tag rarely both fit on one
-       line at 12.5px next to a 17px heading - let them wrap onto their
+       line at 12.5px next to a 17px heading — let them wrap onto their
        own line rather than truncating the date. */
     .empGreetingSub {
         row-gap: 2px;
@@ -528,7 +528,7 @@
     cursor: not-allowed;
 }
 
-/* Desktop-only - see the comment at PlanBadge's render site in
+/* Desktop-only — see the comment at PlanBadge's render site in
    Dashboard.jsx. 900px matches every other desktop-only topbar item in
    this file (.inviteBtn below, the sidebar/bottom-nav split, etc). */
 .planBadgeSlot {
@@ -553,7 +553,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     padding: 20px 24px;
-    /* Extra breathing room at the end of scroll - set as a separate
+    /* Extra breathing room at the end of scroll — set as a separate
        property (not folded into the shorthand above) so it survives
        any later shorthand `padding` overrides, same reasoning as the
        .contentFull note below. */
@@ -569,7 +569,7 @@
    than the viewport scrolls instead of getting clipped; tabs that already
    manage their own internal scroll region (e.g. Messages) are unaffected
    since their inner panes are sized to fit exactly.
-   NOTE: this must stay ABOVE the responsive media query below - it's a
+   NOTE: this must stay ABOVE the responsive media query below — it's a
    plain (non-media) rule, and CSS applies same-specificity rules in source
    order regardless of media queries, so if this appeared after the mobile
    override further down, its shorthand `padding` would silently reset
@@ -589,7 +589,7 @@
 }
 
 /* Attendance opted out of the standard card/box treatment and wants to
-   show as much table width as possible - same vertical rhythm as
+   show as much table width as possible — same vertical rhythm as
    .contentFull, much less horizontal margin eaten up on the sides. */
 .contentFullNarrow {
     flex: 1;
@@ -601,7 +601,7 @@
     min-height: 0;
     min-width: 0;
     /* Belt-and-braces alongside the matching fix in AttendanceSection /
-       QrcodeTab / BusinessSettingsTab's own .tabBody - those already stop
+       QrcodeTab / BusinessSettingsTab's own .tabBody — those already stop
        scroll-chaining at their own boundary, this stops it here too so
        nothing can bleed past this container either. */
     overscroll-behavior: contain;
@@ -615,7 +615,7 @@
 
 /* Messages tab only. It renders its own WhatsApp-style two-pane layout
    (MessagingHub) which needs to reach the true edges of the content area
-   on EVERY device - not just fill the mobile-fullscreen case - so unlike
+   on EVERY device — not just fill the mobile-fullscreen case — so unlike
    Attendance/Departments/etc. (.contentFullNarrow, still want a narrow
    gutter around a table), this has zero padding unconditionally and
    fills the full available height via flex:1/min-height:0 below. */
@@ -632,8 +632,8 @@
 
 
 /* Applied to .topbar / .dashboardFooter / .bottomNav while a chat thread
-   is open, so opening a chat on mobile takes over the whole screen -
-   same as any normal chat app - instead of sitting in a panel wedged
+   is open, so opening a chat on mobile takes over the whole screen —
+   same as any normal chat app — instead of sitting in a panel wedged
    between a header and a bottom nav. No-op on desktop, where a thread
    just occupies its usual pane inside the two-column chat layout. */
 .hiddenOnMobileChat {
@@ -646,7 +646,7 @@
     }
 }
 
-/* ── Brand footer - sits at the very end of the scrollable content,
+/* ── Brand footer — sits at the very end of the scrollable content,
    same spot regardless of which tab is active. margin-top pushes it below
    whatever content precedes it without fighting the .content/.contentFull*
    padding-bottom gutters. Full opacity and no mobile shrink so it stays
@@ -694,7 +694,7 @@
     }
 }
 
-/* Plays while the card is being dismissed via the cancel button - the
+/* Plays while the card is being dismissed via the cancel button — the
    card actually unmounts once this finishes (see dismissInviteLink),
    so it reads as being cancelled off the screen rather than just
    vanishing. */
@@ -795,7 +795,7 @@
 
 /* Desktop/tablet: invite-link card sits in its usual spot near the top
    of the page. Hidden on phones, where a second copy renders right
-   under the Quick actions row instead (see .inviteLinkMobileSlot) -
+   under the Quick actions row instead (see .inviteLinkMobileSlot) —
    `display: contents` so this wrapper adds no box of its own when the
    card is showing. */
 .inviteLinkDesktopSlot {
@@ -906,7 +906,7 @@
 }
 
 /* This one icon color was left as a light-mode literal rather than a
-   variable when .teal/.amber/.blue were converted - harmless in light
+   variable when .teal/.amber/.blue were converted — harmless in light
    mode, but it meant this specific icon ignored dark mode entirely.
    Overridden here rather than switched to var() outright so light mode's
    exact shade is untouched for now, per your "light mode later" note. */
@@ -956,7 +956,7 @@
 }
 
 /* Recent activity's header doubles as a collapse/expand control on mobile
-   and desktop alike - starts closed so the dashboard opens shorter. */
+   and desktop alike — starts closed so the dashboard opens shorter. */
 .panelHdrToggle {
     display: block;
     width: 100%;
@@ -1004,12 +1004,12 @@
     color: var(--text-primary);
 }
 
-/* Primary section headers on the employee dashboard home - "My attendance"
-   and "My payroll" - sized up from the shared .panelTitle (13px/500) so
+/* Primary section headers on the employee dashboard home — "My attendance"
+   and "My payroll" — sized up from the shared .panelTitle (13px/500) so
    they visually outrank secondary panels like "Quick actions" and "Recent
    activity" on the same page. Deliberately a separate class rather than
    changing .panelTitle itself, since that class is shared by panel
-   headers across both this dashboard and the employer's Dashboard.jsx -
+   headers across both this dashboard and the employer's Dashboard.jsx —
    changing it directly would have resized every panel title app-wide
    instead of creating hierarchy on just this page. */
 .panelTitleLg {
@@ -1067,7 +1067,7 @@
     color: var(--accent);
 }
 
-/* Small colored icon chip inside each quick-action button - mirrors the
+/* Small colored icon chip inside each quick-action button — mirrors the
    stat cards' teal/amber/blue/coral system so the two areas read as one
    cohesive palette instead of introducing new colors. */
 .qaIconWrap {
@@ -1085,7 +1085,7 @@
 }
 
 /* Only meaningful once the row becomes a horizontally scrolling pill
-   strip on phones - see the phone-layout media query below. */
+   strip on phones — see the phone-layout media query below. */
 .qaScrollTrack {
     display: none;
 }
@@ -1170,7 +1170,7 @@
 }
 
 /* ── Empty / loading state text (pending approvals, pending leave
-   requests, latest attendance) - matched to Recent activity's type
+   requests, latest attendance) — matched to Recent activity's type
    scale rather than the browser's default paragraph size. ── */
 .emptyState {
     font-size: 12px;
@@ -1236,7 +1236,7 @@
 }
 
 /* Lets a table scroll horizontally instead of squeezing its columns
-   until text wraps and overlaps - the actual working mobile pattern
+   until text wraps and overlaps — the actual working mobile pattern
    for every data table on this page (Pending approvals, Pending leave
    requests, Latest attendance). Pair with .attendanceTable's min-width
    so columns keep a sane, readable width; the user scrolls sideways on
@@ -1265,7 +1265,7 @@
     vertical-align: middle;
     /* table-layout: fixed gives every column a set width, but a long
        unbroken string (an email address, for example) has no natural
-       break point - without this it silently overflows the cell and
+       break point — without this it silently overflows the cell and
        bleeds into the next column instead of wrapping. */
     overflow-wrap: anywhere;
     word-break: break-word;
@@ -1442,7 +1442,7 @@
 
 /* ── Phone layout ──────────────────────────────────────────────────────
    Stat cards collapse to one compact single-line row each (small icon,
-   label, number - no wasted vertical space), and Quick actions becomes a
+   label, number — no wasted vertical space), and Quick actions becomes a
    horizontally scrollable pill strip, styled like WhatsApp's Unread /
    Favourites / Groups filter row, so it reads as swipeable at a glance. */
 @media (max-width: 640px) {
@@ -1459,7 +1459,7 @@
     }
 
     /* Totals row (Total/Active/Pending/Unread) is dropped entirely on
-       phones - Today's Pulse + Quick actions + Recent activity carry
+       phones — Today's Pulse + Quick actions + Recent activity carry
        the dashboard instead. */
     .statsGrid {
         display: none;
@@ -1661,7 +1661,7 @@
         font-weight: 600;
     }
 
-    /* Trend detail dropped here - the single line is for label + number
+    /* Trend detail dropped here — the single line is for label + number
        only, keeping each row compact. */
     .statTrend {
         display: none;
@@ -1686,7 +1686,7 @@
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
         min-width: 0;
-        /* Just a soft edge, not the main "you can scroll this" cue - that
+        /* Just a soft edge, not the main "you can scroll this" cue — that
            job now belongs to the underline track below + the on-load
            nudge. A wide fade was actually swallowing the third pill's
            peek entirely, which is why it didn't read as scrollable. */
@@ -1722,10 +1722,10 @@
         transform: scale(.985);
     }
 
-    /* "Underneath line" scroll indicator - the thumb's width and position
+    /* "Underneath line" scroll indicator — the thumb's width and position
        genuinely reflect how much content there is and how far through
-       it you've scrolled (see useScrollThumb). Kept deliberately quiet -
-       thin, flat, muted - so it reads as a small "this scrolls" cue
+       it you've scrolled (see useScrollThumb). Kept deliberately quiet —
+       thin, flat, muted — so it reads as a small "this scrolls" cue
        rather than competing with the pills for attention. */
     .qaScrollTrack {
         display: none;
@@ -1749,7 +1749,7 @@
             width 0.18s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Pending approvals / pending leave requests / latest attendance -
+    /* Pending approvals / pending leave requests / latest attendance —
        a soft shadow instead of the flat hairline border reads as a real
        elevated surface rather than a plain outlined box. */
     .dirPanel {
@@ -1762,7 +1762,7 @@
     /* ── Latest attendance: table → stacked cards ─────────────────────
        A 6-column table has no room to breathe on a phone. Scoped to
        .attendanceTable only (not the Pending approvals / leave-request
-       tables, which still scroll normally) - each row becomes its own
+       tables, which still scroll normally) — each row becomes its own
        compact card: name up top, then Department/Clock in/Clock
        out/Status as label:value rows, then actions along the bottom. */
     .attendanceTable {
@@ -1796,13 +1796,13 @@
         border-top: 0.5px solid var(--border-color);
     }
 
-    /* Name cell - no label prefix, sits at the top of the card as-is. */
+    /* Name cell — no label prefix, sits at the top of the card as-is. */
     .attendanceTable td:first-child {
         border-top: none;
         padding: 12px 12px 10px;
     }
 
-    /* Department / Clock in / Clock out / Status - label:value rows,
+    /* Department / Clock in / Clock out / Status — label:value rows,
        the label coming from the cell's own data-label attribute so no
        extra markup is needed beyond what's already there. */
     .attendanceTable td[data-label] {
@@ -1823,7 +1823,7 @@
         flex-shrink: 0;
     }
 
-    /* Actions - full-width row along the bottom of the card. */
+    /* Actions — full-width row along the bottom of the card. */
     .attendanceTable td:last-child {
         padding: 10px 12px 12px;
     }
@@ -1836,7 +1836,7 @@
 /* ── Mobile bottom navigation ──────────────────────────────────────────
    Hidden entirely on desktop/tablet (≥901px); replaces the sidebar as the
    primary navigation surface below that, since the sidebar is hidden there.
-   Every item is present in one strip - scroll sideways to reach the rest. */
+   Every item is present in one strip — scroll sideways to reach the rest. */
 .bottomNav {
     display: none;
 }
@@ -1859,7 +1859,7 @@
         padding-bottom: env(safe-area-inset-bottom, 0px);
     }
 
-    /* Same quiet indicator pattern as the quick-actions row - a real,
+    /* Same quiet indicator pattern as the quick-actions row — a real,
        scroll-linked cue rather than a static hint, kept thin and muted
        so it doesn't compete with the nav icons above it. */
     .bottomNavScrollTrack {
@@ -1988,7 +1988,7 @@
     flex-direction: column;
 }
 
-/* Small phones - a fixed 360px panel can overflow the viewport, so it
+/* Small phones — a fixed 360px panel can overflow the viewport, so it
    shrinks to fit with a small margin on each side instead. */
 @media (max-width: 420px) {
     .notifPanel {
@@ -2173,12 +2173,12 @@
     color: var(--danger-text);
 }
 
-/* ── Undo bar - appears whenever one or more deletes are pending. Two
+/* ── Undo bar — appears whenever one or more deletes are pending. Two
    positioning variants share the same look:
    - .undoBarPanel:  contained inside the small bell-dropdown panel.
    - .undoBarFixed:  pinned to the viewport itself (not the scrolling
      notifications list) so it can never end up scrolled out of view or
-     buried under a long list - and it sits above the fixed mobile bottom
+     buried under a long list — and it sits above the fixed mobile bottom
      nav (z-index + bottom offset) instead of getting hidden behind it. ── */
 .undoBar {
     display: flex;
@@ -2385,7 +2385,7 @@
 /* Remove-employee confirmation dialog styling now lives in
    RemoveEmployeeModal.module.css, shared with WorkforceTab.jsx, so
    there's only one place to update it. */
-/* ── Messages tab - let it fill the remaining content height ── */
+/* ── Messages tab — let it fill the remaining content height ── */
 .messagesContent {
     flex: 1;
     display: flex;
@@ -2395,7 +2395,7 @@
     height: 100%;
 }
 
-/* ── Notifications - full page (sidebar "Notifications" tab) ──────────────
+/* ── Notifications — full page (sidebar "Notifications" tab) ──────────────
    Distinct from the bell icon's dropdown panel above: this is a full page
    using the same notification-row styling, just laid out to fill the
    content area instead of floating in a fixed-width popover. */

@@ -13,3 +13,8 @@ export const getCustomers = () => API.get("/customers");
 export const getPublicStorefront = (slug) => API.get(`/storefronts/${encodeURIComponent(slug)}`);
 export const getPublicProducts = (slug) => API.get(`/public/storefronts/${encodeURIComponent(slug)}/products`);
 export const createPublicOrder = (slug,data) => API.post(`/public/storefronts/${encodeURIComponent(slug)}/orders`, data);
+
+export const uploadProductImage=file=>{const f=new FormData();f.append("file",file);return API.post("/products/images",f,{headers:{"Content-Type":"multipart/form-data"}})}; export const uploadStorefrontCover=file=>{const f=new FormData();f.append("file",file);return API.post("/business/storefront/cover-image",f,{headers:{"Content-Type":"multipart/form-data"}})}; export const createCustomer=d=>API.post("/customers",d); export const updateCustomer=(id,d)=>API.put(`/customers/${id}`,d); export const deleteCustomer=id=>API.delete(`/customers/${id}`);
+export const claimStorefrontCustomer=(slug,phoneVerificationToken)=>API.post(`/public/storefronts/${encodeURIComponent(slug)}/customer/claim`,null,{params:{phoneVerificationToken}});
+
+export const getCustomerOrders = () => API.get("/customer/orders");

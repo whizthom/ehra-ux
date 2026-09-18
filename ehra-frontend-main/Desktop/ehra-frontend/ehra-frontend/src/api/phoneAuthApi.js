@@ -32,6 +32,13 @@ export const checkPhone = (idToken) =>
 // queues a verification email for `email` (never awaited - see
 // EmailVerificationService). Returns an AuthResponseDTO shape, same as
 // login().
+
+export const registerCustomerWithPhone = async (idToken, { businessSlug, firstName, lastName, email }) => {
+  const { data } = await API.post("/auth/phone/customer-register", { idToken, businessSlug, firstName, lastName, email });
+  saveSession(data);
+  return data;
+};
+
 export const registerWithPhone = async (idToken, { businessName, password, firstName, lastName, email }) => {
   const { data } = await API.post("/auth/phone/register", {
     idToken,

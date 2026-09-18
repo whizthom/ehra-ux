@@ -1,5 +1,5 @@
-import styles from "./pricing.module.css";
-import { formatNaira } from "../../data/pricingPlans";
+import styles from "./pricing/pricing.module.css";
+import { formatNaira } from "../data/pricingPlans";
 
 function CheckIcon({ className }) {
   return (

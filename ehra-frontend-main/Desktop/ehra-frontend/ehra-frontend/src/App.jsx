@@ -48,6 +48,8 @@ const EmployeeDashboard = lazy(() => import("./pages/EmployeeDashboard"));
 const EmployeeProfilePage = lazy(() => import("./pages/EmployeeProfilePage"));
 const MyAccountsPage = lazy(() => import("./pages/MyAccountsPage"));
 const Support = lazy(() => import("./pages/Support"));
+const BusinessSetup = lazy(() => import("./pages/BusinessSetup"));
+const RetailWorkspace = lazy(() => import("./pages/RetailWorkspace"));
 
 function RootEntry() {
   const { user } = useAuth();
@@ -150,6 +152,25 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Pricing />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* BUSINESS SETUP / SPECIALIZED WORKSPACE */}
+            <Route
+              path="/business-setup"
+              element={
+                <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                  <BusinessSetup />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/retail"
+              element={
+                <ProtectedRoute roles={["ROLE_ADMIN", "ROLE_EMPLOYEE"]}>
+                  <RetailWorkspace />
                 </ProtectedRoute>
               }
             />

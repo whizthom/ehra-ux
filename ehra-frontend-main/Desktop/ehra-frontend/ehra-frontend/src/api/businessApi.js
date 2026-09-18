@@ -47,3 +47,8 @@ export const getAttendanceProfileSetting = () =>
   API.get("/business/attendance-profile");
 export const updateAttendanceProfileSetting = (enabled) =>
   API.put("/business/attendance-profile", { attendanceProfileEnabled: enabled });
+// Business Type is a property of the Business, not the user. It is unset
+// for legacy businesses until the owner explicitly confirms a type.
+export const getBusinessType = () => API.get("/business/type");
+export const setBusinessType = (businessType, confirm = true) =>
+  API.post("/business/type", { businessType, confirm });
