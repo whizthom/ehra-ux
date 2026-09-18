@@ -13,7 +13,6 @@ import {
   RETAIL_CATEGORIES,
   today,
 } from "./shared";
-
 function ProductModal({
   item,
   onClose,
@@ -23,19 +22,15 @@ function ProductModal({
 }) {
   let initialVariants = [];
   let initialImages = [];
-
   try {
     const parsed = item?.variantsJson ? JSON.parse(item.variantsJson) : [];
     initialVariants = Array.isArray(parsed) ? parsed : [];
   } catch {}
-
   try {
     const parsed = item?.imagesJson ? JSON.parse(item.imagesJson) : [];
     initialImages = Array.isArray(parsed) ? parsed : [];
   } catch {}
-
   if (!initialImages.length && item?.imageUrl) initialImages = [item.imageUrl];
-
   const [d, setD] = useState({
     name: item?.name || "",
     description: item?.description || "",
@@ -60,11 +55,8 @@ function ProductModal({
     imageFiles: initialImages,
     variants: initialVariants,
   });
-
   const [uploading, setUploading] = useState(false);
-
   const set = (k, v) => setD((x) => ({ ...x, [k]: v }));
-
   const addVariant = () =>
     setD((x) => ({
       ...x,
@@ -80,16 +72,13 @@ function ProductModal({
         },
       ],
     }));
-
   const updateVariant = (i, k, v) =>
     setD((x) => ({
       ...x,
       variants: x.variants.map((a, n) => (n === i ? { ...a, [k]: v } : a)),
     }));
-
   const removeVariant = (i) =>
     setD((x) => ({ ...x, variants: x.variants.filter((_, n) => n !== i) }));
-
   const handleImages = async (files) => {
     if (!files.length) return;
     setUploading(true);
@@ -111,13 +100,11 @@ function ProductModal({
       setUploading(false);
     }
   };
-
   const removeImage = (u) =>
     setD((x) => {
       const imageFiles = (x.imageFiles || []).filter((a) => a !== u);
       return { ...x, imageFiles, imageUrl: imageFiles[0] || "" };
     });
-
   const submit = () =>
     onSave({
       ...d,
@@ -129,7 +116,6 @@ function ProductModal({
       imageUrl: d.imageFiles?.[0] || d.imageUrl,
       variantsJson: JSON.stringify(d.variants || []),
     });
-
   return (
     <Modal
       title={item ? "Edit product" : "Add product"}
@@ -152,7 +138,6 @@ function ProductModal({
             </p>
           </div>
         </div>
-
         <div className={s.productSection}>
           <div className={s.productSectionHead}>
             <span>01</span>
@@ -204,21 +189,31 @@ function ProductModal({
               onChange={(e) => set("tags", e.target.value)}
               placeholder="new, premium, popular"
             />
-            <label className={s.fieldWide}>
+            <label className={`${s.fieldWide} ${s.descriptionField}`}>
               <span>
                 Description <em>Optional</em>
               </span>
-              <textarea
-                className={s.productDescription}
-                value={d.description}
-                onChange={(e) => set("description", e.target.value)}
-                placeholder="Describe the product, key features, materials, size or other useful details…"
-              />
-              <small className={s.charCount}>{d.description.length}/2000</small>
+              <div className={s.descriptionBox}>
+                <textarea
+                  className={s.productDescription}
+                  maxLength={2000}
+                  value={d.description}
+                  onChange={(e) => set("description", e.target.value)}
+                  placeholder="Tell customers what makes this product useful, distinctive, or worth buying. You can include features, materials, sizing, care instructions, or other helpful details."
+                />
+                <div className={s.descriptionMeta}>
+                  <small>
+                    Optional · A clear description helps customers understand
+                    the product.
+                  </small>
+                  <small className={s.charCount}>
+                    {d.description.length}/2000
+                  </small>
+                </div>
+              </div>
             </label>
           </div>
         </div>
-
         <div className={s.productSection}>
           <div className={s.productSectionHead}>
             <span>02</span>
@@ -247,7 +242,6 @@ function ProductModal({
               {uploading ? "Please wait" : "Choose images"}
             </span>
           </label>
-
           {(d.imageFiles || []).length > 0 && (
             <div className={s.productImageGrid}>
               {d.imageFiles.map((u, i) => (
@@ -267,7 +261,6 @@ function ProductModal({
             </div>
           )}
         </div>
-
         <div className={s.productSection}>
           <div className={s.productSectionHead}>
             <span>03</span>
@@ -350,7 +343,6 @@ function ProductModal({
             />
           </div>
         </div>
-
         <div className={s.productSection}>
           <div className={s.productSectionHead}>
             <span>04</span>
@@ -399,20 +391,47 @@ function ProductModal({
                       updateVariant(i, "price", Number(e.target.value))
                     }
                   />
-                  <label className={s.fieldWide}>
-                    <span>Variant image</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={async (e) => {
-                        const f = e.target.files?.[0];
-                        if (f) {
+                  <div className={`${s.fieldWide} ${s.variantImageField}`}>
+                    <span>
+                      Variant image <em>Optional</em>
+                    </span>
+                    <label className={s.variantImagePicker}>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const f = e.target.files?.[0];
+                          if (!f) return;
+                          if (
+                            !f.type.startsWith("image/") ||
+                            f.size > 8 * 1024 * 1024
+                          )
+                            return;
                           const r = await uploadProductImage(f);
-                          updateVariant(i, "image", r.data.url);
-                        }
-                      }}
-                    />
-                  </label>
+                          if (r?.data?.url)
+                            updateVariant(i, "image", r.data.url);
+                        }}
+                      />
+                      <div className={s.variantImagePreview}>
+                        {v.image ? (
+                          <img src={v.image} alt="Variant preview" />
+                        ) : (
+                          <span>＋</span>
+                        )}
+                      </div>
+                      <div className={s.variantImageCopy}>
+                        <strong>
+                          {v.image
+                            ? "Change variant image"
+                            : "Add variant image"}
+                        </strong>
+                        <small>PNG, JPG or WEBP · Up to 8 MB</small>
+                      </div>
+                      <span className={s.variantImageButton}>
+                        {v.image ? "Change image" : "Choose image"}
+                      </span>
+                    </label>
+                  </div>
                 </div>
               </div>
             ))}
@@ -426,7 +445,6 @@ function ProductModal({
           </button>
         </div>
       </div>
-
       <div className={`${s.modalFoot} ${s.productModalFoot}`}>
         <button className={s.outline} onClick={onClose}>
           Cancel
@@ -452,7 +470,6 @@ function PurchaseModal({ products, suppliers, onClose, onSave }) {
   const [items, setItems] = useState([
     { productId: "", quantity: 1, unitCost: "" },
   ]);
-
   const update = (i, k, v) =>
     setItems((a) => a.map((x, n) => (n === i ? { ...x, [k]: v } : x)));
   const addRow = () =>
@@ -462,7 +479,6 @@ function PurchaseModal({ products, suppliers, onClose, onSave }) {
     (n, x) => n + Number(x.quantity || 0) * Number(x.unitCost || 0),
     0,
   );
-
   return (
     <Modal title="Record purchase" onClose={onClose}>
       <div className={s.formGrid}>
@@ -506,7 +522,6 @@ function PurchaseModal({ products, suppliers, onClose, onSave }) {
           onChange={(e) => setPaid(e.target.value)}
         />
       </div>
-
       <div className={s.fieldWide}>
         <span>Items</span>
         {items.map((x, i) => (
@@ -555,13 +570,11 @@ function PurchaseModal({ products, suppliers, onClose, onSave }) {
           ＋ Add item
         </button>
       </div>
-
       <Field
         label="Note"
         value={note}
         onChange={(e) => setNote(e.target.value)}
       />
-
       <div className={s.modalFoot}>
         <strong>Total: {money(total)}</strong>
         <button className={s.outline} onClick={onClose}>
@@ -598,7 +611,6 @@ function PurchaseModal({ products, suppliers, onClose, onSave }) {
     </Modal>
   );
 }
-
 function ExpenseModal({ item, onClose, onSave }) {
   const [d, setD] = useState({
     category: item?.category || "Other",
@@ -608,7 +620,6 @@ function ExpenseModal({ item, onClose, onSave }) {
     recurring: item?.recurring || false,
     ownerWithdrawal: item?.ownerWithdrawal || false,
   });
-
   return (
     <Modal title={item ? "Edit expense" : "Add expense"} onClose={onClose}>
       <div className={s.formGrid}>
@@ -654,7 +665,6 @@ function ExpenseModal({ item, onClose, onSave }) {
           onChange={(e) => setD({ ...d, description: e.target.value })}
         />
       </div>
-
       <div className={s.modalFoot}>
         <button className={s.outline} onClick={onClose}>
           Cancel
@@ -685,7 +695,6 @@ function ExpenseModal({ item, onClose, onSave }) {
     </Modal>
   );
 }
-
 function PaymentModal({ title, max, onClose, onSave }) {
   const [d, setD] = useState({
     amount: max > 0 ? max : "",
@@ -696,7 +705,6 @@ function PaymentModal({ title, max, onClose, onSave }) {
     note: "",
     status: "COMPLETED",
   });
-
   return (
     <Modal title={title} onClose={onClose}>
       <div className={s.formGrid}>
@@ -754,7 +762,6 @@ function PaymentModal({ title, max, onClose, onSave }) {
           </select>
         </label>
       </div>
-
       <div className={s.modalFoot}>
         <button className={s.outline} onClick={onClose}>
           Cancel
@@ -772,7 +779,6 @@ function PaymentModal({ title, max, onClose, onSave }) {
     </Modal>
   );
 }
-
 function ReceiptModal({ sale, money, onClose }) {
   return (
     <Modal title={`Receipt ${sale?.saleNumber || ""}`} onClose={onClose}>
@@ -803,7 +809,6 @@ function ReceiptModal({ sale, money, onClose }) {
     </Modal>
   );
 }
-
 function CustomerModal({ item, onClose, onSave }) {
   const [d, setD] = useState({
     firstName: item?.firstName || "",
@@ -812,7 +817,6 @@ function CustomerModal({ item, onClose, onSave }) {
     email: item?.email || "",
   });
   const set = (k, v) => setD((x) => ({ ...x, [k]: v }));
-
   return (
     <Modal title={item ? "Edit customer" : "Add customer"} onClose={onClose}>
       <div className={s.formGrid}>
@@ -853,7 +857,6 @@ function CustomerModal({ item, onClose, onSave }) {
     </Modal>
   );
 }
-
 function SupplierModal({ item, onClose, onSave }) {
   const [d, setD] = useState({
     name: item?.name || "",
@@ -863,7 +866,6 @@ function SupplierModal({ item, onClose, onSave }) {
     notes: item?.notes || "",
   });
   const set = (k, v) => setD((x) => ({ ...x, [k]: v }));
-
   return (
     <Modal title={item ? "Edit supplier" : "Add supplier"} onClose={onClose}>
       <div className={s.formGrid}>
