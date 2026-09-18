@@ -1,111 +1,214 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import s from "../../RetailWorkspace.module.css";
 import { Field, Panel, Toolbar } from "./shared";
+import { getMovementHistory } from "../../../api/retailApi";
 
-const MOVEMENTS = [
+const MOVEMENT_TYPES = [
+  ["", "All movements"],
+  ["PURCHASE", "Purchases"],
+  ["SALE", "Sales"],
+  ["RETURN", "Returns"],
   ["CORRECTION", "Correction in"],
   ["CORRECTION_OUT", "Correction out"],
   ["DAMAGED", "Damaged"],
   ["LOST", "Lost"],
   ["THEFT", "Theft"],
   ["INTERNAL_USE", "Internal use"],
+  ["INITIAL_STOCK", "Initial stock"],
 ];
 
-function formatHistoryDate(value) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "—";
-  const day = date.getDate();
-  const suffix =
-    day % 10 === 1 && day !== 11
-      ? "st"
-      : day % 10 === 2 && day !== 12
-        ? "nd"
-        : day % 10 === 3 && day !== 13
-          ? "rd"
-          : "th";
-  const weekday = date.toLocaleDateString(undefined, { weekday: "long" });
-  const month = date.toLocaleDateString(undefined, { month: "long" });
-  const year = date.getFullYear();
-  const time = date.toLocaleTimeString(undefined, {
+function ordinal(n) {
+  const v = n % 100;
+  return `${n}${v >= 11 && v <= 13 ? "th" : n % 10 === 1 ? "st" : n % 10 === 2 ? "nd" : n % 10 === 3 ? "rd" : "th"}`;
+}
+function formatMovementDate(value) {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+  const day = d.toLocaleDateString(undefined, { weekday: "long" });
+  const month = d.toLocaleDateString(undefined, { month: "long" });
+  return `${day}, ${ordinal(d.getDate())} of ${month} ${d.getFullYear()}`;
+}
+function formatMovementTime(value) {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleTimeString(undefined, {
     hour: "numeric",
     minute: "2-digit",
   });
-  return `${weekday}, ${day}${suffix} of ${month} ${year} · ${time}`;
 }
 
-function SearchField({ value, onChange, placeholder = "Search products..." }) {
-  return (
-    <div className={s.inventorySearch}>
-      <span aria-hidden="true">⌕</span>
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        aria-label={placeholder}
-      />
-      {value && (
-        <button
-          type="button"
-          onClick={() => onChange("")}
-          aria-label="Clear search"
-        >
-          ×
-        </button>
-      )}
-    </div>
-  );
-}
+function HistoryModal({ products, onClose }) {
+  const [productId, setProductId] = useState("");
+  const [type, setType] = useState("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [cursor, setCursor] = useState(null);
+  const [rows, setRows] = useState([]);
+  const [nextCursor, setNextCursor] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
 
-function SelectMenu({
-  label,
-  value,
-  onChange,
-  options,
-  placeholder = "Select",
-}) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
-  const selected = options.find((o) => o[0] === value);
+  const load = async (next = null) => {
+    setLoading(true);
+    setError("");
+    try {
+      const params = { size: 50 };
+      if (productId) params.productId = productId;
+      if (type) params.type = type;
+      if (from) params.from = from;
+      if (to) params.to = to;
+      if (next) params.cursor = next;
+      const { data } = await getMovementHistory(params);
+      setRows(data?.items || []);
+      setNextCursor(data?.nextCursor || null);
+      setCursor(next);
+      setPage((p) => (next ? p + 1 : 1));
+    } catch (e) {
+      setError(
+        e?.response?.data?.message || "Unable to load movement history.",
+      );
+      setRows([]);
+      setNextCursor(null);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const close = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener("mousedown", close);
-    return () => document.removeEventListener("mousedown", close);
-  }, []);
+    load(null);
+  }, [productId, type, from, to]);
+
+  const reset = () => {
+    setProductId("");
+    setType("");
+    setFrom("");
+    setTo("");
+    setCursor(null);
+    setPage(1);
+  };
   return (
-    <div className={s.customSelect} ref={ref}>
-      <span className={s.customSelectLabel}>{label}</span>
-      <button
-        type="button"
-        className={`${s.customSelectButton} ${open ? s.customSelectOpen : ""}`}
-        onClick={() => setOpen((v) => !v)}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-      >
-        <span>{selected?.[1] || placeholder}</span>
-        <span className={s.selectChevron}>⌄</span>
-      </button>
-      {open && (
-        <div className={s.customSelectMenu} role="listbox">
-          {options.map(([key, text]) => (
-            <button
-              type="button"
-              role="option"
-              aria-selected={key === value}
-              className={`${s.customSelectOption} ${key === value ? s.customSelectSelected : ""}`}
-              key={key}
-              onClick={() => {
-                onChange(key);
-                setOpen(false);
-              }}
+    <div
+      className={s.modalBackdrop}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Inventory movement history"
+    >
+      <section className={`${s.modal} ${s.movementHistoryModal}`}>
+        <header className={s.modalHead}>
+          <div>
+            <span className={s.kicker}>INVENTORY HISTORY</span>
+            <h2>All stock movements</h2>
+            <p>
+              Browse your complete inventory record without loading the entire
+              history at once.
+            </p>
+          </div>
+          <button className={s.iconBtn} onClick={onClose} aria-label="Close">
+            <i className="ti ti-x" />
+          </button>
+        </header>
+        <div className={s.movementHistoryFilters}>
+          <label className={s.field}>
+            <span>Product</span>
+            <select
+              value={productId}
+              onChange={(e) => setProductId(e.target.value)}
             >
-              <span>{text}</span>
-              {key === value && <span className={s.selectCheck}>✓</span>}
-            </button>
-          ))}
+              <option value="">All products</option>
+              {products.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className={s.field}>
+            <span>Movement</span>
+            <select value={type} onChange={(e) => setType(e.target.value)}>
+              {MOVEMENT_TYPES.map(([v, l]) => (
+                <option key={v} value={v}>
+                  {l}
+                </option>
+              ))}
+            </select>
+          </label>
+          <Field
+            label="From"
+            type="date"
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+          />
+          <Field
+            label="To"
+            type="date"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+          />
+          <button type="button" className={s.outline} onClick={reset}>
+            Reset filters
+          </button>
         </div>
-      )}
+        {error && <div className={s.errorBox}>{error}</div>}
+        <div className={s.movementHistoryTableWrap}>
+          {loading ? (
+            <div className={s.modalLoading}>Loading movement history…</div>
+          ) : rows.length === 0 ? (
+            <div className={s.emptyState}>
+              <strong>No movements found</strong>
+              <span>Try changing the filters or date range.</span>
+            </div>
+          ) : (
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Product</th>
+                  <th>Movement</th>
+                  <th>Quantity</th>
+                  <th>Reference</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((m) => (
+                  <tr key={m.id}>
+                    <td>
+                      <strong>{formatMovementDate(m.createdAt)}</strong>
+                      <small>{formatMovementTime(m.createdAt)}</small>
+                    </td>
+                    <td>{m.productName}</td>
+                    <td>
+                      <span className={s.badge}>{m.type}</span>
+                    </td>
+                    <td>{m.quantity}</td>
+                    <td>{m.reference || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+        <footer className={s.movementHistoryFooter}>
+          <span>
+            {rows.length ? `Page ${page} · Showing ${rows.length} records` : ""}
+          </span>
+          <div>
+            <button
+              className={s.outline}
+              disabled={!cursor || loading}
+              onClick={() => load(null)}
+            >
+              First page
+            </button>
+            <button
+              className={s.primary}
+              disabled={!nextCursor || loading}
+              onClick={() => load(nextCursor)}
+            >
+              Next 50
+            </button>
+          </div>
+        </footer>
+      </section>
     </div>
   );
 }
@@ -113,34 +216,9 @@ function SelectMenu({
 function Inventory({ data, products, onAdjust, money }) {
   const [p, setP] = useState(products[0]);
   const [qty, setQty] = useState(1);
-  const [type, setType] = useState("CORRECTION");
+  const [type, setType] = useState("CORRECTION_IN");
   const [note, setNote] = useState("");
-  const [stockSearch, setStockSearch] = useState("");
-  const [stockPage, setStockPage] = useState(1);
-  const STOCK_PAGE_SIZE = 12;
-  const filteredProducts = useMemo(
-    () =>
-      products.filter((x) =>
-        String(x.name || "")
-          .toLowerCase()
-          .includes(stockSearch.trim().toLowerCase()),
-      ),
-    [products, stockSearch],
-  );
-  const stockPages = Math.max(
-    1,
-    Math.ceil(filteredProducts.length / STOCK_PAGE_SIZE),
-  );
-  const visibleProducts = filteredProducts.slice(
-    (stockPage - 1) * STOCK_PAGE_SIZE,
-    stockPage * STOCK_PAGE_SIZE,
-  );
-  useEffect(() => {
-    setStockPage(1);
-  }, [stockSearch]);
-  useEffect(() => {
-    if (p && !products.some((x) => x.id === p.id)) setP(products[0]);
-  }, [products, p]);
+  const [historyOpen, setHistoryOpen] = useState(false);
   return (
     <>
       <Toolbar
@@ -156,13 +234,9 @@ function Inventory({ data, products, onAdjust, money }) {
         }
       />
       <div className={s.grid2}>
-        <Panel
-          title="Stock levels"
-          sub={`${products.length} product${products.length === 1 ? "" : "s"} · quantities update as movements are recorded`}
-        >
-          <SearchField value={stockSearch} onChange={setStockSearch} />
+        <Panel title="Stock levels" sub="Live quantities by product">
           <div className={s.stockGrid}>
-            {visibleProducts.map((x) => (
+            {products.map((x) => (
               <div
                 key={x.id}
                 className={
@@ -183,54 +257,39 @@ function Inventory({ data, products, onAdjust, money }) {
                 </small>
               </div>
             ))}
-            {!visibleProducts.length && (
-              <div className={s.stockEmpty}>No products match your search.</div>
-            )}
           </div>
-          {stockPages > 1 && (
-            <div className={s.stockPagination}>
-              <button
-                type="button"
-                className={s.pageButton}
-                disabled={stockPage === 1}
-                onClick={() => setStockPage((v) => v - 1)}
-              >
-                Previous
-              </button>
-              <span>
-                Page <strong>{stockPage}</strong> of{" "}
-                <strong>{stockPages}</strong>
-              </span>
-              <button
-                type="button"
-                className={s.pageButton}
-                disabled={stockPage === stockPages}
-                onClick={() => setStockPage((v) => v + 1)}
-              >
-                Next
-              </button>
-            </div>
-          )}
         </Panel>
         <Panel
           title="Record movement"
           sub="Use positive quantities. Ehral calculates the resulting stock."
         >
           <div className={s.formGrid}>
-            <SelectMenu
-              label="Product"
-              value={p?.id || ""}
-              onChange={(id) =>
-                setP(products.find((x) => String(x.id) === String(id)))
-              }
-              options={products.map((x) => [String(x.id), x.name])}
-            />
-            <SelectMenu
-              label="Movement"
-              value={type}
-              onChange={setType}
-              options={MOVEMENTS}
-            />
+            <label className={s.field}>
+              <span>Product</span>
+              <select
+                value={p?.id || ""}
+                onChange={(e) =>
+                  setP(products.find((x) => x.id === Number(e.target.value)))
+                }
+              >
+                {products.map((x) => (
+                  <option key={x.id} value={x.id}>
+                    {x.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className={s.field}>
+              <span>Movement</span>
+              <select value={type} onChange={(e) => setType(e.target.value)}>
+                <option value="CORRECTION">Correction in</option>
+                <option value="CORRECTION_OUT">Correction out</option>
+                <option value="DAMAGED">Damaged</option>
+                <option value="LOST">Lost</option>
+                <option value="THEFT">Theft</option>
+                <option value="INTERNAL_USE">Internal use</option>
+              </select>
+            </label>
             <Field
               label="Quantity"
               type="number"
@@ -250,6 +309,11 @@ function Inventory({ data, products, onAdjust, money }) {
       <Panel
         title="Recent movement history"
         sub="Latest 200 recorded movements"
+        action={
+          <button className={s.outline} onClick={() => setHistoryOpen(true)}>
+            View all history
+          </button>
+        }
       >
         <div className={s.tableWrap}>
           <table>
@@ -271,15 +335,23 @@ function Inventory({ data, products, onAdjust, money }) {
                   </td>
                   <td>{m.quantity}</td>
                   <td>{m.reference || "—"}</td>
-                  <td>{formatHistoryDate(m.createdAt)}</td>
+                  <td>
+                    <strong>{formatMovementDate(m.createdAt)}</strong>
+                    <small>{formatMovementTime(m.createdAt)}</small>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </Panel>
+      {historyOpen && (
+        <HistoryModal
+          products={products}
+          onClose={() => setHistoryOpen(false)}
+        />
+      )}
     </>
   );
 }
-
 export { Inventory };

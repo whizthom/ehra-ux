@@ -1958,273 +1958,623 @@ td small {
   }
 }
 
-/* Inventory controls: responsive search, scalable stock list, and custom selects. */
-.inventorySearch {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  height: 42px;
-  box-sizing: border-box;
-  border: 1px solid var(--border-color);
-  background: var(--bg-surface);
-  border-radius: 10px;
-  padding: 0 11px;
-  margin: 0 0 13px;
-  transition: border-color .16s, box-shadow .16s
-}
-
-.inventorySearch:focus-within {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent)
-}
-
-.inventorySearch>span {
-  font-size: 20px;
-  line-height: 1;
-  color: var(--text-secondary);
-  transform: rotate(-20deg);
-  flex: 0 0 auto
-}
-
-.inventorySearch input {
-  border: 0 !important;
-  outline: 0 !important;
-  box-shadow: none !important;
-  background: transparent !important;
-  color: var(--text-primary);
-  width: 100%;
-  min-width: 0;
-  height: 100%;
-  padding: 0;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 600
-}
-
-.inventorySearch input::placeholder {
-  color: var(--text-secondary);
-  font-weight: 500
-}
-
-.inventorySearch button {
-  border: 0;
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: 20px;
-  line-height: 1;
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  cursor: pointer;
-  flex: 0 0 auto
-}
-
-.inventorySearch button:hover {
-  background: var(--bg-surface-alt);
+/* Store profile enhancements */
+.sectionLabel {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .02em;
   color: var(--text-primary)
 }
 
-.stockGrid {
-  max-height: 450px;
-  overflow-y: auto;
-  padding-right: 3px;
-  scrollbar-width: thin
+.hoursEditor {
+  margin-top: 6px
 }
 
-.stockGrid>div:not(.stockEmpty) {
+.hoursHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 12px
+}
+
+.hoursHeader small,
+.storeUrlTop small {
+  display: block;
+  color: var(--text-secondary);
+  font-size: 10px;
+  line-height: 1.5;
+  margin-top: 4px;
+  max-width: 680px
+}
+
+.smallAction {
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface-alt);
+  color: var(--text-primary);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap
+}
+
+.smallAction:hover {
+  border-color: var(--accent);
+  color: var(--accent)
+}
+
+.hoursList {
+  display: grid;
+  gap: 7px
+}
+
+.hoursRowCard {
+  display: grid;
+  grid-template-columns: minmax(130px, 1.25fr) minmax(120px, 1fr) minmax(120px, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface-alt);
+  border-radius: 11px;
+  padding: 10px
+}
+
+.hoursClosed {
+  opacity: .78
+}
+
+.hoursDay {
+  align-self: center
+}
+
+.hoursDay strong {
+  display: block;
+  font-size: 11px;
+  color: var(--text-primary)
+}
+
+.hoursDay span {
+  display: block;
+  margin-top: 3px;
+  font-size: 9px;
+  color: var(--text-secondary)
+}
+
+.timeField span {
+  display: block;
+  font-size: 9px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  font-weight: 700
+}
+
+.timeField input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 38px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-radius: 8px;
+  padding: 0 9px;
+  font: inherit;
+  font-size: 11px;
+  outline: none
+}
+
+.timeField input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent)
+}
+
+.hoursStatus {
+  height: 38px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  border-radius: 8px;
+  padding: 0 10px;
+  font-size: 10px;
+  font-weight: 750;
+  cursor: pointer
+}
+
+.hoursStatus:hover {
+  border-color: var(--accent);
+  color: var(--accent)
+}
+
+.slugField {
   min-width: 0
 }
 
-.stockEmpty {
-  grid-column: 1/-1;
-  text-align: center;
-  padding: 34px 12px;
-  color: var(--text-secondary);
-  font-size: 12px;
-  border: 1px dashed var(--border-color);
-  border-radius: 10px
-}
-
-.stockPagination {
+.slugInputWrap {
   display: flex;
   align-items: center;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  border-radius: 8px;
+  overflow: hidden
+}
+
+.slugInputWrap:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent)
+}
+
+.slugPrefix {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 0 0 10px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  white-space: nowrap
+}
+
+.slugInputWrap input {
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  min-width: 0
+}
+
+.fieldHint {
+  font-size: 9px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin-top: 5px
+}
+
+.slugField .fieldHint {
+  min-height: 13px
+}
+
+.descriptionField textarea {
+  min-height: 132px;
+  line-height: 1.55;
+  padding: 12px;
+  resize: vertical
+}
+
+.fieldLabelRow {
+  display: flex;
   justify-content: space-between;
-  gap: 10px;
-  margin-top: 13px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border-color);
+  gap: 12px;
+  align-items: baseline
+}
+
+.fieldLabelRow span {
+  margin-bottom: 6px
+}
+
+.fieldLabelRow small {
+  font-size: 9px;
+  color: var(--text-secondary)
+}
+
+.imagePicker {
+  min-width: 0
+}
+
+.imageDropzone {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 190px;
+  padding: 0;
+  border: 1.5px dashed color-mix(in srgb, var(--border-color) 90%, var(--accent));
+  background: var(--bg-surface-alt);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  color: var(--text-primary)
+}
+
+.imageDropzone:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--bg-soft-accent) 45%, var(--bg-surface-alt))
+}
+
+.imageDropzone:disabled {
+  cursor: wait;
+  opacity: .72
+}
+
+.imageDropzone img {
+  display: block;
+  width: 100%;
+  height: 190px;
+  object-fit: cover
+}
+
+.imagePlaceholder {
+  min-height: 190px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 20px;
+  box-sizing: border-box
+}
+
+.imagePlaceholder i {
+  font-size: 30px;
+  color: var(--accent)
+}
+
+.imagePlaceholder strong {
+  font-size: 12px
+}
+
+.imagePlaceholder small {
   font-size: 10px;
   color: var(--text-secondary)
 }
 
-.stockPagination strong {
-  color: var(--text-primary)
-}
-
-.pageButton {
-  border: 1px solid var(--border-color);
-  background: var(--bg-surface);
-  color: var(--text-primary);
-  border-radius: 8px;
+.imageOverlay {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
   padding: 7px 10px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, .72);
+  color: #fff;
   font-size: 10px;
-  font-weight: 700;
-  cursor: pointer
+  font-weight: 750
 }
 
-.pageButton:hover:not(:disabled) {
-  border-color: var(--accent);
+.hiddenFileInput {
+  display: none
+}
+
+.storeUrlCard {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 13px;
+  background: var(--bg-surface-alt)
+}
+
+.storeUrlTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start
+}
+
+.urlStatus {
+  min-height: 20px;
+  font-size: 9px;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 4px 7px;
+  background: var(--bg-surface);
+  color: var(--text-secondary)
+}
+
+.urlAvailable {
+  background: var(--bg-soft-accent);
   color: var(--accent)
 }
 
-.pageButton:disabled {
-  opacity: .45;
-  cursor: not-allowed
+.urlTaken {
+  background: color-mix(in srgb, #b42318 10%, var(--bg-surface));
+  color: #b42318
 }
 
-.customSelect {
-  position: relative;
-  min-width: 0
+.urlCopyRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px
 }
 
-.customSelectLabel {
-  display: block;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--text-secondary);
-  margin: 0 0 6px
-}
-
-.customSelectButton {
-  width: 100%;
-  height: 39px;
+.urlCopyRow input {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
   box-sizing: border-box;
   border: 1px solid var(--border-color);
   background: var(--bg-surface);
   color: var(--text-primary);
   border-radius: 8px;
-  padding: 0 11px;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 10px
+}
+
+.urlCopyRow button {
+  height: 40px;
+  white-space: nowrap
+}
+
+.urlCopyRow button i {
+  margin-right: 5px
+}
+
+.copyConfirmation {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  font: inherit;
-  font-size: 12px;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color .16s, box-shadow .16s
-}
-
-.customSelectButton:hover,
-.customSelectOpen {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent)
-}
-
-.customSelectButton>span:first-child {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis
-}
-
-.selectChevron {
-  font-size: 16px;
-  color: var(--text-secondary);
-  line-height: 1;
-  transform: translateY(-2px)
-}
-
-.customSelectMenu {
-  position: absolute;
-  z-index: 35;
-  left: 0;
-  right: 0;
-  top: calc(100% + 7px);
-  padding: 5px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: 11px;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, .16);
-  max-height: 250px;
-  overflow: auto
-}
-
-.customSelectOption {
-  width: 100%;
-  border: 0;
-  background: transparent;
-  color: var(--text-primary);
-  border-radius: 7px;
+  gap: 7px;
+  margin-top: 9px;
   padding: 9px 10px;
+  border-radius: 9px;
+  background: var(--bg-soft-accent);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 750
+}
+
+.channelInfo {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  text-align: left;
-  font: inherit;
-  font-size: 11px;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px
+}
+
+.channelInfo>i {
+  font-size: 18px;
+  color: var(--accent);
+  margin-top: 1px
+}
+
+.channelInfo b,
+.channelInfo small {
+  display: block
+}
+
+.channelInfo b {
+  font-size: 10px
+}
+
+.channelInfo small {
+  font-size: 9px;
+  color: var(--text-secondary);
+  margin-top: 3px;
+  line-height: 1.45
+}
+
+.deliveryOptions {
+  grid-column: 1/-1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px
+}
+
+.toggleCard {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 11px;
+  background: var(--bg-surface-alt);
   cursor: pointer
 }
 
-.customSelectOption:hover,
-.customSelectSelected {
-  background: var(--bg-soft-accent);
-  color: var(--accent)
+.toggleCard:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border-color))
 }
 
-.selectCheck {
-  font-weight: 800;
-  color: var(--accent)
+.toggleCard input {
+  accent-color: var(--accent);
+  margin-top: 2px
 }
 
-@media (max-width: 760px) {
-  .inventorySearch {
-    height: 48px;
-    border-radius: 12px;
-    padding: 0 13px;
-    margin-bottom: 14px
+.toggleCard b,
+.toggleCard small {
+  display: block
+}
+
+.toggleCard b {
+  font-size: 10px;
+  color: var(--text-primary)
+}
+
+.toggleCard small {
+  font-size: 9px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-top: 3px
+}
+
+@media(max-width:680px) {
+  .hoursHeader {
+    flex-direction: column;
+    gap: 9px
   }
 
-  .inventorySearch>span {
-    font-size: 23px
+  .smallAction {
+    width: 100%
   }
 
-  .inventorySearch input {
-    font-size: 14px;
-    font-weight: 700
+  .hoursRowCard {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px
   }
 
-  .inventorySearch input::placeholder {
-    font-size: 14px;
-    font-weight: 600
+  .hoursDay {
+    grid-column: 1/-1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center
   }
 
-  .stockGrid {
-    max-height: 420px;
+  .hoursStatus {
+    width: 100%
+  }
+
+  .deliveryOptions {
     grid-template-columns: 1fr
   }
 
-  .stockGrid>div:not(.stockEmpty) {
-    padding: 13px
+  .imageDropzone,
+  .imageDropzone img,
+  .imagePlaceholder {
+    min-height: 170px;
+    height: 170px
   }
 
-  .stockGrid span {
-    font-size: 12px
+  .urlCopyRow {
+    flex-direction: column
   }
 
-  .stockGrid strong {
-    font-size: 21px
+  .urlCopyRow input,
+  .urlCopyRow button {
+    width: 100%
   }
 
-  .stockPagination {
-    position: sticky;
-    bottom: 0;
-    background: var(--bg-surface);
-    padding-bottom: 2px
+  .storeUrlTop {
+    flex-direction: column
   }
 
-  .customSelectMenu {
-    max-height: 220px
+  .urlStatus:empty {
+    display: none
+  }
+}
+
+@media(max-width:380px) {
+  .hoursRowCard {
+    grid-template-columns: 1fr
+  }
+
+  .hoursDay {
+    grid-column: auto
+  }
+
+  .hoursStatus {
+    grid-column: auto
+  }
+
+  .descriptionField textarea {
+    min-height: 145px
+  }
+
+  .imageDropzone,
+  .imageDropzone img,
+  .imagePlaceholder {
+    min-height: 150px;
+    height: 150px
+  }
+}
+
+/* Full inventory movement history */
+.movementHistoryModal {
+  width: min(1180px, calc(100vw - 32px));
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column
+}
+
+.movementHistoryFilters {
+  display: grid;
+  grid-template-columns: 1.4fr 1.2fr 1fr 1fr auto;
+  gap: 12px;
+  align-items: end;
+  padding: 18px 0
+}
+
+.movementHistoryTableWrap {
+  overflow: auto;
+  min-height: 240px;
+  flex: 1;
+  border: 1px solid var(--line, #e6e8ec);
+  border-radius: 14px
+}
+
+.movementHistoryTableWrap table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px
+}
+
+.movementHistoryTableWrap th,
+.movementHistoryTableWrap td {
+  padding: 13px 15px;
+  text-align: left;
+  border-bottom: 1px solid var(--line, #e6e8ec)
+}
+
+.movementHistoryTableWrap td small {
+  display: block;
+  margin-top: 3px;
+  opacity: .62
+}
+
+.movementHistoryFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-top: 15px
+}
+
+.movementHistoryFooter>div {
+  display: flex;
+  gap: 8px
+}
+
+.modalLoading,
+.errorBox {
+  padding: 30px;
+  text-align: center
+}
+
+.errorBox {
+  color: #b42318;
+  background: #fff4f2;
+  border-radius: 12px;
+  margin-bottom: 12px
+}
+
+@media(max-width:800px) {
+  .movementHistoryModal {
+    width: calc(100vw - 20px);
+    max-height: 92vh;
+    padding: 18px
+  }
+
+  .movementHistoryFilters {
+    grid-template-columns: 1fr 1fr
+  }
+
+  .movementHistoryFilters .field:nth-child(1),
+  .movementHistoryFilters .field:nth-child(2),
+  .movementHistoryFilters .outline {
+    grid-column: 1/-1
+  }
+
+  .movementHistoryFooter {
+    align-items: stretch;
+    flex-direction: column
+  }
+
+  .movementHistoryFooter>div {
+    width: 100%
+  }
+
+  .movementHistoryFooter button {
+    flex: 1
+  }
+}
+
+@media(max-width:520px) {
+  .movementHistoryFilters {
+    grid-template-columns: 1fr
+  }
+
+  .movementHistoryFilters .field,
+  .movementHistoryFilters .outline {
+    grid-column: auto
+  }
+
+  .movementHistoryTableWrap {
+    margin-inline: -2px
   }
 }
