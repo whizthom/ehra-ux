@@ -34,7 +34,7 @@ const TAB_STATUSES = {
 };
 
 // Drives the thin scroll-position indicator under the employer nav on
-// mobile, once it's a horizontally-scrollable pill strip — same
+// mobile, once it's a horizontally-scrollable pill strip - same
 // scroll-linked-cue pattern already used for the app's other scrollable
 // tab strips (dashboard bottom nav, quick actions).
 function useScrollThumb(ref) {
@@ -75,7 +75,7 @@ function useScrollThumb(ref) {
 function WorkflowTimeline({ leave }) {
   const steps = [];
 
-  // Step 1 — Cover (if there was one)
+  // Step 1 - Cover (if there was one)
   if (leave.coverPersonFirstName) {
     steps.push({
       label: "Cover person",
@@ -91,7 +91,7 @@ function WorkflowTimeline({ leave }) {
     });
   }
 
-  // Step 2 — HOD (if there was one)
+  // Step 2 - HOD (if there was one)
   if (leave.hodDecidedByName) {
     steps.push({
       label: "Head of Dept",
@@ -106,7 +106,7 @@ function WorkflowTimeline({ leave }) {
     });
   }
 
-  // Step 3 — Employer (always last)
+  // Step 3 - Employer (always last)
   steps.push({
     label: "Employer",
     detail: "Final sign-off",
@@ -169,7 +169,7 @@ function PolicyEditor() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(null); // leaveType being saved
   const [edits, setEdits] = useState({}); // { policyId: { field: value } }
-  const [saved, setSaved] = useState({}); // { policyId: true } — green flash
+  const [saved, setSaved] = useState({}); // { policyId: true } - green flash
 
   const fetchPolicies = useCallback(async () => {
     try {
@@ -334,7 +334,7 @@ function PolicyEditor() {
                     />
                     <span>Requires a cover person</span>
                     <span className={styles.policyFieldHint}>
-                      — employee must nominate a colleague before submitting
+                      - employee must nominate a colleague before submitting
                     </span>
                   </label>
                 </div>
@@ -351,7 +351,7 @@ function PolicyEditor() {
                     />
                     <span>Requires HOD approval</span>
                     <span className={styles.policyFieldHint}>
-                      — skipped if the employee's department has no HOD
+                      - skipped if the employee's department has no HOD
                     </span>
                   </label>
                 </div>
@@ -445,7 +445,7 @@ function OnLeavePanel() {
     fetch();
   }, [fetch]);
 
-  // Live update — patch the "currently on leave" list in-place
+  // Live update - patch the "currently on leave" list in-place
   useMessageStream({
     onLeaveUpdate: (leave) => {
       if (leave.status === "APPROVED") {
@@ -455,7 +455,7 @@ function OnLeavePanel() {
           return [leave, ...prev];
         });
       } else {
-        // No longer approved — remove from the on-leave view
+        // No longer approved - remove from the on-leave view
         setOnLeave((prev) => prev.filter((l) => l.id !== leave.id));
       }
     },
@@ -583,7 +583,7 @@ function BalancesPanel() {
   const [balances, setBalances] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Card list (mobile) starts fully collapsed — a business with any real
+  // Card list (mobile) starts fully collapsed - a business with any real
   // headcount turns into a long scroll of chip grids otherwise. Nothing
   // in this Set means nothing's expanded.
   const [expandedCards, setExpandedCards] = useState(new Set());
@@ -636,7 +636,7 @@ function BalancesPanel() {
 
   return (
     <>
-      {/* Table — horizontally-scrollable, sticky first column. Fine down to
+      {/* Table - horizontally-scrollable, sticky first column. Fine down to
           tablet width, but a spreadsheet you have to pan around stops being
           usable on a phone, so it's hidden below that breakpoint in favor
           of the card list underneath (see .balancesTable / .balancesCards
@@ -679,7 +679,7 @@ function BalancesPanel() {
                   if (!b)
                     return (
                       <td key={type} className={styles.muted}>
-                        —
+                        -
                       </td>
                     );
                   const pct =
@@ -721,10 +721,10 @@ function BalancesPanel() {
         </table>
       </div>
 
-      {/* Card list — phone-only (see .balancesCards). Each employee's
+      {/* Card list - phone-only (see .balancesCards). Each employee's
           balances become a wrapped row of small labeled chips instead of
           a table cell, so nothing needs a sideways scroll to be read.
-          Collapsed by default — a card per employee times a chip per
+          Collapsed by default - a card per employee times a chip per
           leave type gets long fast on a real headcount, so only the
           summary shows until you tap to open one. */}
       <div className={styles.balancesCards}>
@@ -843,7 +843,7 @@ export default function LeavesTab({ onSectionChange } = {}) {
 
   // Dashboard.jsx renders the shared brand-footer Logo as a sibling of
   // this whole component (see the "Brand footer" comment there) and
-  // has no visibility into which Leaves sub-tab is open on its own —
+  // has no visibility into which Leaves sub-tab is open on its own -
   // this is the one line that tells it, so it can hide that footer
   // specifically while Policies is open (see Dashboard.jsx's own
   // comment on why, right where it checks leavesSection).
@@ -872,10 +872,10 @@ export default function LeavesTab({ onSectionChange } = {}) {
 
   // Drives the mobile layout: below the breakpoint the list and detail
   // panes can't sit side by side, so the detail pane becomes a full-screen
-  // overlay that slides over the list instead — see .showDetail below.
+  // overlay that slides over the list instead - see .showDetail below.
   const showingDetail = Boolean(selected);
 
-  // ── Swipe-to-go-back on the detail pane (touch only) — same
+  // ── Swipe-to-go-back on the detail pane (touch only) - same
   // finger-follows-exactly technique as the Messages inbox: mutate the
   // DOM node directly via a ref rather than routing every touchmove
   // through React state, which is what keeps it from lagging behind
@@ -906,7 +906,7 @@ export default function LeavesTab({ onSectionChange } = {}) {
     if (dragState.current.dx > 90) setSelected(null);
   };
 
-  // Employer nav becomes a horizontally-scrollable pill strip on mobile —
+  // Employer nav becomes a horizontally-scrollable pill strip on mobile -
   // this drives its scroll-position indicator.
   const employerNavScrollRef = useRef(null);
   const employerNavThumb = useScrollThumb(employerNavScrollRef);
@@ -927,7 +927,7 @@ export default function LeavesTab({ onSectionChange } = {}) {
     fetchAll();
   }, [fetchAll]);
 
-  // Live update — patch the leaves list in-place from the pushed LeaveDTO
+  // Live update - patch the leaves list in-place from the pushed LeaveDTO
   useMessageStream({
     onLeaveUpdate: (leave) => {
       setLeaves((prev) => {
@@ -1129,7 +1129,7 @@ export default function LeavesTab({ onSectionChange } = {}) {
           >
             {selected ? (
               <div className={styles.detailArea}>
-                {/* Mobile-only back affordance — the detail pane is a
+                {/* Mobile-only back affordance - the detail pane is a
                     full-screen overlay below the breakpoint, so it needs
                     its own way back besides the desktop-only X below. */}
                 <button
@@ -1246,7 +1246,7 @@ export default function LeavesTab({ onSectionChange } = {}) {
                     </div>
                   )}
 
-                {/* Actions — only for PENDING_EMPLOYER */}
+                {/* Actions - only for PENDING_EMPLOYER */}
                 {selected.status === "PENDING_EMPLOYER" && (
                   <div className={styles.actions}>
                     <div className={styles.noteField}>
@@ -1347,7 +1347,7 @@ export default function LeavesTab({ onSectionChange } = {}) {
             </h2>
             <p className={styles.sectionSub}>
               Employees with an approved leave that covers today. Updates
-              automatically — no refresh needed.
+              automatically - no refresh needed.
             </p>
           </div>
           <OnLeavePanel />

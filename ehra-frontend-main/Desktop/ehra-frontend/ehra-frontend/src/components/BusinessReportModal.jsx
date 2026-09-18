@@ -43,7 +43,7 @@ function rangeFor(key) {
 
 /* ── formatting helpers (same conventions as the existing report tabs) ── */
 function fmtDate(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d + "T00:00:00").toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
@@ -51,27 +51,27 @@ function fmtDate(d) {
   });
 }
 function fmtMonth(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d + "T00:00:00").toLocaleDateString(undefined, {
     month: "short",
     year: "2-digit",
   });
 }
 function pct(v) {
-  return v === null || v === undefined ? "—" : `${v}%`;
+  return v === null || v === undefined ? "-" : `${v}%`;
 }
 function num(v) {
   return v === null || v === undefined ? "0" : v;
 }
 function money(v) {
-  if (v === null || v === undefined) return "—";
+  if (v === null || v === undefined) return "-";
   return Number(v).toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 }
 function titleCase(s) {
-  if (!s) return "—";
+  if (!s) return "-";
   return String(s)
     .toLowerCase()
     .split("_")
@@ -79,14 +79,14 @@ function titleCase(s) {
     .join(" ");
 }
 function fullName(first, last) {
-  return [first, last].filter(Boolean).join(" ") || "—";
+  return [first, last].filter(Boolean).join(" ") || "-";
 }
 function initials(first, last) {
   return `${(first || "?")[0]}${(last || "")[0] || ""}`.toUpperCase();
 }
 
 /* Attendance-rate style thresholds used purely for the colored status dots
-   on the department cards — not a fabricated metric, just a display
+   on the department cards - not a fabricated metric, just a display
    convention over the real attendanceRatePercent value. */
 function healthStatus(rate) {
   if (rate === null || rate === undefined) return "unknown";
@@ -338,12 +338,12 @@ export default function BusinessReportModal({ open, onClose }) {
   }, [open, attendance, leave, payroll, deptHealth, workforce]);
 
   // Keep the pill nav itself scrolled so the currently-active pill is
-  // always visible — the scrollspy above only toggled which pill LOOKS
+  // always visible - the scrollspy above only toggled which pill LOOKS
   // active; on a narrow screen (or with six sections in a row) the
   // active pill could already be scrolled out of view in its own
   // horizontal strip, with nothing moving it back into frame as the
   // person scrolls the body. `inline: "center"` moves the nav bar
-  // horizontally only — `block: "nearest"` is there specifically to stop
+  // horizontally only - `block: "nearest"` is there specifically to stop
   // scrollIntoView from also nudging the page's own vertical scroll,
   // which would fight with the person's own scrolling.
   useEffect(() => {
@@ -451,7 +451,7 @@ export default function BusinessReportModal({ open, onClose }) {
                     />
                     <div className={styles.gaugeCenter}>
                       <div className={styles.gaugeNum}>
-                        {attendance?.attendanceRatePercent ?? "—"}%
+                        {attendance?.attendanceRatePercent ?? "-"}%
                       </div>
                       <div className={styles.gaugeSub}>attendance rate</div>
                     </div>
@@ -463,21 +463,21 @@ export default function BusinessReportModal({ open, onClose }) {
 
                 <div className={styles.quickGrid}>
                   <StatTile
-                    value={`${attendance?.attendanceRatePercent ?? "—"}%`}
+                    value={`${attendance?.attendanceRatePercent ?? "-"}%`}
                     label="Attendance rate"
                   />
                   <StatTile
                     value={
-                      payrollError ? "—" : `${money(payroll?.totalDeduction)}`
+                      payrollError ? "-" : `${money(payroll?.totalDeduction)}`
                     }
                     label="Payroll deduction (recent periods)"
                   />
                   <StatTile
-                    value={leaveError ? "—" : num(leave?.totalPending)}
+                    value={leaveError ? "-" : num(leave?.totalPending)}
                     label="Open leave requests"
                   />
                   <StatTile
-                    value={wfError ? "—" : num(workforce?.totalHeadcount)}
+                    value={wfError ? "-" : num(workforce?.totalHeadcount)}
                     label="Active headcount"
                   />
                 </div>
@@ -1050,7 +1050,7 @@ export default function BusinessReportModal({ open, onClose }) {
 
 /* ── gauge SVG (matches TodaysPulse's ring styling/tokens) ────────────── */
 function GaugeSvg({ percent }) {
-  // R was 64 with a 160 viewBox — the ring's inner hole (2*(R-STROKE/2))
+  // R was 64 with a 160 viewBox - the ring's inner hole (2*(R-STROKE/2))
   // came out smaller than "ATTENDANCE RATE" needs at its font size and
   // letter-spacing, so the text visually spilled past the ring instead of
   // sitting cleanly inside it. Bigger R (and a proportionally bigger

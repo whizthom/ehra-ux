@@ -10,12 +10,12 @@
 /* App-shell pages (Dashboard, EmployeeDashboard, etc.) toggle a
    `app-shell-lock` class on <body> while mounted (see their useEffect) so
    the page itself can't rubber-band/scroll past the shell on mobile and
-   drag the "fixed" header along with it. Scoped to those pages only —
+   drag the "fixed" header along with it. Scoped to those pages only -
    other pages (Login, Register, ...) still rely on normal body scroll. */
 /* `position: fixed` (plus the matching `html.app-shell-lock` below) is the
    important part here, not just belt-and-braces alongside height/overflow.
    Mobile Safari/Chrome bring a focused input into view by scrolling the
-   page EVEN WHEN body has overflow:hidden — overflow:hidden only stops
+   page EVEN WHEN body has overflow:hidden - overflow:hidden only stops
    scrolling caused by user drag/momentum, it doesn't stop the browser's
    own "scroll focused element into view" behavior on focus. That's what
    was dragging the chat header (a sibling higher up the page, not an
@@ -23,7 +23,7 @@
    was tapped, since the whole document scrolled to keep the on-screen
    keyboard from covering the caret. Pinning body to the viewport with
    `position: fixed` removes the ability to scroll the document at all, so
-   that browser behavior has nothing to move — the header simply can't be
+   that browser behavior has nothing to move - the header simply can't be
    pushed out of view anymore. */
 html.app-shell-lock {
   height: 100%;

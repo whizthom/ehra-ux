@@ -159,7 +159,7 @@ function OverviewTab({ branchId }) {
 }
 
 function formatDate(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
   return (
@@ -173,7 +173,7 @@ function formatDate(iso) {
   );
 }
 
-// Expandable row — clicking an employee reveals their branch-transfer
+// Expandable row - clicking an employee reveals their branch-transfer
 // timeline inline (a custom accordion, not a native popup/dialog), fetched
 // lazily so opening the Employees tab doesn't pay for every employee's
 // history up front.
@@ -218,7 +218,7 @@ function EmployeeHistoryRow({ emp }) {
           </span>
           <span className={styles.employeeMeta}>{emp.email}</span>
         </div>
-        <span className={styles.employeePosition}>{emp.position || "—"}</span>
+        <span className={styles.employeePosition}>{emp.position || "-"}</span>
         <i
           className={`ti ti-chevron-down ${styles.employeeChevron} ${open ? styles.employeeChevronOpen : ""}`}
           aria-hidden="true"
@@ -314,7 +314,7 @@ function AddEmployeeToBranchWidget({ branchId, branchName, onAdded, toast }) {
       setOpen(false);
       setPickedId("");
 
-      // Same immediate hand-off as BranchCell (Workforce) — the employer
+      // Same immediate hand-off as BranchCell (Workforce) - the employer
       // decides right away whether this employee is liable to just this
       // branch or several locations. See LocationsTab.
       navigate(`/employees/${data.id}`, {
@@ -344,7 +344,7 @@ function AddEmployeeToBranchWidget({ branchId, branchName, onAdded, toast }) {
   }
 
   const options = (allEmployees || [])
-    // Employees already at this branch don't need to show up as pickable —
+    // Employees already at this branch don't need to show up as pickable -
     // they're already visible in the list below.
     .filter((e) => e.branchId !== branchId)
     .map((e) => ({
@@ -517,9 +517,9 @@ function attendanceStatusClass(status) {
 }
 
 function formatClock(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
+  if (Number.isNaN(d.getTime())) return "-";
   return d.toLocaleTimeString(undefined, {
     hour: "2-digit",
     minute: "2-digit",
@@ -623,10 +623,10 @@ function AttendanceHistoryTab({ branchId }) {
   );
 }
 
-// "Today" — backed by a dedicated, unpaginated endpoint (every attendance
+// "Today" - backed by a dedicated, unpaginated endpoint (every attendance
 // row for this branch today, bounded naturally by headcount rather than
 // historical volume) so this view is guaranteed complete regardless of
-// how much history the branch has accumulated — see
+// how much history the branch has accumulated - see
 // AttendanceService#getBranchAttendanceToday.
 function TodayTab({ branchId }) {
   const [rows, setRows] = useState(null);
@@ -723,7 +723,7 @@ function sortScheduleDays(days) {
   );
 }
 
-// "Schedule" — this branch's own full-time working hours (Business default
+// "Schedule" - this branch's own full-time working hours (Business default
 // → branch override, same hierarchy as the geofencing zone in the QR
 // tab's Settings panel). Employer or this branch's own Manager, enforced
 // server-side.
@@ -785,7 +785,7 @@ function BranchScheduleTab({ branchId, branchName }) {
       <p className={styles.scheduleDesc}>
         Working hours for full-time employees stationed at{" "}
         {branchName || "this branch"}. Leave a day off to fall back to the
-        business's own hours for that day — turning any day on here gives this
+        business's own hours for that day - turning any day on here gives this
         branch its own hours instead, for every day, not just this one.
       </p>
 
@@ -849,7 +849,7 @@ const ATTENDANCE_SUBTABS = [
   { key: "schedule", label: "Schedule settings" },
 ];
 
-// Wraps Today / History / Schedule settings — mirrors the business-wide
+// Wraps Today / History / Schedule settings - mirrors the business-wide
 // AttendanceSection.jsx's own three-part structure, scoped to one branch.
 function AttendanceSectionTab({ branchId, branchName }) {
   const [subTab, setSubTab] = useState("today");
@@ -994,9 +994,9 @@ function LeaveTab({ branchId }) {
 }
 
 function formatMoney(v) {
-  if (v === null || v === undefined) return "—";
+  if (v === null || v === undefined) return "-";
   const n = Number(v);
-  if (Number.isNaN(n)) return "—";
+  if (Number.isNaN(n)) return "-";
   return n.toLocaleString(undefined, { style: "currency", currency: "USD" });
 }
 

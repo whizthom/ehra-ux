@@ -190,7 +190,7 @@
     margin-top: 2px;
 }
 
-/* ── Mobile hero — hidden on desktop, replaces the left panel below 768px ── */
+/* ── Mobile hero - hidden on desktop, replaces the left panel below 768px ── */
 .mobileHero {
     display: none;
 }

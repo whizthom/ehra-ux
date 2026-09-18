@@ -16,12 +16,12 @@ function fmt(iso) {
 
 /**
  * Renders an employee's hire date as a clickable pill. Clicking opens an
- * inline date field to set/change it. Mirrors PositionCell exactly —
+ * inline date field to set/change it. Mirrors PositionCell exactly -
  * hire date is never editable by the employee themselves, only by the
  * employer or their HOD.
  *
- * mode="employer" — change applies immediately.
- * mode="hod"      — change is submitted for the employer's approval; the
+ * mode="employer" - change applies immediately.
+ * mode="hod"      - change is submitted for the employer's approval; the
  *                    cell shows a "pending approval" state until decided.
  */
 export default function HireDateCell({
@@ -68,7 +68,7 @@ export default function HireDateCell({
           : await assignHireDateByEmployer(employee.id, value);
 
       if (mode === "hod") {
-        // Pending employer approval — don't change the live hire date yet.
+        // Pending employer approval - don't change the live hire date yet.
         onAssigned(employee.id, {
           hireDatePending: true,
           pendingHireDate: data.newHireDate || value,

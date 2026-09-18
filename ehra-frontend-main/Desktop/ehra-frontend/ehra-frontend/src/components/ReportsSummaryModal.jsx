@@ -22,7 +22,7 @@ function startOfQuarter(d) {
 }
 
 function fmtDate(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d + "T00:00:00").toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
@@ -30,20 +30,20 @@ function fmtDate(d) {
   });
 }
 function fmtMonth(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d + "T00:00:00").toLocaleDateString(undefined, {
     month: "short",
     year: "numeric",
   });
 }
 function pct(v) {
-  return v === null || v === undefined ? "—" : `${v}%`;
+  return v === null || v === undefined ? "-" : `${v}%`;
 }
 function num(v) {
-  return v === null || v === undefined ? "—" : v;
+  return v === null || v === undefined ? "-" : v;
 }
 function money(v) {
-  if (v === null || v === undefined) return "—";
+  if (v === null || v === undefined) return "-";
   return Number(v).toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -55,7 +55,7 @@ function delta(v, suffix = "") {
   return `${v > 0 ? "+" : ""}${v}${suffix} vs prior period`;
 }
 function titleCase(s) {
-  if (!s) return "—";
+  if (!s) return "-";
   return String(s)
     .toLowerCase()
     .split("_")
@@ -63,15 +63,15 @@ function titleCase(s) {
     .join(" ");
 }
 function fullName(first, last) {
-  return [first, last].filter(Boolean).join(" ") || "—";
+  return [first, last].filter(Boolean).join(" ") || "-";
 }
 function line(label, value) {
   return `${label}: ${value}`;
 }
 
-// Builds the entire report-tab summary as one plain text block — headings
+// Builds the entire report-tab summary as one plain text block - headings
 // plus label/value lines and simple "- " list rows. No charts, tables,
-// colors, or badges — just text and numbers, so it can be read, copied, or
+// colors, or badges - just text and numbers, so it can be read, copied, or
 // pasted anywhere.
 function buildSummaryText({
   attendance,
@@ -207,7 +207,7 @@ function buildSummaryText({
   out.push(
     line(
       "Avg approval turnaround",
-      `${leave.avgApprovalTurnaroundHours ?? "—"} hrs across ${leave.decidedCount} decided (${delta(leave.avgApprovalTurnaroundDeltaHours, " hrs")})`,
+      `${leave.avgApprovalTurnaroundHours ?? "-"} hrs across ${leave.decidedCount} decided (${delta(leave.avgApprovalTurnaroundDeltaHours, " hrs")})`,
     ),
   );
   out.push("");
@@ -325,7 +325,7 @@ function buildSummaryText({
   out.push("");
   out.push("Departments without a HOD:");
   if (!workforce.departmentsWithoutHod?.length) {
-    out.push("  None — every department has a HOD assigned.");
+    out.push("  None - every department has a HOD assigned.");
   } else {
     workforce.departmentsWithoutHod.forEach((n) => out.push(`  - ${n}`));
   }
@@ -389,7 +389,7 @@ export default function ReportsSummaryModal({ open, onClose }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // clipboard API unavailable — silently ignore, the text is still
+      // clipboard API unavailable - silently ignore, the text is still
       // visible and selectable in the modal.
     }
   };

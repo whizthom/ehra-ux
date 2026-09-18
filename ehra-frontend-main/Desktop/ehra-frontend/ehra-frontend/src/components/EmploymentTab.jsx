@@ -146,7 +146,7 @@ export default function EmploymentTab({ employeeId }) {
         <div className={styles.infoBanner}>
           <i className="ti ti-shield-lock" aria-hidden="true" />
           <span>
-            {settings.employeeFirstName} is a Head of Department — only the
+            {settings.employeeFirstName} is a Head of Department - only the
             employer can change employment settings for a fellow HOD.
           </span>
         </div>
@@ -204,7 +204,7 @@ export default function EmploymentTab({ employeeId }) {
             <div className={styles.typeText}>
               <span className={styles.typeLabel}>Part-time</span>
               <span className={styles.typeDesc}>
-                Uses a personalized schedule — attendance is only expected on
+                Uses a personalized schedule - attendance is only expected on
                 the days set below.
               </span>
             </div>

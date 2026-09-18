@@ -140,7 +140,7 @@
     font-size: 12px;
 }
 
-/* ── Mobile logo row — hidden on desktop; on mobile this sits directly on
+/* ── Mobile logo row - hidden on desktop; on mobile this sits directly on
    the page's white canvas with no background box, left-aligned, exactly
    like Login.jsx's mobile logo treatment. ── */
 .mobileLogoRow {
@@ -370,7 +370,7 @@
     background: #e1e8e5;
 }
 
-/* ── "Already have an account?" — a real secondary action, not an
+/* ── "Already have an account?" - a real secondary action, not an
    afterthought: same size/shape as the primary button so it's impossible
    to miss, an outlined (not filled) treatment keeps it clearly secondary. ── */
 .secondaryBtn {
@@ -398,7 +398,7 @@
 
 /* ── Responsive ──────────────────────────────────────────────────────────
    Mobile gets a fixed viewport shell (height locked to the device's real
-   visible area via 100dvh) with the scroll living inside .right only —
+   visible area via 100dvh) with the scroll living inside .right only -
    the page itself never scrolls, in either direction. The logo sits
    directly on the white canvas, transparent and left-aligned, matching
    Login.jsx's mobile treatment exactly. ─────────────────────────────── */

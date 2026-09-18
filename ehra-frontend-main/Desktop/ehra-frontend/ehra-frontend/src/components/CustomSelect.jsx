@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import styles from "./CustomSelect.module.css";
 
 /**
- * Fully custom dropdown — replaces native <select> everywhere so the menu
+ * Fully custom dropdown - replaces native <select> everywhere so the menu
  * always matches the app's own styling instead of the OS/browser popup.
  *
  * options: [{ value, label, icon? }]

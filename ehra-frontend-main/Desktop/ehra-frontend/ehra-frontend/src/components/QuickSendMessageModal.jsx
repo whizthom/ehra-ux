@@ -5,9 +5,9 @@ import styles from "./QuickSendMessageModal.module.css";
 export default function QuickSendMessageModal({
   open,
   onClose,
-  initialRecipient = null, // {id, firstName, lastName} — when set, locks this message to just them
+  initialRecipient = null, // {id, firstName, lastName} - when set, locks this message to just them
 }) {
-  const [target, setTarget] = useState("ALL"); // "ALL" | "HODS_ONLY" — irrelevant when initialRecipient is set
+  const [target, setTarget] = useState("ALL"); // "ALL" | "HODS_ONLY" - irrelevant when initialRecipient is set
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);

@@ -4,7 +4,7 @@ import { searchMessaging } from "../api/messagingApi";
 const DEBOUNCE_MS = 300;
 
 // Backend-powered search over conversation names AND message text/
-// document filenames (see MsgMessageRepository#searchBody's doc) —
+// document filenames (see MsgMessageRepository#searchBody's doc) -
 // distinct from ChatList's own instant client-side filter, which can
 // only ever see the conversation names already loaded on screen, never
 // message content. This is what actually makes "search messages" work at

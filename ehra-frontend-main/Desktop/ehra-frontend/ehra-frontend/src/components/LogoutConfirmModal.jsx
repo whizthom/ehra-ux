@@ -10,10 +10,10 @@ import styles from "./LogoutConfirmModal.module.css";
  * employee" action.
  *
  * Props:
- *   open      — whether the dialog is visible.
- *   onCancel  — called when the person backs out (overlay click or Cancel).
- *   onConfirm — called when the person confirms they want to log out.
- *   loading   — true while the logout request is in flight.
+ *   open      - whether the dialog is visible.
+ *   onCancel  - called when the person backs out (overlay click or Cancel).
+ *   onConfirm - called when the person confirms they want to log out.
+ *   loading   - true while the logout request is in flight.
  */
 export default function LogoutConfirmModal({
   open,

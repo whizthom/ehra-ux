@@ -3,13 +3,13 @@ import useMentionToasts from "../../hooks/useMentionToasts";
 import useNewMessageToasts from "../../hooks/useNewMessageToasts";
 import styles from "./MentionToastStack.module.css";
 
-// The single toast stack for BOTH real-time messaging notifications —
+// The single toast stack for BOTH real-time messaging notifications -
 // "you were @mentioned" (useMentionToasts) and "you have a new message"
 // (useNewMessageToasts). Deliberately ONE component rendering ONE
 // fixed-position stack rather than two separate ones: each used its own
 // independent `position: fixed` container at the same screen
 // coordinates, so mounting both at once made them overlap on top of each
-// other instead of stacking — merging the two toast lists here (sorted
+// other instead of stacking - merging the two toast lists here (sorted
 // oldest-first, same as they'd naturally arrive) is what actually fixes
 // that, not just moving one of them to a different corner.
 export default function NotificationToastStack({

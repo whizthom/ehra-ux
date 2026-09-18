@@ -7,7 +7,7 @@ import styles from "./VerifyEmail.module.css";
 
 // Landed on directly from the link in the verification email:
 // https://ehral.com/verify-email?token=xxxxxxxx (see EmailTemplates on
-// the backend). Fires the redeem call automatically on mount — no
+// the backend). Fires the redeem call automatically on mount - no
 // "press Verify" button needed, matching the "Verify Page" spec.
 export default function VerifyEmail() {
   const [searchParams] = useSearchParams();
@@ -36,7 +36,7 @@ export default function VerifyEmail() {
         if (cancelled) return;
         setStatus("success");
         // Give the success state a moment to register before bouncing
-        // onward — a person who just clicked an email link benefits from
+        // onward - a person who just clicked an email link benefits from
         // seeing confirmation, not an instant redirect.
         setTimeout(() => {
           if (!cancelled) {
@@ -105,7 +105,7 @@ export default function VerifyEmail() {
             <p className={styles.desc}>
               Your email has been successfully verified. It's now the one
               verified email for your account, shared across every business you
-              own and any workplace you're an employee at — ready for
+              own and any workplace you're an employee at - ready for
               subscriptions, Two-Factor Authentication, and future account
               recovery.
             </p>
@@ -137,7 +137,7 @@ export default function VerifyEmail() {
 
             {resent ? (
               <p className={styles.desc}>
-                A new verification link is on its way — check your inbox.
+                A new verification link is on its way - check your inbox.
               </p>
             ) : (
               <div className={styles.actions}>

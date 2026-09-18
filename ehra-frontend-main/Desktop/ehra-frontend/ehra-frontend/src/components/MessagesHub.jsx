@@ -8,7 +8,7 @@ import styles from "./MessagesHub.module.css";
 
 /**
  * The single entry point for both real conversation (Chats) and one-way
- * official notices (Announcements) — two clearly separate sections under
+ * official notices (Announcements) - two clearly separate sections under
  * one tab, the way WhatsApp keeps normal chats and "official" broadcasts
  * conceptually distinct even though you reach both from the same place.
  *
@@ -24,7 +24,7 @@ export default function MessagesHub({
   const [chatUnread, setChatUnread] = useState(0);
   const [announcementUnread, setAnnouncementUnread] = useState(0);
   // Mirrors onThreadOpenChange locally so the switcher pills themselves can
-  // hide on mobile too — otherwise a "full-screen" thread/message still had
+  // hide on mobile too - otherwise a "full-screen" thread/message still had
   // this row floating above it, eating into the screen it just claimed.
   const [detailOpen, setDetailOpen] = useState(false);
 
@@ -58,7 +58,7 @@ export default function MessagesHub({
   });
 
   // While the Chats section is open, its own thread-open logic already
-  // marks things read — re-sync the badge whenever we leave that section.
+  // marks things read - re-sync the badge whenever we leave that section.
   useEffect(() => {
     if (section !== "chats") refreshChatUnread();
   }, [section, refreshChatUnread]);

@@ -469,7 +469,7 @@
     }
 
     /* The pardon-reason row already spans full width once its parent
-       <tr> is display:block — colSpan just stops mattering, which is
+       <tr> is display:block - colSpan just stops mattering, which is
        fine, nothing needs it to do so explicitly anymore. */
     .pardonFormCell {
         display: block !important;

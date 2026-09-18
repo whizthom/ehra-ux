@@ -16,7 +16,7 @@ export default function AttendanceSettingsPanel() {
   const [error, setError] = useState("");
   const [toast, setToast] = useState(null); // { type: "ok"|"error", text }
 
-  // Working copy of settings — only written back to the server on Save,
+  // Working copy of settings - only written back to the server on Save,
   // so switching cards/toggles around never partially-saves anything.
   const [method, setMethod] = useState("DYNAMIC_QR");
   const [staticToken, setStaticToken] = useState(null);
@@ -109,7 +109,7 @@ export default function AttendanceSettingsPanel() {
     if (
       staticToken &&
       !window.confirm(
-        "Regenerating creates a brand-new code and invalidates the current one — any printed copies will stop working. Continue?",
+        "Regenerating creates a brand-new code and invalidates the current one - any printed copies will stop working. Continue?",
       )
     )
       return;
@@ -127,7 +127,7 @@ export default function AttendanceSettingsPanel() {
 
   const handleSave = async () => {
     if (method === "STATIC_QR" && !staticToken) {
-      // First time switching to Static QR — issue a token before saving.
+      // First time switching to Static QR - issue a token before saving.
       try {
         setRegenerating(true);
         const { data } = await regenerateStaticQr();
@@ -142,7 +142,7 @@ export default function AttendanceSettingsPanel() {
     if (zoneEnabled && (lat == null || lng == null)) {
       showToast(
         "error",
-        'Set your Attendance Zone location before saving — tap "Use current location".',
+        'Set your Attendance Zone location before saving - tap "Use current location".',
       );
       return;
     }
@@ -174,7 +174,7 @@ export default function AttendanceSettingsPanel() {
     } catch {
       showToast(
         "error",
-        "PDF export isn't available yet — run npm install and reload.",
+        "PDF export isn't available yet - run npm install and reload.",
       );
       return;
     }
@@ -187,7 +187,7 @@ export default function AttendanceSettingsPanel() {
       try {
         doc.addImage(business.logo, "PNG", centerX - 12, 22, 24, 24);
       } catch {
-        /* logo may be a remote URL jsPDF can't embed synchronously — skip silently */
+        /* logo may be a remote URL jsPDF can't embed synchronously - skip silently */
       }
     }
 
@@ -300,7 +300,7 @@ export default function AttendanceSettingsPanel() {
               <span className={styles.methodName}>Static QR</span>
               <span className={styles.methodDesc}>
                 One permanent code you print and stick on the wall. No screen
-                needed — great for a salon, small shop, or clinic.
+                needed - great for a salon, small shop, or clinic.
               </span>
             </div>
             {method === "STATIC_QR" && (
@@ -377,7 +377,7 @@ export default function AttendanceSettingsPanel() {
             <h3>Attendance zone</h3>
             <p>
               Require employees to be physically at your workplace to check in.
-              Optional — off by default.
+              Optional - off by default.
             </p>
           </div>
           <button
@@ -527,7 +527,7 @@ export default function AttendanceSettingsPanel() {
             </h4>
             <p>
               Offline attendance is restricted to devices Ehral has
-              previously recognized and authorized — a new or unrecognized
+              previously recognized and authorized - a new or unrecognized
               device can't record attendance while offline, no matter how
               the settings above are configured. Authorization is also tied
               to the specific employee it was issued to, so handing an

@@ -13,7 +13,7 @@ export default function ChatListItem({
   const isAnnouncement = conversation.type === "ANNOUNCEMENT";
   const isGroup = conversation.type === "GROUP";
   const online = isDirect ? conversation.online : false;
-  // A role badge only means something for a specific person — a group or
+  // A role badge only means something for a specific person - a group or
   // the Announcements channel has many people with different roles, not
   // one to badge (see RoleBadge.jsx's doc).
   const otherRoleLabel = isDirect

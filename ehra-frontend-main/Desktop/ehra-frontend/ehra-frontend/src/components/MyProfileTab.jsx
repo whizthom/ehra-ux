@@ -13,7 +13,7 @@ const TABS = [
 
 // Merges the previously separate "Settings" (read-only profile view) and
 // "Profile Edits" (request-a-change form + request history + HOD approval
-// queue) into the "Profile" sub-tab here — unchanged from before, just
+// queue) into the "Profile" sub-tab here - unchanged from before, just
 // under a tab now. "Security" is new: the same SecuritySettingsSection
 // component the employer uses for their own account (2FA / password),
 // reused as-is so employees get the exact same self-service 2FA setup.
@@ -48,7 +48,7 @@ export default function MyProfileTab({ profile, isHod }) {
         ))}
       </div>
 
-      {/* Plain flowing content — this tab renders inside the dashboard's
+      {/* Plain flowing content - this tab renders inside the dashboard's
           .content wrapper, so the outer .main owns the scroll, same as
           the other simple tabs. No internal scroll region here. */}
       <div className={styles.tabBody}>

@@ -22,7 +22,7 @@ export default function QrScanModal({ onClose, onSuccess }) {
   const [result, setResult] = useState(null);
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
   const [scanning, setScanning] = useState(true);
-  // Camera is never started automatically — see startCamera() for why.
+  // Camera is never started automatically - see startCamera() for why.
   // "idle" = not requested yet, "starting" = request in flight.
   const [cameraState, setCameraState] = useState("idle");
 
@@ -34,7 +34,7 @@ export default function QrScanModal({ onClose, onSuccess }) {
     }
   }, []);
 
-  // Best-effort — only businesses with Attendance Zone turned on actually
+  // Best-effort - only businesses with Attendance Zone turned on actually
   // require this; everyone else's scan works exactly the same whether or
   // not location is available/granted. Short timeout so a slow/denied
   // location prompt never holds up an otherwise-valid scan.
@@ -157,7 +157,7 @@ export default function QrScanModal({ onClose, onSuccess }) {
 
     if (!window.isSecureContext) {
       // getUserMedia is unavailable outside a secure context (HTTPS, or
-      // localhost) on every browser — this isn't a permission problem,
+      // localhost) on every browser - this isn't a permission problem,
       // no prompt will ever appear, so say so plainly rather than
       // showing the generic "allow camera permission" message.
       setCameraError(
@@ -184,7 +184,7 @@ export default function QrScanModal({ onClose, onSuccess }) {
         });
       } catch (err) {
         // Rear-camera constraint couldn't be satisfied (no matching
-        // camera — common on laptops/desktops with only a front camera,
+        // camera - common on laptops/desktops with only a front camera,
         // or a device whose camera enumeration doesn't cleanly resolve
         // "environment"). Fall back to whatever camera is available
         // rather than failing outright. A genuine permission denial
@@ -217,7 +217,7 @@ export default function QrScanModal({ onClose, onSuccess }) {
 
   // No auto-start: getUserMedia is only ever called directly from a tap
   // (the "Enable camera" button below, or "Try again" on error). Every
-  // browser — Chrome, Safari, Firefox, Samsung Internet — is most
+  // browser - Chrome, Safari, Firefox, Samsung Internet - is most
   // permissive right when the request is tied to a real, direct user
   // gesture; deferring it to an effect on mount is exactly what made
   // some browsers (notably Samsung Internet) silently do nothing at all
@@ -258,14 +258,14 @@ export default function QrScanModal({ onClose, onSuccess }) {
         </p>
 
         <div className={styles.scannerFrame}>
-          {/* Always mounted — never conditionally rendered on cameraState.
+          {/* Always mounted - never conditionally rendered on cameraState.
               startCamera() assigns the stream to videoRef.current as soon
               as getUserMedia resolves, *before* cameraState flips to
               "running". If this element only existed once cameraState
               was already "running", videoRef.current would still be null
               at assignment time, the srcObject/play() call would silently
               no-op, and the <video> that finally mounted afterwards would
-              have no stream attached — exactly the dark, blank
+              have no stream attached - exactly the dark, blank
               .scannerFrame (background: #000) that was being reported.
               Visibility is handled with a CSS class instead. */}
           <video

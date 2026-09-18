@@ -7,10 +7,10 @@ import {
 import styles from "./BranchQrPanel.module.css";
 
 /**
- * Branch-scoped "Share Live QR" — same concept and same public route
+ * Branch-scoped "Share Live QR" - same concept and same public route
  * (/qr-display/:token) as the business-wide QrDisplayLinkPanel, but this
  * link only ever shows THIS branch's own rotating QR (the backend tells
- * the two kinds apart via QrDisplayLink#branch — see its class doc). A
+ * the two kinds apart via QrDisplayLink#branch - see its class doc). A
  * business with several locations can hand each branch's own front desk
  * its own link instead of one link that's ambiguous about which branch
  * it's actually for.
@@ -81,7 +81,7 @@ export default function BranchQrDisplayLinkPanel({ branchId, branchStatus }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      setError("Couldn't copy automatically — select and copy the link below.");
+      setError("Couldn't copy automatically - select and copy the link below.");
     }
   };
 
@@ -94,7 +94,7 @@ export default function BranchQrDisplayLinkPanel({ branchId, branchStatus }) {
         Share this branch's live QR
       </div>
       <p className={styles.linkPanelDesc}>
-        Generate a link that shows only this branch's live QR — no Ehra login
+        Generate a link that shows only this branch's live QR - no Ehra login
         needed. Useful for a tablet or screen at this branch's own entrance.
       </p>
 

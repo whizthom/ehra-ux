@@ -4,8 +4,8 @@ import styles from "./LegalNav.module.css";
 
 /**
  * Slim, always-solid top bar for standalone legal documents (Terms,
- * Privacy). Deliberately simpler than the marketing nav on About.jsx —
- * no transparent-over-hero state, no in-page section links — since a
+ * Privacy). Deliberately simpler than the marketing nav on About.jsx -
+ * no transparent-over-hero state, no in-page section links - since a
  * legal document isn't a scrolling story, it's a reference someone
  * lands on directly and wants to read or leave quickly.
  */

@@ -104,7 +104,7 @@
     font-weight: 600;
 }
 
-/* ── Callout — used sparingly for the handful of statements that
+/* ── Callout - used sparingly for the handful of statements that
    deserve to stand out from the surrounding legal prose (e.g. "we do
    not sell personal data"), not for routine clauses. ── */
 .callout {
@@ -141,7 +141,7 @@
     color: var(--gold-deep, #a97a1c);
 }
 
-/* ── Contact card — closing section of both documents ── */
+/* ── Contact card - closing section of both documents ── */
 .contactCard {
     display: flex;
     flex-direction: column;

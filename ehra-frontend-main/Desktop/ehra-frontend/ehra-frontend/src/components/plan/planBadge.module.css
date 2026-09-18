@@ -70,10 +70,10 @@
     background: rgba(85, 224, 174, 0.16);
 }
 
-/* ── Urgency overlay — only ever layered on a paid, ACTIVE plan with an
+/* ── Urgency overlay - only ever layered on a paid, ACTIVE plan with an
    approaching expiryDate (see planUrgency.js). Each tier fades further
    from the plan's identity color toward amber, then a gently pulsing
-   red — the badge itself becomes the reminder, not just a status label. */
+   red - the badge itself becomes the reminder, not just a status label. */
 
 .tierUpcoming {
     border-color: var(--warning);

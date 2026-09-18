@@ -5,14 +5,14 @@ import styles from "./WelcomeCard.module.css";
 const sessionKey = (identityId) => `ehra:welcomeCard:seen:${identityId}`;
 
 /**
- * "First Login Experience" — shown once, directly on the Dashboard the
+ * "First Login Experience" - shown once, directly on the Dashboard the
  * person lands on right after STEP 5 (Account Creation). Mount
  * unconditionally near the top of Dashboard; renders nothing once
  * dismissed or once it's already been shown this browser session (a
  * refresh loses the router `state` this reads from, so sessionStorage is
  * what actually prevents it reappearing on every reload).
  *
- * `justRegistered` comes from Register.jsx's navigate(..., { state }) —
+ * `justRegistered` comes from Register.jsx's navigate(..., { state }) -
  * this card ONLY ever appears immediately after that specific redirect,
  * never on an ordinary login.
  */
@@ -35,7 +35,7 @@ export default function WelcomeCard({
     window.sessionStorage.setItem(sessionKey(identityId), "1");
 
     // Auto-reveal the dev verification link the same way DevOtpCard
-    // auto-reveals the mock OTP — no click needed. ALWAYS null against a
+    // auto-reveals the mock OTP - no click needed. ALWAYS null against a
     // real provider; see EmailVerificationService#getStatus.
     getEmailStatus()
       .then((status) => {
@@ -55,7 +55,7 @@ export default function WelcomeCard({
         setDevLink(status.developmentVerificationLink);
       }
     } catch {
-      // Non-critical — the person can always retry from Settings > Security.
+      // Non-critical - the person can always retry from Settings > Security.
     } finally {
       setResending(false);
     }

@@ -16,7 +16,7 @@ import Logo from "../../components/Logo";
 import AboutEhralLink from "../../components/nav/AboutEhralLink";
 
 // Same key InvitationLanding.jsx uses to hand off an invite token across a
-// trip to /login — reused here so "this phone already has an account"
+// trip to /login - reused here so "this phone already has an account"
 // lands the person right back at accepting THIS invite once they're
 // signed in, instead of a dead end.
 const PENDING_INVITE_KEY = "ehra_pending_invite";
@@ -52,9 +52,9 @@ export default function EmployeeRegistration() {
 
   // Scoped per invite link, so switching between different invite emails
   // (or a colleague opening theirs on the same browser) never mixes drafts.
-  // Password fields are deliberately left out of what gets saved — those
+  // Password fields are deliberately left out of what gets saved - those
   // stay in memory only, and are re-typed if the tab is actually closed.
-  // The verified Firebase idToken is NEVER persisted here either — it's
+  // The verified Firebase idToken is NEVER persisted here either - it's
   // short-lived and tied to this browser session; a reload always starts
   // the phone-verification step over rather than trusting a stale one.
   const draftKey = `ehra_employee_reg_${token}`;
@@ -69,7 +69,7 @@ export default function EmployeeRegistration() {
   };
 
   // A restored step past the phone/OTP stage is only trustworthy if we
-  // also still have a live idToken in memory — which a page reload never
+  // also still have a live idToken in memory - which a page reload never
   // does, since it's deliberately not persisted. So any reload always
   // resumes at step 1 (phone) rather than landing on a form step it has
   // no verified phone to actually submit with.
@@ -103,7 +103,7 @@ export default function EmployeeRegistration() {
   }, [resendIn]);
 
   // Going "Back" between the form steps (3-6) already preserves
-  // everything since `form` lives in this single component — this just
+  // everything since `form` lives in this single component - this just
   // also survives a reload or an accidental tab close midway through the
   // invite link. Only reachable once step >= 3 anyway, since step is
   // never restored past 1 on mount.
@@ -115,7 +115,7 @@ export default function EmployeeRegistration() {
         JSON.stringify({ form: safeForm, phone }),
       );
     } catch {
-      // sessionStorage unavailable — the in-page Back button still works fine.
+      // sessionStorage unavailable - the in-page Back button still works fine.
     }
   }, [form, phone, draftKey]);
 
@@ -162,7 +162,7 @@ export default function EmployeeRegistration() {
   };
 
   // ── STEP 2 -> 3: verify the OTP, then check if this phone already has
-  //    an account — if so, this invite gets finished from the login flow
+  //    an account - if so, this invite gets finished from the login flow
   //    instead of creating a duplicate Identity ─────────────────────────
   const handleVerifyOtp = async () => {
     setError("");
@@ -249,10 +249,10 @@ export default function EmployeeRegistration() {
     try {
       const { confirmPassword, ...payload } = form;
       // No separate login step: registerInvitedEmployee logs the new
-      // employee straight in (same as every other registration path —
+      // employee straight in (same as every other registration path -
       // see authApi.js/phoneAuthApi.js) and this navigates directly to
       // their dashboard. Their employer still has to approve the new
-      // membership, but that happens from the employer's own dashboard —
+      // membership, but that happens from the employer's own dashboard -
       // it's not a gate on the new employee seeing theirs. No email is
       // sent either way; the approval itself shows up as a notification
       // on this employee's own dashboard once it happens.
@@ -374,7 +374,7 @@ export default function EmployeeRegistration() {
 
         {/* Body + footer are wrapped together and vertically centered as
             one unit (see .formArea) so the Back/Next row always sits
-            right under that step's last field — never stretched down to
+            right under that step's last field - never stretched down to
             the bottom of the viewport regardless of how short a given
             step's content is. */}
         <div className={styles.formArea}>
@@ -524,7 +524,7 @@ export default function EmployeeRegistration() {
               </>
             )}
 
-            {/* Step 4: contact details (phone already verified — no phone field here) */}
+            {/* Step 4: contact details (phone already verified - no phone field here) */}
             {step === 4 && (
               <div className={styles.grid1}>
                 <div className={styles.field}>
@@ -690,7 +690,7 @@ export default function EmployeeRegistration() {
         </div>
       </div>
 
-      {/* Invisible reCAPTCHA host — Firebase only renders a visible
+      {/* Invisible reCAPTCHA host - Firebase only renders a visible
           challenge into this if it decides the traffic looks risky, per
           sendPhoneOtp()'s "invisible" verifier config. Without this
           element present, RecaptchaVerifier's constructor throws
@@ -706,14 +706,14 @@ function friendlyFirebaseError(err) {
   // errors now come from Ehra's own backend via api/phoneAuthApi.js, not
   // the Firebase SDK, so the friendly message is whatever
   // PhoneVerificationException / OtpDeliveryException put in
-  // ErrorResponseDTO.message (see GlobalExceptionHandler) — surfaced
+  // ErrorResponseDTO.message (see GlobalExceptionHandler) - surfaced
   // here first, ahead of any generic fallback.
   const backendMessage = err?.response?.data?.message;
   if (backendMessage) {
     return backendMessage;
   }
   if (err?.code === "ERR_NETWORK") {
-    return "Network error — please check your connection and try again.";
+    return "Network error - please check your connection and try again.";
   }
   return err?.message || "Something went wrong. Please try again.";
 }

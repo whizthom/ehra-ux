@@ -16,10 +16,10 @@ const EVENT_LABELS = {
 };
 
 function formatDate(value) {
-  if (!value) return "—";
+  if (!value) return "-";
   const date = new Date(value);
   return Number.isNaN(date.getTime())
-    ? "—"
+    ? "-"
     : date.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
 }
 
@@ -181,7 +181,7 @@ export default function AttendanceSecurityPanel() {
                   {devices.map((device) => (
                     <tr key={`${device.employeeId}-${device.deviceId}`}>
                       <td>
-                        <strong>{device.employeeName || "—"}</strong>
+                        <strong>{device.employeeName || "-"}</strong>
                       </td>
                       <td>{device.deviceName || "This device"}</td>
                       <td>{device.platform || "web"}</td>
@@ -190,7 +190,7 @@ export default function AttendanceSecurityPanel() {
                         <span
                           className={`${styles.status} ${device.bindingStatus === "ACTIVE" && device.deviceStatus === "ACTIVE" ? styles.good : styles.warn}`}
                         >
-                          {device.bindingStatus || device.deviceStatus || "—"}
+                          {device.bindingStatus || device.deviceStatus || "-"}
                         </span>
                       </td>
                       <td>
@@ -247,7 +247,7 @@ export default function AttendanceSecurityPanel() {
                   <div
                     className={`${styles.risk} ${event.riskLevel === "MEDIUM" ? styles.medium : styles.high}`}
                   >
-                    {event.riskLevel || "—"}
+                    {event.riskLevel || "-"}
                   </div>
                   <div className={styles.eventMain}>
                     <strong>{event.employeeName || "Employee"}</strong>
@@ -296,19 +296,19 @@ export default function AttendanceSecurityPanel() {
             <div className={styles.detailGrid}>
               <div>
                 <span>Employee</span>
-                <strong>{selectedEvent.employeeName || "—"}</strong>
+                <strong>{selectedEvent.employeeName || "-"}</strong>
               </div>
               <div>
                 <span>Event</span>
                 <strong>
                   {EVENT_LABELS[selectedEvent.eventType] ||
                     selectedEvent.eventType ||
-                    "—"}
+                    "-"}
                 </strong>
               </div>
               <div>
                 <span>Action</span>
-                <strong>{selectedEvent.action || "—"}</strong>
+                <strong>{selectedEvent.action || "-"}</strong>
               </div>
               <div>
                 <span>Time</span>
@@ -316,7 +316,7 @@ export default function AttendanceSecurityPanel() {
               </div>
               <div>
                 <span>Status</span>
-                <strong>{selectedEvent.status || "—"}</strong>
+                <strong>{selectedEvent.status || "-"}</strong>
               </div>
               <div>
                 <span>Device</span>

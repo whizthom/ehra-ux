@@ -142,7 +142,7 @@
     font-weight: 600;
 }
 
-/* ── Chat bubbles — reuses the app's actual bubble colors ── */
+/* ── Chat bubbles - reuses the app's actual bubble colors ── */
 .bubbleReceived,
 .bubbleSent {
     max-width: 78%;

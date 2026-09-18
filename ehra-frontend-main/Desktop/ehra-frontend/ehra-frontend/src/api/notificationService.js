@@ -2,14 +2,14 @@
  * Push-notification abstraction.
  *
  * This module intentionally does NOT talk to Firebase Cloud Messaging (or
- * any provider) yet — it exists so the rest of the app (Settings, the
+ * any provider) yet - it exists so the rest of the app (Settings, the
  * install flow, EmployeeInbox, ChatPanel, etc.) can be wired against a
  * stable interface today, and swapping in a real FCM-backed
  * implementation later is a one-file change instead of a hunt through
  * every call site.
  *
  * How to wire up FCM later:
- *   1. `npm install firebase` — as of the Termii phone-auth migration,
+ *   1. `npm install firebase` - as of the Termii phone-auth migration,
  *      the repo no longer depends on the `firebase` package at all (see
  *      src/firebase-lazy.js), so this would be a fresh install, not a
  *      reuse of an existing initializeApp() instance.
@@ -22,7 +22,7 @@
  *      registry used below, so existing callers don't change.
  *   4. Register public/firebase-messaging-sw.js as FCM's background
  *      service worker (separate from the Workbox-generated PWA service
- *      worker registered in main.jsx — FCM requires its own file at a
+ *      worker registered in main.jsx - FCM requires its own file at a
  *      fixed path). vite-plugin-pwa's `injectManifest` strategy or a
  *      second `navigator.serviceWorker.register()` call both work; a
  *      second registration is simplest and keeps the two workers
@@ -59,7 +59,7 @@ export function getPermissionState() {
 
 /**
  * Asks the browser for notification permission. Must be called from a
- * user gesture (a button click), same as the install prompt — browsers
+ * user gesture (a button click), same as the install prompt - browsers
  * ignore/auto-deny permission requests fired on page load.
  */
 export async function requestPermission() {
@@ -106,7 +106,7 @@ export function isSubscribed() {
 
 /**
  * Registers a listener for incoming push messages. Returns an unsubscribe
- * function — call it in a useEffect cleanup.
+ * function - call it in a useEffect cleanup.
  *
  * STUBBED: nothing calls `listeners` yet since there's no real transport.
  * Once FCM's onMessage() is wired up, forward its payload here with

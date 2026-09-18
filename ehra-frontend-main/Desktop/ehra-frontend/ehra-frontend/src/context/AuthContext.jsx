@@ -39,7 +39,7 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (identifier, password) => {
     const data = await apiLogin(identifier, password);
-    // requiresTwoFactor: no session was saved yet (see apiLogin) — nothing
+    // requiresTwoFactor: no session was saved yet (see apiLogin) - nothing
     // to reflect into `user` until the OTP step completes and calls
     // refreshSession() below.
     if (!data.requiresTwoFactor) {
@@ -48,7 +48,7 @@ export function AuthProvider({ children }) {
     return data;
   }, []);
 
-  // Re-reads whatever's currently in localStorage into `user` — for flows
+  // Re-reads whatever's currently in localStorage into `user` - for flows
   // that persist a session themselves outside this context's own
   // login()/completeProfile()/etc. wrappers (phone registration via
   // phoneAuthApi.registerWithPhone, and the 2FA OTP step via
@@ -59,7 +59,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   // Completes the new business's admin profile AND establishes a fresh
-  // session for that business — mirrors login(), so the dashboard never
+  // session for that business - mirrors login(), so the dashboard never
   // falls back to a stale session's tokens left over in localStorage.
   const completeProfile = useCallback(async (payload) => {
     const { data } = await apiCompleteProfile(payload);
@@ -69,7 +69,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   // Switches the active workspace (business + role) for the CURRENT
-  // Identity without a full re-login — see AuthController#switchContext.
+  // Identity without a full re-login - see AuthController#switchContext.
   // type: "EMPLOYER" | "EMPLOYEE"; membershipId: one the Identity holds.
   const switchContext = useCallback(async (type, membershipId) => {
     const data = await apiSwitchContext(type, membershipId);
@@ -79,7 +79,7 @@ export function AuthProvider({ children }) {
 
   // Creates a brand-new business under the CURRENTLY authenticated
   // Identity (My Accounts > "Create a business") and switches straight
-  // into it — no new password, no new Identity.
+  // into it - no new password, no new Identity.
   const addBusiness = useCallback(async (payload) => {
     const data = await apiAddBusiness(payload);
     saveSession(data);
@@ -90,8 +90,8 @@ export function AuthProvider({ children }) {
   const logout = useCallback(async () => {
     await apiLogout();
     setUser(null);
-    // Nothing about this person's inbox — the WebSocket connection or the
-    // local message cache — should survive them signing out, especially
+    // Nothing about this person's inbox - the WebSocket connection or the
+    // local message cache - should survive them signing out, especially
     // on a shared/kiosk device.
     disconnectMessagingSocket();
     clearMessagingCache();

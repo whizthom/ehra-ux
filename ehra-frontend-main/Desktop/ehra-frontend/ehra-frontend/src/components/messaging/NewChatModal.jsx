@@ -3,7 +3,7 @@ import Avatar from "./Avatar";
 import { listContacts } from "../../api/messagingApi";
 import styles from "./NewChatModal.module.css";
 
-// Group creation only — the old "start a 1:1 chat" flow this modal also
+// Group creation only - the old "start a 1:1 chat" flow this modal also
 // used to handle was removed from the UI (ChatList's header icon is gone;
 // direct conversations are now auto-populated per person's org
 // relationships instead, see MembershipDirectoryService#listAutoContacts

@@ -5,7 +5,7 @@ import styles from "./QrcodeTab.module.css";
 
 // Lazy-loaded so that if anything in the Settings panel's dependency tree
 // fails to resolve (e.g. a fresh dependency that hasn't been npm-installed
-// yet), it can't break the Live QR tab too — Live QR keeps working
+// yet), it can't break the Live QR tab too - Live QR keeps working
 // regardless, and only the Settings tab shows an error.
 const AttendanceSettingsPanel = lazy(() => import("./AttendanceSettingsPanel"));
 
@@ -18,7 +18,7 @@ const TABS = [
  * "QR Code" nav destination. Two views:
  *  - Live QR: the rotating attendance code (unchanged from before).
  *  - Settings: attendance method (Dynamic/Static QR) + Attendance Zone
- *    (GPS) configuration — everything from the attendance module spec
+ *    (GPS) configuration - everything from the attendance module spec
  *    lives here so it's all in one place for the employer.
  */
 export default function QrCodeTab() {
@@ -28,7 +28,7 @@ export default function QrCodeTab() {
   // Content scrolls as one unit through the page-level .contentFullNarrow
   // wrapper (same as every other nav tab) rather than its own nested
   // scroll region, so switching tabs no longer resets scroll position on
-  // its own — do it explicitly here instead, on whichever ancestor is
+  // its own - do it explicitly here instead, on whichever ancestor is
   // actually the scrollable one.
   useEffect(() => {
     let node = rootRef.current?.parentElement;
@@ -63,7 +63,7 @@ export default function QrCodeTab() {
               <p className={styles.desc}>
                 Employees scan this with their phone camera to clock in or out.
                 It rotates automatically every 10 seconds, so a screenshot or
-                photo of it stops working almost immediately — display it
+                photo of it stops working almost immediately - display it
                 somewhere visible at your entrance or front desk.
               </p>
             </div>
@@ -72,7 +72,7 @@ export default function QrCodeTab() {
               <QrAttendancePanel />
             </div>
 
-            {/* "Share Live QR" — only on this tab, per the requirement
+            {/* "Share Live QR" - only on this tab, per the requirement
                 that this link is scoped to the live rotating code and
                 nothing else in Settings. */}
             <div className={styles.panelWrapWide}>

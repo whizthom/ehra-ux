@@ -24,7 +24,7 @@ function ChevronIcon({ open }) {
 }
 
 export default function FAQAccordion() {
-  // Multiple items can be open at once — closing one to read another is
+  // Multiple items can be open at once - closing one to read another is
   // more friction than benefit for five short answers like these.
   const [openIndex, setOpenIndex] = useState(0);
 

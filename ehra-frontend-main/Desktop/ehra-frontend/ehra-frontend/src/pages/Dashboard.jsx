@@ -15,7 +15,7 @@ import {
   resolveMissingClockOut,
 } from "../api/attendanceApi";
 import { softDeleteEmployee } from "../api/workforceApi";
-// Real-time messaging (V1 rebuild) — replaces the old SSE-based chat's
+// Real-time messaging (V1 rebuild) - replaces the old SSE-based chat's
 // getChatUnreadCount for the sidebar/topbar "Messages" badge. The old
 // chatApi.js/ChatPanel/MessagesHub files are left in place untouched but
 // unused, in case anything else still imports them.
@@ -65,9 +65,13 @@ import {
 } from "../api/businessApi";
 import { getMyProfile } from "../api/employeeApi";
 import { getMySubscription } from "../api/subscriptionApi";
+import ProductsTab from "../components/ProductsTab";
+import OrdersTab from "../components/OrdersTab";
+import CustomersTab from "../components/CustomersTab";
+import StorefrontTab from "../components/StorefrontTab";
 
 // ── Sidebar nav ────────────────────────────────────────────────────────────
-// "My Accounts" is handled specially — clicking it navigates to the
+// "My Accounts" is handled specially - clicking it navigates to the
 // full-page My Accounts route (see MyAccountsPage) instead of switching
 // the main content area, since it's an identity-level concern (switch
 // workspace / add a business) rather than a business-scoped tab.
@@ -79,6 +83,10 @@ const NAV = [
   { icon: "ti-building", label: "Departments", section: "main" },
   { icon: "ti-building-store", label: "Branches", section: "main" },
   { icon: "ti-calendar-event", label: "Leave", section: "main" },
+  { icon: "ti-package", label: "Products", section: "main" },
+  { icon: "ti-shopping-cart", label: "Orders", section: "main" },
+  { icon: "ti-users-group", label: "Customers", section: "main" },
+  { icon: "ti-world", label: "Storefront", section: "main" },
   { icon: "ti-user-edit", label: "Profile Edits", section: "main" },
   { icon: "ti-mail", label: "Messages", section: "main" },
   { icon: "ti-cash-banknote", label: "Penalty", section: "tools" },
@@ -131,19 +139,19 @@ function fullName(first, last) {
   return [safeString(first), safeString(last)].filter(Boolean).join(" ").trim();
 }
 
-// Mobile header only — the company name there has real estate for roughly
+// Mobile header only - the company name there has real estate for roughly
 // this many characters before it starts crowding the icons on the right.
 function truncateName(name, max = 13) {
   const s = safeString(name);
   return s.length > max ? `${s.slice(0, max)}...` : s;
 }
 
-// "Monday, Aug 3, 2026" — used for the pending leave requests widget's
+// "Monday, Aug 3, 2026" - used for the pending leave requests widget's
 // start/end dates. Local to this file for the same reason as LeavesTab's
 // copy: this shouldn't ripple into other date displays that intentionally
 // stay in their current short format.
 function formatFullDate(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d).toLocaleDateString([], {
     weekday: "long",
     month: "short",
@@ -196,7 +204,7 @@ const ATTENDANCE_LABEL = {
 };
 
 // Tracks a horizontally-scrollable element and returns { left, width } as
-// percentages of its own track — feeds the thin "underneath line" scroll
+// percentages of its own track - feeds the thin "underneath line" scroll
 // indicators (quick actions pill row, bottom nav strip) so the thumb's
 // size/position always reflects exactly how much more there is to scroll,
 // rather than a static decorative hint.
@@ -225,7 +233,7 @@ function useScrollThumb(ref) {
 
     // Icon-font/content can still be settling in right after mount
     // (webfont swap, images, dynamic pill count), which can leave the
-    // very first measurement wrong — one more pass shortly after fixes
+    // very first measurement wrong - one more pass shortly after fixes
     // that without needing a visible flash.
     const settle = setTimeout(update, 400);
 
@@ -250,7 +258,7 @@ function useScrollThumb(ref) {
 }
 
 // Tracks whether the viewport is at or below the mobile/tablet breakpoint
-// (the same 900px threshold the sidebar/bottom-nav switch already uses) —
+// (the same 900px threshold the sidebar/bottom-nav switch already uses) -
 // for the handful of cases where mobile needs genuinely different
 // *behavior*, not just different CSS (e.g. the bell going straight to the
 // full Notifications page instead of opening its dropdown).
@@ -278,7 +286,7 @@ export default function Dashboard() {
   const location = useLocation();
   const { user, logout } = useAuth();
   // Opens (and keeps alive) the real-time messaging WebSocket as soon as
-  // someone is logged in — deliberately mounted HERE, at the top of the
+  // someone is logged in - deliberately mounted HERE, at the top of the
   // whole dashboard, not inside MessagingHub (which only exists while the
   // Messages tab is active). Presence ("is this person online") and any
   // real-time notification both depend entirely on this connection
@@ -287,7 +295,7 @@ export default function Dashboard() {
   // bug this fixes.
   useMessagingConnection();
 
-  // Mobile bottom-nav "Log out" — confirmed via LogoutConfirmModal before
+  // Mobile bottom-nav "Log out" - confirmed via LogoutConfirmModal before
   // the session is actually torn down, so a stray tap on a crowded phone
   // screen can't sign someone out by accident.
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -303,8 +311,8 @@ export default function Dashboard() {
       navigate("/login");
     }
   };
-  // If we arrived here via navigate(..., { state: { activeNav } }) — e.g.
-  // the "Back to workforce" button on an employee's profile page — open
+  // If we arrived here via navigate(..., { state: { activeNav } }) - e.g.
+  // the "Back to workforce" button on an employee's profile page - open
   // directly on that tab instead of always resetting to "Dashboard".
   const dashboardStateKey = `ehral:dashboardState:${user?.identityId ?? "unknown"}:${user?.businessId ?? "unknown"}`;
   const readDashboardState = () => {
@@ -403,22 +411,22 @@ export default function Dashboard() {
   }, [activeNav, dashboardStateKey]);
 
   // Which sub-tab is open within the Leave tab (Requests/On Leave/
-  // Policies/Balances) — reported up by LeavesTab itself via
+  // Policies/Balances) - reported up by LeavesTab itself via
   // onSectionChange, since Dashboard has no visibility into it
-  // otherwise. Only used to hide the brand footer below on Policies —
+  // otherwise. Only used to hide the brand footer below on Policies -
   // see that condition for why.
   const [leavesSection, setLeavesSection] = useState(null);
 
-  // Set while a Messages > Chats thread is open — used to hide the topbar,
+  // Set while a Messages > Chats thread is open - used to hide the topbar,
   // brand footer, and bottom nav on mobile so the thread reads as a real
   // full-screen view rather than a panel wedged between them.
   const [chatThreadOpen, setChatThreadOpen] = useState(false);
   // Set when a notification toast is clicked (see NotificationToastStack
-  // below) — handed to MessagingHub, which consumes it to jump straight
+  // below) - handed to MessagingHub, which consumes it to jump straight
   // to that conversation/message regardless of which tab was active when
   // the notification arrived.
   const [messagingDeepLink, setMessagingDeepLink] = useState(null);
-  // Which conversation MessagingHub currently has open, if any — reported
+  // Which conversation MessagingHub currently has open, if any - reported
   // up so NotificationToastStack can skip popping a toast for a message
   // the person can already see arrive live on screen.
   const [messagingActiveConversationId, setMessagingActiveConversationId] =
@@ -454,7 +462,7 @@ export default function Dashboard() {
   const [pendingDeletes, setPendingDeletes] = useState([]); // [{ id, notif }]
   const deleteTimers = useRef(new Map());
 
-  // Unread chat/message count — powers the pop badge on the topbar
+  // Unread chat/message count - powers the pop badge on the topbar
   // message shortcut and the sidebar "Messages" nav item. Kept separate
   // from `notifs`/`unreadCount` above since chats (1:1 messages) are a
   // distinct read/unread concept from Notifications, backed by their own
@@ -480,7 +488,7 @@ export default function Dashboard() {
   const [actioningLeaveId, setActioningLeaveId] = useState(null);
 
   // Invite link
-  // Invite Employee modal — one popup, three ways to invite (single
+  // Invite Employee modal - one popup, three ways to invite (single
   // link, reusable link, invite by email). See InviteEmployeeModal.jsx.
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
@@ -495,31 +503,31 @@ export default function Dashboard() {
   const [pendingApprovalsOpen, setPendingApprovalsOpen] = useState(false);
   const [pendingLeavesOpen, setPendingLeavesOpen] = useState(false);
 
-  // Profile edit requests — employer approval queue (final sign-off after
+  // Profile edit requests - employer approval queue (final sign-off after
   // the HOD, or first stop if the employee has no HOD).
   const [profileEdits, setProfileEdits] = useState([]);
   const [pendingProfileEdits, setPendingProfileEdits] = useState([]);
   const [loadingProfileEdits, setLoadingProfileEdits] = useState(true);
 
-  // Business (company) profile — Settings tab
+  // Business (company) profile - Settings tab
   const [businessProfile, setBusinessProfile] = useState(null);
   const [loadingBusinessProfile, setLoadingBusinessProfile] = useState(true);
 
-  // Current plan — powers the topbar PlanBadge and the periodic
+  // Current plan - powers the topbar PlanBadge and the periodic
   // PlanExpiryReminder toast. Owned once here (not inside those
   // components) so both read the exact same fetch instead of doubling
   // up requests.
   const [subscription, setSubscription] = useState(null);
   const [loadingSubscription, setLoadingSubscription] = useState(true);
 
-  // Personal attendance profile — Settings tab. Off by default; toggling
+  // Personal attendance profile - Settings tab. Off by default; toggling
   // this changes whether the employer counts as staff and is subject to
   // clock-in/out (see BusinessSettingsTab).
   const [attendanceProfile, setAttendanceProfile] = useState(null);
   const [loadingAttendanceProfile, setLoadingAttendanceProfile] =
     useState(true);
 
-  // The employer's own profile (auto-created Employee row, role ADMIN) —
+  // The employer's own profile (auto-created Employee row, role ADMIN) -
   // Settings tab "My Profile". Edits here save instantly, no approval.
   const [myProfile, setMyProfile] = useState(null);
   const [loadingMyProfile, setLoadingMyProfile] = useState(true);
@@ -600,7 +608,7 @@ export default function Dashboard() {
     }
   }, []);
 
-  // Lightweight branch list for the Workforce tab's assignment dropdown —
+  // Lightweight branch list for the Workforce tab's assignment dropdown -
   // separate from BranchesTab's own richer fetch (employee counts, etc.)
   // since Workforce only needs id/name/status to populate BranchCell.
   const fetchBranches = useCallback(async () => {
@@ -655,7 +663,7 @@ export default function Dashboard() {
     }
   }, []);
 
-  // Current subscription/plan — deliberately swallows errors the same
+  // Current subscription/plan - deliberately swallows errors the same
   // way the other summary widgets do (log and move on) rather than
   // surfacing a dashboard-wide failure state just because the plan pill
   // couldn't load.
@@ -696,7 +704,7 @@ export default function Dashboard() {
     }
   }, []);
 
-  // Today's attendance feed shown on the main Dashboard view — replaces
+  // Today's attendance feed shown on the main Dashboard view - replaces
   // the old static employee directory with a live "who clocked in/out
   // today" list, since that's the more relevant thing for a daily landing page.
   const fetchLatestAttendance = useCallback(async () => {
@@ -733,13 +741,13 @@ export default function Dashboard() {
 
   // Locks page-level scrolling to <body> while this app-shell page is
   // mounted, so mobile browsers can't rubber-band the whole page (and
-  // drag the "fixed" topbar along with it) — only .content should scroll.
+  // drag the "fixed" topbar along with it) - only .content should scroll.
   useEffect(() => {
     document.body.classList.add("app-shell-lock");
     return () => document.body.classList.remove("app-shell-lock");
   }, []);
 
-  // Keeps the mobile "Today's Pulse" widget's "live" badge honest — it
+  // Keeps the mobile "Today's Pulse" widget's "live" badge honest - it
   // isn't just decorative, today's attendance really does get re-polled
   // periodically while the dashboard is open.
   useEffect(() => {
@@ -749,7 +757,7 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, [fetchLatestAttendance]);
 
-  // Pending approvals / pending leave requests stay collapsed by default —
+  // Pending approvals / pending leave requests stay collapsed by default -
   // opening automatically only once there's actually something to review.
   useEffect(() => {
     if (!loadingPending && pending.length > 0) setPendingApprovalsOpen(true);
@@ -794,7 +802,7 @@ export default function Dashboard() {
 
   // Keep the plan pill/expiry reminder current without needing a full
   // page reload: re-check periodically, and whenever the tab regains
-  // focus (the most likely moment to actually notice a change — e.g.
+  // focus (the most likely moment to actually notice a change - e.g.
   // coming back from paying on the Pricing page in another tab, or the
   // scheduled expiry job having run while this tab sat idle overnight).
   useEffect(() => {
@@ -834,7 +842,7 @@ export default function Dashboard() {
     },
 
     // NOTE: onNewChatMessage/onChatRead above are wired to the OLD SSE
-    // chat stream and no longer fire for real messaging traffic — the new
+    // chat stream and no longer fire for real messaging traffic - the new
     // messaging system's badge live-update is the WebSocket subscription
     // below instead (see useMessagingBadgeSync).
   });
@@ -846,7 +854,7 @@ export default function Dashboard() {
     if (activeNav === "Notifications") fetchNotifs();
   }, [activeNav, fetchNotifs]);
 
-  // Re-sync the message badge whenever the Messages tab is opened or left —
+  // Re-sync the message badge whenever the Messages tab is opened or left -
   // catches any reads that happened inside it without a matching SSE event.
   useEffect(() => {
     if (activeNav === "Messages") fetchMessagesUnread();
@@ -880,7 +888,7 @@ export default function Dashboard() {
     const { data } = await updateAttendanceProfileSetting(enabled);
     setAttendanceProfile(data);
     // Staff counts (dashboard totals) and the Workforce grid both change
-    // depending on this setting — refresh them so the UI reflects it
+    // depending on this setting - refresh them so the UI reflects it
     // immediately instead of waiting for the next natural refetch.
     fetchSummary();
     fetchDirectory();
@@ -894,7 +902,7 @@ export default function Dashboard() {
   const openNotifPanel = () => {
     if (isMobile) {
       // Mobile/tablet: the bell is a shortcut straight to the full
-      // Notifications page — the small dropdown doesn't get its own
+      // Notifications page - the small dropdown doesn't get its own
       // trigger there, it's a desktop-only convenience.
       setActiveNav("Notifications");
       fetchNotifs();
@@ -978,7 +986,7 @@ export default function Dashboard() {
 
   // Timers must keep running even if the user switches tabs (Dashboard
   // stays mounted), but if the whole page unmounts, finish the deletes
-  // rather than silently dropping them — the user already confirmed intent.
+  // rather than silently dropping them - the user already confirmed intent.
   useEffect(() => {
     return () => {
       deleteTimers.current.forEach((timer, id) => {
@@ -1232,10 +1240,10 @@ export default function Dashboard() {
     pendingApprovals: 0,
   };
 
-  // Today's Pulse (mobile hero widget) — real attendance figures. "Staff"
+  // Today's Pulse (mobile hero widget) - real attendance figures. "Staff"
   // = active employees (the people expected to clock in); "clocked in" =
   // anyone with a record in today's attendance feed at all.
-  // "Clocked in" must only count people who actually clocked in — the
+  // "Clocked in" must only count people who actually clocked in - the
   // backend now also creates explicit ABSENT/LATE entries (no clockIn
   // timestamp) once an employee's scheduled clock-in/clock-out time passes
   // without them showing up, so `latestAttendance` can contain rows for
@@ -1246,7 +1254,7 @@ export default function Dashboard() {
   const pulseClockedIn = latestAttendance.filter((r) => !!r.clockIn).length;
   // "Late" includes both people who actually clocked in late AND people who
   // simply haven't clocked in yet once their clock-in time has passed (a
-  // live, not-yet-persisted status the backend computes on the fly) — those
+  // live, not-yet-persisted status the backend computes on the fly) - those
   // graduate into Absent once their clock-out time passes too, so nobody is
   // ever counted in both buckets at once.
   const pulseLate = latestAttendance.filter((r) => r.status === "LATE").length;
@@ -1257,7 +1265,7 @@ export default function Dashboard() {
   const pulseOnTime = latestAttendance.filter(
     (r) => !!r.clockIn && !r.lateArrival && !r.earlyLeave,
   ).length;
-  // Only employees explicitly (or live-)marked ABSENT count as absent —
+  // Only employees explicitly (or live-)marked ABSENT count as absent -
   // anyone who simply hasn't clocked in yet but whose shift also hasn't
   // ended isn't "absent" yet, just not yet accounted for.
   const pulseAbsent = latestAttendance.filter(
@@ -1299,7 +1307,7 @@ export default function Dashboard() {
       {/* ── Sidebar ── */}
       <aside className={styles.sidebar}>
         <div className={styles.sbLogo}>
-          {/* Desktop sidebar always shows Ehral's own logo here — flat
+          {/* Desktop sidebar always shows Ehral's own logo here - flat
               white (tone="sidebar") rather than the normal two-tone
               brand colors, because --accent equals --bg-sidebar exactly
               in light mode (both #0f6e56), which makes the wordmark's
@@ -1429,7 +1437,7 @@ export default function Dashboard() {
           </div>
 
           <div className={styles.topbarRight}>
-            {/* ── Current plan — desktop only. On mobile/tablet this moves
+            {/* ── Current plan - desktop only. On mobile/tablet this moves
                 into the Settings dropdown's "My account" section instead
                 (see ThemeToggleMenu below) rather than crowding this
                 already-tight icon row. ── */}
@@ -1445,7 +1453,7 @@ export default function Dashboard() {
               />
             </div>
 
-            {/* ── Message shortcut — jumps straight to the Messages tab ── */}
+            {/* ── Message shortcut - jumps straight to the Messages tab ── */}
             <div
               className={`${styles.notifBtn} ${styles.messageShortcut}`}
               onClick={() => setActiveNav("Messages")}
@@ -1464,7 +1472,7 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* ── Ehral Agent — right after the message shortcut, as requested ── */}
+            {/* ── Ehral Agent - right after the message shortcut, as requested ── */}
             <AiAgentWidget onOpen={() => setActiveNav("Ehral Intelligence")} />
 
             {/* ── Bell button + dropdown panel ── */}
@@ -1631,7 +1639,7 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* ── Settings icon (theme toggle) — also houses "My account"
+            {/* ── Settings icon (theme toggle) - also houses "My account"
                 (current plan + Plans link) on mobile/tablet; see
                 ThemeToggleMenu.jsx. ── */}
             <ThemeToggleMenu
@@ -1665,6 +1673,7 @@ export default function Dashboard() {
             activeNav === "Ehral Intelligence"
               ? styles.contentAgent
               : activeNav === "Attendance" ||
+                  activeNav === "Products" || activeNav === "Orders" || activeNav === "Customers" || activeNav === "Storefront" ||
                   activeNav === "Departments" ||
                   activeNav === "Leave" ||
                   activeNav === "My profile" ||
@@ -1707,6 +1716,14 @@ export default function Dashboard() {
               onDeepLinkConsumed={() => setMessagingDeepLink(null)}
               onActiveConversationChange={setMessagingActiveConversationId}
             />
+          ) : activeNav === "Products" ? (
+            <ProductsTab />
+          ) : activeNav === "Orders" ? (
+            <OrdersTab />
+          ) : activeNav === "Customers" ? (
+            <CustomersTab />
+          ) : activeNav === "Storefront" ? (
+            <StorefrontTab />
           ) : activeNav === "Leave" ? (
             <LeavesTab onSectionChange={setLeavesSection} />
           ) : activeNav === "Attendance" ? (
@@ -1783,7 +1800,7 @@ export default function Dashboard() {
                 profilePictureUrl={myProfile?.profilePictureUrl}
               />
 
-              {/* Today's Pulse — mobile-only hero widget, replaces the
+              {/* Today's Pulse - mobile-only hero widget, replaces the
                   totals row on phones (see .todaysPulseMobile). */}
               <div className={styles.todaysPulseMobile}>
                 <TodaysPulse
@@ -2010,7 +2027,7 @@ export default function Dashboard() {
                   {
                     icon: "ti-users",
                     color: "teal",
-                    num: loadingSummary ? "—" : safeSummary.totalEmployees,
+                    num: loadingSummary ? "-" : safeSummary.totalEmployees,
                     label: "Total employees",
                     trend: loadingSummary
                       ? "Loading…"
@@ -2127,7 +2144,7 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Recent activity — driven by real notifications. Hidden on
+                {/* Recent activity - driven by real notifications. Hidden on
                     phones, where the notification bell already surfaces
                     this same feed. */}
                 <div
@@ -2277,20 +2294,20 @@ export default function Dashboard() {
                                         )}
                                       </div>
                                       <div className={styles.empName}>
-                                        {name || "—"}
+                                        {name || "-"}
                                       </div>
                                     </div>
                                   </td>
                                   <td className={styles.muted}>{emp.email}</td>
                                   <td className={styles.muted}>
-                                    {emp.phone ?? "—"}
+                                    {emp.phone ?? "-"}
                                   </td>
                                   <td className={styles.muted}>
                                     {emp.createdAt
                                       ? new Date(
                                           emp.createdAt,
                                         ).toLocaleDateString()
-                                      : "—"}
+                                      : "-"}
                                   </td>
                                   <td>
                                     <div className={styles.tblActions}>
@@ -2405,7 +2422,7 @@ export default function Dashboard() {
                                       </div>
                                       <div>
                                         <div className={styles.empName}>
-                                          {name || "—"}
+                                          {name || "-"}
                                         </div>
                                       </div>
                                     </div>
@@ -2426,7 +2443,7 @@ export default function Dashboard() {
                                       ? new Date(
                                           lv.createdAt,
                                         ).toLocaleDateString()
-                                      : "—"}
+                                      : "-"}
                                   </td>
                                   <td>
                                     <div className={styles.tblActions}>
@@ -2536,7 +2553,7 @@ export default function Dashboard() {
                                     hour: "2-digit",
                                     minute: "2-digit",
                                   })
-                                : "—"}
+                                : "-"}
                             </span>
                             <span className={styles.missingClockOutStatus}>
                               Clock-out missing
@@ -2587,7 +2604,7 @@ export default function Dashboard() {
                 )}
               </div>
 
-              {/* Latest attendance — today's clock-ins/outs, with quick access
+              {/* Latest attendance - today's clock-ins/outs, with quick access
               to a full profile or to remove an employee. The full directory
               now lives under the Workforce tab. */}
               <div className={styles.dirPanel}>
@@ -2657,7 +2674,7 @@ export default function Dashboard() {
                                     )}
                                   </div>
                                   <div className={styles.empName}>
-                                    {name || "—"}
+                                    {name || "-"}
                                   </div>
                                 </div>
                               </td>
@@ -2679,7 +2696,7 @@ export default function Dashboard() {
                                         minute: "2-digit",
                                       },
                                     )
-                                  : "—"}
+                                  : "-"}
                               </td>
                               <td
                                 className={styles.muted}
@@ -2690,7 +2707,7 @@ export default function Dashboard() {
                                       [],
                                       { hour: "2-digit", minute: "2-digit" },
                                     )
-                                  : "—"}
+                                  : "-"}
                               </td>
                               <td data-label="Status">
                                 <span
@@ -2733,11 +2750,11 @@ export default function Dashboard() {
             </>
           )}
 
-          {/* Brand footer — last thing in the scrollable content, same
+          {/* Brand footer - last thing in the scrollable content, same
               spot for every tab since it sits after the tab-switch above
               but still inside this scrolling wrapper. Suppressed
               specifically on the Leave > Policies sub-section (removed
-              on request) — everywhere else, including the other three
+              on request) - everywhere else, including the other three
               Leave sub-tabs (Requests/On Leave/Balances), keeps it. */}
           {!(activeNav === "Leave" && leavesSection === "policies") &&
             activeNav !== "Messages" && (
@@ -2815,7 +2832,7 @@ export default function Dashboard() {
 }
 
 // ── Notifications (full page) ───────────────────────────────────────────
-// This is the sidebar "Notifications" tab — a dedicated page listing every
+// This is the sidebar "Notifications" tab - a dedicated page listing every
 // notification, distinct from the bell icon's quick dropdown panel.
 // ── Undo bar ─────────────────────────────────────────────────────────────
 // Sits under the notification list (bell dropdown or full page) whenever

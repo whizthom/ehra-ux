@@ -4,7 +4,7 @@ import styles from "./SiteFooter.module.css";
 
 // Mirrors About.jsx's FOOTER_LINKS, but as real paths back to /about's
 // sections (About.jsx's own footer uses bare #anchors, which only work
-// when you're already on that page — this footer can be reached from
+// when you're already on that page - this footer can be reached from
 // anywhere, so Company/Platform links route to /about first).
 const FOOTER_LINKS = {
   Platform: [

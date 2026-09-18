@@ -141,7 +141,7 @@
     height: 100%;
     width: 100%;
     transform-origin: left;
-    /* Matches PlanExpiryReminder's AUTO_DISMISS_MS exactly — if that
+    /* Matches PlanExpiryReminder's AUTO_DISMISS_MS exactly - if that
      constant changes, update this duration too. */
     animation: planToastDeplete 14s linear forwards;
 }
@@ -167,7 +167,7 @@
     }
 }
 
-/* ── Tier coloring — mirrors PlanBadge's palette so the toast and the
+/* ── Tier coloring - mirrors PlanBadge's palette so the toast and the
    topbar pill always agree on what "urgent" looks like. ── */
 
 .upcoming .toastIcon {

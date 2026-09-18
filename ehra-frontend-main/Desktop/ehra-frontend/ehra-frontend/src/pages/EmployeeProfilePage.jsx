@@ -20,7 +20,7 @@ import styles from "./EmployeeProfilePage.module.css";
 // Mirrors NAV in Dashboard.jsx (employer) / EmployeeDashboard.jsx
 // (employee/HOD). This page sits outside either dashboard's tab-switcher,
 // so "clicking a nav item" here means a real route change rather than
-// local state — see goToNav, which sends the label along as
+// local state - see goToNav, which sends the label along as
 // navigate state the same way each dashboard's own nav already does for
 // the "My Accounts" full-page detour.
 const ADMIN_NAV = [
@@ -64,7 +64,7 @@ const EMPLOYEE_NAV = [
   },
 ];
 
-// Drives the bottom-nav's scroll-position indicator on mobile — copied
+// Drives the bottom-nav's scroll-position indicator on mobile - copied
 // from Dashboard.jsx/EmployeeDashboard.jsx (same small, self-contained
 // helper, no shared-hooks module exists for it yet).
 function useScrollThumb(ref) {
@@ -113,7 +113,7 @@ const ATTENDANCE_COLOR = {
 };
 
 function formatTime(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   return new Date(iso).toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
@@ -130,7 +130,7 @@ export default function EmployeeProfilePage() {
   const location = useLocation();
   const { user, logout } = useAuth();
 
-  // When navigated from HodWorkforceTab, state.hodView=true — hide messaging.
+  // When navigated from HodWorkforceTab, state.hodView=true - hide messaging.
   const hodView = location.state?.hodView === true;
 
   const isAdmin = user?.role === "ROLE_ADMIN";
@@ -141,7 +141,7 @@ export default function EmployeeProfilePage() {
   );
 
   // Every nav item is a real navigation now (there's no local tab state on
-  // this page to flip) — landing back on the dashboard with `activeNav` set
+  // this page to flip) - landing back on the dashboard with `activeNav` set
   // is exactly what each dashboard's own nav already does for you when you
   // click around normally, so this page just plugs into that.
   const goToNav = (n) => {
@@ -194,7 +194,7 @@ export default function EmployeeProfilePage() {
   const [msgBody, setMsgBody] = useState("");
   const [sending, setSending] = useState(false);
 
-  // Badge on the topbar bell — same lightweight count-only endpoint each
+  // Badge on the topbar bell - same lightweight count-only endpoint each
   // dashboard's own bell uses, so it's real and not just decorative.
   const [unreadNotifCount, setUnreadNotifCount] = useState(0);
   useEffect(() => {
@@ -205,7 +205,7 @@ export default function EmployeeProfilePage() {
       );
   }, [isAdmin]);
 
-  // Badge on the topbar message shortcut — same endpoint the dashboards'
+  // Badge on the topbar message shortcut - same endpoint the dashboards'
   // own message icon and sidebar "Messages" row use.
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   useEffect(() => {
@@ -322,7 +322,7 @@ export default function EmployeeProfilePage() {
             <span className={styles.backBtnShort}>Back</span>
           </button>
           <div className={shellStyles.topbarRight}>
-            {/* ── Message shortcut — same jump-to-Messages affordance the
+            {/* ── Message shortcut - same jump-to-Messages affordance the
                 dashboards' topbar has, just via a route instead of local
                 tab state since this page lives outside either dashboard. ── */}
             <div
@@ -343,7 +343,7 @@ export default function EmployeeProfilePage() {
               )}
             </div>
 
-            {/* ── Notification bell — real unread count, jumps to the
+            {/* ── Notification bell - real unread count, jumps to the
                 Notifications tab on the dashboard this profile belongs to. ── */}
             <div
               className={shellStyles.notifBtn}
@@ -471,7 +471,7 @@ export default function EmployeeProfilePage() {
               component's own JS chunk, so there is no possibility of them
               being missing, stale, or overridden by a separately-cached
               CSS file. Solid pill buttons (not a thin underline) so it's
-              visually unmistakable whether this row is rendering at all —
+              visually unmistakable whether this row is rendering at all -
               easy to confirm with a glance or a screenshot. */}
           <nav
             aria-label="Employee profile sections"
@@ -546,7 +546,7 @@ export default function EmployeeProfilePage() {
                   <div className={styles.infoRows}>
                     <div className={styles.infoRow}>
                       <span className={styles.infoLabel}>Full name</span>
-                      <span className={styles.infoValue}>{name || "—"}</span>
+                      <span className={styles.infoValue}>{name || "-"}</span>
                     </div>
                     <div className={styles.infoRow}>
                       <span className={styles.infoLabel}>Email</span>
@@ -555,7 +555,7 @@ export default function EmployeeProfilePage() {
                     <div className={styles.infoRow}>
                       <span className={styles.infoLabel}>Phone</span>
                       <span className={styles.infoValue}>
-                        {profile.phone || "—"}
+                        {profile.phone || "-"}
                       </span>
                     </div>
                     <div className={styles.infoRow}>
@@ -573,7 +573,7 @@ export default function EmployeeProfilePage() {
                       <span className={styles.infoValue}>
                         {profile.createdAt
                           ? new Date(profile.createdAt).toLocaleDateString()
-                          : "—"}
+                          : "-"}
                       </span>
                     </div>
                   </div>
@@ -725,7 +725,7 @@ export default function EmployeeProfilePage() {
                             <td>
                               {l.createdAt
                                 ? new Date(l.createdAt).toLocaleDateString()
-                                : "—"}
+                                : "-"}
                             </td>
                             <td>{l.startDate}</td>
                             <td>{l.endDate}</td>
@@ -755,7 +755,7 @@ export default function EmployeeProfilePage() {
                                 fontSize: 12,
                               }}
                             >
-                              {l.adminNote || "—"}
+                              {l.adminNote || "-"}
                             </td>
                           </tr>
                         );
@@ -811,7 +811,7 @@ export default function EmployeeProfilePage() {
               <PayrollTab employeeId={id} canManage={!hodView} />
             )}
 
-            {/* Announcements/Messages — hidden in HOD view */}
+            {/* Announcements/Messages - hidden in HOD view */}
             {tab === "announcements" && (
               <div className={styles.announcementList}>
                 {!profile.recentAnnouncements?.length ? (
@@ -899,7 +899,7 @@ export default function EmployeeProfilePage() {
         loading={loggingOut}
       />
 
-      {/* ── Send message modal (employer only — hidden in HOD view) ── */}
+      {/* ── Send message modal (employer only - hidden in HOD view) ── */}
       {msgOpen && !hodView && (
         <div className={styles.modalOverlay} onClick={() => setMsgOpen(false)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>

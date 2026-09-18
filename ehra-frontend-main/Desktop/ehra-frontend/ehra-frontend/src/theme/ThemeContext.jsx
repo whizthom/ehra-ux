@@ -5,7 +5,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 // Persists the user's choice in localStorage and mirrors it onto
 // <html data-theme="..."> so plain CSS (see src/theme.css) can react to it
 // via `[data-theme="dark"] { ... }` overrides. This file only adds new
-// behavior — it doesn't touch any existing app logic.
+// behavior - it doesn't touch any existing app logic.
 
 const STORAGE_KEY = "ehra-theme";
 
@@ -21,7 +21,7 @@ export function ThemeProvider({ children }) {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved === "light" || saved === "dark") return saved;
     } catch {
-      // localStorage unavailable (private mode, etc.) — fall back silently
+      // localStorage unavailable (private mode, etc.) - fall back silently
     }
     return "light";
   });

@@ -14,14 +14,14 @@ const EMPTY = { live: false };
  * (DashboardPreview / MobileProductPreview) can render genuine data
  * instead of the illustrative mock.
  *
- * About is a public, unauthenticated-by-default page — the overwhelming
+ * About is a public, unauthenticated-by-default page - the overwhelming
  * majority of visitors have no session at all, in which case this hook
  * resolves to `{ live: false }` immediately and every preview quietly
  * renders its static mock, exactly as before. It only switches to real
  * data for the (comparatively rare) case of someone viewing /about
  * while already signed in.
  *
- * Every call below is independently wrapped via Promise.allSettled —
+ * Every call below is independently wrapped via Promise.allSettled -
  * one failing (wrong role for that endpoint, an expired session, a
  * contextType the call doesn't apply to) never breaks the others, and
  * if literally nothing comes back, `live` stays false so callers fall
@@ -67,7 +67,7 @@ export default function useLiveWorkspaceData() {
       const contacts = Array.isArray(contactsRaw) ? contactsRaw : null;
 
       // A thread is only worth fetching if we actually have someone to
-      // fetch it for — and it's allowed to fail silently on its own,
+      // fetch it for - and it's allowed to fail silently on its own,
       // same as everything above.
       let thread = null;
       if (contacts && contacts.length > 0 && contacts[0]?.withKey) {

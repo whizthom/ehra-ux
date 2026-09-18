@@ -252,7 +252,7 @@
 }
 
 /* Wraps formBody + formFooter as one unit and centers that unit inside
-   the remaining space below the header — so the footer (Back/Next)
+   the remaining space below the header - so the footer (Back/Next)
    always sits directly under whatever content a given step has,
    instead of being flex-stretched down to the bottom of the page. */
 .formArea {
@@ -453,14 +453,14 @@
     cursor: not-allowed;
 }
 
-/* ── Mobile hero — replaces the left timeline sidebar below 768px ──────── */
+/* ── Mobile hero - replaces the left timeline sidebar below 768px ──────── */
 .mobileHero {
     display: none;
 }
 
 /* ── Responsive ─────────────────────────────────────────────────────────
    Mobile locks to the device's real visible viewport (100dvh) and never
-   scrolls at the page level, in either direction — only the form body
+   scrolls at the page level, in either direction - only the form body
    (the region between the fixed header and footer) scrolls internally if
    a given step's content is taller than the available space. The logo
    sits directly on the white canvas with no background box, left-aligned,

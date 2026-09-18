@@ -3,28 +3,28 @@
 // Single source of truth for the /pricing page (cards, comparison table,
 // FAQ) AND for anything else that needs to reason about plan limits on the
 // frontend (e.g. an "upgrade to add another business" banner). Keeping it
-// here — instead of scattering ₦ figures and feature lists across JSX —
+// here - instead of scattering ₦ figures and feature lists across JSX -
 // means adding a future plan (Enterprise), running a promo price, or
 // bumping a limit is a one-file data edit, not a hunt through components.
 //
-// Mirrors the backend's PlanType enum 1:1 — `id` is the value that gets
+// Mirrors the backend's PlanType enum 1:1 - `id` is the value that gets
 // sent to the API (see initializeCheckout in api/subscriptionApi.js), so
 // it must stay in sync with that enum's names exactly.
 //
 // Backend sync status: fully wired up. STARTER/PRO/PREMIUM/ELITE all
 // exist as backend PlanType values with matching prices AND enforced
 // limits in PlanLimits.java (maxBusinesses, maxEmployeesPerBusiness,
-// maxBranchesPerBusiness — see PlanLimitService for where each is
+// maxBranchesPerBusiness - see PlanLimitService for where each is
 // actually checked). id: "PREMIUM" is deliberately reused for the plan
-// DISPLAYED here as "Business" — its price (₦12,000/mo) was already
+// DISPLAYED here as "Business" - its price (₦12,000/mo) was already
 // correct under the old Premium tier, so no new enum value was needed,
-// just updated limits. Custom has no `id` used for checkout — its CTA
+// just updated limits. Custom has no `id` used for checkout - its CTA
 // (action: "contact") sends the person to /support instead of
 // initializeCheckout.
 //
 // Yearly prices below follow the same "2 months free" convention as the
 // original Pro/Premium figures (yearly = monthly × 10) since no yearly
-// price was specified for the new tiers — adjust here if a different
+// price was specified for the new tiers - adjust here if a different
 // yearly discount is wanted.
 
 export const PLAN_IDS = {
@@ -124,7 +124,7 @@ export const PLANS = [
   {
     id: PLAN_IDS.BUSINESS,
     name: "Business",
-    tagline: "More room to grow — branches included.",
+    tagline: "More room to grow - branches included.",
     badge: "MOST POPULAR",
     theme: "light",
     highlight: true,
@@ -255,8 +255,8 @@ export const COMPARISON_ROWS = [
   {
     label: "Branches",
     values: {
-      STARTER: "—",
-      PRO: "—",
+      STARTER: "-",
+      PRO: "-",
       PREMIUM: "Up to 2",
       ELITE: "Up to 3 per business",
       CUSTOM: "Custom",
@@ -420,7 +420,7 @@ export const FAQ_ITEMS = [
   {
     question: "What happens if my subscription expires?",
     answer:
-      "Your account automatically returns to the Starter plan and all your data is kept exactly as it is. Paid-only features become unavailable until you renew. If your usage is above Starter's limits — for example more than 5 employees, or more than one business — nothing is deleted; those businesses simply become read-only until you upgrade again.",
+      "Your account automatically returns to the Starter plan and all your data is kept exactly as it is. Paid-only features become unavailable until you renew. If your usage is above Starter's limits - for example more than 5 employees, or more than one business - nothing is deleted; those businesses simply become read-only until you upgrade again.",
   },
 
   {

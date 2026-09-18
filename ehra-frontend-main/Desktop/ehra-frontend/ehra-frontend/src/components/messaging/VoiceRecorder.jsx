@@ -3,7 +3,7 @@ import { formatDuration } from "../../utils/messagingFormat";
 import styles from "./MessageComposer.module.css";
 
 // Record / stop / cancel / send a voice note (section 6). Uses the
-// browser's native MediaRecorder — no extra dependency needed. Produces a
+// browser's native MediaRecorder - no extra dependency needed. Produces a
 // webm/opus blob on Chrome/Edge/Firefox and falls back to whatever
 // mime type the browser reports as supported (Safari uses mp4/aac).
 const MAX_DURATION_SECONDS = 300; // 5 minutes
@@ -93,7 +93,7 @@ export default function VoiceRecorder({ onCancel, onSend }) {
 
   // Auto-stops (and sends whatever was captured) once the cap is hit,
   // rather than letting someone record indefinitely and then discover
-  // the failure only at upload time — MsgAttachmentServiceImpl's own
+  // the failure only at upload time - MsgAttachmentServiceImpl's own
   // 20MB voice-note limit is what this cap is really protecting against,
   // since an unbounded recording eventually exceeds it regardless of
   // codec/bitrate.
@@ -134,7 +134,7 @@ export default function VoiceRecorder({ onCancel, onSend }) {
       </span>
       <span className={styles.recordingHint}>
         {nearLimit
-          ? `Max ${formatDuration(MAX_DURATION_SECONDS)} — sending soon`
+          ? `Max ${formatDuration(MAX_DURATION_SECONDS)} - sending soon`
           : "Recording…"}
       </span>
       <button className={styles.voiceSendBtn} onClick={handleSend} title="Send">

@@ -98,7 +98,7 @@ function titleCase(str) {
 
 // Turns the signed-in visitor's own real workspace data (see
 // useLiveWorkspaceData) into the same {stats, rows} shape STATS/ROWS
-// use, per screen. Returns null — never throws — whenever there isn't
+// use, per screen. Returns null - never throws - whenever there isn't
 // enough real data for a given screen, so the caller falls back to the
 // static mock instead of rendering a half-empty real UI.
 function deriveLive(screen, liveData) {
@@ -162,7 +162,7 @@ function deriveLive(screen, liveData) {
         .filter((r) => r.clockIn)
         .map((r) => new Date(r.clockIn))
         .filter((d) => !Number.isNaN(d.getTime()));
-      let avgLabel = "—";
+      let avgLabel = "-";
       if (withTimes.length) {
         const avgMinutes =
           withTimes.reduce(
@@ -195,8 +195,8 @@ function deriveLive(screen, liveData) {
             fullName(r.employeeFirstName, r.employeeLastName),
             r.department || "Unassigned",
             r.clockIn
-              ? timeLabel(r.clockIn) || "—"
-              : titleCase(r.status) || "—",
+              ? timeLabel(r.clockIn) || "-"
+              : titleCase(r.status) || "-",
           ]),
       };
     }
@@ -207,12 +207,12 @@ function deriveLive(screen, liveData) {
         stats: [
           {
             label: "Total employees",
-            value: String(summary.totalEmployees ?? "—"),
+            value: String(summary.totalEmployees ?? "-"),
             tone: "accent",
           },
           {
             label: "Active",
-            value: String(summary.activeEmployees ?? "—"),
+            value: String(summary.activeEmployees ?? "-"),
             tone: "info",
           },
           {
@@ -264,7 +264,7 @@ function deriveLive(screen, liveData) {
         stats: [
           {
             label: "Attendance today",
-            value: rate != null ? `${rate}%` : "—",
+            value: rate != null ? `${rate}%` : "-",
             tone: "accent",
           },
           {
@@ -288,12 +288,12 @@ function deriveLive(screen, liveData) {
 }
 
 /**
- * A replica of the real Ehral business dashboard — same sidebar,
+ * A replica of the real Ehral business dashboard - same sidebar,
  * topbar, stat-card and table language used in Dashboard.module.css.
  *
  * Renders instantly from fixed sample data by default, so it's never
  * blocked on auth/network. When a `liveData` snapshot is passed in AND
- * has real data for this `screen` (see useLiveWorkspaceData — only
+ * has real data for this `screen` (see useLiveWorkspaceData - only
  * true when the visitor is actually signed in), it renders that real
  * data instead and shows a small "Live" indicator in place of the
  * static date pill.

@@ -4,13 +4,13 @@ import styles from "./DeviceFrame.module.css";
  * Generic device chrome. Wraps arbitrary content (usually a
  * <DashboardPreview /> or <MobileProductPreview /> screen) in a frame that
  * reads instantly as "this is the real app", without pulling in a design
- * system of its own — colors are drawn from theme.css so it repaints with
+ * system of its own - colors are drawn from theme.css so it repaints with
  * light/dark mode automatically.
  *
  * variant:
  *  - "browser"  desktop/tablet browser chrome (traffic lights + url pill)
  *  - "phone"    iOS-style phone frame (notch + side buttons)
- *  - "bare"     just a soft-shadowed rounded panel, no chrome — for
+ *  - "bare"     just a soft-shadowed rounded panel, no chrome - for
  *               tightly-cropped feature callouts where a full frame would
  *               fight the content
  */

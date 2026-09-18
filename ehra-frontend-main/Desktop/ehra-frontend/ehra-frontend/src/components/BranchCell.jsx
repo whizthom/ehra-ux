@@ -4,7 +4,7 @@ import { assignEmployeeBranch } from "../api/branchApi";
 import styles from "./DepartmentCell.module.css";
 
 /**
- * Renders the employee's current branch as a clickable pill — same
+ * Renders the employee's current branch as a clickable pill - same
  * interaction as DepartmentCell (deliberately reuses its CSS module too,
  * so the two pills sit consistently side by side in the Workforce table).
  * Clicking opens a dropdown listing every branch for the business;
@@ -35,7 +35,7 @@ export default function BranchCell({ employee, branches, onAssigned }) {
 
       // Assigning TO a branch (not unassigning) immediately hands off to
       // that employee's profile so the employer can decide right away
-      // whether this is their only location or one of several — see
+      // whether this is their only location or one of several - see
       // LocationsTab. Unassigning (branchId === null) doesn't need this;
       // there's nothing to decide when removing a location.
       if (branchId !== null) {
@@ -65,7 +65,7 @@ export default function BranchCell({ employee, branches, onAssigned }) {
         {saving
           ? "Saving…"
           : error
-            ? "Failed — retry"
+            ? "Failed - retry"
             : employee.branch || "Unassigned"}
         <i
           className="ti ti-chevron-down"

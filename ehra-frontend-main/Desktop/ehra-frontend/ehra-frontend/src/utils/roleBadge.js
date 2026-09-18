@@ -2,23 +2,23 @@
 // backend ever produces (see MembershipDirectoryService#resolve on the
 // backend), not a hardcoded switch that only recognizes today's roles.
 // The four roles that exist right now get a deliberately chosen, fixed
-// color each — so "gold = Employer" becomes something a person actually
+// color each - so "gold = Employer" becomes something a person actually
 // learns and recognizes at a glance, which a role whose color changes
 // depending on WHO holds it could never give them. Anything NOT in that
-// known set — a role introduced later, "Branch Manager", "Supervisor",
-// whatever the business grows into — still gets a consistent, distinct
+// known set - a role introduced later, "Branch Manager", "Supervisor",
+// whatever the business grows into - still gets a consistent, distinct
 // color derived from a hash of its own label, so a brand-new role type
 // is never left unstyled or falls back to something generic just
 // because the frontend hasn't been explicitly taught about it yet.
 
 const KNOWN_ROLE_COLORS = {
-  Employer: "#f5b300", // gold — deliberately distinct; a business only ever has one
+  Employer: "#f5b300", // gold - deliberately distinct; a business only ever has one
   HOD: "#845ef7", // violet
-  Employee: "#2f9e44", // green — the baseline/most common role
+  Employee: "#2f9e44", // green - the baseline/most common role
   Customer: "#e8590c", // orange
 };
 
-// Small, visually distinct palette for the hash fallback — chosen to
+// Small, visually distinct palette for the hash fallback - chosen to
 // stay readable against both light and dark bubble/list backgrounds, and
 // deliberately excludes anything close to the four KNOWN_ROLE_COLORS
 // above so a future role can never be confused with an existing one.
@@ -34,7 +34,7 @@ function hashString(str) {
 }
 
 // roleLabel examples from the backend: "Employer", "Employee",
-// "HOD - Engineering", "Customer" — or any label introduced later.
+// "HOD - Engineering", "Customer" - or any label introduced later.
 export function getRoleColor(roleLabel) {
   if (!roleLabel) return "#868e96";
   const base = roleLabel.split(" - ")[0].trim(); // "HOD - Engineering" -> "HOD"
@@ -42,7 +42,7 @@ export function getRoleColor(roleLabel) {
   return FALLBACK_PALETTE[hashString(roleLabel) % FALLBACK_PALETTE.length];
 }
 
-// Short display text for the compact pill — "HOD - Engineering" is fine
+// Short display text for the compact pill - "HOD - Engineering" is fine
 // as a hover title but too long for an inline badge; the badge itself
 // just shows what precedes " - ".
 export function getRoleShortLabel(roleLabel) {

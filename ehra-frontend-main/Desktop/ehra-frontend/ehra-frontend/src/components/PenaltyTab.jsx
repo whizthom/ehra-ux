@@ -10,9 +10,9 @@ import {
 import styles from "./PenaltyTab.module.css";
 
 function formatMoney(value) {
-  if (value === null || value === undefined) return "—";
+  if (value === null || value === undefined) return "-";
   const num = Number(value);
-  if (Number.isNaN(num)) return "—";
+  if (Number.isNaN(num)) return "-";
   return num.toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -20,7 +20,7 @@ function formatMoney(value) {
 }
 
 function formatDate(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   return new Date(iso + "T00:00:00").toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",

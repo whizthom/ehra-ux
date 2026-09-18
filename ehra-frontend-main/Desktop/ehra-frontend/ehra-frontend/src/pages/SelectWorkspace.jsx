@@ -32,20 +32,20 @@ function roleLabel(type) {
 }
 
 // Membership-type → post-switch destination. TODO: point CUSTOMER at a
-// real customer-facing dashboard once that surface exists — routing it
+// real customer-facing dashboard once that surface exists - routing it
 // to "/dashboard" (the owner's view) for now is a deliberate placeholder,
 // not a real destination, since nothing creates CustomerMembership rows
 // yet and there's nowhere else to send it.
 function destinationFor(contextType) {
   if (contextType === "EMPLOYEE") return "/my-dashboard";
-  if (contextType === "CUSTOMER") return "/dashboard"; // TODO: /customer-dashboard once it exists
+  if (contextType === "CUSTOMER") return "/customer-dashboard";
   return "/dashboard";
 }
 
 // Shown right after login when the authenticated Identity holds more than
 // one membership and the session hasn't picked an active workspace yet
 // (AuthResponseDTO.needsContextSelection === true). Also reachable any
-// time from the "My Accounts" nav — this page and that panel share the
+// time from the "My Accounts" nav - this page and that panel share the
 // same data (GET /api/auth/my-accounts) and the same switch action
 // (POST /api/auth/context).
 export default function SelectWorkspace() {
@@ -96,7 +96,7 @@ export default function SelectWorkspace() {
         <h1 className={styles.title}>Choose a workspace</h1>
         <p className={styles.subtitle}>
           You're connected to more than one business. Pick where you want to go
-          — you can switch anytime from My Accounts.
+          - you can switch anytime from My Accounts.
         </p>
 
         {error && (

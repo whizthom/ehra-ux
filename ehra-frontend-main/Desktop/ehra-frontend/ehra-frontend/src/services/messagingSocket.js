@@ -6,14 +6,14 @@ import {
   API_BASE_URL,
 } from "../api/authApi";
 
-// One shared STOMP connection for the whole app — every open chat window,
+// One shared STOMP connection for the whole app - every open chat window,
 // the chat list, and the sidebar unread badge all subscribe through this
 // same client rather than each opening their own socket. This is the
 // "persistent WebSocket connection" section 1 of the spec asks for, plus
 // the reconnection/backoff/offline handling section 22 asks for.
 //
 // The backend authenticates the STOMP CONNECT frame itself (see
-// StompAuthChannelInterceptor) — the access token travels as a STOMP
+// StompAuthChannelInterceptor) - the access token travels as a STOMP
 // header, since a browser WebSocket/SockJS connection can't carry a real
 // "Authorization" HTTP header the way axios requests can.
 

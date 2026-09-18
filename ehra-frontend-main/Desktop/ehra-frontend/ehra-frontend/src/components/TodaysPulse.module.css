@@ -1,5 +1,5 @@
-/* ── Today's Pulse — mobile-only hero widget ──────────────────────────────
-   Fully theme-responsive — every color comes from the shared variables in
+/* ── Today's Pulse - mobile-only hero widget ──────────────────────────────
+   Fully theme-responsive - every color comes from the shared variables in
    theme.css, so it follows light/dark mode the same way the rest of the
    app does rather than carrying its own fixed palette. A subtle gradient
    between --bg-surface and --bg-surface-alt (instead of a flat fill) is
@@ -147,7 +147,7 @@
 }
 
 /* Very narrow phones (real data can push On time / Late / Absent into
-   double or triple digits) — dropping the label below its number and
+   double or triple digits) - dropping the label below its number and
    dot keeps each column readable instead of the row squeezing or
    wrapping mid-item, while still keeping the colored dot visible so
    the three states stay easy to tell apart at a glance. */
@@ -227,7 +227,7 @@
     animation: pulseDot 1.8s ease-in-out infinite;
 }
 
-/* Opacity + scale rather than a colored box-shadow ring — a glow keyed to
+/* Opacity + scale rather than a colored box-shadow ring - a glow keyed to
    a specific rgba() couldn't follow --accent across themes, this can. */
 @keyframes pulseDot {
 

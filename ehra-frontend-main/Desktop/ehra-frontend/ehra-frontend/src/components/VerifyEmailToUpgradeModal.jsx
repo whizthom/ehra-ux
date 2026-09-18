@@ -3,15 +3,15 @@ import { getEmailStatus, sendEmailVerification } from "../api/phoneAuthApi";
 import styles from "./VerifyEmailToUpgradeModal.module.css";
 
 // Shown INSTEAD OF the Paystack popup whenever checkout/initialize comes
-// back 403 (EmailNotVerifiedException — see
+// back 403 (EmailNotVerifiedException - see
 // EmailVerificationService#requireVerifiedEmailForSecurity). Starter
 // never reaches this, since it never calls checkout at all; every paid
 // plan does.
 //
-// "If verified, it leads them straight to processing" — this modal
+// "If verified, it leads them straight to processing" - this modal
 // polls verified-email status every few seconds while open, so the
 // moment the person clicks the link in their inbox (in another tab), it
-// auto-detects that and calls onVerified() itself — no manual "I've
+// auto-detects that and calls onVerified() itself - no manual "I've
 // verified, continue" click required, though that button is also there
 // as a fallback for anyone who'd rather trigger it themselves.
 export default function VerifyEmailToUpgradeModal({ onVerified, onClose }) {
@@ -39,7 +39,7 @@ export default function VerifyEmailToUpgradeModal({ onVerified, onClose }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Auto-continue the moment the email becomes verified —
+  // Auto-continue the moment the email becomes verified -
   // catches the person clicking the emailed link in another tab without
   // making them come back and click anything here.
   useEffect(() => {
@@ -52,7 +52,7 @@ export default function VerifyEmailToUpgradeModal({ onVerified, onClose }) {
           onVerified();
         }
       } catch {
-        // transient — keep polling
+        // transient - keep polling
       }
     }, 4000);
     return () => clearInterval(interval);
@@ -91,7 +91,7 @@ export default function VerifyEmailToUpgradeModal({ onVerified, onClose }) {
         onVerified();
       } else {
         setError(
-          "Not verified yet — check your inbox and click the link, then try again.",
+          "Not verified yet - check your inbox and click the link, then try again.",
         );
       }
     } catch {
@@ -141,7 +141,7 @@ export default function VerifyEmailToUpgradeModal({ onVerified, onClose }) {
         {sent && !error && (
           <p className={styles.sentNote}>
             <i className="ti ti-clock" /> Check {currentEmail} for a
-            verification link — this will continue automatically once you click
+            verification link - this will continue automatically once you click
             it.
           </p>
         )}
@@ -153,7 +153,7 @@ export default function VerifyEmailToUpgradeModal({ onVerified, onClose }) {
         )}
         {devLink && (
           <div className={styles.devLinkBox}>
-            <p>Development Mode — Verification Link</p>
+            <p>Development Mode - Verification Link</p>
             <a href={devLink} target="_blank" rel="noreferrer">
               Open Link
             </a>
@@ -171,7 +171,7 @@ export default function VerifyEmailToUpgradeModal({ onVerified, onClose }) {
               onClick={handleCheckNow}
               disabled={checking}
             >
-              {checking ? "Checking…" : "I've verified — Continue"}
+              {checking ? "Checking…" : "I've verified - Continue"}
             </button>
           )}
         </div>

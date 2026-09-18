@@ -11,18 +11,18 @@ import {
 } from "../api/supportApi";
 import styles from "./Support.module.css";
 
-// The customer-facing half of the Support Inbox — reachable via the
+// The customer-facing half of the Support Inbox - reachable via the
 // "Help & Support" nav item added to Dashboard.jsx/EmployeeDashboard.jsx
 // (isFullPage: true, route: "/support", same mechanism as My Accounts).
 // Talks to com.Ehra.support.controller.SupportEntryController; the
-// staff-facing half lives entirely in the separate Ops Console app —
+// staff-facing half lives entirely in the separate Ops Console app -
 // nothing here can see internal notes or other customers' conversations
 // (enforced server-side, not just hidden client-side).
 //
 // Deliberately its OWN lightweight header rather than cloning the full
 // Dashboard/EmployeeDashboard sidebar shell (that shared shell is
 // several thousand lines with scroll-position tracking, HOD-gating,
-// admin/employee NAV switching, etc. — safer to keep this screen
+// admin/employee NAV switching, etc. - safer to keep this screen
 // self-contained than risk a subtle bug in code this page doesn't
 // otherwise touch). "Back to Dashboard" returns to wherever the person
 // came from.
@@ -179,7 +179,7 @@ export default function Support() {
       setReply("");
       loadConversations();
     } catch {
-      // Left in the box on failure so nothing typed is lost — no
+      // Left in the box on failure so nothing typed is lost - no
       // dedicated error banner here since it's a small, retryable action.
     } finally {
       setSending(false);
@@ -241,7 +241,7 @@ export default function Support() {
             <form className={styles.createForm} onSubmit={handleCreate}>
               <h2 className={styles.formTitle}>Contact support</h2>
               <p className={styles.muted}>
-                Tell us what's going on — our team typically responds within a
+                Tell us what's going on - our team typically responds within a
                 few hours.
               </p>
 

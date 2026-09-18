@@ -7,7 +7,7 @@ export const getAttendanceReport = (from, to, departmentId) =>
 
 // Both export helpers fetch the file as a blob (so the auth header still
 // gets attached by the axios interceptor) and then trigger a normal
-// browser download — a plain <a href=".../export.csv"> wouldn't carry the
+// browser download - a plain <a href=".../export.csv"> wouldn't carry the
 // Authorization header and would just 401.
 async function downloadBlob(url, params, filename) {
   const { data } = await API.get(url, { params, responseType: "blob" });

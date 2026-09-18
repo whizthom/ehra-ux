@@ -5,7 +5,7 @@ import styles from "./SelectDropdown.module.css";
  * A themeable dropdown panel standing in for a native <select>. The
  * browser's native option list always renders as plain OS chrome (light
  * or dark regardless of the app's theme, no room for icons/avatars), so
- * anywhere the app needs a nicer picker uses this instead — same
+ * anywhere the app needs a nicer picker uses this instead - same
  * value/onChange contract as ReportDropdown, generalized so it can carry
  * either a Tabler icon or an avatar-style initials badge per option.
  *

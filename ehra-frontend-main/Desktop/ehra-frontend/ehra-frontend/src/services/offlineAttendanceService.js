@@ -2,7 +2,7 @@
 // available on this device right now, builds and signs a transaction
 // when it is, and syncs the local queue once connectivity returns.
 //
-// This is the one module ScanAttendance.jsx should call into — it should
+// This is the one module ScanAttendance.jsx should call into - it should
 // never talk to offlineAttendanceJournal.js or attendanceDeviceCrypto.js
 // directly, so there's exactly one place that decides what "recognized
 // device" and "authorized offline" actually mean.
@@ -52,7 +52,7 @@ function currentContext() {
 
 /**
  * navigator.onLine only reflects the OS network interface, not whether
- * Ehral's API is actually reachable (spec §40 — a device can show
+ * Ehral's API is actually reachable (spec §40 - a device can show
  * "online" while the API is unreachable, or vice versa on some captive
  * portals). A short, cheap authenticated request is the real signal;
  * this reuses the status endpoint itself rather than adding a dedicated
@@ -70,7 +70,7 @@ export async function isServerReachable(deviceId) {
 }
 
 /**
- * Local-only check for immediate UI state (badge/button enablement) —
+ * Local-only check for immediate UI state (badge/button enablement) -
  * does not hit the network. The server re-validates everything again at
  * sync time regardless (spec §42), so a stale local "yes" here can never
  * turn into a real attendance record on its own.
@@ -93,10 +93,10 @@ export async function getLocalOfflineAvailability() {
 
 /**
  * Called right after a successful ONLINE clock-in/out response, if the
- * backend included an offline authorization in it — persists it locally
+ * backend included an offline authorization in it - persists it locally
  * so it's available the next time this device goes offline. A response
  * with no authorization (e.g. device proof wasn't presented online, so
- * the backend never minted one) is a normal, expected case — nothing to
+ * the backend never minted one) is a normal, expected case - nothing to
  * store.
  */
 export async function captureOfflineAuthorization(authorization) {
@@ -108,7 +108,7 @@ export async function captureOfflineAuthorization(authorization) {
 /**
  * Builds, signs, and durably queues one offline clock-in/out. Throws
  * with a `.reason` matching OFFLINE_BLOCK_REASON if offline attendance
- * isn't actually available — the caller (ScanAttendance.jsx) is
+ * isn't actually available - the caller (ScanAttendance.jsx) is
  * responsible for showing the "Device not recognized" UI from spec §39
  * rather than a generic error.
  */
@@ -160,7 +160,7 @@ export async function recordOfflineAttendance(action, coords) {
     transactionId,
     deviceId: stored.deviceId,
     action,
-    // The EXACT same string the payload was hashed/signed over — not
+    // The EXACT same string the payload was hashed/signed over - not
     // clientCreatedAt.toISOString(), which is UTC and would silently
     // desync from what was actually signed. See
     // toCanonicalLocalDateTime's doc.
@@ -184,7 +184,7 @@ export async function recordOfflineAttendance(action, coords) {
 
 /**
  * Uploads whatever is currently queued. Safe to call speculatively (e.g.
- * on an `online` browser event, or on a timer) — a queue of zero is a
+ * on an `online` browser event, or on a timer) - a queue of zero is a
  * cheap no-op, and a partial failure mid-batch leaves the un-synced
  * remainder queued for the next attempt rather than losing anything
  * (spec §63/§64).
@@ -212,7 +212,7 @@ export async function getPendingOfflineCount() {
 // "What's my next action today?" cache.
 //
 // Deciding whether the next tap should be CLOCK_IN or CLOCK_OUT normally
-// means asking the server (getMyAttendance()) — not possible while
+// means asking the server (getMyAttendance()) - not possible while
 // offline. This is a small, deliberately non-sensitive local cache
 // (today's clockedIn/clockedOut booleans only, nothing else) kept in
 // localStorage rather than the IndexedDB journal, updated from two
@@ -224,8 +224,8 @@ export async function getPendingOfflineCount() {
 // employee uses a second device to clock in online and then goes offline
 // on THIS device without ever loading this page while online today, this
 // cache won't know about it, and the offline action picker may default
-// to the wrong action. The server is always the final word regardless —
-// see OfflineAttendanceSyncService — so the worst case is a rejected/
+// to the wrong action. The server is always the final word regardless -
+// see OfflineAttendanceSyncService - so the worst case is a rejected/
 // flagged sync, not a silently wrong attendance record.
 // ─────────────────────────────────────────────────────────────────────────
 
@@ -252,7 +252,7 @@ export function setCachedTodayState(patch) {
     const current = getCachedTodayState();
     window.localStorage.setItem(todayStateKey(context), JSON.stringify({ ...current, ...patch }));
   } catch {
-    // Best-effort — worst case the offline action picker shows the wrong
+    // Best-effort - worst case the offline action picker shows the wrong
     // default and the employee can't do much about it offline anyway.
   }
 }

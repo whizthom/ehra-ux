@@ -208,7 +208,7 @@
     flex-wrap: wrap;
 }
 
-/* Explicit "Date" / "Holiday name" captions above each input — these
+/* Explicit "Date" / "Holiday name" captions above each input - these
    were previously unlabeled (the date field especially had nothing
    telling you what it was for beyond its own native chrome), which is
    what made the form's two-step "pick a date, then name it" intent easy
@@ -351,7 +351,7 @@
 /* ── Phone ── */
 @media (max-width: 480px) {
     .wrap {
-        /* Requested mobile gutter: 7px on each side. (No overflow here —
+        /* Requested mobile gutter: 7px on each side. (No overflow here -
            .tabBody, one level up, is the actual scroll container; this
            had no bounded height so overflow-y:auto on it was inert, and
            stacking another scroll container on top of that one risked
@@ -364,7 +364,7 @@
         gap: 8px;
     }
 
-    /* Kept as ONE compact row rather than stacked — a toggle, a day
+    /* Kept as ONE compact row rather than stacked - a toggle, a day
        name, and two small time fields all comfortably fit side by side
        even on a narrow phone. The previous full stack (toggle+label on
        its own row, then each time field on its own row below) made
@@ -431,7 +431,7 @@
     }
 }
 
-/* ── Smallest phones — even the compact single-row day layout needs a
+/* ── Smallest phones - even the compact single-row day layout needs a
    fallback once there's genuinely not enough width for a toggle, a day
    name, and two time fields side by side without everything squeezing
    unreadably small. This is the only width where it stacks again. ── */

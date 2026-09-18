@@ -16,7 +16,7 @@ import AboutEhralLink from "../components/nav/AboutEhralLink";
 
 // Draft is kept in sessionStorage (not localStorage) so it survives a trip
 // between steps or an accidental refresh, but doesn't linger forever on a
-// shared machine — it's cleared the moment registration fully completes.
+// shared machine - it's cleared the moment registration fully completes.
 const DRAFT_KEY = "ehra_signup_phone_draft";
 
 function loadDraft() {
@@ -32,7 +32,7 @@ function saveDraft(partial) {
   try {
     sessionStorage.setItem(DRAFT_KEY, JSON.stringify(partial));
   } catch {
-    // sessionStorage unavailable (private mode etc.) — fail silently.
+    // sessionStorage unavailable (private mode etc.) - fail silently.
   }
 }
 
@@ -141,7 +141,7 @@ export default function Register() {
       const check = await checkPhone(token);
       if (check.exists) {
         // STEP 7: never continue into registration for a phone that
-        // already has an account — send them to log in instead.
+        // already has an account - send them to log in instead.
         clearDraft();
         navigate("/login", {
           state: {
@@ -161,9 +161,9 @@ export default function Register() {
     }
   };
 
-  // ── STEP 3: business name + password — just advances to Personal Info,
+  // ── STEP 3: business name + password - just advances to Personal Info,
   //    nothing is submitted to the backend yet (that happens together, in
-  //    one call, once Personal Information is complete too — see
+  //    one call, once Personal Information is complete too - see
   //    PhoneRegisterRequestDTO). ─────────────────────────────────────────
   const handleContinueToPersonal = () => {
     setError("");
@@ -182,7 +182,7 @@ export default function Register() {
     setStep("personal");
   };
 
-  // ── STEP 4: first name, last name, email — creates the account ─────────
+  // ── STEP 4: first name, last name, email - creates the account ─────────
   const handleCreateAccount = async () => {
     setError("");
     if (!termsAccepted) {
@@ -209,7 +209,7 @@ export default function Register() {
         email: email.trim().toLowerCase(),
       });
       clearDraft();
-      // STEP 9-10: auto-logged in — redirect exactly as a normal login
+      // STEP 9-10: auto-logged in - redirect exactly as a normal login
       // would, straight into the dashboard (never a needsContextSelection
       // case for a brand-new business, but handled the same way for
       // consistency with every other entry point).
@@ -218,7 +218,7 @@ export default function Register() {
         {
           // Lets the Dashboard show a one-time, dismissible Welcome card
           // ("We've sent a verification email to ...") right after
-          // registration without an extra round trip — see Dashboard's
+          // registration without an extra round trip - see Dashboard's
           // WelcomeCard. Purely a UI hint; the source of truth for
           // verification status is always GET /api/auth/email/status.
           state: {
@@ -231,7 +231,7 @@ export default function Register() {
     } catch (err) {
       const data = err.response?.data;
       if (err.response?.status === 409) {
-        // STEP 7 defense in depth — the /register call itself re-checks
+        // STEP 7 defense in depth - the /register call itself re-checks
         // both phone AND (now) email uniqueness.
         navigate("/login", {
           state: { message: data?.message, phone },
@@ -266,7 +266,7 @@ export default function Register() {
           <span className={styles.eyebrow}>Get started</span>
           <h1 className={styles.headline}>Set up your workspace in minutes</h1>
           <p className={styles.desc}>
-            Your phone number is your Ehra identity — verify it once, and you're
+            Your phone number is your Ehra identity - verify it once, and you're
             in.
           </p>
 
@@ -391,7 +391,7 @@ export default function Register() {
                 {loading ? "Sending code…" : "Send verification code"}
                 {!loading && <i className="ti ti-arrow-right" />}
               </button>
-              {/* Moved up from the page footer — users were missing the
+              {/* Moved up from the page footer - users were missing the
                   sign-in link buried at the very bottom of the page.
                   Only shown on this first step: by the time someone's
                   verified their phone (step 2+), handleVerifyOtp has
@@ -574,7 +574,7 @@ export default function Register() {
               <div className={styles.infoBox}>
                 <i className="ti ti-shield-lock" />
                 <p>
-                  Your phone number is verified — this password is all you need
+                  Your phone number is verified - this password is all you need
                   going forward.
                 </p>
               </div>
@@ -646,7 +646,7 @@ export default function Register() {
                   />
                 </div>
                 <span className={phoneStyles.hint}>
-                  We'll send a verification link here — you can start using Ehra
+                  We'll send a verification link here - you can start using Ehra
                   right away and verify whenever suits you.
                 </span>
               </div>
@@ -682,7 +682,7 @@ export default function Register() {
         </div>
       </div>
 
-      {/* Invisible reCAPTCHA host — Firebase only renders a visible
+      {/* Invisible reCAPTCHA host - Firebase only renders a visible
           challenge into this if it decides the traffic looks risky, per
           sendPhoneOtp()'s "invisible" verifier config. */}
       <div id="recaptcha-container" />
@@ -707,7 +707,7 @@ function friendlyFirebaseError(err) {
     return "That code is incorrect or has expired. Please try again.";
   }
   if (code.includes("network-request-failed")) {
-    return "Network error — please check your connection and try again.";
+    return "Network error - please check your connection and try again.";
   }
   return err?.message || "Something went wrong. Please try again.";
 }

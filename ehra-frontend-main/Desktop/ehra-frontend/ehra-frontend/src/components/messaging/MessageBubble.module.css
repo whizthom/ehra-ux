@@ -4,7 +4,7 @@
     animation: messageIn 0.18s ease-out;
 }
 
-/* New messages settle into place instead of just popping in — small
+/* New messages settle into place instead of just popping in - small
    touch, but it's the difference between the chat feeling alive and
    feeling like a static list re-rendering. */
 @keyframes messageIn {
@@ -52,7 +52,7 @@
     box-shadow: 0 1px 2px var(--shadow-color);
 }
 
-/* Real bubble colors, not a flat accent fill — --bubble-sent-bg /
+/* Real bubble colors, not a flat accent fill - --bubble-sent-bg /
    --bubble-received-bg are the theme's own tokens for exactly this
    (theme.css marks them "reserved for later passes"; this is that
    pass). Using them instead of var(--accent) is also what actually
@@ -63,7 +63,7 @@
    that produces a barely-visible tick. The real bubble tokens are pale
    in light mode and deep in dark mode on purpose, so plain
    var(--text-primary)/var(--text-secondary) already contrast correctly
-   against them in BOTH themes without bubble-specific color overrides —
+   against them in BOTH themes without bubble-specific color overrides -
    see how few of those remain below compared to before.
 */
 .ownBubble {
@@ -118,7 +118,7 @@
     color: var(--text-secondary);
 }
 
-/* The one deliberately hardcoded (not theme-token) color in this file —
+/* The one deliberately hardcoded (not theme-token) color in this file -
    WhatsApp's actual "read" blue reads clearly against BOTH a pale-green
    AND a deep-green bubble at once (it's a different hue entirely, not
    just a different shade of the same green), which a single grey/white
@@ -208,7 +208,7 @@
     top: 4px;
 }
 
-/* Own-message bubbles sit near the RIGHT edge of the screen — anchoring
+/* Own-message bubbles sit near the RIGHT edge of the screen - anchoring
    the popup's right edge to the bubble's right edge and letting it
    extend leftward is what stays safely on-screen there. */
 .anchorRight {
@@ -220,7 +220,7 @@
 }
 
 /* Received-message bubbles sit near the LEFT edge and can be very
-   narrow (a short one-word reply, for instance) — anchoring rightward
+   narrow (a short one-word reply, for instance) - anchoring rightward
    here is exactly what pushed a ~170px-wide menu off the edge of the
    viewport before. Anchoring from the bubble's LEFT edge instead makes
    the popup extend rightward, which stays within the row's available

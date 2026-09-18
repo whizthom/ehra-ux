@@ -299,7 +299,7 @@
     justify-content: center;
     text-align: center;
     /* Caps the text block to comfortably inside the ring's inner hole
-       (rather than the full gaugeWrap box) — belt-and-braces alongside
+       (rather than the full gaugeWrap box) - belt-and-braces alongside
        the bigger ring above, so "ATTENDANCE RATE" wraps to two lines
        instead of overlapping the ring on any browser's font metrics. */
     max-width: 106px;

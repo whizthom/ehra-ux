@@ -52,7 +52,7 @@ function buildMonthGrid(monthStart) {
  * A self-contained popover calendar standing in for two native
  * <input type="date"> fields. Click a day to start the range, click a
  * later day to complete it (clicking an earlier day just restarts the
- * range from there) — then confirm with Apply. Nothing commits to the
+ * range from there) - then confirm with Apply. Nothing commits to the
  * parent's from/to state until Apply is pressed, so Cancel is a true
  * no-op.
  */

@@ -1,4 +1,4 @@
-/* Shares the same token system as Login.module.css — see that file for the
+/* Shares the same token system as Login.module.css - see that file for the
    full palette rationale. Kept consistent so the whole auth journey
    (sign up -> complete profile -> sign in) feels like one product. */
 
@@ -303,7 +303,7 @@
     justify-content: center;
 }
 
-/* Each field/notice rises in with a slight stagger — replays on every
+/* Each field/notice rises in with a slight stagger - replays on every
    step change since React mounts fresh elements for the new step. */
 .formBody>* {
     animation: fieldRise 0.4s cubic-bezier(0.16, 0.8, 0.24, 1) both;
@@ -475,7 +475,7 @@
     color: #a32d2d;
 }
 
-/* ── "Already have an account?" — moved up from the page footer where
+/* ── "Already have an account?" - moved up from the page footer where
    users kept missing it. A filled, tappable pill rather than a plain
    text link so it reads as its own actionable element sitting right
    above the first field, not as fine print. */
@@ -563,7 +563,7 @@
     cursor: not-allowed;
 }
 
-/* ── Mobile hero — replaces the left brand panel below 900px ──────────── */
+/* ── Mobile hero - replaces the left brand panel below 900px ──────────── */
 .mobileHero {
     display: none;
 }

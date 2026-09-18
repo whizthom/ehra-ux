@@ -15,6 +15,10 @@ const employerOperations = [
   { key: "Penalty", label: "Penalty", icon: "ti-coins", description: "Attendance deductions." },
   { key: "Reports", label: "Reports", icon: "ti-chart-bar", description: "Reports and insights." },
   { key: "QR Code", label: "QR Code", icon: "ti-qrcode", description: "Attendance QR tools." },
+  { key: "Products", label: "Products", icon: "ti-package", description: "Manage your product catalog." },
+  { key: "Orders", label: "Orders", icon: "ti-shopping-cart", description: "Review storefront orders." },
+  { key: "Customers", label: "Customers", icon: "ti-users-group", description: "Customer relationships." },
+  { key: "Storefront", label: "Storefront", icon: "ti-world", description: "Publish your public store." },
 ];
 
 const employeePeople = [
@@ -70,7 +74,7 @@ function getPrimary(activeNav, role) {
   if (activeNav === "Dashboard" || activeNav === "Ehral Intelligence") return "Home";
   if (role === "employer") {
     if (["Workforce", "Departments", "Branches", "Profile Edits"].includes(activeNav)) return "People";
-    if (["Attendance", "Leave", "Payroll", "Penalty", "Reports", "QR Code"].includes(activeNav)) return "Operations";
+    if (["Attendance", "Leave", "Payroll", "Penalty", "Reports", "QR Code", "Products", "Orders", "Customers", "Storefront"].includes(activeNav)) return "Operations";
   } else {
     if (["Workforce", "Departments"].includes(activeNav)) return "People";
     if (["Attendance", "Leave", "Cover Requests", "Penalty"].includes(activeNav)) return "Operations";

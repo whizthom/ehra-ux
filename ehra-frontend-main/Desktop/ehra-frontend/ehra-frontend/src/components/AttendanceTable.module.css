@@ -1,4 +1,4 @@
-/* Horizontal-scroll container for phones — six columns of tabular data
+/* Horizontal-scroll container for phones - six columns of tabular data
    can't reasonably reflow into a single narrow column without losing
    scannability, so instead of cramming/wrapping cells this lets the table
    scroll sideways (same swipe pattern already used elsewhere in the app),
@@ -107,7 +107,7 @@
 /* Mobile-only: on the "My attendance" self-view, the Employee and
    Department columns are redundant (every row is already the signed-in
    person) so they're dropped, leaving Date/Clock in/Clock out/Status.
-   Desktop keeps all columns regardless — this only fires under 640px. */
+   Desktop keeps all columns regardless - this only fires under 640px. */
 @media (max-width: 640px) {
     .table.hideIdentityMobile {
         min-width: 0;
@@ -142,7 +142,7 @@
   .pill { font-size: 9px; padding: 4px 7px; }
 }
 
-/* ── Offline attendance sync badge (spec §58/§59) — additive only ── */
+/* ── Offline attendance sync badge (spec §58/§59) - additive only ── */
 .syncPill {
     display: inline-block;
     margin-left: 6px;

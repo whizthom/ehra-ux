@@ -3,7 +3,7 @@ import styles from "./FeatureVisual.module.css";
 /**
  * Compact feature card: icon, title, one-line description, and an
  * optional status tag. Used throughout the About page's feature grids
- * (workforce, business management, why-Ehral) instead of a screenshot —
+ * (workforce, business management, why-Ehral) instead of a screenshot -
  * keeps those sections scannable rather than screenshot-heavy.
  *
  * status: "today" (default, shown as "Available now") | "vision" (shown

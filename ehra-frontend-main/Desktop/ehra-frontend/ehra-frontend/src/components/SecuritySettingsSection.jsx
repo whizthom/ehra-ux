@@ -13,17 +13,17 @@ export default function SecuritySettingsSection() {
 
   const emailCardRef = useRef(null);
 
-  // ── Verified email — ONE shared email per Identity, identical
+  // ── Verified email - ONE shared email per Identity, identical
   //    regardless of employer/employee context (see
   //    EmailVerificationService's class doc). "Enter it and verify right
-  //    there" — same pattern for everyone. ────────────────────────────
+  //    there" - same pattern for everyone. ────────────────────────────
   const [emailInput, setEmailInput] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [devLink, setDevLink] = useState(null);
 
-  // Confirmation modal state — toggling 2FA either direction requires the
+  // Confirmation modal state - toggling 2FA either direction requires the
   // current password. A SEPARATE "verify first" modal (no password
   // field) appears instead whenever the person tries to ENABLE 2FA
   // without a verified email yet.
@@ -63,7 +63,7 @@ export default function SecuritySettingsSection() {
     setConfirmError("");
     if (action === "enable") {
       // Pre-select the person's last choice, falling back to whichever
-      // channel is actually usable — mirrors the backend's own default
+      // channel is actually usable - mirrors the backend's own default
       // in PhoneAuthServiceImpl#toggleTwoFactor.
       const preferred = settings?.twoFactorMethod || "PHONE";
       setMethod(
@@ -186,11 +186,11 @@ export default function SecuritySettingsSection() {
             <h3>Verified email</h3>
             <p>
               Required to enable Two-Factor Authentication and purchase a
-              subscription. This is the ONE verified email for your account —
+              subscription. This is the ONE verified email for your account -
               it's shared across every business you own and any workplace you're
               an employee at, so you only ever verify once. Your personal
               contact email (My Profile) and any business's own contact email
-              can still be changed freely any time — that never affects what's
+              can still be changed freely any time - that never affects what's
               verified here.
             </p>
           </div>
@@ -245,7 +245,7 @@ export default function SecuritySettingsSection() {
         )}
         {devLink && (
           <div className={styles.devLinkBox}>
-            <p>Development Mode — Verification Link</p>
+            <p>Development Mode - Verification Link</p>
             <a href={devLink} target="_blank" rel="noreferrer">
               Open Link
             </a>
@@ -300,7 +300,7 @@ export default function SecuritySettingsSection() {
         </div>
       </div>
 
-      {/* "Verify your email first" — shown INSTEAD OF the password modal
+      {/* "Verify your email first" - shown INSTEAD OF the password modal
           whenever the person tries to enable 2FA without a verified
           email. No password field here at all: there is nothing to
           confirm yet. */}

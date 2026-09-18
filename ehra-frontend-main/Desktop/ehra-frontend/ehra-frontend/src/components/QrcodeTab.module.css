@@ -1,6 +1,6 @@
 /* ── Layout ──
    Content flows and scrolls as a single unit through the page-level
-   .contentFullNarrow wrapper — the same pattern Dashboard and Penalty
+   .contentFullNarrow wrapper - the same pattern Dashboard and Penalty
    use. QR Code used to run its own independently-scrolling .tabBody
    nested inside that wrapper (two overlapping scroll regions); on
    mobile that's what made the content feel disconnected from the
@@ -48,7 +48,7 @@
 }
 
 /* Bottom clearance comes from the page-level .contentFullNarrow wrapper
-   (same mechanism as Dashboard/Workforce/Attendance) — content just
+   (same mechanism as Dashboard/Workforce/Attendance) - content just
    flows normally here and the page scrolls as a whole. */
 .tabBody {
     padding: 16px 0 0;
@@ -87,7 +87,7 @@
 }
 
 /* The QR canvas itself is a fixed small square, but "Share Live QR" has a
-   full URL + Copy button on one row plus wrapping action buttons — 320px
+   full URL + Copy button on one row plus wrapping action buttons - 320px
    clips that awkwardly. Wider cap, same centered layout. */
 .panelWrapWide {
     width: 100%;

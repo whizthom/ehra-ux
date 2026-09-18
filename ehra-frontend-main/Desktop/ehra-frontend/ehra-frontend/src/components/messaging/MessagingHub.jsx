@@ -22,7 +22,7 @@ const TABS = [
 // Drop-in replacement for the old <MessagesHub /> (SSE-based, text-only,
 // employee<->manager-only). Same two props the dashboards already pass
 // (`viewer`, `onThreadOpenChange`) so wiring it in was a one-line import
-// swap in Dashboard.jsx / EmployeeDashboard.jsx — see those files. Every
+// swap in Dashboard.jsx / EmployeeDashboard.jsx - see those files. Every
 // requirement from section 3 onward (groups, attachments, reactions,
 // presence, etc.) lives inside ChatList/ChatWindow and the hooks they use;
 // this component is just the responsive shell + "which conversation is
@@ -30,7 +30,7 @@ const TABS = [
 //
 // "Announcement" is deliberately NOT another chat conversation type. Ehral
 // already had a separate, more capable Announcements system (subject+body
-// broadcasts to ALL/HODS_ONLY/INDIVIDUAL, with read receipts —
+// broadcasts to ALL/HODS_ONLY/INDIVIDUAL, with read receipts -
 // com.Ehra.entity.Announcement / AnnouncementService / /api/announcements)
 // that predates this messaging feature, reachable before via the old
 // MessagesHub's own Chats/Announcements switcher. Selecting that tab here
@@ -49,7 +49,7 @@ export default function MessagingHub({
   // is always a STRING, while every identityId the backend sends over
   // REST/WebSocket is a JSON number. Comparing them with === anywhere
   // downstream (isOwn checks, delivery/read/typing matching) would always
-  // be false — every message would render as "received", on the wrong
+  // be false - every message would render as "received", on the wrong
   // side, in the wrong color. Coercing once here, at the single place this
   // value enters the messaging feature, is what fixes that for every
   // consumer below.
@@ -57,7 +57,7 @@ export default function MessagingHub({
     user?.identityId != null ? Number(user.identityId) : null;
   const isEmployer = user?.contextType === "EMPLOYER";
   // The actual WebSocket connection is opened once, at the top of the
-  // dashboard (Dashboard.jsx/EmployeeDashboard.jsx), NOT here — see
+  // dashboard (Dashboard.jsx/EmployeeDashboard.jsx), NOT here - see
   // useMessagingConnection's own doc for why mounting it only inside this
   // component (which only exists while the Messages tab is active) was
   // the root cause of presence and notifications both requiring the chat
@@ -71,7 +71,7 @@ export default function MessagingHub({
   const [tab, setTab] = useState("all");
   // Mirrors onThreadOpenChange locally, the same way the old MessagesHub
   // did, so the tab row itself can hide on mobile once EITHER a chat
-  // thread OR one specific announcement is open full-screen — not just
+  // thread OR one specific announcement is open full-screen - not just
   // the chat-thread case.
   const [detailOpen, setDetailOpen] = useState(false);
 
@@ -97,7 +97,7 @@ export default function MessagingHub({
 
   const switchTab = (nextTab) => {
     // Leaving the Chats section always clears mobile full-screen thread
-    // state — matches the old MessagesHub's switchSection exactly, so
+    // state - matches the old MessagesHub's switchSection exactly, so
     // switching tabs never leaves a stale full-screen view behind.
     if (nextTab !== tab) {
       setMobileShowList(true);
@@ -119,7 +119,7 @@ export default function MessagingHub({
     setMobileShowList(false);
   };
 
-  // Consumes an externally-requested deep link (a clicked mention toast —
+  // Consumes an externally-requested deep link (a clicked mention toast -
   // see MentionToastStack.jsx, mounted at the Dashboard level since a
   // mention needs to be actionable even from a tab other than Messages).
   // Also makes sure the "Chats" tab (not Group/Archived, which would hide

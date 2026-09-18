@@ -132,7 +132,7 @@
 }
 
 /* ── Cards grid ─────────────────────────────────────────────────────────── */
-/* 5 plans now (Starter/Pro/Business/Elite/Custom) — widened from the old
+/* 5 plans now (Starter/Pro/Business/Elite/Custom) - widened from the old
    3-card max-width/column-count so each card still gets reasonable room;
    padding on .card below is trimmed slightly to match. */
 .cardsGrid {
@@ -535,13 +535,13 @@
 }
 
 /* ── Mobile: swipeable card carousel ────────────────────────────────────────
-   Below 640px (the phone breakpoint this codebase already uses elsewhere —
+   Below 640px (the phone breakpoint this codebase already uses elsewhere -
    see theme.css's scrollbar-hiding rule at the same width), three stacked
    full-height cards means a lot of scrolling before you ever see Premium.
-   Instead the deck becomes a horizontal, snap-scrolling carousel — each
+   Instead the deck becomes a horizontal, snap-scrolling carousel - each
    plan gets its own "screen", Pro peeks in from the edge so it's obvious
    there's more, and the whole thing feels like a native app's plan picker
-   rather than a webpage that happens to be narrow. Pure CSS scroll-snap —
+   rather than a webpage that happens to be narrow. Pure CSS scroll-snap -
    no JS needed for the scrolling itself; the dot indicators below are a
    small enhancement on top, not a requirement for it to work. */
 .swipeHint {
@@ -605,7 +605,7 @@
         overflow-x: auto;
         scroll-snap-type: x mandatory;
         scroll-padding-inline: 16px;
-        /* Extra top padding — not cosmetic: this is a horizontally-scrolling
+        /* Extra top padding - not cosmetic: this is a horizontally-scrolling
        container, and scroll containers clip overflow on BOTH axes once
        either one is set to auto/scroll. Without room reserved here, the
        "Most Popular" ribbon (which intentionally pokes above the card
@@ -618,7 +618,7 @@
     }
 
     .cardSlide {
-        /* Wider slide — less of the neighboring card peeking in, more room
+        /* Wider slide - less of the neighboring card peeking in, more room
        for each plan's own content to breathe on a phone screen. */
         flex: 0 0 92%;
         scroll-snap-align: center;
@@ -659,7 +659,7 @@
     }
 
     /* Comparison table: first column pinned so plan names stay visible
-     while swiping through Starter/Pro/Premium horizontally — otherwise
+     while swiping through Starter/Pro/Premium horizontally - otherwise
      every row reads as a mystery of checkmarks with nothing labeling
      them once you've scrolled past the first column. */
     .swipeHintTable {
@@ -672,7 +672,7 @@
     }
 
     .table {
-        /* Narrower minimum than desktop's 560px — the table only has 4
+        /* Narrower minimum than desktop's 560px - the table only has 4
        columns (Feature + 3 plans), so this is roughly one pinned label
        column plus three comfortably-tappable plan columns, not an
        arbitrary shrink. */

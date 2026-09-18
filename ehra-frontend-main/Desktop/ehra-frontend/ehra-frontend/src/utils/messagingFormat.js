@@ -1,4 +1,4 @@
-// Formatting helpers shared across the messaging UI — deliberately tiny
+// Formatting helpers shared across the messaging UI - deliberately tiny
 // and dependency-free (no date-fns/moment) since these are the only few
 // formats the feature needs.
 
@@ -52,7 +52,7 @@ export function formatRelativeListTime(dateLike) {
 const URL_RE = /((https?:\/\/|www\.)[^\s<]+[^\s<.,:;!?'")\]])/gi;
 
 // Splits text into plain-string / {url} segments so a renderer can turn
-// only the URL pieces into <a> tags — used by MessageBubble for the "URLs
+// only the URL pieces into <a> tags - used by MessageBubble for the "URLs
 // should be detected and displayed appropriately" requirement.
 export function splitLinks(text) {
   if (!text) return [];

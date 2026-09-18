@@ -5,7 +5,7 @@ import {
   signInWithPhoneNumber,
 } from "firebase/auth";
 
-// Public client config — see .env.example. Safe to ship in the bundle;
+// Public client config - see .env.example. Safe to ship in the bundle;
 // Firebase's actual security boundary is server-side ID token
 // verification (see FirebaseTokenVerifier on the backend), not secrecy of
 // these values.
@@ -23,7 +23,7 @@ export const firebaseAuth = getAuth(app);
 
 // ── Invisible reCAPTCHA ─────────────────────────────────────────────────
 //
-// "The user should only see it if required by Firebase" — an invisible
+// "The user should only see it if required by Firebase" - an invisible
 // verifier is exactly that contract: it runs silently in the background
 // and Firebase only surfaces a visible challenge if it decides the
 // traffic looks risky. One verifier instance per container id; callers
@@ -50,7 +50,7 @@ function getRecaptchaVerifier(containerId) {
 /**
  * Sends an OTP to `phoneNumber` (must already be in E.164 format, e.g.
  * "+2348012345678") via Firebase Phone Authentication. Returns Firebase's
- * ConfirmationResult — hang onto it and pass it to confirmOtp() once the
+ * ConfirmationResult - hang onto it and pass it to confirmOtp() once the
  * person types the code.
  */
 export async function sendPhoneOtp(phoneNumber, containerId = "recaptcha-container") {
@@ -60,7 +60,7 @@ export async function sendPhoneOtp(phoneNumber, containerId = "recaptcha-contain
 
 /**
  * Confirms the OTP the person typed in against Firebase, then returns the
- * Firebase ID token — this is what every backend phone-auth endpoint
+ * Firebase ID token - this is what every backend phone-auth endpoint
  * (see phoneAuthApi.js) expects as `idToken`. The backend re-verifies it
  * server-side; nothing here is trusted on its own.
  */
@@ -70,7 +70,7 @@ export async function confirmPhoneOtp(confirmationResult, code) {
 }
 
 /**
- * Resets a container's reCAPTCHA verifier — call this after a failed
+ * Resets a container's reCAPTCHA verifier - call this after a failed
  * send/verify so "resend code" gets a fresh challenge instead of reusing
  * one Firebase may have already flagged.
  */

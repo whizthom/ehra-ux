@@ -1,6 +1,6 @@
 import API from "./authApi";
 
-// ── Settings — employer only ────────────────────────────────────────────
+// ── Settings - employer only ────────────────────────────────────────────
 export const getPenaltySettings = () => API.get(`/penalty/settings`);
 
 export const updatePenaltySettings = (payload) =>
@@ -14,7 +14,7 @@ export const getFinalizedPeriods = () => API.get(`/penalty/business/periods`);
 
 export const finalizePayrollNow = () => API.post(`/penalty/business/finalize-now`);
 
-// ── Single employee (employer / HOD / self — server enforces access) ───
+// ── Single employee (employer / HOD / self - server enforces access) ───
 export const getEmployeePenaltySummary = (employeeId, periodEnd) =>
   API.get(`/penalty/employees/${employeeId}/summary`, {
     params: periodEnd ? { periodEnd } : {},
@@ -29,7 +29,7 @@ export const getMyPenaltySummary = (periodEnd) =>
 
 export const getMyPenaltyHistory = () => API.get(`/penalty/me/history`);
 
-// ── Pardon — employer only ──────────────────────────────────────────────
+// ── Pardon - employer only ──────────────────────────────────────────────
 export const pardonAttendance = (attendanceId, reason) =>
   API.post(`/penalty/attendance/${attendanceId}/pardon`, { reason });
 

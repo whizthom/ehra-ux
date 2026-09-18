@@ -1,4 +1,4 @@
-/* BusinessSettingsTab.module.css — consistent with Ehra design system
+/* BusinessSettingsTab.module.css - consistent with Ehra design system
    Brand green: var(--accent) | Dark text: var(--text-primary) | Muted: var(--text-secondary) */
 
 .wrap {
@@ -52,7 +52,7 @@
     box-shadow: 0 1px 3px var(--shadow-color);
 }
 
-/* No card/box — this sits directly on the plain page background.
+/* No card/box - this sits directly on the plain page background.
    Content flows normally here; scrolling and bottom-nav clearance are
    handled once, by the page-level .contentFullNarrow wrapper (same as
    Dashboard/Penalty/QR Code), instead of duplicating it in a nested
@@ -69,7 +69,7 @@
 
 /* Business profile's content (unlike the other sub-tabs, which each
    bring their own padded component) rendered straight into .tabBody,
-   which only reserves top space — nothing on the sides or bottom. This
+   which only reserves top space - nothing on the sides or bottom. This
    gives it the same breathing room the other tabs already have. */
 .businessPad {
     padding: 4px 16px 32px;
@@ -375,7 +375,7 @@
     color: var(--text-secondary);
 }
 
-/* Toggle switch — same pattern as ScheduleSettings, kept consistent
+/* Toggle switch - same pattern as ScheduleSettings, kept consistent
    app-wide rather than reinventing a second style of switch. */
 .switch {
     position: relative;

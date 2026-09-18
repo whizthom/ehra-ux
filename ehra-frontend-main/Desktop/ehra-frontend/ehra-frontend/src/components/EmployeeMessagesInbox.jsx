@@ -17,7 +17,7 @@ function timeAgo(iso) {
 }
 
 function formatDate(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   return new Date(iso).toLocaleString([], {
     month: "short",
     day: "numeric",
@@ -37,7 +37,7 @@ function senderInitials(name) {
     .join("");
 }
 
-// Placeholder rows shown while the first fetch is in flight — a shimmering
+// Placeholder rows shown while the first fetch is in flight - a shimmering
 // approximation of real list items reads as "this is already loading" far
 // faster than a static "Loading…" line, which is most of what "responsive"
 // means in a UI that's actually waiting on the network.
@@ -78,7 +78,7 @@ export default function EmployeeInbox({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showingDetail]);
 
-  // ── Swipe-to-go-back (touch only — mirrors the native "swipe from the
+  // ── Swipe-to-go-back (touch only - mirrors the native "swipe from the
   // left edge" gesture people already know from Mail/Messages apps) ──────
   // Manipulates the DOM node directly via a ref instead of pushing every
   // touchmove through React state: at 60fps that's the difference between

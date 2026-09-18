@@ -16,9 +16,9 @@ const STATUS_LABEL = {
 };
 
 function money(v) {
-  if (v === null || v === undefined) return "—";
+  if (v === null || v === undefined) return "-";
   const n = Number(v);
-  if (Number.isNaN(n)) return "—";
+  if (Number.isNaN(n)) return "-";
   return n.toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -26,7 +26,7 @@ function money(v) {
 }
 
 function fmtDate(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d).toLocaleDateString([], {
     day: "numeric",
     month: "short",
@@ -35,7 +35,7 @@ function fmtDate(d) {
 }
 
 function fmtTime(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d).toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
@@ -43,12 +43,12 @@ function fmtTime(d) {
 }
 
 /**
- * Payroll section on an employee's full profile page — salary, the
+ * Payroll section on an employee's full profile page - salary, the
  * current pay period's deduction breakdown (with pardon controls), and
  * finalized past periods.
  *
  * Salary and pardon/unpardon are employer-only actions (the server
- * enforces this — see PenaltyController); an HOD sees everything else
+ * enforces this - see PenaltyController); an HOD sees everything else
  * (attendance/deduction detail) but never the salary figure or pardon
  * buttons, per `canViewPay` on the summary response.
  */

@@ -2,7 +2,7 @@ import useMentionToasts from "../../hooks/useMentionToasts";
 import styles from "./MentionToastStack.module.css";
 
 // Rendered once, near the top of the app shell (Dashboard.jsx /
-// EmployeeDashboard.jsx) — see useMentionToasts.js's doc for why it
+// EmployeeDashboard.jsx) - see useMentionToasts.js's doc for why it
 // can't just live inside MessagingHub. Clicking a toast hands the
 // (conversationId, messageId) up to onNavigate, which the dashboard uses
 // to both switch to the Messages tab AND deep-link MessagingHub straight

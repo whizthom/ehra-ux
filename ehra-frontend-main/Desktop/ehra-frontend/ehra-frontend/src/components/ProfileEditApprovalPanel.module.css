@@ -53,7 +53,7 @@
 .viewToggle {
     display: flex;
     gap: 6px;
-    /* Was var(--bg-soft-accent) — a translucent green tint that reads
+    /* Was var(--bg-soft-accent) - a translucent green tint that reads
        fine as a barely-there wash in light mode, but turns into an
        unmistakable green glow over dark surfaces. This is chrome, not a
        "success" indicator, so it gets a neutral surface color instead;
@@ -205,7 +205,7 @@
     border-radius: 20px;
 }
 
-/* Theme-aware status colors — these used to be hardcoded hex values
+/* Theme-aware status colors - these used to be hardcoded hex values
    passed via inline style, which meant the pill stayed light-mode-only
    regardless of the active theme. Mapped onto the same semantic
    variables the rest of the app already uses for pending/success/danger
@@ -261,7 +261,7 @@
     display: flex;
     align-items: center;
     gap: 0;
-    /* Neutral container — same reasoning as .viewToggle above. The
+    /* Neutral container - same reasoning as .viewToggle above. The
        individual step dots (.chainDone/.chainPending/.chainRejected)
        already carry the actual status color, so the strip itself
        doesn't need to be green-tinted too. */
@@ -354,7 +354,7 @@
     gap: 0;
     padding: 8px 14px;
     /* This band repeats once per request card, so a green tint here
-       especially stacks up into an obvious wash down the whole list —
+       especially stacks up into an obvious wash down the whole list -
        neutral surface color instead. */
     background: var(--bg-surface-alt);
     border-bottom: 1px solid var(--border-color);
@@ -395,7 +395,7 @@
 /* Wraps old-value/arrow/new-value as one group. On desktop it's
    `display: contents` so its children still land directly in the
    parent grid's 3 remaining columns, exactly as if this wrapper
-   weren't there at all — purely a mobile reflow hook (see the
+   weren't there at all - purely a mobile reflow hook (see the
    responsive block at the bottom of this file). */
 .diffValues {
     display: contents;
@@ -436,7 +436,7 @@
     gap: 8px;
     font-size: 12.5px;
     color: var(--text-primary);
-    /* Neutral — this box renders identically whether the HOD approved or
+    /* Neutral - this box renders identically whether the HOD approved or
        rejected, so a green background was misleading on a rejection.
        The actual verdict already reads clearly via .priorApproved /
        .priorRejected's own color below. */
@@ -626,7 +626,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    /* Was var(--danger-text) — a variable meant for text/labels, which
+    /* Was var(--danger-text) - a variable meant for text/labels, which
        in dark mode is a pale pink (#ffb4bd) and made this button look
        washed-out with barely-there contrast against its white label.
        var(--danger) is the solid fill meant for exactly this. */
@@ -770,7 +770,7 @@
     }
 
     .submittedAt {
-        /* Least essential piece of the header row on a narrow screen —
+        /* Least essential piece of the header row on a narrow screen -
            the status pill already conveys what matters most; the exact
            submit date is one tap (expand) away in the card body. */
         display: none;

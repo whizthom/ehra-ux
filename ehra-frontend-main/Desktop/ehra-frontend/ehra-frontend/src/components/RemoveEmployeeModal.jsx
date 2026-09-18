@@ -6,15 +6,15 @@ import styles from "./RemoveEmployeeModal.module.css";
  * Used by both WorkforceTab.jsx and Dashboard.jsx so the warning shown to
  * the admin is always identical, no matter where "Remove" was clicked from.
  * Previously each page had its own copy of this JSX/CSS, which is exactly
- * how they drifted apart — keeping one component here means there's only
+ * how they drifted apart - keeping one component here means there's only
  * one place to update.
  *
  * Props:
- *   employee  — { firstName, lastName } of the employee being removed.
+ *   employee  - { firstName, lastName } of the employee being removed.
  *               The modal renders nothing if this is null/undefined.
- *   onCancel  — called when the admin backs out (overlay click or Cancel).
- *   onConfirm — called when the admin confirms the removal.
- *   loading   — true while the soft-delete request is in flight.
+ *   onCancel  - called when the admin backs out (overlay click or Cancel).
+ *   onConfirm - called when the admin confirms the removal.
+ *   loading   - true while the soft-delete request is in flight.
  */
 export default function RemoveEmployeeModal({
   employee,

@@ -7,7 +7,7 @@ import { connect, disconnect } from "../services/messagingSocket";
 // for: the tab becoming visible again after being backgrounded, and the
 // browser regaining network connectivity after being offline. Mount this
 // ONCE near the top of each dashboard (Dashboard.jsx / EmployeeDashboard.jsx)
-// — every chat component below it just subscribes to the already-open
+// - every chat component below it just subscribes to the already-open
 // socket via messagingSocket.js, they never open their own.
 export default function useMessagingConnection() {
   const { isAuthenticated } = useAuth();

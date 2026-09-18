@@ -585,7 +585,7 @@
    Down to ~900px the settings card and toolbar controls stop fitting
    comfortably on one line; below ~640px the 9-column table can't be a
    table anymore at all, so it becomes a stack of labeled cards instead
-   (each <td> turns into a "label: value" row via its data-label attr —
+   (each <td> turns into a "label: value" row via its data-label attr -
    see PenaltyTab.jsx). Nothing about the data or markup structure changes,
    only how it's presented. */
 @media (max-width: 900px) {
@@ -650,7 +650,7 @@
     }
 
     /* Below 640px the real <table> steps aside for a dedicated
-       expand/collapse card list (rendered further down in the JSX) —
+       expand/collapse card list (rendered further down in the JSX) -
        trying to force one markup to serve both a data-dense desktop
        table and a tappable mobile list stopped being worth it once
        expand/collapse + a separate "view profile" action came in. */

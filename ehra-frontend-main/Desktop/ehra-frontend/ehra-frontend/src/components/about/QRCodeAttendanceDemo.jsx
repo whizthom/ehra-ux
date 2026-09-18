@@ -1,6 +1,6 @@
 import styles from "./QRCodeAttendanceDemo.module.css";
 
-// Fixed pattern, animated in CSS via staggered per-cell opacity — reads as
+// Fixed pattern, animated in CSS via staggered per-cell opacity - reads as
 // "a QR code that refreshes" without actually encoding anything.
 const CELLS = Array.from({ length: 64 }, (_, i) => {
   const n = (i * 37 + 11) % 100;
@@ -33,7 +33,7 @@ const STEPS = [
 ];
 
 /**
- * The flagship visual for "Attendance without the attendance book" —
+ * The flagship visual for "Attendance without the attendance book" -
  * an animated rotating QR panel paired with the actual check-in
  * sequence. Self-contained: doesn't depend on WorkflowDiagram, since
  * this one needs its own countdown-ring/scan-pulse choreography.

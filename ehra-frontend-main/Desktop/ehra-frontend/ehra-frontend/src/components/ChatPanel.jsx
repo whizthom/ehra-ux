@@ -125,7 +125,7 @@ export default function ChatPanel({ viewer = "employee", onThreadOpenChange }) {
   const openContact = (contact) => {
     setSelected(contact);
     fetchThread(contact.withKey);
-    // Opening a thread marks it read server-side — reflect that locally
+    // Opening a thread marks it read server-side - reflect that locally
     // right away rather than waiting on a refetch.
     setContacts((prev) =>
       prev.map((c) =>
@@ -145,7 +145,7 @@ export default function ChatPanel({ viewer = "employee", onThreadOpenChange }) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages]);
 
-  // Tell the parent page whenever a thread is opened/closed — it decides
+  // Tell the parent page whenever a thread is opened/closed - it decides
   // what to do with that on mobile (hide its topbar/logo/bottom nav so the
   // thread reads as a genuine full-screen view, same as most chat apps).
   useEffect(() => {
@@ -300,7 +300,7 @@ export default function ChatPanel({ viewer = "employee", onThreadOpenChange }) {
               ) : messages.length === 0 ? (
                 <div className={styles.emptyState}>
                   <i className={`ti ti-message-circle ${styles.emptyIcon}`} />
-                  <p>No messages yet — say hello.</p>
+                  <p>No messages yet - say hello.</p>
                 </div>
               ) : (
                 dayGroups.map((group, gi) => (

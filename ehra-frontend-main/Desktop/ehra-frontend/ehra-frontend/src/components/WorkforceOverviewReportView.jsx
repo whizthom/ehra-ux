@@ -7,7 +7,7 @@ import {
 import styles from "./ReportsTab.module.css";
 
 function fmtDateFull(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d + "T00:00:00").toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
@@ -16,7 +16,7 @@ function fmtDateFull(d) {
 }
 
 function formatMonthLabel(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d + "T00:00:00").toLocaleDateString(undefined, {
     month: "short",
     year: "2-digit",
@@ -24,7 +24,7 @@ function formatMonthLabel(d) {
 }
 
 function statusLabel(s) {
-  if (!s) return "—";
+  if (!s) return "-";
   return s
     .toLowerCase()
     .split("_")
@@ -33,7 +33,7 @@ function statusLabel(s) {
 }
 
 function employmentTypeLabel(t) {
-  if (!t) return "—";
+  if (!t) return "-";
   return t
     .toLowerCase()
     .split("_")

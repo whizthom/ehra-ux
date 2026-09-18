@@ -22,7 +22,7 @@ function Cell({ value }) {
     );
   }
   if (value === false) {
-    return <span className={styles.tableDash}>—</span>;
+    return <span className={styles.tableDash}>-</span>;
   }
   return <span>{value}</span>;
 }

@@ -20,7 +20,7 @@ import phoneStyles from "./PhoneAuth.module.css";
 import Logo from "../components/Logo";
 import AboutEhralLink from "../components/nav/AboutEhralLink";
 
-// A believable, static glimpse of what's happening inside a live workspace —
+// A believable, static glimpse of what's happening inside a live workspace -
 // the same kind of event this app already surfaces as real notifications.
 // Doubled below so the marquee loops seamlessly.
 const TICKER_ITEMS = [
@@ -73,7 +73,7 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Phone is the login identifier now (same as the create-business flow) —
+  // Phone is the login identifier now (same as the create-business flow) -
   // the backend's dual-identifier support still accepts email underneath,
   // but the UI only ever collects a phone number here.
   const [form, setForm] = useState({
@@ -85,7 +85,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
 
-  // 2FA step — null until /auth/login comes back with requiresTwoFactor.
+  // 2FA step - null until /auth/login comes back with requiresTwoFactor.
   // method is "PHONE" or "EMAIL" (see AuthResponseDTO#twoFactorMethod);
   // maskedEmail is only present for the EMAIL method.
   const [twoFactor, setTwoFactor] = useState(null); // { pendingToken, method, phoneNumber, maskedEmail }
@@ -113,7 +113,7 @@ export default function Login() {
 
   const routeAfterLogin = (data) => {
     // Someone else may have sent an invite link while this person was
-    // logged out — InvitationLanding stashes the token here before
+    // logged out - InvitationLanding stashes the token here before
     // bouncing them to /login. Finish that trip now that they're signed
     // in, instead of dropping them on a generic dashboard.
     const pendingInvite = sessionStorage.getItem("ehra_pending_invite");
@@ -124,7 +124,7 @@ export default function Login() {
     }
 
     // An Identity holding more than one membership hasn't picked a
-    // workspace for this session yet — show the switcher instead of
+    // workspace for this session yet - show the switcher instead of
     // guessing which dashboard to land on.
     if (data.needsContextSelection) {
       navigate("/select-workspace");
@@ -147,7 +147,7 @@ export default function Login() {
 
       if (data.requiresTwoFactor) {
         if (data.twoFactorMethod === "EMAIL") {
-          // Backend already sent the code (see AuthController#login) —
+          // Backend already sent the code (see AuthController#login) -
           // no client-side send step needed here, unlike the PHONE path.
           setTwoFactor({
             pendingToken: data.twoFactorToken,
@@ -174,8 +174,8 @@ export default function Login() {
       routeAfterLogin(data);
     } catch (err) {
       // describeApiError distinguishes offline / timeout / unreachable
-      // server from an actual credentials error, and — for a real
-      // err.response — trusts the backend's specific message (now
+      // server from an actual credentials error, and - for a real
+      // err.response - trusts the backend's specific message (now
       // "Incorrect password" vs "We couldn't find an account with that
       // phone number" as of the hideUserNotFoundExceptions change in
       // SecurityConfig) rather than assuming any response at all means
@@ -240,7 +240,7 @@ export default function Login() {
     } catch (err) {
       // Both branches can throw either an axios error (verifyEmailTwoFactorLogin /
       // verifyTwoFactorLogin) or, on the PHONE path, a Firebase SDK error
-      // (confirmPhoneOtp) — isAxiosError reliably tells them apart
+      // (confirmPhoneOtp) - isAxiosError reliably tells them apart
       // regardless of which method is active, so a dropped connection on
       // the axios call never gets run through friendlyFirebaseError,
       // which isn't built to interpret axios error shapes.
@@ -263,7 +263,7 @@ export default function Login() {
 
   return (
     <div className={styles.wrap}>
-      {/* ── Left panel — brand + live product moment ── */}
+      {/* ── Left panel - brand + live product moment ── */}
       <div className={styles.left}>
         <div className={styles.dotGrid} aria-hidden="true" />
         <AboutEhralLink tone="dark" />
@@ -278,7 +278,7 @@ export default function Login() {
             Run your whole workforce from one screen.
           </h1>
           <p className={styles.desc}>
-            Attendance, leave, payroll and performance — synced in real time,
+            Attendance, leave, payroll and performance - synced in real time,
             not spreadsheets.
           </p>
 
@@ -293,7 +293,7 @@ export default function Login() {
         <p className={styles.leftFooter}>© 2026 Ehra. All rights reserved.</p>
       </div>
 
-      {/* ── Right panel — sign in ── */}
+      {/* ── Right panel - sign in ── */}
       <div className={styles.right}>
         <AboutEhralLink tone="light" className={styles.mobileOnlyAboutLink} />
         <div
@@ -529,7 +529,7 @@ function friendlyFirebaseError(err) {
     return "That code is incorrect or has expired. Please try again.";
   }
   if (code.includes("network-request-failed")) {
-    return "Network error — please check your connection and try again.";
+    return "Network error - please check your connection and try again.";
   }
   return err?.message || "Something went wrong. Please try again.";
 }

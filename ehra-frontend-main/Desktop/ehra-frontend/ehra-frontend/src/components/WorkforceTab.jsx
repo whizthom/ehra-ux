@@ -213,7 +213,7 @@ export default function WorkforceTab({ departments, branches = [] }) {
                     </div>
 
                     <div className={styles.cardBody}>
-                      <p className={styles.empName}>{name || "—"}</p>
+                      <p className={styles.empName}>{name || "-"}</p>
                       <p className={styles.empEmail}>{emp.email}</p>
                       {emp.phone && (
                         <p className={styles.empPhone}>{emp.phone}</p>
@@ -325,7 +325,7 @@ export default function WorkforceTab({ departments, branches = [] }) {
           <div className={styles.trashHeader}>
             <div className={styles.trashHeaderInfo}>
               <i className="ti ti-trash" aria-hidden="true" />
-              <span>Employees in trash — permanently deleted after 7 days</span>
+              <span>Employees in trash - permanently deleted after 7 days</span>
             </div>
             <button
               type="button"
@@ -356,7 +356,7 @@ export default function WorkforceTab({ departments, branches = [] }) {
                   .join(" ");
                 const deletedAt = emp.deletedAt
                   ? new Date(emp.deletedAt).toLocaleDateString()
-                  : "—";
+                  : "-";
                 const daysLeft = emp.deletedAt
                   ? Math.max(
                       0,
@@ -419,7 +419,7 @@ export default function WorkforceTab({ departments, branches = [] }) {
       />
 
       {/* ── Personal message modal (mobile shortcut from the avatar) ──
-          Locked to this one employee — for official personal messages
+          Locked to this one employee - for official personal messages
           (promotion, suspension, etc.), distinct from the broadcast
           composer in Quick Actions / the Announcements tab. */}
       <QuickSendMessageModal

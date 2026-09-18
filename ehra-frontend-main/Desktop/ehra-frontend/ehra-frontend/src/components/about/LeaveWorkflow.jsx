@@ -34,7 +34,7 @@ const LANE = [
 ];
 
 /**
- * Dedicated visual for "Leave shouldn't require a WhatsApp conversation" —
+ * Dedicated visual for "Leave shouldn't require a WhatsApp conversation" -
  * shows the structured request lane (employee → cover person → HOD →
  * employer → notification) as a distinct component from the generic
  * WorkflowDiagram, since this one carries roles + per-step status chips

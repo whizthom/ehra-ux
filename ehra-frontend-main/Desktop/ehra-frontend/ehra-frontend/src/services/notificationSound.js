@@ -79,7 +79,7 @@ function eventId(notification) {
  * - frequency: pitch in Hz
  * - offset: seconds after the chime starts
  * - duration: how long this note rings, in seconds
- * - waveform: oscillator type — "sine" (soft), "triangle" (warmer, a bit
+ * - waveform: oscillator type - "sine" (soft), "triangle" (warmer, a bit
  *   reedier), used together across notes so each chime has its own timbre
  *   instead of every category sounding like a plain beep.
  *
@@ -98,7 +98,7 @@ function tones(category) {
         [880, 0.36, 0.22, "sine"],
       ];
     case "financial":
-      // A confident ascending arpeggio — deliberate, "cha-ching" feel.
+      // A confident ascending arpeggio - deliberate, "cha-ching" feel.
       return [
         [392, 0.00, 0.15, "triangle"],
         [523, 0.12, 0.15, "triangle"],
@@ -107,7 +107,7 @@ function tones(category) {
         [1046, 0.50, 0.28, "sine"],
       ];
     case "important":
-      // Urgent double-pulse on one note, then a higher alert note — the
+      // Urgent double-pulse on one note, then a higher alert note - the
       // most attention-grabbing of the set.
       return [
         [740, 0.00, 0.13, "sine"],
@@ -124,7 +124,7 @@ function tones(category) {
         [880, 0.46, 0.24, "triangle"],
       ];
     default:
-      // General notifications — neutral but still a short melodic phrase
+      // General notifications - neutral but still a short melodic phrase
       // rather than a flat beep.
       return [
         [659, 0.00, 0.13, "sine"],
@@ -154,7 +154,7 @@ export function playNotificationSound(notification) {
   if (!ctx || ctx.state !== "running") return false;
   try {
     // Peak gain per note. 1.0 is the loudest a note can go before the
-    // waveform itself starts clipping into distortion — this is
+    // waveform itself starts clipping into distortion - this is
     // effectively the maximum clean volume Web Audio supports.
     const PEAK_GAIN = 1.0;
 

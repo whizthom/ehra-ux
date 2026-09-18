@@ -15,7 +15,7 @@ import styles from "./BranchesTab.module.css";
 // ── Helpers ───────────────────────────────────────────────────────────────
 
 function fullName(emp) {
-  return [emp?.firstName, emp?.lastName].filter(Boolean).join(" ") || "—";
+  return [emp?.firstName, emp?.lastName].filter(Boolean).join(" ") || "-";
 }
 
 function empInitials(emp) {
@@ -81,7 +81,7 @@ function useToast() {
   return { toasts, push };
 }
 
-// ── Add / Edit Branch — full in-flow page, not a modal ───────────────────
+// ── Add / Edit Branch - full in-flow page, not a modal ───────────────────
 
 const EMPTY_FORM = {
   name: "",
@@ -196,7 +196,7 @@ function BranchFormPage({ branch, employees, onCancel, onSaved, toast }) {
             <p className={styles.pageSubtitle}>
               {isEdit
                 ? `Update details for ${branch.name}.`
-                : "Set up a new location for your business — you can always edit this later."}
+                : "Set up a new location for your business - you can always edit this later."}
             </p>
           </div>
 
@@ -427,7 +427,7 @@ function BranchFormPage({ branch, employees, onCancel, onSaved, toast }) {
   );
 }
 
-// ── Delete confirmation — a purpose-built dialog, not a native confirm() ──
+// ── Delete confirmation - a purpose-built dialog, not a native confirm() ──
 
 function DeleteBranchDialog({ branch, onClose, onDeleted, toast }) {
   const [deleting, setDeleting] = useState(false);

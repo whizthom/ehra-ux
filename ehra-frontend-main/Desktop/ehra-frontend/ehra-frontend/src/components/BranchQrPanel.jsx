@@ -9,7 +9,7 @@ import styles from "./BranchQrPanel.module.css";
 /**
  * Same rotating-QR model as QrAttendancePanel, scoped to one branch. A
  * screenshot of this code only ever authenticates attendance for THIS
- * branch — an employee assigned to a different branch who scans it gets
+ * branch - an employee assigned to a different branch who scans it gets
  * rejected server-side (see AttendanceServiceImpl#processEmployeeScan).
  */
 export default function BranchQrPanel({ branchId, branchStatus }) {
@@ -140,7 +140,7 @@ export default function BranchQrPanel({ branchId, branchStatus }) {
         </div>
         <p className={styles.hint}>
           Only employees assigned to this branch can clock in with it. Refreshes
-          every {totalSeconds ?? "—"}s.
+          every {totalSeconds ?? "-"}s.
         </p>
         <button
           type="button"

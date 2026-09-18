@@ -9,8 +9,8 @@ import styles from "./PositionCell.module.css";
  * Renders an employee's position (job title) as a clickable pill.
  * Clicking opens an inline text field to set/change it.
  *
- * mode="employer" — change applies immediately.
- * mode="hod"      — change is submitted for the employer's approval;
+ * mode="employer" - change applies immediately.
+ * mode="hod"      - change is submitted for the employer's approval;
  *                    the cell shows a "pending approval" state until
  *                    it's decided.
  */
@@ -59,7 +59,7 @@ export default function PositionCell({
           : await assignPositionByEmployer(employee.id, trimmed);
 
       if (mode === "hod") {
-        // Pending employer approval — don't change the live position yet.
+        // Pending employer approval - don't change the live position yet.
         onAssigned(employee.id, {
           positionPending: true,
           pendingPosition: data.newPosition || trimmed,

@@ -2,12 +2,12 @@
 // issued by the backend (see OfflineAttendanceAuthorizationService) and
 // the queue of signed, hash-chained transactions waiting to be uploaded.
 //
-// Unlike messagingCache.js (best-effort — a cache miss just means a
+// Unlike messagingCache.js (best-effort - a cache miss just means a
 // spinner), a lost entry here means a lost attendance record, so this
 // module follows attendanceDeviceCrypto.js's stricter convention:
 // failures reject instead of silently resolving to null/empty.
 //
-// Keyed by business + employee membership, NOT by device — the device
+// Keyed by business + employee membership, NOT by device - the device
 // credential itself is shared across employees on a business (see
 // attendanceDeviceCrypto.js), but each employee's offline authorization
 // and pending queue must stay completely separate. Employee B must never
@@ -101,7 +101,7 @@ export async function getJournal(context) {
 /**
  * Called right after a successful ONLINE attendance action, mirroring
  * OfflineAttendanceAuthorizationService#issueOrRenew on the backend.
- * Overwrites any previous authorization for this business+employee —
+ * Overwrites any previous authorization for this business+employee -
  * there is only ever one live grant to track locally.
  */
 export async function saveAuthorization(context, authorization) {
@@ -110,10 +110,10 @@ export async function saveAuthorization(context, authorization) {
 }
 
 /**
- * "Can I clock offline right now?" — same question
+ * "Can I clock offline right now?" - same question
  * OfflineAttendanceAuthorizationService#findLiveAuthorization answers
  * server-side, checked here purely for immediate UI state (the server
- * re-validates everything again at sync time regardless — spec §42).
+ * re-validates everything again at sync time regardless - spec §42).
  */
 export async function getLiveAuthorization(context, deviceId) {
   const entry = await getJournal(context);
@@ -126,7 +126,7 @@ export async function getLiveAuthorization(context, deviceId) {
 }
 
 /**
- * The (sequence, previousHash) pair the NEXT transaction must use —
+ * The (sequence, previousHash) pair the NEXT transaction must use -
  * accounts for transactions already queued locally but not yet
  * confirmed-synced, not just what's been uploaded, so two offline
  * actions taken back-to-back before any connectivity returns still chain
@@ -164,7 +164,7 @@ export async function countPending(context) {
 /**
  * Reconciles the local queue against the server's sync results (spec
  * §64): a SYNCED or REJECTED transaction is removed from the pending
- * queue for good — REJECTED is a definitive server verdict, not
+ * queue for good - REJECTED is a definitive server verdict, not
  * something to silently retry forever. A FLAGGED transaction is also
  * removed from the queue (the server has a durable record of it now,
  * even though a human needs to look at it) but is NOT treated as if it
@@ -173,7 +173,7 @@ export async function countPending(context) {
  * sync attempt.
  * <p>
  * `lastPayloadHash`/`lastSequence` only advance past transactions that
- * actually got a definitive server outcome — a transaction that never
+ * actually got a definitive server outcome - a transaction that never
  * made it to the server keeps the chain exactly where it was, so a retry
  * continues the chain correctly instead of skipping ahead.
  */
@@ -193,9 +193,9 @@ export async function applySyncResults(context, results) {
       continue;
     }
 
-    // SYNCED, FLAGGED, or REJECTED — all definitive. Advance the chain
+    // SYNCED, FLAGGED, or REJECTED - all definitive. Advance the chain
     // pointer regardless of which one, since the server has already
-    // validated (or rejected) this exact sequence/hash — retrying it
+    // validated (or rejected) this exact sequence/hash - retrying it
     // under a new sequence number would only break the chain further.
     lastPayloadHash = transaction.payloadHash;
     lastSequence = transaction.sequence;
@@ -209,7 +209,7 @@ export async function applySyncResults(context, results) {
   });
 }
 
-/** Call on logout — nothing about one employee's offline queue should be reachable by whoever logs in next on this device. */
+/** Call on logout - nothing about one employee's offline queue should be reachable by whoever logs in next on this device. */
 export async function clearJournal(context) {
   await putEntry(journalKey(context), emptyEntry());
 }

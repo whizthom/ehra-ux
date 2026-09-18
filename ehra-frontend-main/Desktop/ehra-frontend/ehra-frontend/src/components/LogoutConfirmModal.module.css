@@ -1,4 +1,4 @@
-/* ── Confirmation modal — same visual pattern as
+/* ── Confirmation modal - same visual pattern as
    RemoveEmployeeModal.module.css so every confirm dialog in the app looks
    and feels the same. ── */
 
@@ -89,7 +89,7 @@
 
 /* --danger-text in dark mode (#ffb4bd) is a light pink meant for TEXT
    sitting on a translucent --danger-bg, not for use as a solid button
-   fill — using it here made this button render pale-pink-on-white
+   fill - using it here made this button render pale-pink-on-white
    instead of a proper filled danger button, and looked like the modal
    hadn't picked up dark mode at all. --danger is the actual solid-fill
    danger color in both themes; only overriding it for dark mode keeps

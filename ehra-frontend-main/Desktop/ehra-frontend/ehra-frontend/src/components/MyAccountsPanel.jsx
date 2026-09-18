@@ -31,19 +31,19 @@ function roleLabel(type) {
 }
 
 // Membership-type → post-switch destination. TODO: point CUSTOMER at a
-// real customer-facing dashboard once that surface exists — routing it
+// real customer-facing dashboard once that surface exists - routing it
 // to "/dashboard" (the owner's view) for now is a deliberate placeholder,
 // not a real destination, since nothing creates CustomerMembership rows
 // yet and there's nowhere else to send it.
 function destinationFor(contextType) {
   if (contextType === "EMPLOYEE") return "/my-dashboard";
-  if (contextType === "CUSTOMER") return "/dashboard"; // TODO: /customer-dashboard once it exists
+  if (contextType === "CUSTOMER") return "/customer-dashboard";
   return "/dashboard";
 }
 
-// The "My Accounts" nav feature — every workspace (business) the logged-in
+// The "My Accounts" nav feature - every workspace (business) the logged-in
 // Identity currently holds a membership at: as owner (EMPLOYER), as staff
-// (EMPLOYEE), or as a customer (CUSTOMER — groundwork only; nothing creates
+// (EMPLOYEE), or as a customer (CUSTOMER - groundwork only; nothing creates
 // these yet, but the label/routing below already handle it so this file
 // doesn't need a second pass once that role ships). Lets the person switch
 // between them without logging out, and start a brand-new business under
@@ -150,7 +150,7 @@ export default function MyAccountsPanel({ open, onClose }) {
           {!showCreate && (
             <>
               <p className={styles.hint}>
-                Switch between every business you own or work for — all under
+                Switch between every business you own or work for - all under
                 this one login.
               </p>
 
@@ -237,7 +237,7 @@ export default function MyAccountsPanel({ open, onClose }) {
               </button>
 
               <p className={styles.hint}>
-                This creates a new, separate business — you'll be its owner, and
+                This creates a new, separate business - you'll be its owner, and
                 it stays fully independent from any other business you're
                 connected to.
               </p>

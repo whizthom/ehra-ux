@@ -36,7 +36,7 @@ export default function VoicePlayer({ url, durationSeconds }) {
       <button className={styles.voicePlayBtn} onClick={toggle}>
         {/* Tabler's webfont only ships a dedicated "-filled" class for
             icons that have a genuinely separate filled artwork (like
-            circle-check-filled) — player-play/player-pause don't have
+            circle-check-filled) - player-play/player-pause don't have
             one, so "ti-player-play-filled" simply doesn't exist as a
             class and resolved to no glyph at all, leaving just the
             colored circle with nothing inside it. Plain ti-player-play /

@@ -12,14 +12,14 @@ import {
   getPendingProfileEdits,
   submitEmployerDecision,
 } from "../api/profileEditApi";
-// Employee/HOD-scoped tabs — these replace the employer-only components
+// Employee/HOD-scoped tabs - these replace the employer-only components
 // (WorkforceTab, LeavesTab, AttendanceSection, MessagesTab, PenaltyTab,
 // ReportsTab, ProfileEditApprovalPanel mode="employer", BusinessSettingsTab,
 // DepartmentsTab) that were previously wired into this file despite it
-// rendering for ROLE_EMPLOYEE sessions — every one of those calls an
+// rendering for ROLE_EMPLOYEE sessions - every one of those calls an
 // ADMIN-only endpoint (or, for DepartmentsTab, exposes full company-wide
 // department CRUD) and isn't appropriate for an employee/HOD session.
-// "Departments" reuses HodWorkforceTab, same as "Workforce" — both are
+// "Departments" reuses HodWorkforceTab, same as "Workforce" - both are
 // scoped to the HOD's own department via GET /employees/my-department.
 import HodWorkforceTab from "../components/Hodworkforcetab";
 import MessagingHub from "../components/messaging/MessagingHub";
@@ -34,7 +34,7 @@ import LogoutConfirmModal from "../components/LogoutConfirmModal";
 import CoverRequestsTab from "../components/CoverRequestsTab";
 import { getMyProfile } from "../api/employeeApi";
 import { getMyCoverRequests } from "../api/leaveApi";
-// Real-time messaging (V1 rebuild) — replaces the old SSE-based chat's
+// Real-time messaging (V1 rebuild) - replaces the old SSE-based chat's
 // getChatUnreadCount for the sidebar/topbar "Messages" badge. The old
 // chatApi.js/ChatPanel/MessagesHub files are left in place untouched but
 // unused, in case anything else still imports them.
@@ -46,7 +46,7 @@ import useMessagingConnection from "../hooks/useMessagingConnection";
 // "My Accounts" navigates to the full-page identity-level workspace
 // switcher (see MyAccountsPage) instead of switching the main content area.
 // "Workforce" and "Departments" are filtered out for non-HOD employees at
-// render time — see the NAV.filter(...) call in the sidebar rendering
+// render time - see the NAV.filter(...) call in the sidebar rendering
 // below. Regular employees never see either: department management is an
 // employer/HOD-only concept, and an HOD only ever sees their own
 // department's employees, never the whole company. "Reports" has no
@@ -101,7 +101,7 @@ function fullName(first, last) {
   return [safeString(first), safeString(last)].filter(Boolean).join(" ").trim();
 }
 
-// Mobile header only — same rule as the employer dashboard's company name.
+// Mobile header only - same rule as the employer dashboard's company name.
 function truncateName(name, max = 13) {
   const s = safeString(name);
   return s.length > max ? `${s.slice(0, max)}...` : s;
@@ -150,7 +150,7 @@ const ATTENDANCE_LABEL = {
 };
 
 // Tracks a horizontally-scrollable element and returns { left, width } as
-// percentages of its own track — feeds the thin "underneath line" scroll
+// percentages of its own track - feeds the thin "underneath line" scroll
 // indicators (quick actions pill row, bottom nav strip) so the thumb's
 // size/position always reflects exactly how much more there is to scroll,
 // rather than a static decorative hint.
@@ -185,7 +185,7 @@ function useScrollThumb(ref) {
   return thumb;
 }
 
-// Time-of-day greeting — recomputed on every render (cheap), so it flips
+// Time-of-day greeting - recomputed on every render (cheap), so it flips
 // from "Good morning" to "Good afternoon" etc. the moment someone's still
 // on the dashboard when the hour rolls over, no reload needed. The icon
 // rides along so the greeting reads as a genuine "what time is it for
@@ -205,14 +205,14 @@ export default function Dashboard() {
   const location = useLocation();
   const { logout, user } = useAuth();
   // Opens (and keeps alive) the real-time messaging WebSocket as soon as
-  // someone is logged in — deliberately mounted HERE, not inside
+  // someone is logged in - deliberately mounted HERE, not inside
   // MessagingHub (which only exists while the Messages tab is active).
   // Presence and any real-time notification both depend entirely on this
   // connection existing; mounting it only inside MessagingHub meant
   // neither worked until someone actively opened the chat list.
   useMessagingConnection();
 
-  // Mobile bottom-nav "Log out" — confirmed via LogoutConfirmModal before
+  // Mobile bottom-nav "Log out" - confirmed via LogoutConfirmModal before
   // the session is actually torn down, so a stray tap on a crowded phone
   // screen can't sign someone out by accident.
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -229,7 +229,7 @@ export default function Dashboard() {
     }
   };
 
-  // Same idea as the admin dashboard — land on the tab we came from
+  // Same idea as the admin dashboard - land on the tab we came from
   // instead of resetting to "Dashboard" every time.
   const employeeStateKey = `ehral:employeeDashboardState:${user?.identityId ?? "unknown"}:${user?.membershipId ?? "unknown"}`;
   const readEmployeeState = () => {
@@ -297,16 +297,16 @@ export default function Dashboard() {
     };
   }, [activeNav, employeeStateKey]);
 
-  // Set while a Messages > Chats thread is open — used to hide the topbar,
+  // Set while a Messages > Chats thread is open - used to hide the topbar,
   // brand footer, and bottom nav on mobile so the thread reads as a real
   // full-screen view rather than a panel wedged between them.
   const [chatThreadOpen, setChatThreadOpen] = useState(false);
   // Set when a notification toast is clicked (see NotificationToastStack
-  // below) — handed to MessagingHub, which consumes it to jump straight
+  // below) - handed to MessagingHub, which consumes it to jump straight
   // to that conversation/message regardless of which tab was active when
   // the notification arrived.
   const [messagingDeepLink, setMessagingDeepLink] = useState(null);
-  // Which conversation MessagingHub currently has open, if any — reported
+  // Which conversation MessagingHub currently has open, if any - reported
   // up so NotificationToastStack can skip popping a toast for a message
   // the person can already see arrive live on screen.
   const [messagingActiveConversationId, setMessagingActiveConversationId] =
@@ -332,7 +332,7 @@ export default function Dashboard() {
   const [pendingDeletes, setPendingDeletes] = useState([]); // [{ id, notif }]
   const deleteTimers = useRef(new Map());
 
-  // Unread chat/message count — powers the pop badge on the topbar
+  // Unread chat/message count - powers the pop badge on the topbar
   // message shortcut and the sidebar/nav "Messages" item, same as
   // Dashboard.jsx (the employer view).
   const [messagesUnread, setMessagesUnread] = useState(0);
@@ -342,26 +342,26 @@ export default function Dashboard() {
 
   const [recentActivityOpen, setRecentActivityOpen] = useState(false);
 
-  // My attendance + payroll — the employee-facing dashboard home content
+  // My attendance + payroll - the employee-facing dashboard home content
   // (replaces the employer's "Today's Pulse" business-wide widget, which
-  // never belonged here — see fetchMyAttendanceSummary/fetchMyPayroll).
+  // never belonged here - see fetchMyAttendanceSummary/fetchMyPayroll).
   const [myAttendance, setMyAttendance] = useState([]);
   const [loadingMyAttendance, setLoadingMyAttendance] = useState(true);
   const [myPayroll, setMyPayroll] = useState(null);
   const [loadingMyPayroll, setLoadingMyPayroll] = useState(true);
 
-  // Profile edit requests — employer approval queue (final sign-off after
+  // Profile edit requests - employer approval queue (final sign-off after
   // the HOD, or first stop if the employee has no HOD).
   const [profileEdits, setProfileEdits] = useState([]);
   const [pendingProfileEdits, setPendingProfileEdits] = useState([]);
   const [loadingProfileEdits, setLoadingProfileEdits] = useState(true);
 
-  // The employer's own profile (auto-created Employee row, role ADMIN) —
+  // The employer's own profile (auto-created Employee row, role ADMIN) -
   // Settings tab "My Profile". Edits here save instantly, no approval.
   const [myProfile, setMyProfile] = useState(null);
   const [loadingMyProfile, setLoadingMyProfile] = useState(true);
 
-  // Cover requests — leaves where a colleague has nominated ME as their
+  // Cover requests - leaves where a colleague has nominated ME as their
   // cover person. Fetched lightly here (just for the sidebar/bottom-nav
   // badge count); the full working list lives in CoverRequestsTab itself.
   // Any employee can be nominated, regardless of role, so this isn't
@@ -392,7 +392,7 @@ export default function Dashboard() {
   const fetchNotifs = useCallback(async () => {
     try {
       setLoadingNotifs(true);
-      // Employee/HOD-scoped feed — NOT the business-wide admin endpoint.
+      // Employee/HOD-scoped feed - NOT the business-wide admin endpoint.
       // The admin endpoint returns every notification ever raised for the
       // whole business, so using it here was letting employees (including
       // brand-new hires) see notifications from long before they joined.
@@ -501,7 +501,7 @@ export default function Dashboard() {
 
   // Locks page-level scrolling to <body> while this app-shell page is
   // mounted, so mobile browsers can't rubber-band the whole page (and
-  // drag the "fixed" topbar along with it) — only .content should scroll.
+  // drag the "fixed" topbar along with it) - only .content should scroll.
   useEffect(() => {
     document.body.classList.add("app-shell-lock");
     return () => document.body.classList.remove("app-shell-lock");
@@ -510,7 +510,7 @@ export default function Dashboard() {
   useEffect(() => {
     // fetchPending, fetchPendingLeaves, fetchLatestAttendance, fetchDirectory,
     // fetchProfileEdits and fetchBusinessProfile are ALL admin-only
-    // endpoints — calling them here on every employee login is what
+    // endpoints - calling them here on every employee login is what
     // produced the 403 storm (and the refresh/retry cascade that could tip
     // into a forced logout). They're intentionally NOT called from this
     // mount effect; the panels that used to depend on their data have been
@@ -546,12 +546,12 @@ export default function Dashboard() {
         return [payload, ...prev];
       });
       // NOTE: this used to call fetchPendingLeaves()/fetchProfileEdits()
-      // here (both ADMIN-only) in reaction to these events — removed for
+      // here (both ADMIN-only) in reaction to these events - removed for
       // the same reason as the mount effect above. EmployeeLeaveTab and
       // EmployeeProfileEditsTab re-fetch their own correct data whenever
       // their tab is open.
     },
-    // Keeps the "Cover Requests" sidebar/bottom-nav badge live — only
+    // Keeps the "Cover Requests" sidebar/bottom-nav badge live - only
     // reacts to leaves where I'm the nominated cover person, same guard
     // CoverRequestsTab itself uses, so this stays a cheap in-place patch
     // rather than a re-fetch.
@@ -566,7 +566,7 @@ export default function Dashboard() {
     },
 
     // NOTE: onNewChatMessage/onChatRead above are wired to the OLD SSE
-    // chat stream and no longer fire for real messaging traffic — the new
+    // chat stream and no longer fire for real messaging traffic - the new
     // messaging system's badge live-update is the WebSocket subscription
     // below instead (see useMessagingBadgeSync).
   });
@@ -578,7 +578,7 @@ export default function Dashboard() {
     if (activeNav === "Notifications") fetchNotifs();
   }, [activeNav, fetchNotifs]);
 
-  // Re-sync the message badge whenever the Messages tab is opened or left —
+  // Re-sync the message badge whenever the Messages tab is opened or left -
   // catches any reads that happened inside it without a matching SSE event.
   useEffect(() => {
     if (activeNav === "Messages") fetchMessagesUnread();
@@ -604,7 +604,7 @@ export default function Dashboard() {
 
   const openNotifPanel = () => {
     // Mobile/tablet: skip the dropdown entirely and jump straight to the
-    // full Notifications page — a small popover is awkward to use on a
+    // full Notifications page - a small popover is awkward to use on a
     // touch screen and the page itself is only one tap away anyway.
     if (window.innerWidth <= 900) {
       setActiveNav("Notifications");
@@ -689,7 +689,7 @@ export default function Dashboard() {
 
   // Timers must keep running even if the user switches tabs (Dashboard
   // stays mounted), but if the whole page unmounts, finish the deletes
-  // rather than silently dropping them — the user already confirmed intent.
+  // rather than silently dropping them - the user already confirmed intent.
   useEffect(() => {
     return () => {
       deleteTimers.current.forEach((timer, id) => {
@@ -742,9 +742,9 @@ export default function Dashboard() {
   });
 
   // myProfile (GET /employees/me) is the logged-in employee's OWN record
-  // — resolved server-side from their EmployeeMembership. summary (GET
+  // - resolved server-side from their EmployeeMembership. summary (GET
   // /business/dashboard-summary) is business-wide and its "admin" fields
-  // are the employer's name, not whoever's actually logged in — using it
+  // are the employer's name, not whoever's actually logged in - using it
   // for "my name" was wrong for any non-employer viewer. myFirst/myLast
   // are the source of truth for anything that should say "you" (topbar
   // greeting, sidebar footer identity).
@@ -752,7 +752,7 @@ export default function Dashboard() {
   const myLast = myProfile?.lastName ?? "";
   // The backend seeds firstName="Owner" as a placeholder for identities
   // that registered via the phone-only flow (business name + password,
-  // no personal name collected — see PhoneAuthServiceImpl). It's a real,
+  // no personal name collected - see PhoneAuthServiceImpl). It's a real,
   // non-null value in the DB, but it isn't an actual first name, so it
   // shouldn't be shown here as if the person had set one.
   const hasRealFirstName = Boolean(myFirst) && myFirst.trim() !== "Owner";
@@ -763,7 +763,7 @@ export default function Dashboard() {
   const greeting = getTimeGreeting();
 
   // Today's row from the employee's own attendance history (GET
-  // /attendance/me) — replaces the employer's business-wide "Today's
+  // /attendance/me) - replaces the employer's business-wide "Today's
   // Pulse" widget, which never belonged on an employee's own dashboard.
   const myAttendanceToday = myAttendance.find((r) => {
     const d = new Date(r.date || r.clockIn);
@@ -787,9 +787,9 @@ export default function Dashboard() {
   })();
 
   const money = (v) => {
-    if (v === null || v === undefined) return "—";
+    if (v === null || v === undefined) return "-";
     const n = Number(v);
-    if (Number.isNaN(n)) return "—";
+    if (Number.isNaN(n)) return "-";
     return n.toLocaleString(undefined, {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
@@ -809,7 +809,7 @@ export default function Dashboard() {
       {/* ── Sidebar ── */}
       <aside className={styles.sidebar}>
         <div className={styles.sbLogo}>
-          {/* Desktop sidebar always shows Ehral's own logo here — flat
+          {/* Desktop sidebar always shows Ehral's own logo here - flat
               white (tone="sidebar") rather than the normal two-tone
               brand colors, because --accent equals --bg-sidebar exactly
               in light mode (both #0f6e56), which makes the wordmark's
@@ -950,7 +950,7 @@ export default function Dashboard() {
           </div>
 
           <div className={styles.topbarRight}>
-            {/* ── Message shortcut — jumps straight to the Messages tab ── */}
+            {/* ── Message shortcut - jumps straight to the Messages tab ── */}
             <div
               className={styles.notifBtn}
               onClick={() => setActiveNav("Messages")}
@@ -1226,7 +1226,7 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* My attendance + payroll — this replaces the employer's
+              {/* My attendance + payroll - this replaces the employer's
                   business-wide "Today's Pulse" widget, which never
                   belonged on an employee's own dashboard. */}
               <div className={styles.statsGrid}>
@@ -1235,7 +1235,7 @@ export default function Dashboard() {
                     icon: "ti-calendar-check",
                     color: "teal",
                     num: loadingMyAttendance
-                      ? "—"
+                      ? "-"
                       : (ATTENDANCE_LABEL[myAttendanceToday?.status] ??
                         "Not yet"),
                     label: "Today's attendance",
@@ -1250,7 +1250,7 @@ export default function Dashboard() {
                     icon: "ti-calendar-stats",
                     color: "blue",
                     num: loadingMyAttendance
-                      ? "—"
+                      ? "-"
                       : myAttendanceThisWeek.present,
                     label: "Present this week",
                     trend: loadingMyAttendance
@@ -1263,7 +1263,7 @@ export default function Dashboard() {
                     color: "amber",
                     num:
                       loadingMyPayroll || !myPayroll?.canViewPay
-                        ? "—"
+                        ? "-"
                         : money(myPayroll?.netPay),
                     label: "Net pay (this period)",
                     trend: loadingMyPayroll
@@ -1277,7 +1277,7 @@ export default function Dashboard() {
                     icon: "ti-discount-2",
                     color: "coral",
                     num: loadingMyPayroll
-                      ? "—"
+                      ? "-"
                       : money(myPayroll?.totalDeduction),
                     label: "Deductions (this period)",
                     trend: loadingMyPayroll
@@ -1346,7 +1346,7 @@ export default function Dashboard() {
                                 hour: "2-digit",
                                 minute: "2-digit",
                               })
-                            : "—"}
+                            : "-"}
                         </span>
                         <span>
                           <i className="ti ti-logout" aria-hidden="true" /> Out:{" "}
@@ -1357,7 +1357,7 @@ export default function Dashboard() {
                                 hour: "2-digit",
                                 minute: "2-digit",
                               })
-                            : "—"}
+                            : "-"}
                         </span>
                         <span
                           className={`${styles.statusPill} ${styles[ATTENDANCE_PILL[myAttendanceToday.status]] ?? ""}`}
@@ -1524,7 +1524,7 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Recent activity — driven by real notifications. Hidden on
+                {/* Recent activity - driven by real notifications. Hidden on
                     phones, where the notification bell already surfaces
                     this same feed. */}
                 <div
@@ -1599,7 +1599,7 @@ export default function Dashboard() {
             </>
           )}
 
-          {/* Brand footer — last thing in the scrollable content, same
+          {/* Brand footer - last thing in the scrollable content, same
               spot for every tab. Matches Dashboard.jsx's employer-side
               footer. Hidden entirely on the Messages tab, which wants the
               full content height for the chat UI instead. */}
@@ -1640,7 +1640,7 @@ export default function Dashboard() {
 }
 
 // ── Notifications (full page) ───────────────────────────────────────────
-// This is the sidebar "Notifications" tab — a dedicated page listing every
+// This is the sidebar "Notifications" tab - a dedicated page listing every
 // notification, distinct from the bell icon's quick dropdown panel.
 // ── Undo bar ─────────────────────────────────────────────────────────────
 // Sits under the notification list (bell dropdown or full page) whenever

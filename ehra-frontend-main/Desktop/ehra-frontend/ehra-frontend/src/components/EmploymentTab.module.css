@@ -290,7 +290,7 @@
     outline: none;
     box-sizing: border-box;
     /* iOS Safari otherwise renders <input type="time"> narrower than its
-       box, ignoring width:100% — this keeps the field filling its column
+       box, ignoring width:100% - this keeps the field filling its column
        on every platform instead of just desktop/Android. */
     min-width: 0;
     -webkit-appearance: none;
@@ -320,8 +320,8 @@
    height inconsistent (a wrapped .timeFields sat flush against
    .dayToggle with no visual separation, and the two time inputs could
    still feel cramped side by side on very narrow phones). This makes the
-   whole row deliberately stack — toggle+label full-width on its own line,
-   then the two clock in/out boxes below, evenly split — rather than
+   whole row deliberately stack - toggle+label full-width on its own line,
+   then the two clock in/out boxes below, evenly split - rather than
    relying on wrap alone to happen to land in a readable spot. */
 @media (max-width: 520px) {
     .dayRow {

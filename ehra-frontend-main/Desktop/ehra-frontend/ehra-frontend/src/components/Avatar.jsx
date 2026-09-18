@@ -13,7 +13,7 @@ function initials(name) {
 /**
  * A photo when one is set and actually loads; initials otherwise. Covers
  * three cases the same way: no picture on file, a picture URL that 404s,
- * and a picture that's still loading — all show initials rather than a
+ * and a picture that's still loading - all show initials rather than a
  * broken-image glyph or a flash of empty space.
  */
 export default function Avatar({ src, name, className, imgClassName }) {

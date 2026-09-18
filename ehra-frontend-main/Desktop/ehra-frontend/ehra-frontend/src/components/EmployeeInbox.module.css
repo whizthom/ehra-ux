@@ -1,5 +1,5 @@
 /* ── Layout ──────────────────────────────────────────────────────────────
-   No card here — sits directly on the page background, same as
+   No card here - sits directly on the page background, same as
    ChatPanel/MessagesTab. position:relative is still needed: it anchors
    the sliding detail panel overlay on phones (see the 900px block below). */
 .container {
@@ -86,7 +86,7 @@
     animation-delay: calc(var(--stagger, 0) * 35ms);
 }
 
-/* A quick, subtle rise-and-fade as the list first populates — makes a
+/* A quick, subtle rise-and-fade as the list first populates - makes a
    freshly loaded inbox feel like it just arrived rather than snapping
    into place all at once. Respects users who'd rather not see motion. */
 @keyframes itemIn {
@@ -316,7 +316,7 @@
 
 /* Doubles as "close" on desktop (the list is still visible right next to
    it) and as the primary "go back" affordance on phones, where the list
-   isn't visible at all until this is tapped — or swiped, see the touch
+   isn't visible at all until this is tapped - or swiped, see the touch
    handlers on .detailPanel. */
 .backBtn {
     display: flex;
@@ -464,7 +464,7 @@
 /* ── Responsive ───────────────────────────────────────────────────────────
    Below the app's tablet breakpoint, list and detail can't sit side by
    side. Rather than an instant display:none swap, the detail panel is
-   made an absolutely-positioned overlay that slides in from the right —
+   made an absolutely-positioned overlay that slides in from the right -
    `.showDetail` drives that, and the same transform is what the swipe
    handlers in the component grab onto for a drag-to-dismiss gesture.
    Both panels stay mounted the whole time, so the transition always has
@@ -555,7 +555,7 @@
     }
 }
 
-/* Very small phones in landscape, or split-screen — shrink the swipe
+/* Very small phones in landscape, or split-screen - shrink the swipe
    affordance's shadow so it doesn't dominate a cramped viewport. */
 @media (max-width: 360px) {
     .detailPanel {

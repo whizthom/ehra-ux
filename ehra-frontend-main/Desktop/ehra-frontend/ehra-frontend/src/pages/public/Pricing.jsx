@@ -19,27 +19,27 @@ import {
 import VerifyEmailToUpgradeModal from "../../components/VerifyEmailToUpgradeModal";
 
 /**
- * /pricing — reachable only when signed in (see the ProtectedRoute wrapper
+ * /pricing - reachable only when signed in (see the ProtectedRoute wrapper
  * around this route in App.jsx). Any authenticated Identity can view it;
  * only an Employer/admin context can actually check out (enforced both
  * here and, for real, by the backend's /api/subscription/** being
- * admin-only — see SecurityConfig).
+ * admin-only - see SecurityConfig).
  *
  * Checkout flow:
- *   1. Starter's "Start Free" — there's nothing to pay for, so this just
+ *   1. Starter's "Start Free" - there's nothing to pay for, so this just
  *      returns them to the dashboard rather than sending them anywhere
  *      signup-shaped (they already have an account, that's how they got
  *      here).
- *   2. Custom's "Contact Sales" (cta.action === "contact") — also nothing
+ *   2. Custom's "Contact Sales" (cta.action === "contact") - also nothing
  *      to check out; sends them to /support instead, regardless of
  *      admin/employee context.
  *   3. Any other paid plan (Pro/Business/Elite), signed in but NOT in an
  *      admin/employer context (e.g. viewing as an employee): nothing to
- *      check out from here either — sends them back to the dashboard
+ *      check out from here either - sends them back to the dashboard
  *      rather than attempting a request the backend would reject anyway.
  *   4. Any other paid plan, signed in as an admin: initialize a checkout
  *      on the backend. If the backend blocks it with 403 (business email
- *      not verified — see EmailVerificationService
+ *      not verified - see EmailVerificationService
  *      #requireVerifiedEmailForSecurity), show VerifyEmailToUpgradeModal
  *      instead of the Paystack popup; once verified (auto-detected via
  *      polling, or a manual "I've verified" click), the SAME checkout
@@ -61,7 +61,7 @@ export default function Pricing() {
   const isSignedInAdmin = user?.role === "ROLE_ADMIN";
 
   // Shown INSTEAD OF the Paystack popup when checkout/initialize comes
-  // back 403 — i.e. the email-verification gate
+  // back 403 - i.e. the email-verification gate
   // (EmailVerificationService#requireVerifiedEmailForSecurity) blocked
   // it. Remembers which plan/cycle was being attempted so verifying
   // successfully can resume the EXACT same checkout automatically,
@@ -72,7 +72,7 @@ export default function Pricing() {
   // Below 640px, .cardsGrid becomes a horizontal snap-scroller (see
   // pricing.module.css). The scrolling itself is pure CSS; this just
   // tracks which card is centered so the dots below can reflect and
-  // control it — a small enhancement, not something the carousel depends
+  // control it - a small enhancement, not something the carousel depends
   // on to function. Defaults to Pro (index 1) since that's the card
   // worth landing on first.
   const trackRef = useRef(null);
@@ -150,10 +150,10 @@ export default function Pricing() {
         },
       });
     } catch (err) {
-      // 403 here can ONLY mean the email-verification gate — a non-admin
+      // 403 here can ONLY mean the email-verification gate - a non-admin
       // never reaches this call at all (isSignedInAdmin is checked
       // before initializeCheckout is ever attempted, and /api/subscription/**
-      // is admin-only at the route level regardless — see SecurityConfig).
+      // is admin-only at the route level regardless - see SecurityConfig).
       if (err?.response?.status === 403) {
         setCheckoutState({ planId: null, loading: false, error: null });
         setVerifyPrompt({ plan });
@@ -162,7 +162,7 @@ export default function Pricing() {
       setCheckoutState({
         planId: plan.id,
         loading: false,
-        error: "Checkout isn't available yet — please try again shortly.",
+        error: "Checkout isn't available yet - please try again shortly.",
       });
     }
   }
@@ -175,7 +175,7 @@ export default function Pricing() {
       return;
     }
 
-    // Custom plan has nothing to check out — every authenticated Identity
+    // Custom plan has nothing to check out - every authenticated Identity
     // (admin or employee) can reach /support, so this doesn't need the
     // isSignedInAdmin gate below.
     if (plan.cta.action === "contact") {
@@ -271,7 +271,7 @@ export default function Pricing() {
           onVerified={() => {
             const { plan } = verifyPrompt;
             setVerifyPrompt(null);
-            // Straight into Paystack — no re-click needed, exactly like
+            // Straight into Paystack - no re-click needed, exactly like
             // the "if verified, leads them straight to processing"
             // requirement.
             launchPaystackForPlan(plan);

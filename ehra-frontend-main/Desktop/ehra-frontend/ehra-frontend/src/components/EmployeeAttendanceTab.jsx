@@ -6,7 +6,7 @@ import styles from "./EmployeeAttendanceTab.module.css";
 
 // The employer's `AttendanceSection` pulls the company-wide "who clocked
 // in today" view via GET /attendance/today (ADMIN only). An employee
-// session can never call that — this is the correct replacement, scoped
+// session can never call that - this is the correct replacement, scoped
 // to the signed-in employee's own record via GET /attendance/me.
 export default function EmployeeAttendanceTab() {
   const navigate = useNavigate();
@@ -67,7 +67,7 @@ export default function EmployeeAttendanceTab() {
                     hour: "2-digit",
                     minute: "2-digit",
                   })
-                : "—"}
+                : "-"}
             </span>
             <span>
               <i className="ti ti-logout" /> Out:{" "}
@@ -76,7 +76,7 @@ export default function EmployeeAttendanceTab() {
                     hour: "2-digit",
                     minute: "2-digit",
                   })
-                : "—"}
+                : "-"}
             </span>
             <span className={styles.todayStatus}>{today.status}</span>
           </div>

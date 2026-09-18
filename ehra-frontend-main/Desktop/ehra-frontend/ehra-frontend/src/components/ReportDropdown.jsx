@@ -9,7 +9,7 @@ import styles from "./ReportsTab.module.css";
  *
  * value/onChange behave like a native select: onChange receives the raw
  * string value of whichever option was picked, and the caller converts
- * it (e.g. Number(...)) if needed — same as reading e.target.value.
+ * it (e.g. Number(...)) if needed - same as reading e.target.value.
  */
 export default function ReportDropdown({
   icon,

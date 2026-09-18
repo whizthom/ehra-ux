@@ -87,7 +87,7 @@
 }
 
 /* Used when there isn't enough room below the trigger to clear the fixed
-   mobile bottom nav — anchors the menu above the trigger instead, with a
+   mobile bottom nav - anchors the menu above the trigger instead, with a
    matching upward slide-in so it still feels intentional either way. */
 .menuTop {
     top: auto;

@@ -4,14 +4,14 @@ import { getAccessToken } from "../api/authApi";
 /**
  * Opens an SSE connection to /api/messages/stream and calls the
  * provided callbacks when events arrive. One connection per mounted
- * component is fine — the backend keeps a list of emitters per user
+ * component is fine - the backend keeps a list of emitters per user
  * email, so multiple tabs/components for the same user all get pushed to.
  *
  * @param {object} handlers
- *   - onNewMessage(payload)      — a new announcement/message arrived
- *   - onReadUpdate(payload)      — a read-receipt update arrived (admin)
- *   - onNewNotification(payload) — a new Notification row was created for this user
- * @param {boolean} enabled       — set false to skip opening the connection
+ *   - onNewMessage(payload)      - a new announcement/message arrived
+ *   - onReadUpdate(payload)      - a read-receipt update arrived (admin)
+ *   - onNewNotification(payload) - a new Notification row was created for this user
+ * @param {boolean} enabled       - set false to skip opening the connection
  */
 export default function useMessageStream(
   { onNewMessage, onReadUpdate, onNewNotification } = {},

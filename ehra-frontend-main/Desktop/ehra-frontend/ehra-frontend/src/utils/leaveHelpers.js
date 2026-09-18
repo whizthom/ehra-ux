@@ -1,4 +1,4 @@
-// Shared display helpers for the leave workflow — kept in one place so the
+// Shared display helpers for the leave workflow - kept in one place so the
 // employee, HOD, and employer views never drift out of sync with each
 // other or with the backend's LeaveType / LeaveStatus enums.
 
@@ -98,12 +98,12 @@ export function leaveStatusConfig(status) {
 // for use under a status pill so the chain is legible without reading
 // the whole detail card.
 //
-// Carries the cover-person outcome forward at every later stage — not
+// Carries the cover-person outcome forward at every later stage - not
 // just the moment it happens. Previously this only described whichever
 // single stage the request currently sat at, so as soon as a request
 // moved past PENDING_HOD (e.g. HOD was skipped and it went straight to
 // PENDING_EMPLOYER, or it later reached APPROVED), any mention that a
-// cover person had accepted disappeared from this line entirely — the
+// cover person had accepted disappeared from this line entirely - the
 // only place that fact still showed up was buried in the full timeline.
 export function leaveStageDescription(leave) {
   const hasCover = !!leave.coverPersonFirstName;
@@ -120,12 +120,12 @@ export function leaveStageDescription(leave) {
       return `${coverName} declined to cover this leave. Choose someone else to continue.`;
     case "PENDING_HOD":
       return hasCover
-        ? `${coverName} accepted to cover — now waiting on the Head of Department.`
+        ? `${coverName} accepted to cover - now waiting on the Head of Department.`
         : "Waiting on the Head of Department.";
     case "PENDING_EMPLOYER": {
       const coverPart = hasCover ? `${coverName} accepted to cover. ` : "";
       const nextPart = leave.hodDecidedById
-        ? "HOD approved — awaiting final employer sign-off."
+        ? "HOD approved - awaiting final employer sign-off."
         : "Awaiting the employer's decision.";
       return `${coverPart}${nextPart}`;
     }
@@ -133,7 +133,7 @@ export function leaveStageDescription(leave) {
       const coverPart = hasCover
         ? ` ${coverName} is confirmed as cover.`
         : "";
-      return `Approved — leave is confirmed.${coverPart}`;
+      return `Approved - leave is confirmed.${coverPart}`;
     }
     case "REJECTED":
       return "This leave request was rejected.";
@@ -161,15 +161,15 @@ export const HISTORY_STATUSES = ["APPROVED", "REJECTED", "CANCELLED"];
 // card. Cover is only included when a cover person was actually
 // nominated (it's optional per LeavePolicy). HOD is skipped only when we
 // have positive evidence the request went straight from request/cover to
-// the employer with no HOD decision recorded — otherwise we assume it's
+// the employer with no HOD decision recorded - otherwise we assume it's
 // still to come, since we can't see the department's policy from here.
 export function leaveSteps(leave) {
   const hasCover = !!leave.coverPersonFirstName;
   // Was HOD ever part of this chain? Positive evidence it was skipped is:
   // the request has moved past cover (or never had one) and past HOD
   // (never sat in PENDING_HOD) with no HOD decision recorded. This must
-  // hold for *any* later status — PENDING_EMPLOYER, APPROVED, or
-  // REJECTED — not just PENDING_EMPLOYER, or a since-decided request that
+  // hold for *any* later status - PENDING_EMPLOYER, APPROVED, or
+  // REJECTED - not just PENDING_EMPLOYER, or a since-decided request that
   // skipped HOD would wrongly grow an HOD step once it's approved/rejected.
   const skippedHod =
     leave.status !== "PENDING_COVER" &&
@@ -203,7 +203,7 @@ export function leaveSteps(leave) {
 }
 
 export function formatDate(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d).toLocaleDateString([], {
     day: "numeric",
     month: "short",
@@ -214,7 +214,7 @@ export function formatDate(d) {
 // Same idea as formatDate, but for LocalDateTime fields (cover response,
 // HOD decision, employer decision) where the time-of-day is worth showing.
 function formatDateTime(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d).toLocaleString([], {
     day: "numeric",
     month: "short",
@@ -224,13 +224,13 @@ function formatDateTime(d) {
   });
 }
 
-// Builds the full, detailed timeline for a leave request — one entry per
+// Builds the full, detailed timeline for a leave request - one entry per
 // stage of the chain (Requested → Cover → HOD → Employer), each carrying
 // who acted, what they decided, any note they left, and when. This is the
 // data behind the "detailed process" view on both the Processing and
 // History tabs: the horizontal StageTrack/leaveSteps() only drives the dot
 // tracker (state per stage), but doesn't surface *who* approved/rejected
-// or *what note* they left — this does.
+// or *what note* they left - this does.
 //
 // Mirrors the same "is HOD in the chain at all" logic as leaveSteps() so
 // the two never disagree about which stages exist for a given request.
@@ -243,7 +243,7 @@ export function leaveTimeline(leave) {
 
   // Once the request has moved past the cover stage without ever being
   // pending on an HOD (and none has decided), we know HOD was never part
-  // of this chain — same rule leaveSteps() uses.
+  // of this chain - same rule leaveSteps() uses.
   const skippedHod =
     leave.status !== "PENDING_COVER" &&
     leave.status !== "COVER_DECLINED" &&
@@ -258,7 +258,7 @@ export function leaveTimeline(leave) {
       state: "done",
       timestamp: leave.createdAt ? formatDateTime(leave.createdAt) : null,
       detail: `Submitted a ${leave.days}-day ${leaveTypeLabel(leave.leaveType || "").toLowerCase()} request${
-        leave.reason ? ` — "${leave.reason}"` : ""
+        leave.reason ? ` - "${leave.reason}"` : ""
       }.`,
     },
   ];
@@ -309,7 +309,7 @@ export function leaveTimeline(leave) {
   }
 
   {
-    // A REJECTED status can come from either the HOD or the employer —
+    // A REJECTED status can come from either the HOD or the employer -
     // the request never reaches PENDING_EMPLOYER if the HOD rejects it,
     // so the employer never actually made a decision in that case. Only
     // credit/blame the employer here when they were the one who decided:
@@ -331,7 +331,7 @@ export function leaveTimeline(leave) {
         leave.adminNote ? ` Note: "${leave.adminNote}"` : ""
       }`;
     } else if (leave.status === "REJECTED" && hodRejected) {
-      detail = "Never reached — rejected earlier by the Head of Department.";
+      detail = "Never reached - rejected earlier by the Head of Department.";
     }
     entries.push({
       key: "employer",

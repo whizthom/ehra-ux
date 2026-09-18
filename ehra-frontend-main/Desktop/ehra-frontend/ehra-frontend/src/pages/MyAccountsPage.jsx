@@ -9,8 +9,8 @@ import dash from "./Dashboard.module.css";
 import styles from "./MyAccountsPage.module.css";
 
 // This page reuses the exact same shell (sidebar, topbar, mobile bottom
-// nav) as Dashboard.jsx / EmployeeDashboard.jsx via Dashboard.module.css —
-// see ScanAttendance.jsx for the same pattern — so a person landing here
+// nav) as Dashboard.jsx / EmployeeDashboard.jsx via Dashboard.module.css -
+// see ScanAttendance.jsx for the same pattern - so a person landing here
 // gets the same chrome and can navigate anywhere else in the app without
 // getting stranded on a bare, nav-less page. Only the accounts list/tabs
 // (styles from MyAccountsPage.module.css) are specific to this screen.
@@ -54,7 +54,7 @@ const ADMIN_NAV = [
   },
 ];
 
-// This screen doesn't have its own tab system tied to the shared NAV — so
+// This screen doesn't have its own tab system tied to the shared NAV - so
 // "My Accounts" is always shown as the active nav item, same idea as
 // ScanAttendance.jsx always highlighting "Attendance".
 const ACTIVE_LABEL = "My Accounts";
@@ -77,7 +77,7 @@ function personInitials(first, last) {
 }
 
 // Tracks a horizontally-scrollable element and returns { left, width } as
-// percentages of its own track — same helper used on the dashboards and
+// percentages of its own track - same helper used on the dashboards and
 // ScanAttendance.jsx, kept local here since it isn't exported from
 // anywhere shared.
 function useScrollThumb(ref) {
@@ -126,7 +126,7 @@ const BLANK_BUSINESS = { name: "", email: "", phone: "", address: "" };
 
 // Membership-type → display label / post-switch destination. Same map
 // used in MyAccountsPanel.jsx and SelectWorkspace.jsx, which render the
-// same underlying list elsewhere — kept in sync across all three.
+// same underlying list elsewhere - kept in sync across all three.
 const ROLE_LABEL = {
   EMPLOYER: "Owner · Admin",
   EMPLOYEE: "Employee",
@@ -136,7 +136,7 @@ function roleLabel(type) {
   return ROLE_LABEL[type] || type;
 }
 // TODO: point CUSTOMER at a real customer-facing dashboard once that
-// surface exists — "/dashboard" is a placeholder for now, since nothing
+// surface exists - "/dashboard" is a placeholder for now, since nothing
 // creates CustomerMembership rows yet and there's nowhere else to send it.
 function destinationFor(contextType) {
   if (contextType === "EMPLOYEE") return "/my-dashboard";
@@ -165,9 +165,9 @@ const TABS = [
   },
 ];
 
-// The "My Accounts" nav destination — every workspace (business) the
+// The "My Accounts" nav destination - every workspace (business) the
 // logged-in Identity currently holds a membership at: as owner (EMPLOYER),
-// as staff (EMPLOYEE), or as a customer (CUSTOMER — tab stays hidden until
+// as staff (EMPLOYEE), or as a customer (CUSTOMER - tab stays hidden until
 // someone actually has one; see CustomerMembership's backend class doc).
 // Split into sections/tabs so each role's accounts are easy to scan on
 // their own. Lets the person switch between them without logging out, and
@@ -191,7 +191,7 @@ export default function MyAccountsPage() {
 
   // Matches the save/restore effect in Dashboard.jsx / EmployeeDashboard.jsx.
   // This page has its own separate copy of the bottom nav strip (own DOM
-  // node, own ref), so without this it always mounts at scrollLeft 0 —
+  // node, own ref), so without this it always mounts at scrollLeft 0 -
   // which then gets read back by the dashboard's own restore effect,
   // making the sync look reversed. Keyed by dashboard type so an
   // employer's scroll position never leaks into an employee's strip (or
@@ -238,7 +238,7 @@ export default function MyAccountsPage() {
 
   const handleNavClick = (n) => {
     if (n.isFullPage) {
-      // Already here — nothing to navigate to.
+      // Already here - nothing to navigate to.
       return;
     }
     navigate(dashboardPath, { state: { activeNav: n.label } });
@@ -275,7 +275,7 @@ export default function MyAccountsPage() {
     return byType;
   }, [accounts]);
 
-  // Nothing creates CustomerMembership rows yet (groundwork only — see
+  // Nothing creates CustomerMembership rows yet (groundwork only - see
   // CustomerMembership's backend class doc), so hide the tab entirely
   // until someone actually has at least one, rather than showing a
   // permanently-empty "Customer" tab to every user today.
@@ -563,7 +563,7 @@ export default function MyAccountsPage() {
                   </button>
 
                   <p className={styles.hint}>
-                    This creates a new, separate business — you'll be its owner,
+                    This creates a new, separate business - you'll be its owner,
                     and it stays fully independent from any other business
                     you're connected to.
                   </p>
@@ -671,7 +671,7 @@ export default function MyAccountsPage() {
             </button>
           ))}
 
-          {/* Logout has no sidebar/desktop equivalent in this strip — on
+          {/* Logout has no sidebar/desktop equivalent in this strip - on
               desktop it's the icon button in the sidebar footer instead.
               This item only ever renders inside .bottomNav, which is
               display:none above 900px, so it's mobile-only by construction. */}

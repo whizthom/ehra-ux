@@ -1,6 +1,6 @@
 /* ── BranchesTab.module.css ────────────────────────────────────────────────
    List view (cards + stats + toolbar) and a full in-flow page for
-   Add/Edit — no modal is used for the branch form, only for the
+   Add/Edit - no modal is used for the branch form, only for the
    destructive delete confirmation, which is a custom dialog (not the
    browser's native confirm()).
    ───────────────────────────────────────────────────────────────────────── */
@@ -827,7 +827,7 @@
     margin-top: 1px;
 }
 
-/* Footer save bar — flows with the page like any other section (mirrors
+/* Footer save bar - flows with the page like any other section (mirrors
    the header actions so the choice to save/cancel is repeated at the
    bottom of a long form), rather than being pinned to the viewport. */
 .pageFooterActions {
@@ -917,7 +917,7 @@
     cursor: not-allowed;
 }
 
-/* ── Delete confirmation dialog (custom — not window.confirm) ── */
+/* ── Delete confirmation dialog (custom - not window.confirm) ── */
 .overlay {
     position: fixed;
     inset: 0;

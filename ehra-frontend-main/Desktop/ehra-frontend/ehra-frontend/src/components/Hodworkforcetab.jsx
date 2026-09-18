@@ -18,18 +18,18 @@ const STATUS_STYLE = {
 };
 
 /**
- * HodWorkforceTab — read-only workforce view for Heads of Department.
+ * HodWorkforceTab - read-only workforce view for Heads of Department.
  *
  * Differences from WorkforceTab (employer):
  *  • Only shows employees in the HOD's own department(s) via GET /api/employees/my-department
  *  • No trash / soft-delete / restore actions
  *  • No DepartmentCell reassignment
- *  • Can assign/change an employee's position (job title) via PositionCell —
+ *  • Can assign/change an employee's position (job title) via PositionCell -
  *    the change is submitted for the employer's approval, it isn't applied
  *    immediately (see PositionCell mode="hod")
  *  • No "Send message" button on profile page (navigates to profile but
  *    the view prop `hodView` is passed via URL state so EmployeeProfilePage
- *    can hide the messaging UI — see EmployeeProfilePage.jsx)
+ *    can hide the messaging UI - see EmployeeProfilePage.jsx)
  */
 export default function HodWorkforceTab() {
   const navigate = useNavigate();
@@ -141,7 +141,7 @@ export default function HodWorkforceTab() {
                 </div>
 
                 <div className={styles.cardBody}>
-                  <p className={styles.empName}>{name || "—"}</p>
+                  <p className={styles.empName}>{name || "-"}</p>
                   <p className={styles.empEmail}>{emp.email}</p>
                   {emp.phone && <p className={styles.empPhone}>{emp.phone}</p>}
                   <div className={styles.deptRow}>
@@ -192,7 +192,7 @@ export default function HodWorkforceTab() {
                   </div>
                 </div>
 
-                {/* View profile only — no remove/trash/message actions */}
+                {/* View profile only - no remove/trash/message actions */}
                 <div className={styles.cardActions}>
                   <button
                     className={styles.viewBtn}

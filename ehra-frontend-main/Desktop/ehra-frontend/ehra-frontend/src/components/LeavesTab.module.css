@@ -1,8 +1,8 @@
 /* ── Layout ──
-   No card chrome here on purpose — this sits directly on the page
+   No card chrome here on purpose - this sits directly on the page
    background (same treatment as the Attendance tab), not inside a
    bordered/shadowed panel.
-   flex: 1 is the actual fix for the brand-footer/logo positioning —
+   flex: 1 is the actual fix for the brand-footer/logo positioning -
    Dashboard.jsx renders <LeavesTab/> and the shared footer as siblings
    inside .contentFullNarrow (itself already full viewport height via
    its own flex:1 inside .main). Without flex-grow here, this root div
@@ -10,12 +10,12 @@
    needs. On a short section (Policies with a handful of leave types,
    Balances with few employees, an empty On-Leave list) that stranded
    the footer right after the short content instead of at the bottom of
-   the viewport — it looked like it was "floating in the middle" of a
+   the viewport - it looked like it was "floating in the middle" of a
    mostly-empty screen instead of sitting at the true end of the page.
    flex: 1 makes this div itself grow to fill any leftover space in
    .contentFullNarrow first (its own children still stack at the top as
    normal), so the footer that follows always lands flush with the
-   bottom of the viewport when content is short — and once real content
+   bottom of the viewport when content is short - and once real content
    is tall enough to need scrolling, this has no effect either way: the
    footer just follows right after it and everything scrolls together
    as one, same as it already does on the main dashboard nav. */
@@ -29,7 +29,7 @@
 
 /* Only the Requests section's two-pane list/detail layout needs a bounded
    height (its .requestsLayout below relies on flex:1 + min-height:0 for
-   its own internal scrolling) — applying height:100% unconditionally to
+   its own internal scrolling) - applying height:100% unconditionally to
    every section forced short sections like Policies/Balances to always
    be a full viewport tall too, leaving a large empty gap before the page's
    real end (and the shared footer after it) instead of following right
@@ -376,7 +376,7 @@
     color: var(--text-primary);
 }
 
-/* Hidden on desktop — the detail pane sits right next to the list there,
+/* Hidden on desktop - the detail pane sits right next to the list there,
    so .closeBtn (which just deselects) is enough. Once the pane becomes a
    full-screen overlay on mobile (see .requestsLayout.showDetail below),
    this is the primary way back, alongside the swipe gesture. */
@@ -671,9 +671,9 @@
     flex-shrink: 0;
 }
 
-/* Thin scroll-linked progress cue underneath the nav — same idea as the
+/* Thin scroll-linked progress cue underneath the nav - same idea as the
    dashboard's bottom-nav indicator, only shown once the nav is a
-   horizontally-scrollable pill strip (mobile — see responsive section). */
+   horizontally-scrollable pill strip (mobile - see responsive section). */
 .employerNavScrollTrack {
     display: none;
 }
@@ -910,13 +910,13 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    /* No padding-bottom here — the shared Dashboard content wrapper
+    /* No padding-bottom here - the shared Dashboard content wrapper
        (.contentFullNarrow, in Dashboard.module.css) already adds 35vh of
        end-of-scroll breathing room for every tab on that wrapper,
        including this one. Adding a second 35vh here stacked on top of it,
        shoving the brand-footer logo an extra third-of-a-viewport further
        down than it sits for every other section (Requests/Balances/
-       On-Leave) — it looked "lost"/disconnected from the page bottom
+       On-Leave) - it looked "lost"/disconnected from the page bottom
        instead of following right after the last policy row like it does
        everywhere else. */
 }
@@ -1147,7 +1147,7 @@
     border-radius: 12px;
 }
 
-/* Phone-only alternative to the table above — see .balancesCards in the
+/* Phone-only alternative to the table above - see .balancesCards in the
    responsive section for when each swaps in. A sideways-scrolling
    spreadsheet is fine on a tablet but a bad first move on a phone, so
    below that width each employee becomes a card and each leave type
@@ -1165,7 +1165,7 @@
     overflow: hidden;
 }
 
-/* The whole header row is the tap target — avatar/name on the left,
+/* The whole header row is the tap target - avatar/name on the left,
    a quick "how many days left in total" figure plus a chevron on the
    right, so a collapsed card still tells you something before you open
    it rather than just being a name with nothing underneath. */
@@ -1404,11 +1404,11 @@
        The list used to be stretched to fill a fixed-height flex box
        (via .containerFull + .requestsLayout's own flex/overflow:hidden),
        which made it scroll inside its own little viewport instead of
-       with the page — and gave it a boxed-in, card-like look (distinct
+       with the page - and gave it a boxed-in, card-like look (distinct
        surface background) unlike every other section here. Below this
        width it now sits flush on the page background and flows in
        normal document flow, same treatment as Leave Policies, so the
-       whole page — list, then the brand footer beneath it — scrolls
+       whole page - list, then the brand footer beneath it - scrolls
        together as one.
        This only applies while the list itself is showing. Opening the
        detail view (.showDetail, via .containerDetailOpen below) still
@@ -1427,7 +1427,7 @@
         flex: none;
         min-height: 0;
         overflow: visible;
-        /* Stays relative (not static) even in list mode — the detail
+        /* Stays relative (not static) even in list mode - the detail
            pane below is always mounted (just translated off-screen via
            .showDetail), and position:absolute needs a positioned
            ancestor nearby at all times, not just while it's visible. */
@@ -1484,7 +1484,7 @@
     }
 
     /* ── Employer nav becomes a scrollable strip of filled pills instead
-       of underlined tabs — reads as a native segmented control, and
+       of underlined tabs - reads as a native segmented control, and
        the thin thumb underneath hints there's more to scroll to. ── */
     .employerNav {
         gap: 8px;
@@ -1516,11 +1516,11 @@
     }
 
     /* `.employerNavBtn:hover` above is a class+pseudo-class selector,
-       which beats `.employerNavBtnActive` alone on specificity — without
+       which beats `.employerNavBtnActive` alone on specificity - without
        this rule, hovering the pill that's already active silently reverts
        its text from white back to var(--accent), which is the exact same
        green as the pill's own fill. Same specificity as the hover rule
-       above (also class+pseudo-class), so source order decides — this
+       above (also class+pseudo-class), so source order decides - this
        comes after it, so it wins on the active pill specifically. */
     .employerNavBtnActive:hover {
         background: var(--accent-hover);
@@ -1532,7 +1532,7 @@
         color: #fff;
     }
 
-    /* The On Leave badge had no "sitting on a solid green pill" variant —
+    /* The On Leave badge had no "sitting on a solid green pill" variant -
        its default pale-green-on-translucent-green look nearly disappears
        once the pill behind it is a solid fill, active or hovered. */
     .employerNavBtnActive .onLeaveNavBadge,
@@ -1551,7 +1551,7 @@
         overflow: hidden;
     }
 
-    /* ── Status sub-tabs (Awaiting Me / In Progress / …) — equal-width
+    /* ── Status sub-tabs (Awaiting Me / In Progress / …) - equal-width
        underline tabs get cramped with four labels + counts on a phone,
        so below this width they become the same scrollable pill idiom
        as the employer nav above, just smaller. ── */
@@ -1597,13 +1597,13 @@
     }
 
     /* Toggle's "Active"/"Inactive" text is redundant with the slider
-       itself once space is tight — the slider alone still reads fine. */
+       itself once space is tight - the slider alone still reads fine. */
     .toggleText {
         display: none;
     }
 
     /* ── Balances: table gives way to the card list (see .balancesCards
-       above) — nothing to pan sideways to read on a phone. ── */
+       above) - nothing to pan sideways to read on a phone. ── */
     .balancesTable {
         display: none;
     }
@@ -1623,7 +1623,7 @@
     }
 }
 
-/* Smallest phones — balance chips read better as a single column once
+/* Smallest phones - balance chips read better as a single column once
    two-across gets too narrow to show both the label and value. */
 @media (max-width: 380px) {
     .balanceChipGrid {
@@ -1745,7 +1745,7 @@
     color: var(--text-secondary);
 }
 
-/* Shared with EmployeeDashboard.module.css — days left pill */
+/* Shared with EmployeeDashboard.module.css - days left pill */
 .daysLeftPill {
     margin-left: auto;
     flex-shrink: 0;

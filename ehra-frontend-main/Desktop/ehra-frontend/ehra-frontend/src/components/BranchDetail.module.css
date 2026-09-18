@@ -210,7 +210,7 @@
     margin-bottom: 16px;
     border-bottom: 1px solid var(--border-color);
     overflow-x: auto;
-    /* Same treatment as the page-level .tabBar above — "Schedule
+    /* Same treatment as the page-level .tabBar above - "Schedule
        settings" is the longest label of the three, so on a narrow phone
        this scrolls horizontally instead of wrapping mid-label or forcing
        the page itself wider than the viewport. */
@@ -274,7 +274,7 @@
     border-radius: 10px;
     background: var(--bg-surface);
     flex-wrap: wrap;
-    /* Was a hard, unwrapped row before — switch + 84px label + two time
+    /* Was a hard, unwrapped row before - switch + 84px label + two time
        boxes all fighting for space on one line, with the clock-out box
        specifically the first thing to get squeezed off-screen on a
        narrow phone since it's last in source order. Wrapping lets the
@@ -356,7 +356,7 @@
     color: var(--text-primary);
     box-sizing: border-box;
     /* iOS Safari otherwise renders <input type="time"> narrower than its
-       box regardless of width/flex — this keeps clock-out from silently
+       box regardless of width/flex - this keeps clock-out from silently
        shrinking to an unusable sliver on iPhone specifically. */
     -webkit-appearance: none;
     appearance: none;

@@ -40,7 +40,7 @@
     border-bottom-color: var(--accent);
 }
 
-/* No side padding — this sits directly on the plain page background now
+/* No side padding - this sits directly on the plain page background now
    (no card/box around it), so it can use the full width the page already
    gives it instead of adding its own extra margin on top.
    Content flows normally here; scrolling and bottom-nav clearance are

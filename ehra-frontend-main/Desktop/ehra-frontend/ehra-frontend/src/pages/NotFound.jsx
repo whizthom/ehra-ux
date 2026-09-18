@@ -6,7 +6,7 @@ import styles from "./NotFound.module.css";
  * Catch-all for any URL that doesn't match a route (typo'd link, stale
  * bookmark, a deep link to something removed, etc.). Without this,
  * react-router v7's <Routes> renders nothing at all for an unmatched
- * path — a blank white screen with no way back, which is exactly the
+ * path - a blank white screen with no way back, which is exactly the
  * "no route should produce a blank page" bug this project asked to be
  * rid of. Sits as the last <Route path="*"> in App.jsx.
  */

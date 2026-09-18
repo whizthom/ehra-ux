@@ -8,15 +8,15 @@ function Row({ label, value }) {
   return (
     <div className={styles.row}>
       <span className={styles.rowLabel}>{label}</span>
-      <span className={styles.rowValue}>{value || "—"}</span>
+      <span className={styles.rowValue}>{value || "-"}</span>
     </div>
   );
 }
 
-// Replaces `<BusinessSettingsTab>` (the company profile editor — ADMIN
+// Replaces `<BusinessSettingsTab>` (the company profile editor - ADMIN
 // only, GET/PUT /business/me), which is why "Settings" 403'd for an
 // employee session. This just surfaces the profile already returned by
-// GET /employees/me — read-only here; use "Profile Edits" to request a
+// GET /employees/me - read-only here; use "Profile Edits" to request a
 // change.
 export default function MyProfileSettings({ profile, onGoToProfileEdits }) {
   if (!profile) {

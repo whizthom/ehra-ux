@@ -133,7 +133,7 @@
     gap: 8px;
 }
 
-/* Personal "message this employee" shortcut — mobile only (see the
+/* Personal "message this employee" shortcut - mobile only (see the
    responsive block below); on desktop, messaging happens through the
    dedicated Send Message modal from the dashboard header instead. */
 .messageIconBtn {
@@ -243,7 +243,7 @@
     color: var(--text-secondary);
 }
 
-/* Was mobile-only ("set from the full profile page on desktop" — that
+/* Was mobile-only ("set from the full profile page on desktop" - that
    Payroll section now exists there too, but this quick-set stays visible
    at every size so the employer isn't forced to open a profile just to
    set a salary). */
@@ -335,7 +335,7 @@
 
 /* Mirrors the app's standard "Back to X" pattern (see
    EmployeeProfilePage's .backBtn) so leaving the trash view feels the
-   same as every other back-navigation in the app — just recolored to
+   same as every other back-navigation in the app - just recolored to
    sit legibly on the danger banner instead of a plain surface. */
 .backToWorkforceBtn {
     display: flex;
@@ -464,9 +464,9 @@
 }
 
 /* ── Mobile-only additions ──────────────────────────────────────────────
-   The personal message shortcut is mobile-only — matches the app shell's
+   The personal message shortcut is mobile-only - matches the app shell's
    own mobile breakpoint (900px, where the sidebar gives way to the bottom
-   nav). Salary (.salaryRowMobile, above) is no longer restricted here —
+   nav). Salary (.salaryRowMobile, above) is no longer restricted here -
    it's visible at every size. */
 @media (max-width: 900px) {
     .messageIconBtn {

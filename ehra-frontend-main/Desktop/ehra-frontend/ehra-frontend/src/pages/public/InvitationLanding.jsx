@@ -7,7 +7,7 @@ import Logo from "../../components/Logo";
 
 // Key used to remember an invite token across a trip to /login, so
 // someone who gets an invite link while logged out lands right back here
-// — with their session now attached — instead of losing the invite.
+// - with their session now attached - instead of losing the invite.
 const PENDING_INVITE_KEY = "ehra_pending_invite";
 
 export default function InvitationLanding() {
@@ -20,7 +20,7 @@ export default function InvitationLanding() {
   const [businessName, setBusinessName] = useState("");
 
   // Separate from `valid`: this is true only when the backend actually
-  // answered "no such invitation / expired / used / revoked" — as opposed
+  // answered "no such invitation / expired / used / revoked" - as opposed
   // to the request itself failing (timeout, cold-start backend, dropped
   // connection, CORS misconfig, etc.). Collapsing both into a single
   // "invalid" state used to permanently tell a real invitee their link
@@ -28,7 +28,7 @@ export default function InvitationLanding() {
   // to tell the two apart or retry. See loadInvitation below.
   const [loadError, setLoadError] = useState(false);
 
-  // Authenticated-accept flow state (existing Identity — a business owner
+  // Authenticated-accept flow state (existing Identity - a business owner
   // picking up part-time work, or anyone already on Ehra being invited to
   // a second business). Kept separate from the anonymous /register/:token
   // flow, which creates a brand-new Identity.
@@ -37,7 +37,7 @@ export default function InvitationLanding() {
   const [acceptError, setAcceptError] = useState("");
 
   // Purely cosmetic: validateInvitation can now legitimately take a while
-  // (see its 45s timeout, sized for a cold-starting backend) — after a
+  // (see its 45s timeout, sized for a cold-starting backend) - after a
   // few seconds of silence, say so, rather than leaving a bare spinner
   // that starts to look stuck or broken.
   const [slowLoad, setSlowLoad] = useState(false);
@@ -52,7 +52,7 @@ export default function InvitationLanding() {
       .then((data) => {
         // Defensive: a token that matches no invitation at all (typo'd,
         // stale, or already deleted) makes the backend throw before it
-        // ever builds an InvitationValidationDTO — GlobalExceptionHandler
+        // ever builds an InvitationValidationDTO - GlobalExceptionHandler
         // then responds 500 with an unrelated {status, message, errors}
         // shape instead of {valid, businessName}. Coercing both fields
         // here means a malformed/unexpected response body renders as
@@ -66,15 +66,15 @@ export default function InvitationLanding() {
       .catch((err) => {
         // A real answer from the backend ("no such invitation", expired,
         // used, revoked) always comes back as a normal 200 with
-        // {valid: false} from InvitationServiceImpl.validateInvitation —
+        // {valid: false} from InvitationServiceImpl.validateInvitation -
         // that path is handled above and never lands here. Anything that
         // throws is the REQUEST itself failing: no response at all
         // (dropped connection, DNS hiccup, a sleeping backend that hasn't
-        // finished waking up within the request timeout — see the Render
+        // finished waking up within the request timeout - see the Render
         // free-tier cold-start note in authApi.js), a genuine 5xx, or a
         // CORS misconfiguration. None of those mean the invitation is
         // invalid, so this must not be reported as "invitation
-        // unavailable" — that told real invitees with perfectly good
+        // unavailable" - that told real invitees with perfectly good
         // links that their invite was dead.
         setValid(false);
         setLoadError(true);
@@ -96,7 +96,7 @@ export default function InvitationLanding() {
     .toUpperCase();
 
   // Existing Identity, already logged in: attach this invite to the
-  // account they're currently signed into — no new password, no new
+  // account they're currently signed into - no new password, no new
   // Identity. Lands as a PENDING_APPROVAL membership the business owner
   // still has to approve; shows up right away in "My Accounts".
   const handleAcceptAsSelf = async () => {
@@ -173,7 +173,7 @@ export default function InvitationLanding() {
           </div>
         )}
 
-        {/* Couldn't reach the server — NOT the same as a dead invitation.
+        {/* Couldn't reach the server - NOT the same as a dead invitation.
             Distinct from the branch below so a cold-starting backend or a
             dropped connection never gets reported to a real invitee as
             "this link is invalid." */}
@@ -182,7 +182,7 @@ export default function InvitationLanding() {
             <div className={`${styles.iconWrap} ${styles.iconDanger}`}>📡</div>
             <p className={styles.stateTitle}>Couldn't check this invitation</p>
             <p className={styles.stateSub}>
-              We couldn't reach the server just now — this doesn't mean your
+              We couldn't reach the server just now - this doesn't mean your
               invitation is invalid. Please check your connection and try again.
             </p>
             <button className={styles.acceptBtn} onClick={loadInvitation}>
@@ -232,7 +232,7 @@ export default function InvitationLanding() {
           </div>
         )}
 
-        {/* Valid, authenticated, not yet accepted — accept onto the
+        {/* Valid, authenticated, not yet accepted - accept onto the
             existing Identity rather than the anonymous sign-up form. */}
         {!loading && valid && isAuthenticated && !accepted && (
           <div className={styles.state}>
@@ -243,7 +243,7 @@ export default function InvitationLanding() {
             </p>
             <p className={styles.stateSub}>
               {businessName} has invited you to join as an employee. You're
-              already signed in to Ehra — accept below to add this workspace to
+              already signed in to Ehra - accept below to add this workspace to
               your account.
             </p>
 
@@ -265,7 +265,7 @@ export default function InvitationLanding() {
             <div className={styles.notice}>
               <span>ℹ️</span>
               <p>
-                This adds a new workspace to your existing account — your other
+                This adds a new workspace to your existing account - your other
                 businesses stay exactly as they are.
               </p>
             </div>

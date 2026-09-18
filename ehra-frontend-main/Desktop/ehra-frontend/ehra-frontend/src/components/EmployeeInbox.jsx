@@ -13,7 +13,7 @@ function timeAgo(iso) {
 }
 
 function formatDate(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   return new Date(iso).toLocaleString([], {
     month: "short",
     day: "numeric",
@@ -24,7 +24,7 @@ function formatDate(iso) {
 }
 
 /**
- * Presentational inbox view — fetching, SSE subscription, and unread-count
+ * Presentational inbox view - fetching, SSE subscription, and unread-count
  * tracking all live in EmployeeDashboard now, so the sidebar badge and live
  * updates keep working even while this component isn't mounted (i.e. while
  * the person is on a different tab).

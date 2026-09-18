@@ -1,7 +1,7 @@
 /* ── Layout ──
    This tab renders inside the employee dashboard's plain .content wrapper
    (not .contentFull), so it flows on the page background and scrolls with
-   the outer .main like the other simple tabs — it doesn't own its own
+   the outer .main like the other simple tabs - it doesn't own its own
    scroll region. */
 .layout {
     display: flex;
@@ -62,7 +62,7 @@
 /* ── Security tab ──
    SecuritySettingsSection's own .wrap only reserves vertical padding
    (24px 0) since it's designed to sit inside an already-padded parent
-   on the employer side — giving it the same breathing room here. */
+   on the employer side - giving it the same breathing room here. */
 .securityPad {
     padding: 0 16px 32px;
 }

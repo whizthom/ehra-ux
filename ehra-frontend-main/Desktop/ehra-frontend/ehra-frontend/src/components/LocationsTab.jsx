@@ -39,7 +39,7 @@ function sortDays(days) {
   );
 }
 
-// One location's weekly schedule editor — identical day-row markup to
+// One location's weekly schedule editor - identical day-row markup to
 // EmploymentTab's part-time schedule (same CSS module reused on purpose),
 // just pointed at whichever fetch/save pair fits this location: the
 // original business-wide employment-settings endpoints for the main
@@ -190,7 +190,7 @@ function LocationScheduleEditor({ branchId, employeeId, employeeName }) {
   );
 }
 
-// One row in the locations list — a card that expands to its own schedule
+// One row in the locations list - a card that expands to its own schedule
 // editor. branchId === null means "the main business".
 function LocationCard({ location, employeeId, employeeName, defaultOpen }) {
   const [open, setOpen] = useState(defaultOpen || false);
@@ -236,7 +236,7 @@ function LocationCard({ location, employeeId, employeeName, defaultOpen }) {
   );
 }
 
-// The "Just this branch" vs "Multiple locations" editor — a checklist
+// The "Just this branch" vs "Multiple locations" editor - a checklist
 // (main business + every branch), not a native multi-select, so it reads
 // clearly and matches the app's custom-control conventions elsewhere.
 function EditLocationsPanel({
@@ -307,7 +307,7 @@ function EditLocationsPanel({
       <p className={styles.editPanelDesc}>
         Choose every location this employee is responsible for attendance at.
         Selecting more than one automatically makes them{" "}
-        <strong>part-time</strong> — full-time employment only applies to a
+        <strong>part-time</strong> - full-time employment only applies to a
         single location, since a full-timer's hours are already covered by one
         place.
       </p>
@@ -351,7 +351,7 @@ function EditLocationsPanel({
       {isMulti && (
         <div className={styles.partTimeNotice}>
           <i className="ti ti-info-circle" aria-hidden="true" />
-          {totalSelected} locations selected — this employee will be set to
+          {totalSelected} locations selected - this employee will be set to
           part-time, and you'll be able to set a separate schedule for each
           location below.
         </div>
@@ -452,7 +452,7 @@ export default function LocationsTab({
         {isMulti && (
           <div className={styles.multiBanner}>
             <i className="ti ti-clock-hour-4" aria-hidden="true" />
-            Part-time across {locations.length} locations — each has its own
+            Part-time across {locations.length} locations - each has its own
             schedule below.
           </div>
         )}

@@ -1,7 +1,7 @@
 import API from "./authApi";
 
 // Talks to com.Ehra.support.controller.SupportEntryController on the
-// backend — the customer-facing half of the Support Inbox (the staff
+// backend - the customer-facing half of the Support Inbox (the staff
 // half lives entirely in the separate Ops Console app). Uses the same
 // tenant JWT auth as every other API file here (see API's own
 // interceptors in authApi.js); no new auth mechanism.
@@ -14,7 +14,7 @@ export const createConversation = (data) => API.post("/support/conversations", d
 /** The signed-in identity's own conversation history, most recent first. */
 export const getMyConversations = () => API.get("/support/conversations");
 
-/** Paginated messages for one of the identity's own conversations —
+/** Paginated messages for one of the identity's own conversations -
  *  PUBLIC only; internal staff notes are never returned here. */
 export const getConversationMessages = (id, page = 0, size = 50) =>
   API.get(`/support/conversations/${id}/messages`, { params: { page, size } });

@@ -96,7 +96,7 @@ export default function RegistrationSubmitted() {
                 <p>Watch your dashboard</p>
                 <span>
                   You'll get a notification right on your dashboard as soon as
-                  you're approved — no email needed.
+                  you're approved - no email needed.
                 </span>
               </div>
             </div>

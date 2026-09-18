@@ -8,7 +8,7 @@ export const getEmployerContacts = () => API.get("/chats");
 export const getMyContacts = () => API.get("/chats/me");
 
 // ── Thread ─────────────────────────────────────────────────────────────────
-// `withKey` is "employer" or an EmployeeMembership id — whatever the
+// `withKey` is "employer" or an EmployeeMembership id - whatever the
 // contact list gave back as withKey for that row.
 export const getThread = (withKey) => API.get(`/chats/thread/${withKey}`);
 export const sendChatMessage = (withKey, body) =>

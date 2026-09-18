@@ -8,11 +8,11 @@ const STORAGE_KEY = "ehra:planExpiryReminder:lastShown";
 // How long the toast stays visible before auto-dismissing.
 const AUTO_DISMISS_MS = 14_000;
 
-// How often this is allowed to reappear, per urgency tier — deliberately
+// How often this is allowed to reappear, per urgency tier - deliberately
 // escalating: a renewal 10 days out only needs a once-a-day nudge, but
 // the last 3 days get a nudge every 6 hours since that's the window
 // where "I'll deal with it later" actually risks the plan lapsing.
-// "safe"/null are absent here on purpose — see shouldShow() below,
+// "safe"/null are absent here on purpose - see shouldShow() below,
 // they never show at all.
 const COOLDOWN_MS = {
   upcoming: 24 * 60 * 60 * 1000, // 8–14 days out: once a day
@@ -50,7 +50,7 @@ function shouldShow(tier) {
 /**
  * Mount once near the top of Dashboard. Renders nothing until a paid,
  * ACTIVE subscription is within 14 days of expiryDate AND enough time has
- * passed since it was last shown (see COOLDOWN_MS) — so this nudges
+ * passed since it was last shown (see COOLDOWN_MS) - so this nudges
  * periodically as renewal approaches rather than nagging on every single
  * page load. Recording "last shown" happens the instant it appears, not
  * on dismiss, so refreshing the page mid-cooldown doesn't reset the timer.
@@ -73,7 +73,7 @@ export default function PlanExpiryReminder({ subscription }) {
 
     return () => window.clearTimeout(dismissTimerRef.current);
     // Re-evaluate whenever the subscription object identity changes (a
-    // fresh fetch) — not on every render.
+    // fresh fetch) - not on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subscription]);
 
@@ -83,7 +83,7 @@ export default function PlanExpiryReminder({ subscription }) {
   const days = Math.max(daysUntil(subscription.expiryDate), 0);
   const copy = TIER_COPY[tier];
   // PREMIUM is the backend's enum value for the plan now displayed on
-  // /pricing as "Business" — see the note at the top of data/pricingPlans.js.
+  // /pricing as "Business" - see the note at the top of data/pricingPlans.js.
   const planLabel = subscription.plan === "PREMIUM" ? "Business" : "Pro";
 
   function handleClose() {

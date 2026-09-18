@@ -5,7 +5,7 @@
     padding-bottom: max(10px, env(safe-area-inset-bottom));
     flex-shrink: 0;
     /* Elevated above the wallpapered message area (box-shadow, not a
-       flat border) — matches the header's treatment on the opposite
+       flat border) - matches the header's treatment on the opposite
        edge, so the composer reads as its own floating layer rather than
        a line drawn under the last message. */
     box-shadow: 0 -1px 3px var(--shadow-color);
@@ -66,7 +66,7 @@
 }
 
 /* Purely a DOM/ref boundary for click-outside detection (see
-   useClickOutside usage in MessageComposer.jsx) — `contents` means these
+   useClickOutside usage in MessageComposer.jsx) - `contents` means these
    wrappers don't create their own box at all, so the trigger button
    inside still behaves exactly like a normal direct flex item of
    .inputRow, and the popup panel inside still anchors against .inputRow
@@ -388,8 +388,8 @@
 
 /* ── Mobile: fewer inline icons (attach options moved into the popover
    above) means the input row has room to give the text field itself more
-   presence — both wider (less competing chrome) and taller (easier to
-   read/type multi-line messages with a thumb) — per the "keep the message
+   presence - both wider (less competing chrome) and taller (easier to
+   read/type multi-line messages with a thumb) - per the "keep the message
    text panel wider in both length and height on mobile" requirement. */
 @media (max-width: 640px) {
     .composerWrap {

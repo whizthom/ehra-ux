@@ -7,7 +7,7 @@
     min-width: 0;
     overflow-x: hidden;
     /* Plain app background (not a separate "surface" panel color) per the
-       request — with a very faint dot-grid texture over it so the
+       request - with a very faint dot-grid texture over it so the
        message area still reads as its own distinct space rather than an
        undifferentiated flat fill. color-mix against --text-primary keeps
        it correctly faint in both light and dark automatically, no
@@ -114,7 +114,7 @@
     display: flex;
     flex-direction: column;
     /* Desktop-only (mobile already gets a global scrollbar-hide rule from
-       theme.css) — a slim, unobtrusive thumb instead of the OS default,
+       theme.css) - a slim, unobtrusive thumb instead of the OS default,
        matching the rest of the redesign's overall polish level. */
     scrollbar-width: thin;
     scrollbar-color: color-mix(in srgb, var(--text-primary) 22%, transparent) transparent;

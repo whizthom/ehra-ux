@@ -5,7 +5,7 @@ import { formatDayLabel } from "../../utils/messagingFormat";
 import styles from "./ChatList.module.css";
 
 // The tab bar itself (All / Group / Announcement / Archived) now lives one
-// level up, in MessagingHub — "Announcement" isn't a filter over
+// level up, in MessagingHub - "Announcement" isn't a filter over
 // conversations at all, it swaps the whole pane for Ehral's existing
 // Announcements feature (see MessagingHub.jsx's doc). This component only
 // ever renders for the "all" / "group" / "archived" tabs; `tab` is a prop,
@@ -28,7 +28,7 @@ export default function ChatList({
   const isSearching = query.trim().length > 0;
 
   // While searching, SearchResultsPanel takes over entirely (see its
-  // doc) — it's backed by the real /api/messaging/search endpoint, which
+  // doc) - it's backed by the real /api/messaging/search endpoint, which
   // covers message TEXT and document filenames, not just conversation
   // names already loaded on screen the way a client-side filter here
   // ever could. No point also running a local name-only filter alongside
@@ -46,14 +46,14 @@ export default function ChatList({
   }, [conversations, tab]);
 
   // Groups the list the same way an open conversation's own messages are
-  // grouped (formatDayLabel — TODAY / YESTERDAY / weekday / date), keyed
+  // grouped (formatDayLabel - TODAY / YESTERDAY / weekday / date), keyed
   // off each conversation's lastMessageAt: a chat active today sits under
-  // TODAY, and the next day — with no action needed from anyone — the
+  // TODAY, and the next day - with no action needed from anyone - the
   // exact same conversation reads under YESTERDAY instead, since the
   // label is recomputed from the real clock every render, never stored.
   //
   // Pinned conversations get their own leading "PINNED" group instead of
-  // being folded into whatever day they happen to fall on — otherwise a
+  // being folded into whatever day they happen to fall on - otherwise a
   // pinned chat from three days ago would either break the day ordering
   // or need to be pinned AND recently active to stay at the top, which
   // defeats the point of pinning. `conversations` arrives already sorted
@@ -78,7 +78,7 @@ export default function ChatList({
   const emptyMessage = () => {
     switch (tab) {
       case "group":
-        return "No groups yet — start one below.";
+        return "No groups yet - start one below.";
       case "archived":
         return "No archived chats.";
       default:
@@ -162,7 +162,7 @@ export default function ChatList({
               <p>
                 {error?.response?.status === 403 ||
                 error?.response?.status === 401
-                  ? "Couldn't load conversations — your session may need refreshing."
+                  ? "Couldn't load conversations - your session may need refreshing."
                   : "Couldn't load conversations. Check your connection and try again."}
               </p>
               <button onClick={onRetry}>Retry</button>

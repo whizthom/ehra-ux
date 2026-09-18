@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { uploadBusinessLogo } from "../api/businessApi";
 import ProfileTab from "./ProfileTab";
 import SecuritySettingsSection from "./SecuritySettingsSection";
+import { getWhatsAppSettings, saveWhatsAppSettings, deleteWhatsAppSettings } from "../api/whatsappApi";
 import styles from "./BusinessSettingsTab.module.css";
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -151,19 +152,19 @@ function AttendanceProfilePanel({ setting, onToggle }) {
       <div className={styles.infoBox} style={{ alignItems: "flex-start" }}>
         <i className="ti ti-info-circle" style={{ marginTop: 2 }} />
         <span>
-          By default, this is <strong>off</strong> — you're the employer and
+          By default, this is <strong>off</strong> - you're the employer and
           admin, so you aren't clocked in/out and you aren't counted among your
           staff numbers. For example, if you have 6 employees, your dashboard
           shows <strong>6</strong>.
           <br />
           <br />
           Turn this <strong>on</strong> and you'll be added to the same
-          clock-in/out schedule as everyone else — you'll scan the same QR code
+          clock-in/out schedule as everyone else - you'll scan the same QR code
           to clock in and out, and your attendance will be tracked and reported
           just like any employee's. You'll also be counted as one extra staff
           member everywhere staff totals appear, so 6 employees becomes{" "}
           <strong>7</strong>. You remain the employer and admin the entire time
-          — this only affects attendance tracking, nothing else.
+          - this only affects attendance tracking, nothing else.
         </span>
       </div>
 
@@ -180,8 +181,8 @@ function AttendanceProfilePanel({ setting, onToggle }) {
           </p>
           <p className={styles.attToggleDesc}>
             {enabled
-              ? "On — you clock in/out and count as staff."
-              : "Off — your attendance isn't tracked and you don't count as staff."}
+              ? "On - you clock in/out and count as staff."
+              : "Off - your attendance isn't tracked and you don't count as staff."}
           </p>
         </div>
         <label className={styles.switch}>
@@ -198,7 +199,7 @@ function AttendanceProfilePanel({ setting, onToggle }) {
       {justChanged && (
         <div className={styles.successBox}>
           <i className="ti ti-circle-check" />
-          Saved —{" "}
+          Saved -{" "}
           {enabled
             ? "you're now on the attendance schedule."
             : "your attendance tracking is now off."}
@@ -237,12 +238,15 @@ function AttendanceProfilePanel({ setting, onToggle }) {
  * @param {object}   props
  * @param {object}   props.business          business profile { id, name, email, phone, address, logo }
  * @param {boolean}  props.loadingBusiness
- * @param {function} props.onSaveBusiness     (dto) => Promise<void> — PUT /business/me
- * @param {function} props.onLogoUploaded     () => Promise<void> — refetch business profile after logo upload
+ * @param {function} props.onSaveBusiness     (dto) => Promise<void> - PUT /business/me
+ * @param {function} props.onLogoUploaded     () => Promise<void> - refetch business profile after logo upload
  * @param {object}   props.myProfile          admin's own employee profile (from GET /employees/me)
  * @param {boolean}  props.loadingMyProfile
- * @param {function} props.onMyProfileUpdated () => Promise<void> — refetch admin's own profile
+ * @param {function} props.onMyProfileUpdated () => Promise<void> - refetch admin's own profile
  */
+
+function WhatsAppPanel(){const [settings,setSettings]=useState(null);const [phone,setPhone]=useState("");const [countryCode,setCountryCode]=useState("234");const [enabled,setEnabled]=useState(true);const [saving,setSaving]=useState(false);const [message,setMessage]=useState("");useEffect(()=>{getWhatsAppSettings().then(r=>{const d=r.data||{};setSettings(d);setPhone(d.phoneNumber?`+${d.phoneNumber}`:"");setEnabled(d.enabled!==false)}).catch(()=>setMessage("Could not load WhatsApp settings."))},[]);const save=async()=>{setSaving(true);setMessage("");try{const r=await saveWhatsAppSettings({phoneNumber:phone,countryCode,enabled});setSettings(r.data);setMessage("WhatsApp settings saved.")}catch(e){setMessage(e?.response?.data?.message||"Could not save WhatsApp settings.")}finally{setSaving(false)}};const remove=async()=>{if(!confirm("Remove the business WhatsApp number?"))return;await deleteWhatsAppSettings();setPhone("");setSettings(null);setMessage("WhatsApp has been disconnected.")};return <div className={styles.businessPad}><div className={styles.header}><div className={styles.attIconWrap}><i className="ti ti-brand-whatsapp"/></div><div><h3 className={styles.headerName}>WhatsApp for Your Business</h3><p className={styles.headerSub}>Let customers contact your business and prepare order messages without the WhatsApp Business API.</p></div></div><div className={styles.infoBox}><i className="ti ti-info-circle"/><span>V1 opens WhatsApp or WhatsApp Web with a pre-filled message. Ehral never sends the message automatically. The user reviews it and presses Send.</span></div>{message&&<div className={styles.successBox}><i className="ti ti-circle-check"/> {message}</div>}<div className={styles.grid2}><FormField label="WhatsApp number" value={phone} onChange={e=>setPhone(e.target.value)} placeholder="+2348012345678"/><FormField label="Country calling code" value={countryCode} onChange={e=>setCountryCode(e.target.value.replace(/\D/g,"").slice(0,8))} placeholder="234"/></div><div className={styles.saveRow}><label style={{display:"flex",gap:8,alignItems:"center"}}><input type="checkbox" checked={enabled} onChange={e=>setEnabled(e.target.checked)}/> Enable WhatsApp contact</label><button className={styles.saveBtn} disabled={saving||!phone} onClick={save}><i className="ti ti-brand-whatsapp"/>{saving?"Saving…":"Connect WhatsApp"}</button>{settings?.phoneNumber&&<button className={styles.saveBtn} style={{background:"var(--danger-bg)",color:"var(--danger-text)"}} onClick={remove}>Remove</button>}</div></div>}
+
 export default function BusinessSettingsTab({
   business,
   loadingBusiness,
@@ -260,7 +264,7 @@ export default function BusinessSettingsTab({
 
   // Content now scrolls as one unit through the page-level
   // .contentFullNarrow wrapper rather than its own nested region, so
-  // switching sub-tabs no longer resets scroll position automatically —
+  // switching sub-tabs no longer resets scroll position automatically -
   // do it explicitly on whichever ancestor is actually scrollable.
   useEffect(() => {
     let node = rootRef.current?.parentElement;
@@ -340,6 +344,12 @@ export default function BusinessSettingsTab({
           <i className="ti ti-fingerprint" /> Personal attendance profile
         </button>
         <button
+          className={`${styles.tab} ${tab === "whatsapp" ? styles.tabActive : ""}`}
+          onClick={() => setTab("whatsapp")}
+        >
+          <i className="ti ti-brand-whatsapp" /> WhatsApp
+        </button>
+        <button
           className={`${styles.tab} ${tab === "security" ? styles.tabActive : ""}`}
           onClick={() => setTab("security")}
         >
@@ -348,7 +358,7 @@ export default function BusinessSettingsTab({
       </div>
 
       {/* Whichever sub-tab is active renders into this one shared,
-          independently-scrolling body — no card/box around it, same
+          independently-scrolling body - no card/box around it, same
           plain-background treatment as Attendance. */}
       <div className={styles.tabBody}>
         {/* ══ Business profile ══ */}
@@ -368,7 +378,7 @@ export default function BusinessSettingsTab({
                     {business?.name || "Your business"}
                   </h3>
                   <p className={styles.headerSub}>
-                    Company details — visible to your employees and on invite
+                    Company details - visible to your employees and on invite
                     links.
                   </p>
                 </div>
@@ -438,7 +448,7 @@ export default function BusinessSettingsTab({
                   {submitting ? "Saving…" : "Save changes"}
                 </button>
                 <p className={styles.saveMeta}>
-                  Note: your business email doubles as your login — changing it
+                  Note: your business email doubles as your login - changing it
                   here updates how you sign in too.
                 </p>
               </div>
@@ -467,6 +477,9 @@ export default function BusinessSettingsTab({
               onToggle={onToggleAttendanceProfile}
             />
           ))}
+        {/* ══ WhatsApp ══ */}
+        {tab === "whatsapp" && <WhatsAppPanel />}
+
         {/* ══ Security ══ */}
         {tab === "security" && <SecuritySettingsSection />}
       </div>

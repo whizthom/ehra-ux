@@ -10,7 +10,7 @@ import styles from "./LegalLayout.module.css";
  * hero (title + effective/updated dates), a sticky table of contents
  * that tracks which section is currently on screen, and a top progress
  * bar showing how far through the document you are. The actual legal
- * text is passed in as `children` — this component only owns the
+ * text is passed in as `children` - this component only owns the
  * scaffolding around it.
  *
  * `sections` drives the TOC: [{ id, number, title }]. Each entry's
@@ -31,7 +31,7 @@ export default function LegalLayout({
   const progressRef = useRef(null);
 
   // Reading-progress bar: width tracks how far through the document
-  // body (not the whole page — the hero and footer shouldn't count)
+  // body (not the whole page - the hero and footer shouldn't count)
   // the reader has scrolled. Mutates the bar's width directly via ref
   // instead of storing it in state, since this fires on every scroll
   // tick and a re-render per pixel would be wasteful.
@@ -109,7 +109,7 @@ export default function LegalLayout({
         </div>
       </header>
 
-      {/* Mobile-only TOC toggle — the sticky sidebar becomes a
+      {/* Mobile-only TOC toggle - the sticky sidebar becomes a
           collapsible drawer below the two-column breakpoint. */}
       <button
         type="button"

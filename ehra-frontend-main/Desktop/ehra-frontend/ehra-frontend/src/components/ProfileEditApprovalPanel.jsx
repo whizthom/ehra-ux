@@ -8,7 +8,7 @@ function initials(first, last) {
 }
 
 function formatDate(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   return new Date(iso).toLocaleDateString([], {
     day: "numeric",
     month: "short",
@@ -24,7 +24,7 @@ const STATUS_CFG = {
   CANCELLED: { label: "Cancelled", cls: "statusCancelled" },
 };
 
-// ── DiffTable — side-by-side before/after for every changed field ─────────
+// ── DiffTable - side-by-side before/after for every changed field ─────────
 
 function DiffTable({ req }) {
   const rows = [
@@ -76,7 +76,7 @@ function DiffTable({ req }) {
                 className={styles.diffAvatar}
               />
             ) : (
-              <span className={styles.diffOld}>—</span>
+              <span className={styles.diffOld}>-</span>
             )}
             <i className={`ti ti-arrow-right ${styles.diffArrowIcon}`} />
             <img
@@ -91,7 +91,7 @@ function DiffTable({ req }) {
         <div key={r.label} className={styles.diffRow}>
           <span className={styles.diffFieldName}>{r.label}</span>
           <div className={styles.diffValues}>
-            <span className={styles.diffOld}>{r.old || "—"}</span>
+            <span className={styles.diffOld}>{r.old || "-"}</span>
             <i className={`ti ti-arrow-right ${styles.diffArrowIcon}`} />
             <span className={styles.diffNew}>{r.next}</span>
           </div>
@@ -111,7 +111,7 @@ function DiffTable({ req }) {
                 Current file
               </a>
             ) : (
-              <span className={styles.diffOld}>—</span>
+              <span className={styles.diffOld}>-</span>
             )}
             <i className={`ti ti-arrow-right ${styles.diffArrowIcon}`} />
             <a
@@ -266,12 +266,12 @@ function RequestCard({ req, onDecide, actioning, mode }) {
                   <span className={styles.priorRejected}>Rejected</span>
                 )}
                 {req.hodNote && (
-                  <span className={styles.priorNote}>— "{req.hodNote}"</span>
+                  <span className={styles.priorNote}>- "{req.hodNote}"</span>
                 )}
               </div>
             )}
 
-          {/* Action buttons — only when this stage is pending for this role */}
+          {/* Action buttons - only when this stage is pending for this role */}
           {canAct && !showReject && (
             <div className={styles.actions}>
               <div className={styles.noteFieldRow}>
@@ -354,7 +354,7 @@ function RequestCard({ req, onDecide, actioning, mode }) {
  * @param {array}    props.all            full request list (employer only; null for HOD)
  * @param {boolean}  props.loading
  * @param {function} props.onDecide       (id, approved, note) => Promise<void>
- * @param {function} props.onRefresh      () => void  — reload data after a decision
+ * @param {function} props.onRefresh      () => void  - reload data after a decision
  */
 export default function ProfileEditApprovalPanel({
   mode = "employer",
@@ -405,7 +405,7 @@ export default function ProfileEditApprovalPanel({
         </p>
       </div>
 
-      {/* View toggle (employer only — HOD always sees just their pending) */}
+      {/* View toggle (employer only - HOD always sees just their pending) */}
       {mode === "employer" && (
         <div className={styles.viewToggle}>
           <button

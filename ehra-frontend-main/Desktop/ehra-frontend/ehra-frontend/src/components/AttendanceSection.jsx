@@ -22,7 +22,7 @@ export default function AttendanceSection() {
   const [historyRecords, setHistoryRecords] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   // Empty by default so History loads every attendance record for every
-  // employee, past to present — same "show everything unless narrowed"
+  // employee, past to present - same "show everything unless narrowed"
   // behavior as the employee's own attendance tab (GET /attendance/me).
   // Only once the admin picks both a From and To date does the view
   // narrow to that range.
@@ -77,7 +77,7 @@ export default function AttendanceSection() {
 
   // Content now scrolls as one unit through the page-level
   // .contentFullNarrow wrapper rather than its own nested region, so
-  // switching tabs no longer resets scroll position automatically — do
+  // switching tabs no longer resets scroll position automatically - do
   // it explicitly on whichever ancestor is actually scrollable.
   useEffect(() => {
     let node = rootRef.current?.parentElement;

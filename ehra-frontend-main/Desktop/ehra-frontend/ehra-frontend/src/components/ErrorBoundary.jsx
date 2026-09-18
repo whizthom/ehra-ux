@@ -1,6 +1,6 @@
 import { Component } from "react";
 
-// The app previously had NO error boundary anywhere — a single uncaught
+// The app previously had NO error boundary anywhere - a single uncaught
 // render error on any page (see InvitationLanding's old unguarded
 // `businessName.split(" ")`, which threw whenever a token matched no
 // invitation and the backend's error response didn't carry the expected
@@ -75,7 +75,7 @@ export default class ErrorBoundary extends Component {
           Something went wrong
         </h1>
         <p style={{ color: "#8fa8a0", fontSize: 14, maxWidth: 380, margin: 0 }}>
-          This page hit an unexpected error. Reloading usually fixes it — if it
+          This page hit an unexpected error. Reloading usually fixes it - if it
           keeps happening, please let us know what you were doing.
         </p>
         <button

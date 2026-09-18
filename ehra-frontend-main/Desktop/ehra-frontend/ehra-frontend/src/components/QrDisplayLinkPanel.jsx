@@ -7,16 +7,16 @@ import {
 import styles from "./QrDisplayLinkPanel.module.css";
 
 /**
- * "Share Live QR" section — lets the employer generate a public link that
+ * "Share Live QR" section - lets the employer generate a public link that
  * shows the live rotating QR (see pages/public/QrDisplayPage.jsx) to
  * anyone holding it, with no login required. Solves a real limitation:
  * previously the only way to display the QR on a second device (a
  * reception tablet, a screen at the entrance) was to log that device into
- * the full admin dashboard — handing out real admin access just to show
+ * the full admin dashboard - handing out real admin access just to show
  * a QR code.
  *
  * This link only ever works for whichever business is active when it's
- * generated — the backend scopes it 1:1 to a Business (see
+ * generated - the backend scopes it 1:1 to a Business (see
  * QrDisplayLink's class doc), so an employer with multiple businesses
  * needs a separate link per business, generated while that business is
  * the active workspace.
@@ -92,9 +92,9 @@ export default function QrDisplayLinkPanel() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Clipboard API can fail (permissions, insecure context) — the URL
+      // Clipboard API can fail (permissions, insecure context) - the URL
       // is still selectable/visible in the box below, so this isn't fatal.
-      setError("Couldn't copy automatically — select and copy the link below.");
+      setError("Couldn't copy automatically - select and copy the link below.");
     }
   };
 
@@ -105,7 +105,7 @@ export default function QrDisplayLinkPanel() {
       </div>
       <p className={styles.desc}>
         Generate a link that shows this business's live QR code to anyone who
-        has it — no Ehra login needed. Useful for a reception tablet or a second
+        has it - no Ehra login needed. Useful for a reception tablet or a second
         screen at the entrance, without giving that device access to your admin
         account. Employees still scan and clock in/out exactly as normal.
       </p>

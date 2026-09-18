@@ -1,5 +1,5 @@
 /* ── Layout ──────────────────────────────────────────────────────────────
-   No card here on purpose — this sits directly on the page background,
+   No card here on purpose - this sits directly on the page background,
    the same way the Attendance tab's History view does. The only visual
    separation between the list and the open message is a hairline border,
    not a floating box. */
@@ -566,7 +566,7 @@
     background: var(--bg-surface);
 }
 
-/* The one field people spend the most time in — styled like the chat
+/* The one field people spend the most time in - styled like the chat
    composer's input (ChatPanel.module.css .composerInput) so writing an
    announcement and writing a chat message feel like the same app.
    Selector matches .field textarea's specificity so it wins without
@@ -710,7 +710,7 @@
 }
 
 /* ── Delete-confirmation dialog ──────────────────────────────────────────
-   Referenced in the JSX before but never actually styled — it would have
+   Referenced in the JSX before but never actually styled - it would have
    rendered as an unstyled, non-dimmed overlay. Built out properly here,
    matching the pattern used elsewhere in the app (e.g. remove-employee /
    department deletion dialogs). */

@@ -5,9 +5,9 @@ import styles from "./QrAttendancePanel.module.css";
 
 /**
  * Renders a rotating QR code. Each render encodes a fresh, single-use
- * token issued by the backend (see QrSessionService) — so a screenshot of
+ * token issued by the backend (see QrSessionService) - so a screenshot of
  * the code is worthless once it expires. The rotation length itself is
- * whatever the backend says (QrSessionService.TOKEN_TTL_MS) — this
+ * whatever the backend says (QrSessionService.TOKEN_TTL_MS) - this
  * component doesn't hardcode a duration, it just re-fetches whenever the
  * server tells it the current token is about to expire, so the two can
  * never drift out of sync.
@@ -58,7 +58,7 @@ export default function QrAttendancePanel() {
     return () => clearTimeout(refreshTimeoutRef.current);
   }, [fetchAndRender]);
 
-  // Visual countdown ring — purely cosmetic, ticks down independent of the fetch
+  // Visual countdown ring - purely cosmetic, ticks down independent of the fetch
   useEffect(() => {
     const tick = setInterval(() => {
       setSecondsLeft((s) => (s && s > 0 ? s - 1 : 0));
@@ -81,7 +81,7 @@ export default function QrAttendancePanel() {
           </div>
         ) : (
           <>
-            {/* Canvas stays mounted even while loading — QRCode.toCanvas
+            {/* Canvas stays mounted even while loading - QRCode.toCanvas
                 needs a real element to draw onto during the very first
                 fetch. Rendering it only after `loading` flips false meant
                 canvasRef.current was still null when that first fetch
@@ -107,7 +107,7 @@ export default function QrAttendancePanel() {
           />
         </div>
         <p className={styles.hint}>
-          Refreshes every {totalSeconds ?? "—"} seconds · Employees scan with
+          Refreshes every {totalSeconds ?? "-"} seconds · Employees scan with
           their phone camera
         </p>
       </div>

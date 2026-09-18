@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import styles from "./Dropdown.module.css";
 
 /**
- * A styled listbox standing in for a native <select> — browsers render
+ * A styled listbox standing in for a native <select> - browsers render
  * <select> options with zero styling control (system font, system
  * colors, no icons), which is exactly what looks out of place next to a
  * custom-designed form. This renders entirely with our own markup instead.

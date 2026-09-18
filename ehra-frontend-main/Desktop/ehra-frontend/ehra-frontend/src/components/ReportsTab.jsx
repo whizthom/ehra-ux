@@ -27,7 +27,7 @@ const REPORT_TYPES = [
 ];
 
 // Tools > Reports. A tab switcher between report types, each rendering
-// its own filters, summary cards, trend chart, and CSV/PDF export —
+// its own filters, summary cards, trend chart, and CSV/PDF export -
 // see AttendanceReportView, PayrollReportView, LeaveReportView,
 // DepartmentHealthReportView, and WorkforceOverviewReportView.
 export default function ReportsTab({ departments = [] }) {

@@ -2,8 +2,8 @@ import { getRoleColor, getRoleShortLabel } from "../../utils/roleBadge";
 import styles from "./RoleBadge.module.css";
 
 // A compact, color-coded, gently pulsing indicator of WHO you're talking
-// to — Employer, HOD, Employee, Customer, or any role introduced later
-// (see utils/roleBadge.js — a brand-new role automatically gets its own
+// to - Employer, HOD, Employee, Customer, or any role introduced later
+// (see utils/roleBadge.js - a brand-new role automatically gets its own
 // consistent color with zero changes needed here). Only meaningful for
 // one specific person, so callers only render this for DIRECT
 // conversations; a group or the Announcements channel has many people

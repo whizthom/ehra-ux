@@ -1,5 +1,5 @@
 // ════════════════════════════════════════════════════════════════════════════
-// DASHBOARD.JSX — Patch Instructions (3 changes only)
+// DASHBOARD.JSX - Patch Instructions (3 changes only)
 // ════════════════════════════════════════════════════════════════════════════
 //
 // CHANGE 1 ── Add import at the top (alongside other tab imports)
@@ -50,6 +50,6 @@ import DepartmentsTab from "../components/DepartmentsTab";   // ← ADD THIS
 
 
 // ════════════════════════════════════════════════════════════════════════════
-// That's it — DepartmentsTab manages its own data fetching and real-time SSE.
+// That's it - DepartmentsTab manages its own data fetching and real-time SSE.
 // No props need to be passed in from Dashboard.
 // ════════════════════════════════════════════════════════════════════════════

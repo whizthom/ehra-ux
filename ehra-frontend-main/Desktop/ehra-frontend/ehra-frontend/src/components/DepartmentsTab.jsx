@@ -16,7 +16,7 @@ function initials(first, last) {
 }
 
 function fullName(emp) {
-  return [emp?.firstName, emp?.lastName].filter(Boolean).join(" ") || "—";
+  return [emp?.firstName, emp?.lastName].filter(Boolean).join(" ") || "-";
 }
 
 function deptColor(name = "") {

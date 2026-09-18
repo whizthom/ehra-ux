@@ -1,5 +1,5 @@
 // Provider-independent OTP rebuild: shown ONLY when the backend's
-// otp.provider is "mock" (com.Ehra.otp.impl.MockOtpService) — the `code`
+// otp.provider is "mock" (com.Ehra.otp.impl.MockOtpService) - the `code`
 // prop is `confirmationResult.developmentOtp` from ../firebase-lazy,
 // which is undefined against any real provider (Termii and beyond), so
 // this component renders nothing at all in production. See
@@ -7,7 +7,7 @@
 // originates.
 //
 // Deliberately does NOT auto-fill or auto-submit the code into the
-// verification input below it — the person still has to type it in
+// verification input below it - the person still has to type it in
 // manually, exactly like a real SMS flow, so testing this locally
 // actually exercises the same code path (and builds the same muscle
 // memory / understanding of how OTP works) as production does.

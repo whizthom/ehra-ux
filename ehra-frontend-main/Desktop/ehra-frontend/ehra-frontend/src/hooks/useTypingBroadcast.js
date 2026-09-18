@@ -7,7 +7,7 @@ const RESEND_THROTTLE_MS = 2000;
 // Debounced/throttled typing-indicator broadcast (section 10): sends
 // TYPING_START at most once every RESEND_THROTTLE_MS while the person
 // keeps typing, then TYPING_STOP once they've paused for IDLE_MS or sent
-// the message — never a START/STOP pair per keystroke.
+// the message - never a START/STOP pair per keystroke.
 export default function useTypingBroadcast(conversationId) {
   const idleTimer = useRef(null);
   const lastSentAt = useRef(0);

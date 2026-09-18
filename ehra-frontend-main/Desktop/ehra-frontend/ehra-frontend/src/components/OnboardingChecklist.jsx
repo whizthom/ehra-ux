@@ -6,16 +6,16 @@ const DISMISS_KEY = (identityId) =>
   `ehra:onboardingChecklist:hidden:${identityId}`;
 
 /**
- * "Complete your workspace" — persistent (not a one-time toast like
+ * "Complete your workspace" - persistent (not a one-time toast like
  * WelcomeCard) until every item is done, then it hides itself for good.
  * Phone verification, business creation, and registration itself are
  * always true by the time this can even render (Ehra's registration
- * flow enforces all three before an Identity/Business exist at all) —
+ * flow enforces all three before an Identity/Business exist at all) -
  * they're listed anyway so the person sees real, completed progress
  * immediately rather than starting from 0%.
  *
  * Reuses data Dashboard has already fetched (businessProfile, employees,
- * myProfile) rather than issuing new calls for those — only email
+ * myProfile) rather than issuing new calls for those - only email
  * verification status is fetched here, since Dashboard doesn't otherwise
  * need it.
  */

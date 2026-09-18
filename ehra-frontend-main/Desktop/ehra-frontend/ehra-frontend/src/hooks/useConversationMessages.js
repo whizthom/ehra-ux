@@ -31,17 +31,17 @@ function mergeMessages(cached, fresh) {
 }
 
 // Drives one open conversation: history + cursor-based pagination (section
-// 23) loaded once over REST, then kept live purely by WebSocket events —
+// 23) loaded once over REST, then kept live purely by WebSocket events -
 // no re-fetch of the whole thread on every new message (section 28's
 // "don't reload the entire chat when one message arrives").
 //
 // Renders from messagingCache's last-known copy of THIS conversation
-// immediately on mount/switch — no spinner for a chat that's been opened
-// before, even across a page reload — and reconciles with the server in
+// immediately on mount/switch - no spinner for a chat that's been opened
+// before, even across a page reload - and reconciles with the server in
 // the background (see mergeMessages above and messagingCache.js's doc).
 export default function useConversationMessages(conversationId, viewerIdentityIdRaw) {
   // Defensive second line of defence against the string-vs-number
-  // identityId mismatch documented in MessagingHub.jsx — every comparison
+  // identityId mismatch documented in MessagingHub.jsx - every comparison
   // below assumes a number.
   const viewerIdentityId = viewerIdentityIdRaw != null ? Number(viewerIdentityIdRaw) : null;
   const initialCached = conversationId ? getCachedMessagesSync(conversationId) : null;
@@ -66,7 +66,7 @@ export default function useConversationMessages(conversationId, viewerIdentityId
 
   // Every change to `messages` gets mirrored into the cache (memory
   // immediately, disk debounced) so the NEXT time this conversation opens
-  // — even after a full page reload — it's already there.
+  // - even after a full page reload - it's already there.
   useEffect(() => {
     if (!conversationId) return;
     const confirmed = messages.filter((m) => typeof m.id === "number");
@@ -100,7 +100,7 @@ export default function useConversationMessages(conversationId, viewerIdentityId
     if (cachedNow) {
       reconcile(cachedNow);
     } else {
-      // Nothing in memory (first open since a page refresh) — check disk
+      // Nothing in memory (first open since a page refresh) - check disk
       // before falling back to a bare network fetch, so a hard reload
       // still paints instantly whenever IndexedDB has this thread cached.
       hydrateMessagesFromDisk(conversationId).then((disk) => {
@@ -132,7 +132,7 @@ export default function useConversationMessages(conversationId, viewerIdentityId
   }, [conversationId, loadingOlder, hasMore]);
 
   // Mark-as-read whenever the thread is open and there's something unread
-  // to clear — covers both "opened the conversation" and "a new message
+  // to clear - covers both "opened the conversation" and "a new message
   // arrived while it was already open" (section 13).
   useEffect(() => {
     if (!conversationId) return;

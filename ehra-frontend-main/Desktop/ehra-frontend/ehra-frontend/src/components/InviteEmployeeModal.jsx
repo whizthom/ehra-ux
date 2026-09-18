@@ -10,23 +10,23 @@ const TABS = [
 
 /**
  * "On that same pop up, there should also be a link for multiple
- * employee registration" — one modal, three ways to invite:
+ * employee registration" - one modal, three ways to invite:
  *
- *   - "One link": today's behavior, unchanged — a single-use link, spent
+ *   - "One link": today's behavior, unchanged - a single-use link, spent
  *     the moment one person registers with it.
  *   - "Reusable link": the SAME link works for any number of people
- *     until revoked/expired — post it in a WhatsApp group, a notice
+ *     until revoked/expired - post it in a WhatsApp group, a notice
  *     board, wherever.
  *   - "Invite by email": paste a comma-separated list; the system
  *     creates an individually-bound single-use link PER address (more
- *     secure than sharing one link by email — a forwarded email can't be
+ *     secure than sharing one link by email - a forwarded email can't be
  *     used to claim someone else's slot) and emails each person
  *     automatically.
  */
 export default function InviteEmployeeModal({ open, onClose, companyName }) {
   const [tab, setTab] = useState("single");
 
-  // Link tabs (single / multi) share this state — only one of the two
+  // Link tabs (single / multi) share this state - only one of the two
   // is ever generated at a time per tab switch, each tab remembers its
   // own last-generated link independently.
   const [links, setLinks] = useState({ single: "", multi: "" });
@@ -125,8 +125,8 @@ export default function InviteEmployeeModal({ open, onClose, companyName }) {
             <div className={styles.tabBody}>
               <p className={styles.desc}>
                 {tab === "single"
-                  ? "A one-time link — it stops working the moment one person registers with it. Generate a fresh one for each new hire."
-                  : "A reusable link — the same link works for any number of people, so you can post it in a group chat or notice board. Generate once, share as many times as you like."}
+                  ? "A one-time link - it stops working the moment one person registers with it. Generate a fresh one for each new hire."
+                  : "A reusable link - the same link works for any number of people, so you can post it in a group chat or notice board. Generate once, share as many times as you like."}
               </p>
 
               {currentLink ? (
@@ -247,7 +247,7 @@ export default function InviteEmployeeModal({ open, onClose, companyName }) {
                       <ul>
                         {bulkResult.skipped.map((s) => (
                           <li key={s.email}>
-                            <strong>{s.email}</strong> — {s.reason}
+                            <strong>{s.email}</strong> - {s.reason}
                           </li>
                         ))}
                       </ul>

@@ -9,7 +9,7 @@ import ReportDropdown from "./ReportDropdown";
 import styles from "./ReportsTab.module.css";
 
 function fmtMoney(v) {
-  if (v === null || v === undefined) return "—";
+  if (v === null || v === undefined) return "-";
   return Number(v).toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -17,11 +17,11 @@ function fmtMoney(v) {
 }
 
 function fmtRate(v) {
-  return v === null || v === undefined ? "—" : `${v}%`;
+  return v === null || v === undefined ? "-" : `${v}%`;
 }
 
 function fmtDate(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d + "T00:00:00").toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
@@ -30,7 +30,7 @@ function fmtDate(d) {
 }
 
 function fmtDateShort(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d + "T00:00:00").toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
@@ -38,7 +38,7 @@ function fmtDateShort(d) {
 }
 
 // invertColor: for deductions, a drop is the good outcome. For pardon
-// rate we don't color-code — a rising rate could mean healthy leniency
+// rate we don't color-code - a rising rate could mean healthy leniency
 // or penalties set too aggressively, it's diagnostic rather than good/bad.
 function fmtDelta(
   v,

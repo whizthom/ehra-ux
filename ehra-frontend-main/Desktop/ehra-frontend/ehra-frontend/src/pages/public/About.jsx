@@ -29,7 +29,7 @@ const WORKFORCE_FEATURES = [
     icon: "ti-calendar-off",
     title: "Leave management",
     description:
-      "Structured requests, reviews and decisions — not chat threads.",
+      "Structured requests, reviews and decisions - not chat threads.",
   },
   {
     icon: "ti-adjustments",
@@ -114,7 +114,7 @@ const WHY_POINTS = [
   {
     icon: "ti-map-pin",
     title: "Built around African realities",
-    description: "Not adapted afterward — designed around them from the start.",
+    description: "Not adapted afterward - designed around them from the start.",
   },
   {
     icon: "ti-arrow-up-right",
@@ -194,7 +194,7 @@ export default function About() {
 
   useEffect(() => {
     const prevTitle = document.title;
-    document.title = "Ehral — Building the Future of African Business";
+    document.title = "Ehral - Building the Future of African Business";
 
     let meta = document.querySelector('meta[name="description"]');
     const prevDesc = meta?.getAttribute("content");
@@ -237,7 +237,7 @@ export default function About() {
 
   return (
     <div className={styles.page}>
-      {/* ── Nav — sticky; transparent over the hero, solid once scrolled ── */}
+      {/* ── Nav - sticky; transparent over the hero, solid once scrolled ── */}
       <header
         className={`${styles.nav} ${scrolled ? styles.navScrolled : styles.navTransparent}`}
       >
@@ -304,7 +304,7 @@ export default function About() {
         )}
       </header>
 
-      {/* ── 1. Hero — story-first, not feature-first ── */}
+      {/* ── 1. Hero - story-first, not feature-first ── */}
       <section className={styles.hero}>
         <div className={styles.heroInner}>
           <div className={styles.heroContent}>
@@ -326,7 +326,7 @@ export default function About() {
             <p className={styles.heroDesc}>
               Most business software is built for companies that have already
               grown. Ehral was built differently, to give growing businesses
-              access to the tools they need from the very beginning — manage
+              access to the tools they need from the very beginning - manage
               your people, streamline daily operations, and grow with confidence
               using one simple, connected platform.
             </p>
@@ -351,7 +351,7 @@ export default function About() {
         </p>
       </section>
 
-      {/* ── Capability ticker — a scrolling strip of what Ehral covers,
+      {/* ── Capability ticker - a scrolling strip of what Ehral covers,
            sitting directly under the hero as concrete proof before the
            narrative sections begin. ── */}
       <div className={styles.tickerWrap} aria-hidden="true">
@@ -365,7 +365,7 @@ export default function About() {
         </div>
       </div>
 
-      {/* ── Story behind Ehral — why it exists, right after the hero.
+      {/* ── Story behind Ehral - why it exists, right after the hero.
            Stacked on desktop and up: header centered on top, full story
            underneath in a single editorial column with a "spine" rail
            and the two key lines pulled out as standalone statements. ── */}
@@ -385,7 +385,7 @@ export default function About() {
             <p className={styles.lead}>
               A business can begin with a few people and a simple way of
               working, and a lot of ambition. But as it grows, everything around
-              it grows too — more employees, more responsibilities, more
+              it grows too - more employees, more responsibilities, more
               decisions, more information to keep track of. And the simple
               systems that worked at the start begin to strain.
             </p>
@@ -406,12 +406,12 @@ export default function About() {
               start where a business is today, and grow with it tomorrow.
             </p>
             <p className={styles.lead}>
-              That is why we built Ehral — to give businesses the systems they
+              That is why we built Ehral - to give businesses the systems they
               need to grow, without having to wait until they are already big.
             </p>
             <p className={styles.lead}>
               We started with the workforce, because people are at the heart of
-              every business. That is where Ehral begins — but it doesn&rsquo;t
+              every business. That is where Ehral begins - but it doesn&rsquo;t
               have to end there. Over time, we believe Ehral can connect
               businesses, employees and customers through one identity and one
               growing ecosystem.
@@ -420,7 +420,7 @@ export default function About() {
               But our ambition goes beyond workforce management.
             </p>
             <p className={styles.lead}>
-              Over time, we want Ehral to become a broader business ecosystem —
+              Over time, we want Ehral to become a broader business ecosystem -
               connecting businesses, employees, customers and other businesses
               through one growing platform.
             </p>
@@ -438,7 +438,7 @@ export default function About() {
             />
             <div className={styles.founderCreditText}>
               <p className={styles.founderCreditQuote}>
-                &ldquo;I kept seeing the same challenge — so I built the thing I
+                &ldquo;I kept seeing the same challenge - so I built the thing I
                 wished existed.&rdquo;
               </p>
               <span className={styles.founderCreditName}>
@@ -452,7 +452,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* ── Grow your business with Ehral — two-column section right
+      {/* ── Grow your business with Ehral - two-column section right
            below the story: a short, confident invitation to act on the
            left, the orbit animation (Ehral at the center of Employees,
            Customers, Business and Other businesses) on the right. ── */}
@@ -475,7 +475,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* ── 3. The real problem — a magazine-spread layout: newspaper-style
+      {/* ── 3. The real problem - a magazine-spread layout: newspaper-style
            two-column body copy building up to one oversized pull-statement
            as the section's visual climax, closing with a compact echo of
            the "scattered tools → Ehral" idea instead of a full diagram.
@@ -535,7 +535,7 @@ export default function About() {
           </p>
 
           <p className={styles.problemClosing}>
-            Ehral exists to close that gap — making powerful business technology
+            Ehral exists to close that gap - making powerful business technology
             accessible early, simple to adopt, and capable of growing alongside
             the business.
           </p>
@@ -564,7 +564,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* ── 4. The belief — emotional peak ── */}
+      {/* ── 4. The belief - emotional peak ── */}
       <section
         id="belief"
         className={`${styles.section} ${styles.sectionDark}`}
@@ -627,7 +627,7 @@ export default function About() {
         <p className={styles.lead}>
           Before there are reports, branches, customers, or revenue, there are
           people showing up every day to make the business work. Ehral gives you
-          the tools to understand, organize, and manage your workforce — from
+          the tools to understand, organize, and manage your workforce - from
           the first employee to the team you grow into.
         </p>
         <div className={styles.grid3}>
@@ -698,7 +698,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* ── 10. Product proof — one real dashboard, once ── */}
+      {/* ── 10. Product proof - one real dashboard, once ── */}
       <section className={styles.section} id="platform">
         <span className={`${styles.eyebrowDark} js-reveal`}>
           See it for yourself
@@ -707,7 +707,7 @@ export default function About() {
           See what&rsquo;s happening inside your business.
         </h2>
         <p className={styles.lead}>
-          Attendance rates, leave taken, department health — the picture
+          Attendance rates, leave taken, department health - the picture
           business owners often don&rsquo;t have, made visible.
         </p>
         <DeviceFrame
@@ -856,7 +856,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* ── 17. Final CTA — mission, not a feature pitch ── */}
+      {/* ── 17. Final CTA - mission, not a feature pitch ── */}
       <section className={styles.section}>
         <div className={styles.ctaBanner}>
           <span

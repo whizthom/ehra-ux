@@ -12,7 +12,7 @@ const MAX_ATTACHMENT_HINT = {
   DOCUMENT: ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip",
 };
 
-// Mirrors MsgAttachmentServiceImpl's server-side limits exactly — checked
+// Mirrors MsgAttachmentServiceImpl's server-side limits exactly - checked
 // here BEFORE spending any time/data on an upload attempt that the
 // server would reject anyway. Failing fast and locally, especially on a
 // slow mobile connection, is a meaningfully better experience than
@@ -43,7 +43,7 @@ export default function MessageComposer({
   const [uploadError, setUploadError] = useState(null);
   const [mentionQuery, setMentionQuery] = useState(null);
   // Tracks "has the person tapped into the message field", independent of
-  // whether they've typed anything yet — the mic->send icon swap fires on
+  // whether they've typed anything yet - the mic->send icon swap fires on
   // this, not just on non-empty text (see the send/mic button render
   // below), per the explicit request that focusing the composer alone
   // should switch it.
@@ -54,7 +54,7 @@ export default function MessageComposer({
   // Each popup gets its OWN ref covering its trigger button + panel
   // together (attachGroupRef, emojiGroupRef), so tapping the trigger
   // isn't misread as an "outside" click that would close-then-reopen it.
-  // mentionGroupRef additionally covers the textarea itself — the mention
+  // mentionGroupRef additionally covers the textarea itself - the mention
   // dropdown's whole purpose is to react to what's typed there, so
   // clicking/continuing to type in the textarea must NOT count as
   // "outside" the way it correctly does for the other two popups.
@@ -145,7 +145,7 @@ export default function MessageComposer({
     resetAfterSend();
   };
 
-  // Enter key is intentionally NOT wired to send anymore — it does
+  // Enter key is intentionally NOT wired to send anymore - it does
   // whatever a plain <textarea> already does with Enter/Shift+Enter by
   // default (insert a newline), matching the explicit requirement that
   // Enter should only ever create a new line. Sending happens exclusively
@@ -157,7 +157,7 @@ export default function MessageComposer({
     setUploadError(null);
 
     // Images get downscaled/re-encoded client-side FIRST (see
-    // imageCompress.js) — both so the size check right after this
+    // imageCompress.js) - both so the size check right after this
     // reflects what will actually be uploaded, and because a full-
     // resolution phone-camera photo has no reason to travel over
     // someone's mobile data untouched when nothing in a chat bubble
@@ -167,7 +167,7 @@ export default function MessageComposer({
 
     if (uploadFile.size > MAX_UPLOAD_BYTES[kind]) {
       setUploadError(
-        `That ${kind === "IMAGE" ? "image" : "file"} is ${formatFileSize(uploadFile.size)} — the limit is ${formatFileSize(MAX_UPLOAD_BYTES[kind])}.`,
+        `That ${kind === "IMAGE" ? "image" : "file"} is ${formatFileSize(uploadFile.size)} - the limit is ${formatFileSize(MAX_UPLOAD_BYTES[kind])}.`,
       );
       return;
     }
@@ -188,7 +188,7 @@ export default function MessageComposer({
       });
       onCancelReply?.();
     } catch {
-      setUploadError("Upload failed — please try again.");
+      setUploadError("Upload failed - please try again.");
     } finally {
       setUploading(false);
     }
@@ -201,7 +201,7 @@ export default function MessageComposer({
     });
     if (file.size > MAX_UPLOAD_BYTES.VOICE) {
       setUploadError(
-        `That recording is ${formatFileSize(file.size)} — the limit is ${formatFileSize(MAX_UPLOAD_BYTES.VOICE)}.`,
+        `That recording is ${formatFileSize(file.size)} - the limit is ${formatFileSize(MAX_UPLOAD_BYTES.VOICE)}.`,
       );
       return;
     }
@@ -385,7 +385,7 @@ export default function MessageComposer({
             onFocus={() => {
               setComposerFocused(true);
               // Tapping into the composer should drop the person at the
-              // latest message, same as every other chat app — otherwise
+              // latest message, same as every other chat app - otherwise
               // they can end up typing a reply while looking at whatever
               // point in the history they'd scrolled to earlier.
               onComposerFocus?.();

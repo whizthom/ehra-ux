@@ -7,11 +7,11 @@ import {
 import styles from "./ReportsTab.module.css";
 
 function fmtRate(v) {
-  return v === null || v === undefined ? "—" : `${v}%`;
+  return v === null || v === undefined ? "-" : `${v}%`;
 }
 
 function fmtMoney(v) {
-  if (v === null || v === undefined) return "—";
+  if (v === null || v === undefined) return "-";
   return Number(v).toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -19,7 +19,7 @@ function fmtMoney(v) {
 }
 
 function fmtDateFull(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d + "T00:00:00").toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
@@ -162,7 +162,7 @@ export default function DepartmentHealthReportView() {
         <div>
           <h2 className={styles.heading}>Department Health</h2>
           <p className={styles.subheading}>
-            One glanceable row per department — which team needs attention.
+            One glanceable row per department - which team needs attention.
           </p>
         </div>
         <div className={styles.exportBtns}>

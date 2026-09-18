@@ -2,7 +2,7 @@ import API from "./authApi";
 
 // REST layer for the real-time messaging feature (com.Ehra.messaging on
 // the backend). Kept completely separate from the legacy chatApi.js
-// (which still backs the old SSE-based chat) — nothing here touches that
+// (which still backs the old SSE-based chat) - nothing here touches that
 // file or its endpoints.
 
 export const listConversations = () => API.get("/messaging/conversations");

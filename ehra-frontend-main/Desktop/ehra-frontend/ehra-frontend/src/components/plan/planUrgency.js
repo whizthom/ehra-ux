@@ -1,6 +1,6 @@
 // Shared between PlanBadge (dashboard topbar pill) and PlanExpiryReminder
 // (the periodic expiry toast) so "how urgent is this" is computed exactly
-// one way, in exactly one place — the two surfaces read the same tier for
+// one way, in exactly one place - the two surfaces read the same tier for
 // the same subscription instead of two hand-tuned copies of the same
 // day-count math quietly drifting apart over time.
 
@@ -12,7 +12,7 @@ export function daysUntil(dateString) {
 
 /**
  * @returns {"safe"|"upcoming"|"soon"|"urgent"|null} null means "not on a
- *   paid plan, or no expiry to worry about" — nothing should escalate.
+ *   paid plan, or no expiry to worry about" - nothing should escalate.
  */
 export function urgencyTier(subscription) {
   if (!subscription) return null;

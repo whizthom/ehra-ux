@@ -37,22 +37,22 @@ import { useOnlineStatus } from "../hooks/useOnlineStatus";
 // getting stranded on a bare, nav-less page. Only the scanner card itself
 // (styles from ScanAttendance.module.css) is specific to this screen.
 //
-// OFFLINE ATTENDANCE — high-level shape (see the offline attendance
+// OFFLINE ATTENDANCE - high-level shape (see the offline attendance
 // design doc for the full architecture):
 //
-//   ONLINE:  unchanged — the camera/QR flow below is exactly what it was.
+//   ONLINE:  unchanged - the camera/QR flow below is exactly what it was.
 //            The one addition is that a successful scan response may
 //            carry an `offlineAuthorization`, which gets captured into
 //            the local IndexedDB journal for later offline use.
 //   OFFLINE: there is no QR to scan (the rotating token requires a live
-//            server round trip — see the design doc, section 4), so this
+//            server round trip - see the design doc, section 4), so this
 //            screen skips the camera entirely and shows a direct
 //            "Clock in/out offline" action instead, or a "Device not
 //            recognized" block state if this device/employee combination
 //            has no live offline authorization.
 //
 // Reachability note: `online` below is navigator.onLine plus the browser
-// `online`/`offline` events — it is NOT a live ping of Ehral's API (spec
+// `online`/`offline` events - it is NOT a live ping of Ehral's API (spec
 // §40's fuller reachability check). That's a reasonable next step, not
 // implemented in this pass.
 
@@ -95,8 +95,8 @@ const ADMIN_NAV = [
   },
 ];
 
-// This screen doesn't have its own tab system — it's a single-purpose
-// deep link — so "Attendance" is always shown as the active nav item
+// This screen doesn't have its own tab system - it's a single-purpose
+// deep link - so "Attendance" is always shown as the active nav item
 // (clocking in/out is an attendance action) rather than tracking a
 // locally-switchable activeNav like the dashboards do.
 const ACTIVE_LABEL = "Attendance";
@@ -116,7 +116,7 @@ function initials(first, last) {
 }
 
 // Tracks a horizontally-scrollable element and returns { left, width } as
-// percentages of its own track — same helper used on the dashboards, kept
+// percentages of its own track - same helper used on the dashboards, kept
 // local here since it isn't exported from anywhere shared.
 function useScrollThumb(ref) {
   const [thumb, setThumb] = useState({ left: 0, width: 100 });
@@ -160,7 +160,7 @@ export default function ScanAttendance() {
   const bottomNavScrollRef = useRef(null);
 
   const [cameraError, setCameraError] = useState("");
-  // Camera is never started automatically — see startCamera() below.
+  // Camera is never started automatically - see startCamera() below.
   const [cameraState, setCameraState] = useState("idle");
   const [result, setResult] = useState(null); // { ok, message, action, status, offlinePending }
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
@@ -173,7 +173,7 @@ export default function ScanAttendance() {
   const [pendingOfflineCount, setPendingOfflineCount] = useState(0);
   const [offlineSubmitting, setOfflineSubmitting] = useState(false);
 
-  // Mobile bottom-nav "Log out" — confirmed via LogoutConfirmModal before
+  // Mobile bottom-nav "Log out" - confirmed via LogoutConfirmModal before
   // the session is actually torn down, so a stray tap on a crowded phone
   // screen can't sign someone out by accident.
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -217,7 +217,7 @@ export default function ScanAttendance() {
     }
   }, []);
 
-  // Best-effort — only businesses with Attendance Zone turned on actually
+  // Best-effort - only businesses with Attendance Zone turned on actually
   // require this; everyone else's scan works exactly the same whether or
   // not location is available/granted. Short timeout so a slow/denied
   // location prompt never holds up an otherwise-valid scan.
@@ -252,7 +252,7 @@ export default function ScanAttendance() {
     return () => window.clearInterval(timer);
   }, []);
 
-  // Connectivity itself now comes from useOnlineStatus() above — shared
+  // Connectivity itself now comes from useOnlineStatus() above - shared
   // with OfflineBanner.jsx rather than each tracking navigator.onLine
   // separately.
 
@@ -277,7 +277,7 @@ export default function ScanAttendance() {
     };
   }, [online]);
 
-  // Connectivity returned — upload whatever is queued. Fire-and-forget;
+  // Connectivity returned - upload whatever is queued. Fire-and-forget;
   // failures just leave the queue for the next reconnect/retry, per
   // offlineAttendanceService's own contract.
   useEffect(() => {
@@ -318,7 +318,7 @@ export default function ScanAttendance() {
           else if (!today?.clockOut) action = "CLOCK_OUT";
           // Keep the offline "next action" cache in sync with whatever the
           // server actually reports, since this is the one moment we know
-          // for certain (an online read) — see setCachedTodayState's doc.
+          // for certain (an online read) - see setCachedTodayState's doc.
           setCachedTodayState({
             clockedIn: Boolean(today?.clockIn),
             clockedOut: Boolean(today?.clockOut),
@@ -335,7 +335,7 @@ export default function ScanAttendance() {
           : await submitScan(token, coords, {});
 
         // A successful online action may have minted/renewed an offline
-        // authorization for this device — persist it locally so it's
+        // authorization for this device - persist it locally so it's
         // available the next time this device goes offline.
         captureOfflineAuthorization(data.offlineAuthorization);
         if (data.action) {
@@ -430,7 +430,7 @@ export default function ScanAttendance() {
 
       if (code && code.data) {
         handleDecoded(code.data);
-        return; // stop the loop — handleDecoded() already calls stopCamera()
+        return; // stop the loop - handleDecoded() already calls stopCamera()
       }
     }
     rafRef.current = requestAnimationFrame(tick);
@@ -485,7 +485,7 @@ export default function ScanAttendance() {
       } catch (err) {
         if (err?.name === "NotAllowedError") throw err;
         // No rear camera matched the constraint (common on
-        // laptops/desktops) — fall back to whatever camera is available.
+        // laptops/desktops) - fall back to whatever camera is available.
         stream = await requestCamera({ video: true });
       }
 
@@ -510,7 +510,7 @@ export default function ScanAttendance() {
     }
   }, [tick, requestCamera]);
 
-  // No auto-start — see QrScanModal.jsx for why. getUserMedia only ever
+  // No auto-start - see QrScanModal.jsx for why. getUserMedia only ever
   // runs from a direct tap ("Enable camera" / "Try again" below).
   useEffect(() => {
     return () => stopCamera();
@@ -520,7 +520,7 @@ export default function ScanAttendance() {
     if (cooldownRemaining > 0) return;
     setResult(null);
 
-    // Offline: nothing to scan — just clear the result and re-show the
+    // Offline: nothing to scan - just clear the result and re-show the
     // offline action panel. Only the ONLINE path re-engages the camera.
     if (!online) return;
 
@@ -671,13 +671,13 @@ export default function ScanAttendance() {
             <p className={styles.subtitle}>
               {online
                 ? "Point your camera at the QR code on the admin's screen."
-                : "No connection needed — this will sync automatically once you're back online."}
+                : "No connection needed - this will sync automatically once you're back online."}
             </p>
 
             <div className={styles.scannerFrame}>
               {online && (
                 <>
-                  {/* Always mounted — see startCamera() above for why: it
+                  {/* Always mounted - see startCamera() above for why: it
                       assigns the stream to videoRef.current before cameraState
                       becomes "running", so this element must already exist in
                       the DOM at that point or the assignment silently no-ops
@@ -897,7 +897,7 @@ export default function ScanAttendance() {
             </button>
           ))}
 
-          {/* Logout has no sidebar/desktop equivalent in this strip — on
+          {/* Logout has no sidebar/desktop equivalent in this strip - on
               desktop it's the icon button in the sidebar footer instead.
               This item only ever renders inside .bottomNav, which is
               display:none above 900px, so it's mobile-only by construction. */}

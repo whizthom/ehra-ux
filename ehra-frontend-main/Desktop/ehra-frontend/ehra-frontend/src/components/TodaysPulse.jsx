@@ -1,7 +1,7 @@
 import styles from "./TodaysPulse.module.css";
 
 /**
- * Mobile-only "hero" widget for the top of the employer dashboard — a
+ * Mobile-only "hero" widget for the top of the employer dashboard - a
  * circular gauge summarizing today's attendance at a glance, all values
  * derived from real dashboard-summary + today's-attendance data (see
  * Dashboard.jsx), not placeholders.
@@ -16,7 +16,7 @@ export default function TodaysPulse({
   percent,
   lastClockInLabel,
 }) {
-  // Sits close to the outer tick ring (r=92) rather than R=74's old gap —
+  // Sits close to the outer tick ring (r=92) rather than R=74's old gap -
   // grows the circumference (so the arc reads more precisely) and, just
   // as important, pushes the stroke itself outward, which is what
   // actually gives clockedIn/totalStaff room to grow into double or

@@ -44,7 +44,7 @@ export default function ScheduleSettings() {
     setError("");
 
     // Fetched independently (not Promise.all) so that one endpoint
-    // failing — e.g. holidays erroring — can never blank out the weekly
+    // failing - e.g. holidays erroring - can never blank out the weekly
     // schedule, which previously happened because Promise.all rejects
     // as a whole if either call fails, silently skipping both setState
     // calls with no error shown to the user.
@@ -172,7 +172,7 @@ export default function ScheduleSettings() {
         {schedule.length === 0 ? (
           <p className={styles.noHolidays}>
             {error
-              ? "Schedule couldn't be loaded — tap Retry above."
+              ? "Schedule couldn't be loaded - tap Retry above."
               : "No schedule configured yet."}
           </p>
         ) : (
@@ -282,7 +282,7 @@ export default function ScheduleSettings() {
                 <div>
                   <span className={styles.holidayDate}>{h.date}</span>
                   {h.label && (
-                    <span className={styles.holidayLabel}> — {h.label}</span>
+                    <span className={styles.holidayLabel}> - {h.label}</span>
                   )}
                 </div>
                 <button

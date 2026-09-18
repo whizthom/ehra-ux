@@ -47,7 +47,7 @@ export default function ChatWindow({
   const isAnnouncement = conversation.type === "ANNOUNCEMENT";
   // Both GROUP and ANNOUNCEMENT have more than one possible sender, so
   // bubbles need the sender-name label and the header needs a member
-  // count instead of a single person's presence — GroupInfoModal
+  // count instead of a single person's presence - GroupInfoModal
   // (membership management) stays GROUP-only, since "leave"/"remove
   // member" don't really make sense for a company-wide channel everyone's
   // auto-enrolled in.
@@ -63,7 +63,7 @@ export default function ChatWindow({
   // checks the caller's MsgConversationMember role, ADMIN-only for
   // ANNOUNCEMENT) via the same signal already available client-side: an
   // Employer/HOD's org-level roleLabel. This is a UI convenience, not the
-  // enforcement — the server rejects the POST regardless of what this
+  // enforcement - the server rejects the POST regardless of what this
   // computes, so getting it wrong here can only ever over-hide the
   // composer, never let someone post who isn't allowed to.
   const canPostHere =
@@ -72,7 +72,7 @@ export default function ChatWindow({
     Boolean(myParticipant?.roleLabel?.startsWith("HOD"));
 
   // Auto-scroll to bottom on first load and on new messages, but only if
-  // the person was already near the bottom — never yank them away from
+  // the person was already near the bottom - never yank them away from
   // history they scrolled up to read (section 28's "avoid unnecessary
   // re-renders/jumps").
   useEffect(() => {
@@ -125,13 +125,13 @@ export default function ChatWindow({
   };
 
   // A search result for a MESSAGE hit (see SearchResultsPanel.jsx) opens
-  // this conversation with a specific target message id — which is very
+  // this conversation with a specific target message id - which is very
   // often NOT in the most-recent page useConversationMessages loads by
   // default. Rather than silently failing to highlight anything older
   // than the first page, this keeps calling loadOlder() (the same
   // cursor-pagination the person would use by scrolling up manually)
   // until the target message actually shows up in `messages`, or the
-  // conversation genuinely runs out of history (hasMore false) — turning
+  // conversation genuinely runs out of history (hasMore false) - turning
   // a search hit into a real deep link to any message, not just recent
   // ones.
   useEffect(() => {
@@ -161,12 +161,12 @@ export default function ChatWindow({
   }, []);
 
   // The on-screen keyboard opening/closing resizes window.visualViewport
-  // over several animation frames on mobile — a single scroll right on
+  // over several animation frames on mobile - a single scroll right on
   // focus (handleComposerFocus above) can fire before that finishes and
   // leave the last message sitting partly behind the keyboard. Re-running
   // the same scroll on every visualViewport resize, for as long as the
   // person is near the bottom, keeps the last message pinned in view for
-  // the whole animation instead of just the first frame of it — this is
+  // the whole animation instead of just the first frame of it - this is
   // also what keeps it correctly anchored if the keyboard's height itself
   // changes (e.g. switching from the text keyboard to an emoji picker).
   useEffect(() => {

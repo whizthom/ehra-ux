@@ -8,7 +8,7 @@ import { subscribeToUserQueue } from "../services/messagingSocket";
 // WebSocket event implies the count may have changed.
 //
 // Sound/toast notification for an incoming message does NOT live here
-// anymore — it moved to useNewMessageToasts.js, driven by the backend's
+// anymore - it moved to useNewMessageToasts.js, driven by the backend's
 // dedicated NEW_MESSAGE_NOTIFICATION event (sender name, snippet,
 // mute-aware) rather than piggybacking on CONVERSATION_UPDATED here,
 // which also fires for pin/mute/archive changes and carried no sender

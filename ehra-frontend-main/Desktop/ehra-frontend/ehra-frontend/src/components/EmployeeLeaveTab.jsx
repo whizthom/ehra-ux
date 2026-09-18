@@ -41,7 +41,7 @@ const LEAVE_TYPES = [
 ];
 
 // A request can still be cancelled by the employee up until the employer's
-// final decision — matches the backend rule in LeaveServiceImpl#cancelLeave
+// final decision - matches the backend rule in LeaveServiceImpl#cancelLeave
 // (anything except APPROVED / REJECTED / CANCELLED).
 const CANCELLABLE_STATUSES = PROCESSING_STATUSES;
 
@@ -52,7 +52,7 @@ const HISTORY_FILTERS = [
   { key: "CANCELLED", label: "Cancelled" },
 ];
 
-// Outcome statuses a HOD can monitor for their department — cancellations
+// Outcome statuses a HOD can monitor for their department - cancellations
 // aren't a "decision" so they're left out of this view (the request was
 // withdrawn, not decided).
 const DEPARTMENT_OUTCOME_STATUSES = ["APPROVED", "REJECTED"];
@@ -63,13 +63,13 @@ const DEPARTMENT_FILTERS = [
   { key: "REJECTED", label: "Rejected" },
 ];
 
-// The department-outcomes list is otherwise unbounded — every decided
+// The department-outcomes list is otherwise unbounded - every decided
 // request in the HOD's department, forever. Rather than actually deleting
 // anything (this is someone else's leave record, not the HOD's to erase),
 // "remove" just hides a row from THIS HOD's view from here on. Scoped by
 // membershipId so it's personal to that HOD, and stored in localStorage so
 // it survives refresh/relogin. Wrapped in try/catch since localStorage can
-// throw in private-browsing/quota-exceeded situations — a failed dismiss
+// throw in private-browsing/quota-exceeded situations - a failed dismiss
 // should never break the page.
 function dismissedStorageKey() {
   const { membershipId } = readSession() || {};
@@ -90,7 +90,7 @@ function saveDismissedIds(set) {
   try {
     localStorage.setItem(dismissedStorageKey(), JSON.stringify([...set]));
   } catch {
-    // best-effort — losing the dismissal just means the row reappears
+    // best-effort - losing the dismissal just means the row reappears
   }
 }
 
@@ -98,7 +98,7 @@ function fmt(d) {
   return formatDate(d);
 }
 
-// Small circular gauge for one leave-type balance — used-vs-max, exactly
+// Small circular gauge for one leave-type balance - used-vs-max, exactly
 // like Today's Pulse's ring but sized down for a horizontal strip. Types
 // with no cap (maxDaysPerYear <= 0 / daysRemaining < 0) render an
 // "unlimited" badge instead of a ring, since a percentage doesn't apply.
@@ -156,7 +156,7 @@ function BalanceRing({ balance }) {
   );
 }
 
-// Horizontal stage tracker — dots connected by a line, each dot colored
+// Horizontal stage tracker - dots connected by a line, each dot colored
 // by state (done / current / declined / pending). This is the visual
 // heart of the "Processing" section: at a glance you can see exactly
 // which of Requested → Cover → HOD → Sign-off a request has cleared.
@@ -197,7 +197,7 @@ function StageTrack({ leave }) {
   );
 }
 
-// One card in "Currently processing" — the stage tracker up top, then the
+// One card in "Currently processing" - the stage tracker up top, then the
 // same detail a plain row would show, plus cancel while still eligible.
 function ProcessingCard({ leave, onCancel, cancelling }) {
   const cfg = leaveStatusConfig(leave.status);
@@ -246,7 +246,7 @@ function ProcessingCard({ leave, onCancel, cancelling }) {
   );
 }
 
-// One row in "History" — finalized requests only, so no stage tracker
+// One row in "History" - finalized requests only, so no stage tracker
 // needed; instead show the closing note (rejection reason) when present.
 function HistoryRow({ leave }) {
   const cfg = leaveStatusConfig(leave.status);
@@ -281,7 +281,7 @@ function HistoryRow({ leave }) {
   );
 }
 
-// One row in "Department outcomes" — a finalized request from someone in
+// One row in "Department outcomes" - a finalized request from someone in
 // the HOD's department, laid out so the HOD can see both halves of the
 // decision at a glance: what they themselves decided, and (when their
 // approval sent it onward) what the employer ultimately did with it.
@@ -361,7 +361,7 @@ function DepartmentOutcomeRow({ leave, dismissed, onToggleDismiss }) {
   );
 }
 
-// One row in the HOD decision queue — approve is a single click; reject
+// One row in the HOD decision queue - approve is a single click; reject
 // requires typing a reason first, same pattern as the cover-response flow
 // so employees see a consistent interaction across both roles.
 function HodQueueRow({ leave, onDecide, deciding }) {
@@ -478,13 +478,13 @@ const HOD_DEPARTMENT_TAB = {
 };
 
 // Replaces the employer's `LeavesTab` (which pulls the whole business's
-// leave queue via GET /leave and approves via POST /leave/{id}/approve —
+// leave queue via GET /leave and approves via POST /leave/{id}/approve -
 // both ADMIN only, hence the 403s). This is the actual employee surface:
 // request leave, see your own history/balances, cancel a pending request
-// — and, if this Identity is a Head of Department, decide on requests
+// - and, if this Identity is a Head of Department, decide on requests
 // from their own department (GET/POST /leave/department/...).
 //
-// Laid out as three tabs — Request, Processing, History — so "submit a
+// Laid out as three tabs - Request, Processing, History - so "submit a
 // new request", "where is my pending request right now", and "what
 // happened to my past requests" each get a dedicated, uncluttered view
 // instead of one long scroll.
@@ -574,7 +574,7 @@ export default function EmployeeLeaveTab({ isHod }) {
     }
   }, [isHod]);
 
-  // Every leave in the department, finalized or not — filtered down to
+  // Every leave in the department, finalized or not - filtered down to
   // APPROVED/REJECTED below to show the HOD the outcome of requests
   // they (or, on their behalf, the employer) have already decided on.
   const fetchDepartment = useCallback(async () => {
@@ -606,7 +606,7 @@ export default function EmployeeLeaveTab({ isHod }) {
   // The pushed LeaveDTO doesn't carry an explicit "this is your own
   // leave" flag, so the reliable way to patch "My requests" and the HOD
   // queue live is: (a) patch in place for any id we already have on
-  // screen — cheap and instant, no ambiguity; and (b) on a relevant
+  // screen - cheap and instant, no ambiguity; and (b) on a relevant
   // notification (which the backend only ever sends to someone actually
   // involved), do a light re-fetch to pick up brand-new items. Together
   // these keep both panels current within a fraction of a second of the
@@ -877,7 +877,7 @@ export default function EmployeeLeaveTab({ isHod }) {
             <div className={styles.formCard}>
               {justSubmitted && (
                 <div className={styles.successBox}>
-                  <i className="ti ti-circle-check" /> Request submitted — track
+                  <i className="ti ti-circle-check" /> Request submitted - track
                   it under Processing.
                 </div>
               )}
@@ -1025,7 +1025,7 @@ export default function EmployeeLeaveTab({ isHod }) {
           <div className={styles.sectionStack}>
             <div className={styles.deptOutcomesHeader}>
               <p className={styles.subtitle}>
-                Outcomes of requests decided in your department — yours to
+                Outcomes of requests decided in your department - yours to
                 monitor even after they've moved past you. Getting crowded? Use
                 the <i className="ti ti-x" /> on a row to tuck it away.
               </p>

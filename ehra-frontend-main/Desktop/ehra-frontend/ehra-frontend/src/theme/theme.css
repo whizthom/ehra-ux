@@ -1,7 +1,7 @@
 /* =========================================================================
    THEME VARIABLES
    -------------------------------------------------------------------------
-   Light values below match the app's existing hardcoded colors exactly —
+   Light values below match the app's existing hardcoded colors exactly -
    switching to light changes nothing visually. Dark values follow the
    "Today's Pulse" widget's own palette (deep green surfaces, warm gold
    accent, rose for late/danger) rather than a generic WhatsApp dark theme,
@@ -55,7 +55,7 @@
 }
 
 [data-theme="dark"] {
-   /* Page / surfaces — WhatsApp's actual dark-mode blacks, not the
+   /* Page / surfaces - WhatsApp's actual dark-mode blacks, not the
        Pulse card's green-black. The Pulse card keeps its own gold/green
        palette regardless (it's a deliberate "hero" widget), so this is
        the rest of the app going a cleaner, more neutral direction. */
@@ -67,19 +67,19 @@
    --border-color: #222d34;
    --shadow-color: rgba(0, 0, 0, 0.4);
 
-   /* Text — WhatsApp's own light grey, not tinted cream. */
+   /* Text - WhatsApp's own light grey, not tinted cream. */
    --text-primary: #e9edef;
    --text-secondary: #8696a0;
    --sidebar-text: #e9edef;
    --sidebar-muted: #8696a0;
 
-   /* Brand / accent — WhatsApp's real dark-mode green, bright enough to
+   /* Brand / accent - WhatsApp's real dark-mode green, bright enough to
        read clearly on black without needing much saturation to stand
        out. */
    --accent: #00a884;
    --accent-hover: #06cf9c;
 
-   /* Status — kept as translucent tints (from the last pass) rather
+   /* Status - kept as translucent tints (from the last pass) rather
        than solid fills, just recolored back to a more standard red/amber
        instead of the rose/muted-gold pairing. */
    --danger: #f15c6d;
@@ -98,7 +98,7 @@
    --info-border: rgba(125, 184, 240, 0.3);
    --info-text: #7db8f0;
 
-   /* Message bubbles — WhatsApp's actual bubble colors. */
+   /* Message bubbles - WhatsApp's actual bubble colors. */
    --bubble-sent-bg: #005c4b;
    --bubble-received-bg: #202c33;
 }
@@ -106,7 +106,7 @@
 /* Full-bleed background backstop. .dash (Dashboard.module.css /
    EmployeeDashboard.module.css) already paints --bg-page across its own
    box, but nothing previously guaranteed html/body underneath it did
-   too — normally invisible, but viewport-fit=cover (index.html) means
+   too - normally invisible, but viewport-fit=cover (index.html) means
    content draws all the way under the iOS status bar, and any gap
    between what .dash covers and the true physical screen edge would
    show the browser's own default white instead of the app's actual
@@ -119,7 +119,7 @@ body {
 /* Smooth, subtle transition when switching themes.
    `html` is included here (not just `body`) because it's what actually
    paints the safe-area strip under the iOS status bar (viewport-fit=cover
-   — see the comment above). Without it, html's background snapped to the
+   - see the comment above). Without it, html's background snapped to the
    new theme instantly while body eased in over 150ms, leaving a
    momentary hard-edged line right at the status-bar boundary on every
    toggle. */
@@ -132,22 +132,22 @@ body,
    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
-/* Hide scrollbars on mobile only — native apps don't show a persistent
+/* Hide scrollbars on mobile only - native apps don't show a persistent
    scrollbar track/thumb, and that visible track is one of the more
    obvious "this is just a website" tells on an installed PWA, phone-
    sized screens especially. Desktop keeps its normal scrollbar; this is
    scoped to match this codebase's established phone breakpoint (used
-   the same way throughout — LeavesTab, EmployeeDashboard, etc.), not
+   the same way throughout - LeavesTab, EmployeeDashboard, etc.), not
    the wider ~900px cutoff used elsewhere for the sidebar/bottom-nav
    switch. This only hides the scrollbar itself; scrolling still works
-   exactly the same on mobile (touch drag, keyboard) — mobile Safari/
+   exactly the same on mobile (touch drag, keyboard) - mobile Safari/
    Chrome already auto-hide their scrollbars by default, so this mainly
    affects Android WebView, where a track is shown persistently
    otherwise. Applied globally with a wildcard rather than to
    Dashboard.module.css/EmployeeDashboard.module.css/etc. individually,
    since there are scroll containers (.content, chat panels, tables,
    dropdowns, modals, ...) spread across dozens of component
-   stylesheets — a universal rule here is the only way to actually
+   stylesheets - a universal rule here is the only way to actually
    guarantee "the whole app", not just the ones anyone remembers to
    update. */
 @media (max-width: 640px) {

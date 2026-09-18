@@ -2,14 +2,14 @@ import styles from "./WorkflowDiagram.module.css";
 
 /**
  * Generic connected-step diagram. Give it an ordered list of steps and it
- * draws them as nodes joined by a line/arrow — horizontal on wide
+ * draws them as nodes joined by a line/arrow - horizontal on wide
  * screens, vertical on narrow ones. Used wherever the copy describes a
  * sequence (the "scattered tools → one platform" transformation, the
  * "today → tomorrow" vision shift) without needing a bespoke diagram
  * component for each one.
  *
- * Pass `reverseResponsive` to flip that behavior instead — vertical on
- * desktop/large screens, horizontal on mobile/tablet — for spots (like
+ * Pass `reverseResponsive` to flip that behavior instead - vertical on
+ * desktop/large screens, horizontal on mobile/tablet - for spots (like
  * a narrow side column) where a tall stack reads better on wide screens
  * than a wrapped horizontal row.
  */

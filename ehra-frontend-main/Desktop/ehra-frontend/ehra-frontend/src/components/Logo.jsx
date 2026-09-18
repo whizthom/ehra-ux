@@ -2,13 +2,13 @@ import { useId } from "react";
 import styles from "./Logo.module.css";
 
 /**
- * Ehra logo — mark + wordmark, transparent background.
+ * Ehra logo - mark + wordmark, transparent background.
  *
  * Paths below are traced directly from the source artwork (not
  * hand-approximated), so proportions match the original. Color is pulled
  * entirely from the app's existing theme tokens (--accent / --text-primary,
  * see src/theme/theme.css), so this repaints automatically when
- * <html data-theme="..."> changes — no separate light/dark assets needed.
+ * <html data-theme="..."> changes - no separate light/dark assets needed.
  *
  * Usage:
  *   <Logo />                              // stacked mark + wordmark
@@ -53,12 +53,12 @@ function Mark({ markSize, gradientId, tone }) {
 }
 
 function Wordmark({ height, tone }) {
-  // "e" occupies x[0,200], "hral" occupies x[200,784] — 784 wide, 260 tall
+  // "e" occupies x[0,200], "hral" occupies x[200,784] - 784 wide, 260 tall
   // total, matching the traced source crops exactly.
   //
   // tone="sidebar" is a single flat color (var(--sidebar-text)) for both
   // glyph groups instead of the two-tone accent/text-primary brand
-  // treatment — the sidebar's background (var(--bg-sidebar)) is a solid
+  // treatment - the sidebar's background (var(--bg-sidebar)) is a solid
   // brand-color fill in both themes, so the normal accent-colored "e"
   // would have little to no contrast against it. var(--sidebar-text) is
   // already the color used for every other label in the sidebar, so this
@@ -131,7 +131,7 @@ export default function Logo({
     );
   }
 
-  // stacked (default) — matches the reference artwork's layout
+  // stacked (default) - matches the reference artwork's layout
   return (
     <span
       className={`${styles.wrap} ${styles.stacked} ${className}`}

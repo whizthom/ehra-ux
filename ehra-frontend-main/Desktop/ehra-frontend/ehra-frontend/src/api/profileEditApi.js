@@ -23,7 +23,7 @@ export const assignPositionByHod = (employeeId, position) =>
   API.put(`/profile-edits/position/${employeeId}/hod-assign`, { position });
 
 // ── Direct hire date assignment ──────────────────────────────────────────
-// Never available to the employee — only the employer (applied immediately)
+// Never available to the employee - only the employer (applied immediately)
 // or the employee's HOD (creates a request that needs employer approval).
 export const assignHireDateByEmployer = (employeeId, hireDate) =>
   API.put(`/profile-edits/hire-date/${employeeId}`, { hireDate });

@@ -19,7 +19,7 @@ const STATUS_LABEL = {
 };
 
 function fmt(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d).toLocaleDateString([], {
     day: "numeric",
     month: "short",
@@ -47,10 +47,10 @@ const BLANK = {
 };
 
 // Avatar shown at the top of the form: the initials-in-a-circle icon isn't
-// static — it reflects the employee's actual current profile picture once
+// static - it reflects the employee's actual current profile picture once
 // they have one, and clicking it lets them pick a new photo right here.
 // Like everything else on this form, a new photo doesn't take effect
-// immediately — it rides along in the same submit and only becomes the
+// immediately - it rides along in the same submit and only becomes the
 // employee's live picture once approved (see the pending-preview badge).
 function AvatarPicker({
   firstName,
@@ -98,7 +98,7 @@ function AvatarPicker({
         <p className={styles.avatarLabel}>Profile picture</p>
         <p className={styles.hint}>
           {pendingUrl
-            ? "New photo selected — awaiting approval once submitted."
+            ? "New photo selected - awaiting approval once submitted."
             : "Click the icon to choose a new photo."}
         </p>
       </div>
@@ -107,16 +107,16 @@ function AvatarPicker({
 }
 
 // Replaces the admin-mode `<ProfileEditApprovalPanel mode="employer" />`
-// that was previously wired into this tab — an employee session can never
+// that was previously wired into this tab - an employee session can never
 // call GET /profile-edits or /profile-edits/pending (ADMIN only), which
 // is why that tab 403'd. This is the actual employee surface: submit a
-// change request (every field — name, email, position, ID document,
-// profile picture, phone, address, etc. — goes through the HOD/employer
+// change request (every field - name, email, position, ID document,
+// profile picture, phone, address, etc. - goes through the HOD/employer
 // approval chain, there's no self-service tier), see your own history,
-// cancel a pending one — and, for a Head of Department, the existing
+// cancel a pending one - and, for a Head of Department, the existing
 // HOD-mode approval panel reused as-is (it already supports mode="hod").
 //
-// Hire date is intentionally not a field on this form at all — only the
+// Hire date is intentionally not a field on this form at all - only the
 // employer or the employee's HOD can set it (see PositionCell-style
 // HireDateCell in WorkforceTab / Hodworkforcetab).
 export default function EmployeeProfileEditsTab({ isHod, profile }) {
@@ -261,8 +261,8 @@ export default function EmployeeProfileEditsTab({ isHod, profile }) {
         <div>
           <h2 className={styles.title}>Profile edit requests</h2>
           <p className={styles.subtitle}>
-            Update your details. Every change — including your photo and ID
-            document — needs approval from your HOD and/or employer before it
+            Update your details. Every change - including your photo and ID
+            document - needs approval from your HOD and/or employer before it
             takes effect.
           </p>
         </div>

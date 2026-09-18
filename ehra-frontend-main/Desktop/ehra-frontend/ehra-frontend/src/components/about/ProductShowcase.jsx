@@ -21,7 +21,7 @@ function timeLabel(iso) {
 
 /**
  * The hero's signature visual: the real Ehral desktop dashboard and the
- * real Ehral mobile attendance screen, composed together with depth —
+ * real Ehral mobile attendance screen, composed together with depth -
  * so the very first thing a visitor sees is the actual product, not an
  * illustration of "a product like this".
  *

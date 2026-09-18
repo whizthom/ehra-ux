@@ -81,7 +81,7 @@
     }
 }
 
-/* ── Root wrap — content flows through the page-level scroll,
+/* ── Root wrap - content flows through the page-level scroll,
    same as Dashboard/Penalty/QR Code ── */
 .wrap {
     display: flex;

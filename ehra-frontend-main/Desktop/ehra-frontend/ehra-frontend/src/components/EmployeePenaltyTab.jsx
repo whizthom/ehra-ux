@@ -3,9 +3,9 @@ import { getMyPenaltySummary, getMyPenaltyHistory } from "../api/penaltyApi";
 import styles from "./EmployeePenaltyTab.module.css";
 
 function money(v) {
-  if (v === null || v === undefined) return "—";
+  if (v === null || v === undefined) return "-";
   const n = Number(v);
-  if (Number.isNaN(n)) return "—";
+  if (Number.isNaN(n)) return "-";
   return n.toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -13,7 +13,7 @@ function money(v) {
 }
 
 function fmt(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d).toLocaleDateString([], {
     day: "numeric",
     month: "short",
@@ -22,7 +22,7 @@ function fmt(d) {
 }
 
 // Replaces the admin `<PenaltyTab>` (business-wide settings, payroll
-// finalization — all ADMIN only). An employee can see their own
+// finalization - all ADMIN only). An employee can see their own
 // deductions via GET /penalty/me and /penalty/me/history, which this uses.
 export default function EmployeePenaltyTab() {
   const [summary, setSummary] = useState(null);
@@ -116,7 +116,7 @@ export default function EmployeePenaltyTab() {
                       </span>
 
                       {/* Every deduction type that actually applied this
-                          period, not just absences — late and early-leave
+                          period, not just absences - late and early-leave
                           deductions were previously invisible here even
                           though they're included in the total. */}
                       {(h.lateDeductionTotal > 0 ||
@@ -140,7 +140,7 @@ export default function EmployeePenaltyTab() {
 
                       {/* Net pay = base salary − total deductions, exactly
                           as the backend computes and stores it on the
-                          finalized PayrollRecord (PenaltyServiceImpl —
+                          finalized PayrollRecord (PenaltyServiceImpl -
                           netPay field). Only shown when this viewer is
                           allowed to see pay figures at all (always true for
                           an employee's own history) and a salary was

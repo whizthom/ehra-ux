@@ -15,7 +15,7 @@ import styles from "./CoverRequestsTab.module.css";
 // Statuses that mean "still waiting on my response".
 const PENDING_STATUS = "PENDING_COVER";
 
-// Everything the requester passed through after I responded — shown in
+// Everything the requester passed through after I responded - shown in
 // "History" so I can see what eventually happened to a request I acted on.
 const HISTORY_STATUSES = [
   "COVER_DECLINED",
@@ -45,7 +45,7 @@ function CoverCard({ leave, onRespond, responding }) {
 
   const submitDecline = () => {
     if (!note.trim()) {
-      setError("Please tell them why you can't cover — this is required.");
+      setError("Please tell them why you can't cover - this is required.");
       return;
     }
     setError("");
@@ -66,7 +66,7 @@ function CoverCard({ leave, onRespond, responding }) {
         </div>
         <div className={styles.cardTopInfo}>
           <span className={styles.cardName}>{name}</span>
-          <span className={styles.cardDept}>{leave.department || "—"}</span>
+          <span className={styles.cardDept}>{leave.department || "-"}</span>
         </div>
         {!isPending && (
           <span
@@ -181,7 +181,7 @@ function CoverCard({ leave, onRespond, responding }) {
   );
 }
 
-// Replaces nothing — this is a brand-new surface. Any employee can be
+// Replaces nothing - this is a brand-new surface. Any employee can be
 // nominated as a cover person by a colleague requesting leave, regardless
 // of role or department, so this tab is visible to every employee (not
 // gated behind isHod like Workforce/Departments).
@@ -209,7 +209,7 @@ export default function CoverRequestsTab() {
     fetchMine();
   }, [fetchMine]);
 
-  // Live update — patch this cover person's list in place, no refresh
+  // Live update - patch this cover person's list in place, no refresh
   // needed. Only react to leaves where I'm the nominated cover person, so
   // this connection doesn't get chatty about unrelated leave events.
   useMessageStream({

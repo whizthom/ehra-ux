@@ -5,11 +5,11 @@ import styles from "./EmploymentTypeCell.module.css";
 /**
  * Quick Full-time / Part-time toggle shown on each employee's Workforce
  * grid card. Full editing of a part-time employee's personal schedule
- * lives on their profile page ("Employment" tab) — this is just a fast
+ * lives on their profile page ("Employment" tab) - this is just a fast
  * way to flip the type without leaving the grid.
  *
  * Writes apply immediately (no approval chain) for both the employer and
- * an HOD — except an HOD can never change a fellow HOD's employment type;
+ * an HOD - except an HOD can never change a fellow HOD's employment type;
  * the server enforces this, and the frontend disables the control
  * pre-emptively whenever the target employee is themselves an HOD and the
  * caller is not the employer.

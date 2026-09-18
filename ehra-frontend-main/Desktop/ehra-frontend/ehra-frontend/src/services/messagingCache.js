@@ -1,11 +1,11 @@
 // Client-side cache that makes the messaging UI feel instant, the way
 // WhatsApp does: the chat list and an open conversation render from the
 // last-known local copy the INSTANT they're asked for, while the backend
-// (still the real source of truth — section 1 of the spec never changes)
+// (still the real source of truth - section 1 of the spec never changes)
 // is asked in the background to reconcile it. Two layers:
 //
 //   1. An in-memory Map, alive for as long as the tab is open. Covers
-//      "switch to another chat and back" — zero network calls, zero
+//      "switch to another chat and back" - zero network calls, zero
 //      loading spinner, the exact thing that felt slow before.
 //   2. IndexedDB, persisted across page reloads / browser restarts.
 //      Covers "closed the tab, opened Ehral again later" the way
@@ -14,7 +14,7 @@
 //
 // Neither layer is ever trusted as final. Every hydrate-from-cache is
 // followed by a real REST call (see useConversations.js /
-// useConversationMessages.js) that reconciles and overwrites it — this is
+// useConversationMessages.js) that reconciles and overwrites it - this is
 // a paint-time optimization, not a second source of truth.
 
 const DB_NAME = "ehra-messaging-cache";
@@ -23,7 +23,7 @@ const STORE_CONVERSATIONS = "conversations";
 const STORE_MESSAGES = "messages";
 
 // Deep scrollback always goes to the network (cursor pagination, section
-// 23) — the cache only needs to make the most recent stretch of a
+// 23) - the cache only needs to make the most recent stretch of a
 // conversation reappear instantly, so it's deliberately capped rather
 // than trying to mirror the whole history to disk.
 const MAX_CACHED_MESSAGES_PER_CONVERSATION = 60;
@@ -41,7 +41,7 @@ function openDb() {
       if (!db.objectStoreNames.contains(STORE_MESSAGES)) db.createObjectStore(STORE_MESSAGES);
     };
     req.onsuccess = () => resolve(req.result);
-    // A private-browsing tab or a corrupted DB shouldn't break messaging —
+    // A private-browsing tab or a corrupted DB shouldn't break messaging -
     // just degrade to the in-memory-only layer.
     req.onerror = () => resolve(null);
   });
@@ -90,7 +90,7 @@ export function getCachedMessagesSync(conversationId) {
   return memoryMessages.get(conversationId) || null;
 }
 
-// Debounced disk writes — a conversation firing typing/delivery/read
+// Debounced disk writes - a conversation firing typing/delivery/read
 // events constantly shouldn't mean an IndexedDB write on every single
 // one; batch them.
 const pendingWrites = new Map();
@@ -132,7 +132,7 @@ export async function hydrateMessagesFromDisk(conversationId) {
 }
 
 // Call on logout. Nothing about one person's inbox should linger in
-// IndexedDB (or memory) once their session ends — the next person to use
+// IndexedDB (or memory) once their session ends - the next person to use
 // this browser/device must not see it.
 export async function clearMessagingCache() {
   memoryConversations.value = null;

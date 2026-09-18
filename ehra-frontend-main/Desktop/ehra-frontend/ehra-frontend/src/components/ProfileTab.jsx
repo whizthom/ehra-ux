@@ -15,16 +15,16 @@ function initials(first, last) {
 }
 
 function fmt(v) {
-  return v || "—";
+  return v || "-";
 }
 
 function formatEmploymentType(v) {
-  if (!v) return "—";
+  if (!v) return "-";
   return v === "PART_TIME" ? "Part-time" : v === "FULL_TIME" ? "Full-time" : v;
 }
 
 function formatDate(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   return new Date(iso).toLocaleDateString([], {
     day: "numeric",
     month: "short",
@@ -65,13 +65,13 @@ const STATUS_CFG = {
   },
 };
 
-// ── Diff row — shows old → new for a single field ──────────────────────────
+// ── Diff row - shows old → new for a single field ──────────────────────────
 function DiffRow({ label, oldVal, newVal }) {
   if (!newVal) return null;
   return (
     <div className={styles.diffRow}>
       <span className={styles.diffLabel}>{label}</span>
-      <span className={styles.diffOld}>{oldVal || "—"}</span>
+      <span className={styles.diffOld}>{oldVal || "-"}</span>
       <i className="ti ti-arrow-right" />
       <span className={styles.diffNew}>{newVal}</span>
     </div>
@@ -356,7 +356,7 @@ export default function ProfileTab({
                     )}
                   </span>
                 ) : (
-                  "—"
+                  "-"
                 )
               }
             />
@@ -432,7 +432,7 @@ export default function ProfileTab({
                   Personal &amp; contact info
                 </p>
                 <p className={styles.sectionSub}>
-                  Changes here save immediately — no approval needed.
+                  Changes here save immediately - no approval needed.
                 </p>
               </div>
             </div>
@@ -535,7 +535,7 @@ export default function ProfileTab({
                 </p>
                 <p className={styles.sectionSub}>
                   {selfApprove ? (
-                    "As the employer, changes here save immediately — you don't need approval."
+                    "As the employer, changes here save immediately - you don't need approval."
                   ) : (
                     <>
                       Changes here go to{" "}
@@ -573,7 +573,7 @@ export default function ProfileTab({
               />
             </div>
 
-            {/* ID card upload — supervised, requires approval */}
+            {/* ID card upload - supervised, requires approval */}
             <div
               className={`${styles.uploadRow} ${pending ? styles.formFieldDisabled : ""}`}
             >
@@ -618,7 +618,7 @@ export default function ProfileTab({
               {supervisedForm.idCardUrl &&
                 supervisedForm.idCardUrl !== profile.idCardUrl && (
                   <span className={styles.uploadPendingNote}>
-                    New file selected — submit below to send for approval.
+                    New file selected - submit below to send for approval.
                   </span>
                 )}
             </div>
@@ -648,7 +648,7 @@ export default function ProfileTab({
             </button>
             <p className={styles.saveMeta}>
               {selfApprove
-                ? "All changes save instantly — you approve your own edits."
+                ? "All changes save instantly - you approve your own edits."
                 : "Personal info saves instantly. Name/role changes go for approval."}
             </p>
           </div>
@@ -735,7 +735,7 @@ export default function ProfileTab({
                                 rel="noreferrer"
                                 className={styles.diffOld}
                               >
-                                {r.oldIdCardUrl ? "Current file" : "—"}
+                                {r.oldIdCardUrl ? "Current file" : "-"}
                               </a>
                               <i className="ti ti-arrow-right" />
                               <a
@@ -753,7 +753,7 @@ export default function ProfileTab({
                         {r.hodName && (
                           <div className={styles.approvalStep}>
                             <span className={styles.stepLabel}>
-                              HOD — {r.hodName}
+                              HOD - {r.hodName}
                             </span>
                             {r.hodApproved === true && (
                               <span className={styles.stepGreen}>
@@ -833,7 +833,7 @@ function Field({ label, value, span }) {
   return (
     <div className={`${styles.fieldView} ${span ? styles.fieldSpan : ""}`}>
       <span className={styles.fieldLabel}>{label}</span>
-      <span className={styles.fieldValue}>{value || "—"}</span>
+      <span className={styles.fieldValue}>{value || "-"}</span>
     </div>
   );
 }
@@ -863,7 +863,7 @@ function FormField({
         >
           {options?.map((o) => (
             <option key={o} value={o}>
-              {o || `— ${placeholder} —`}
+              {o || `- ${placeholder} -`}
             </option>
           ))}
         </select>

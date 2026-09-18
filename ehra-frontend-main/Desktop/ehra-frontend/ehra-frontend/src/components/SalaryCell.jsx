@@ -13,10 +13,10 @@ function formatSalary(value) {
 }
 
 /**
- * Compact salary pill for the Workforce grid card — mirrors PositionCell's
+ * Compact salary pill for the Workforce grid card - mirrors PositionCell's
  * click-to-edit pattern, but for the employee's salary.
  *
- * Employer only (the server enforces this too — an HOD can never view or
+ * Employer only (the server enforces this too - an HOD can never view or
  * set salary). Writes apply immediately; the employee is notified of the
  * change, same as the full Edit Profile page's salary field.
  */

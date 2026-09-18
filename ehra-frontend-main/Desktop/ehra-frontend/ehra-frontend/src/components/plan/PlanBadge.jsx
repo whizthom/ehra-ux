@@ -2,7 +2,7 @@ import styles from "./planBadge.module.css";
 import { urgencyTier, daysUntil } from "./planUrgency";
 
 // NOTE: keys are the backend's PlanType enum values, not the /pricing
-// page's current display names — PREMIUM is still what the backend calls
+// page's current display names - PREMIUM is still what the backend calls
 // the plan now shown on /pricing as "Business" (see the note at the top
 // of data/pricingPlans.js). Only the label here needs to match the new
 // name; the key must stay PREMIUM until the backend enum changes.
@@ -15,15 +15,15 @@ const PLAN_META = {
 /**
  * Two independent color signals, deliberately layered rather than merged
  * into one palette:
- *  - Which plan you're on (Starter/Pro/Premium) — a calm, permanent
+ *  - Which plan you're on (Starter/Pro/Premium) - a calm, permanent
  *    identity color per tier, so at a glance you know what you're paying
  *    for without reading the label.
- *  - How urgent renewal is (safe → upcoming → soon → urgent) — an
+ *  - How urgent renewal is (safe → upcoming → soon → urgent) - an
  *    overlay that only ever appears on a paid plan nearing its expiry,
  *    fading the badge from its normal color toward amber and finally a
  *    gently pulsing red. Starter never shows this since it never expires.
  *
- * Clicking it goes straight to /pricing — the badge doubles as the
+ * Clicking it goes straight to /pricing - the badge doubles as the
  * fastest path to actually do something about what it's showing you.
  */
 export default function PlanBadge({ subscription, loading, onClick }) {
@@ -51,8 +51,8 @@ export default function PlanBadge({ subscription, loading, onClick }) {
       onClick={onClick}
       title={
         tier && tier !== "safe"
-          ? `${meta.label} plan — renews in ${Math.max(days, 0)} day${days === 1 ? "" : "s"}. Click to manage.`
-          : `${meta.label} plan — click to view plans.`
+          ? `${meta.label} plan - renews in ${Math.max(days, 0)} day${days === 1 ? "" : "s"}. Click to manage.`
+          : `${meta.label} plan - click to view plans.`
       }
     >
       <span className={styles.dot} aria-hidden="true" />

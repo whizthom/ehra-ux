@@ -4,21 +4,21 @@ import styles from "./ThemeToggleMenu.module.css";
 import planStyles from "../components/plan/planBadge.module.css";
 import { urgencyTier, daysUntil } from "../components/plan/planUrgency";
 
-// Must match the CSS transition duration on .panel/.scrim below — the
+// Must match the CSS transition duration on .panel/.scrim below - the
 // panel stays mounted for exactly this long after closing so it can
 // actually play the slide-out-to-the-left animation instead of just
 // vanishing.
 const CLOSE_DURATION = 260;
 
 // PREMIUM is the backend's enum value for the plan now displayed on
-// /pricing as "Business" — see the note at the top of data/pricingPlans.js.
+// /pricing as "Business" - see the note at the top of data/pricingPlans.js.
 const PLAN_LABEL = { STARTER: "Starter", PRO: "Pro", PREMIUM: "Business" };
 
 // ── Settings icon + dropdown ─────────────────────────────────────────────
 // Self-contained: drop <ThemeToggleMenu /> into any topbar and it Just
 // Works with only the "Settings" category (theme toggle). Pages that also
 // want the "My account" category (current plan + a link to Plans) pass
-// `subscription`/`loadingSubscription`/`onViewPlans` — currently just
+// `subscription`/`loadingSubscription`/`onViewPlans` - currently just
 // Dashboard.jsx, since that's the only place plan info is meaningful. The
 // account category only ever renders on mobile/tablet (see
 // .accountSection's media query below); on desktop the same information
@@ -102,7 +102,7 @@ export default function ThemeToggleMenu({
       {mounted && (
         <>
           {/* Soft scrim so the flyout reads as a distinct layer on top
-              of the page — tap anywhere on it to dismiss, same as the
+              of the page - tap anywhere on it to dismiss, same as the
               outside-click listener above but with a visible cue. */}
           <div
             className={`${styles.scrim} ${open ? styles.scrimIn : ""}`}

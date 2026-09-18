@@ -38,7 +38,7 @@ function sortDays(days) {
  * employee is expected to clock in, and the clock-in/clock-out times for
  * each day. Every toggle/time change is saved to the server as soon as
  * it's made (PUT /employees/{id}/employment-schedule) and the on-screen
- * state is updated from that response immediately — no page refresh is
+ * state is updated from that response immediately - no page refresh is
  * ever needed to see the change take effect.
  *
  * Full-time employees don't have a personal schedule (they follow the
@@ -88,7 +88,7 @@ export default function AttendanceScheduleTab({
     if (!settings?.canEdit) return;
     const updated = { ...day, ...patch };
 
-    // Apply immediately in the UI — no refresh required.
+    // Apply immediately in the UI - no refresh required.
     setSettings((prev) => ({
       ...prev,
       weeklySchedule: prev.weeklySchedule.map((d) =>
@@ -139,7 +139,7 @@ export default function AttendanceScheduleTab({
         <div className={styles.infoBanner}>
           <i className="ti ti-shield-lock" aria-hidden="true" />
           <span>
-            {settings.employeeFirstName} is a Head of Department — only the
+            {settings.employeeFirstName} is a Head of Department - only the
             employer can change the attendance schedule for a fellow HOD.
           </span>
         </div>

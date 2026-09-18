@@ -2,7 +2,7 @@ import DeviceFrame from "./DeviceFrame";
 import styles from "./MobileProductPreview.module.css";
 
 // Fixed dot pattern (not random) so the "QR" doesn't reshuffle on every
-// re-render — it just needs to read as QR-like at a glance, at this size.
+// re-render - it just needs to read as QR-like at a glance, at this size.
 const QR_PATTERN =
   "1101001" +
   "1011011" +
@@ -57,19 +57,19 @@ function AttendanceScreen({ liveData, isLive }) {
   const attendance = liveData?.attendance;
   const mine = !isEmployer && attendance?.length ? attendance[0] : null;
 
-  let statusLine = "Checked in — 8:52 AM";
+  let statusLine = "Checked in - 8:52 AM";
   let subLine = "Location verified";
   let caption = "Scan to check in";
 
   if (isLive) {
     if (mine) {
       statusLine = mine.clockIn
-        ? `Checked in — ${timeLabel(mine.clockIn) || "today"}`
+        ? `Checked in - ${timeLabel(mine.clockIn) || "today"}`
         : mine.status === "ABSENT"
           ? "Not checked in today"
           : "Not yet checked in";
       subLine = mine.clockOut
-        ? `Clocked out — ${timeLabel(mine.clockOut) || ""}`
+        ? `Clocked out - ${timeLabel(mine.clockOut) || ""}`
         : "Your real status, today";
       caption = "Your live status";
     } else if (isEmployer && attendance) {
@@ -261,7 +261,7 @@ const SCREENS = {
   notifications: NotificationsScreen,
 };
 
-// Whether a given screen actually has enough real data to render live —
+// Whether a given screen actually has enough real data to render live -
 // checked per-screen (rather than just liveData.live) so, e.g., a
 // visitor whose announcements call failed still gets a real attendance
 // screen instead of the whole preview silently reverting to mock.
@@ -285,7 +285,7 @@ function computeIsLive(screen, liveData) {
  * Phone-framed snapshot of the mobile experience. `screen` chooses
  * which real Ehral mobile surface it stands in for.
  *
- * Renders its static illustrative mock by default — no auth/network
+ * Renders its static illustrative mock by default - no auth/network
  * dependency. When a `liveData` snapshot is passed in (see
  * useLiveWorkspaceData) AND it has real data for this particular
  * screen, it renders that instead and shows a small "Live" badge.

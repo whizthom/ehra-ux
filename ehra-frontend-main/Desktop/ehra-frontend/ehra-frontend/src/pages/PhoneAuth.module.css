@@ -1,5 +1,5 @@
 /* Shared by every phone-auth screen (Register, Login's 2FA step,
-   ForgotPassword) — same token system as Register.module.css /
+   ForgotPassword) - same token system as Register.module.css /
    Login.module.css: dark green #0b1f1a, mint accent #55e0ae, gold
    #c6a15b, border #d7e2de. Kept in its own module rather than folded
    into Register.module.css so Login.jsx and ForgotPassword.jsx can share
@@ -13,8 +13,8 @@
 
 /* ── react-phone-number-input override ──────────────────────────────────
    The library ships unstyled-ish defaults; this reshapes it to match the
-   app's existing .inputWrap input look exactly — same height, radius,
-   border, and focus ring — so it doesn't read as a bolted-on widget. */
+   app's existing .inputWrap input look exactly - same height, radius,
+   border, and focus ring - so it doesn't read as a bolted-on widget. */
 .phoneInputWrap {
     --PhoneInputCountryFlag-height: 14px;
 }

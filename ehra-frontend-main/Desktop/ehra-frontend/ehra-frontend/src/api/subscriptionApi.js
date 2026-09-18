@@ -5,7 +5,7 @@ import API from "./authApi";
 // These call backend endpoints that don't exist yet (the backend pass for
 // this feature is next). They're written against the API shape the backend
 // should expose, so wiring them up later is a matter of implementing the
-// controller — nothing here should need to change.
+// controller - nothing here should need to change.
 //
 // Expected backend contract:
 //   POST /subscription/checkout/initialize { planId, billingCycle }
@@ -18,7 +18,7 @@ import API from "./authApi";
 //     -> { status }
 //
 // Until the backend exists, calls below reject with a normal axios error
-// (404/network error) — callers surface that as "checkout isn't available
+// (404/network error) - callers surface that as "checkout isn't available
 // yet" rather than silently pretending a payment succeeded.
 
 export const getMySubscription = () => API.get("/subscription/me").then((r) => r.data);
@@ -38,7 +38,7 @@ export const cancelSubscription = () =>
 //
 // Loaded lazily (not in index.html) so the ~40KB script only ever downloads
 // for someone actually reaching the checkout step, not on every page load.
-// The public key is safe to ship in the client bundle — it's the same key
+// The public key is safe to ship in the client bundle - it's the same key
 // Paystack's own docs put directly in browser-side code. The SECRET key
 // never belongs on the frontend; it stays backend-only, used to verify
 // transactions server-side.
@@ -88,7 +88,7 @@ function loadPaystackScript() {
  *   created.
  * @param {(reference: string) => void} params.onSuccess - called with the
  *   Paystack reference once the popup reports success. The caller is still
- *   responsible for calling verifyCheckout(reference) against the backend —
+ *   responsible for calling verifyCheckout(reference) against the backend -
  *   a client-side "success" callback is never sufficient proof of payment
  *   on its own.
  * @param {() => void} [params.onClose] - called if the popup is dismissed
@@ -109,7 +109,7 @@ export async function payWithPaystack({
   const publicKey = publicKeyOverride || import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
   if (!publicKey) {
     throw new Error(
-      "VITE_PAYSTACK_PUBLIC_KEY is not set — add it to your .env file."
+      "VITE_PAYSTACK_PUBLIC_KEY is not set - add it to your .env file."
     );
   }
 

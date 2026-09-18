@@ -11,7 +11,7 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
 const API = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 15000, // 15s — prevents requests from hanging forever on a
+  timeout: 15000, // 15s - prevents requests from hanging forever on a
                    // dropped connection or a stalled token refresh.
 });
 
@@ -25,12 +25,12 @@ const API = axios.create({
 // ones the interceptor itself fires). Inside that re-entrant call, the
 // refresh request looked like "just another request that needs refreshing"
 // (its own `_retry` flag was unset), so it got pushed onto `failedQueue`
-// and awaited a token that nothing would ever provide — `isRefreshing` was
+// and awaited a token that nothing would ever provide - `isRefreshing` was
 // already `true`, so it queued instead of refreshing again, and the
 // `await API.post("/auth/refresh", ...)` below never returned or threw.
 // Net effect: the whole app silently hung forever the first time a refresh
 // token was actually invalid (expired after a week, revoked by logging out
-// elsewhere, etc.) — exactly the case that matters, since a healthy refresh
+// elsewhere, etc.) - exactly the case that matters, since a healthy refresh
 // token never hit this path at all.
 //
 // A plain axios instance with no interceptors can never re-trigger this
@@ -42,13 +42,13 @@ const refreshClient = axios.create({
 
 // ── Session storage (Identity/Membership rebuild) ──────────────────────────
 //
-// Backend now returns AuthResponseDTO — no more "email"/"role" fields.
+// Backend now returns AuthResponseDTO - no more "email"/"role" fields.
 // Instead: identityId, needsContextSelection, contextType ("EMPLOYER" |
 // "EMPLOYEE" | null), businessId, membershipId, role ("ADMIN" | "EMPLOYEE"
 // | "HOD" | null). We persist all of it so a page refresh doesn't lose the
 // active workspace, and derive a Spring-authority-shaped "authRole"
 // ("ROLE_ADMIN" / "ROLE_EMPLOYEE") for the rest of the app (ProtectedRoute,
-// role-gated UI) that was written against the old convention — the backend
+// role-gated UI) that was written against the old convention - the backend
 // grants exactly those authorities for EMPLOYER / EMPLOYEE contexts (see
 // JwtFilter#authoritiesFor), so this mapping is exact, not a guess.
 export const getAccessToken = () => localStorage.getItem("accessToken");
@@ -57,6 +57,7 @@ export const getRefreshToken = () => localStorage.getItem("refreshToken");
 export const authRoleFor = (contextType) => {
   if (contextType === "EMPLOYER") return "ROLE_ADMIN";
   if (contextType === "EMPLOYEE") return "ROLE_EMPLOYEE";
+  if (contextType === "CUSTOMER") return "ROLE_CUSTOMER";
   return null;
 };
 
@@ -121,12 +122,12 @@ export const clearTokens = () => {
   localStorage.removeItem("businessId");
   localStorage.removeItem("membershipId");
   localStorage.removeItem("membershipRole");
-  // Legacy keys from the pre-Identity model — cleared too in case a tab
+  // Legacy keys from the pre-Identity model - cleared too in case a tab
   // still has them from before this rebuild.
   localStorage.removeItem("userEmail");
   localStorage.removeItem("userRole");
 
-  // Best-effort, fire-and-forget — see clearApiCache's own comment for
+  // Best-effort, fire-and-forget - see clearApiCache's own comment for
   // why this matters on a shared device. Not awaited: clearTokens() is
   // called synchronously from several places (including an axios
   // interceptor) that don't expect a promise back, and there's nothing
@@ -137,7 +138,7 @@ export const clearTokens = () => {
 // Cross-tab sync: the `storage` event fires in every OTHER tab (never the
 // tab that made the change) whenever localStorage is written. Without
 // this, a tab sitting idle keeps using its in-memory copy of the access
-// token until its own request fails — by which point another tab may
+// token until its own request fails - by which point another tab may
 // already have rotated the refresh token, and the backend's grace window
 // (see RefreshTokenServiceImpl) is the only thing saving it from being
 // logged out. Picking up the new tokens here means an idle tab's next
@@ -172,13 +173,13 @@ let isRefreshing = false;
 let failedQueue = [];
 
 // Shared by the interceptor below AND useMessageStream's SSE reconnect
-// logic (see src/hooks/useMessageStream.js) — both need "get me a
+// logic (see src/hooks/useMessageStream.js) - both need "get me a
 // guaranteed-current access token" and both can end up wanting one at
 // the same moment (e.g. a dropped SSE connection reconnecting right as
 // a regular API call also 401s). A single in-flight promise means
 // whichever caller asks first triggers the real POST /auth/refresh, and
 // anyone else who asks while it's still in flight gets the same result
-// instead of firing a second, redundant refresh request — which matters
+// instead of firing a second, redundant refresh request - which matters
 // beyond just efficiency if the backend rotates refresh tokens on use,
 // since a second concurrent call would be using a token the first call
 // just invalidated.
@@ -216,16 +217,16 @@ const processQueue = (error, token = null) => {
 };
 
 // Every one of these hits an endpoint the backend's SecurityConfig marks
-// .permitAll() (mirror that list if it ever changes) — no access token is
+// .permitAll() (mirror that list if it ever changes) - no access token is
 // involved in any of them, so a 401/403 from one of these can only ever
 // mean "wrong password", "wrong/expired OTP", "wrong reset token", etc.,
 // never "your session expired." Deliberately excludes
-// /auth/security/2fa — that ONE is an authenticated action (toggling 2FA
+// /auth/security/2fa - that ONE is an authenticated action (toggling 2FA
 // while logged in), where a 401 genuinely can mean an expired access
 // token, and the normal refresh-and-retry behavior below is exactly what
 // should happen for it. If the real problem there is a wrong
 // re-confirmation password instead, the retried request just fails with
-// the same 401 again and surfaces normally — nothing is masked.
+// the same 401 again and surfaces normally - nothing is masked.
 const PUBLIC_AUTH_ENDPOINTS = new Set([
   "/auth/login",
   "/auth/2fa/verify",
@@ -244,7 +245,7 @@ const PUBLIC_AUTH_ENDPOINTS = new Set([
 
 function isPublicAuthEndpoint(url) {
   if (!url) return false;
-  // Strip baseURL/origin if axios ever hands back an absolute URL here —
+  // Strip baseURL/origin if axios ever hands back an absolute URL here -
   // in practice every call site passes a relative path like "/auth/login"
   // (see authApi.js/phoneAuthApi.js), so this is defensive, not the
   // common case.
@@ -258,7 +259,7 @@ API.interceptors.response.use(
     const original = error.config;
 
     // If there's no config at all (e.g. the request timed out before it was
-    // ever sent, or was cancelled), there's nothing to retry — reject immediately
+    // ever sent, or was cancelled), there's nothing to retry - reject immediately
     // instead of falling through and potentially hanging.
     if (!original) {
       return Promise.reject(error);
@@ -266,11 +267,11 @@ API.interceptors.response.use(
 
     // FIX: a 401 from a public/unauthenticated endpoint (wrong login
     // password, wrong OTP, etc.) was being treated by the branch below as
-    // "the access token expired" — since there was never a token to
+    // "the access token expired" - since there was never a token to
     // expire, the silent-refresh attempt failed (no refresh token, or a
     // stale one from an unrelated session), which cleared tokens and did
     // `window.location.href = "/login"`. On the login page itself, that's
-    // a real navigation to the same URL — a hard reload that wiped the
+    // a real navigation to the same URL - a hard reload that wiped the
     // just-shown error message and the whole form, which looked like the
     // page "auto-refreshing on its own" right after showing the error.
     // Skipping these endpoints here means their errors just reject
@@ -282,7 +283,7 @@ API.interceptors.response.use(
 
     // FIX: Spring Security's default behavior for a stateless app with
     // .anyRequest().authenticated() is to treat a missing/expired token as
-    // an "anonymous" principal rather than "no authentication at all" —
+    // an "anonymous" principal rather than "no authentication at all" -
     // and an anonymous principal failing an authorization check comes back
     // as 403, not 401. In practice this meant every request made with an
     // expired access token (e.g. ~15 min after login) returned 403, this
@@ -292,7 +293,7 @@ API.interceptors.response.use(
     // The backend's SecurityConfig now installs a custom
     // AuthenticationEntryPoint so a genuinely unauthenticated request
     // returns a real 401. This 403 check stays as a second line of
-    // defense — belt-and-suspenders for any endpoint or future code path
+    // defense - belt-and-suspenders for any endpoint or future code path
     // that ends up surfacing a 403 for an expired-token reason instead.
     //
     // This does NOT risk masking a real "you don't have permission" 403:
@@ -300,7 +301,7 @@ API.interceptors.response.use(
     // attempt. If the role genuinely lacks access, the retried request
     // fails with 403 again, _retry is already true, and it falls through
     // to the final `return Promise.reject(error)` below and surfaces
-    // normally — it isn't silently swallowed or retried forever.
+    // normally - it isn't silently swallowed or retried forever.
     if (
       (error.response?.status === 401 || error.response?.status === 403) &&
       !original._retry
@@ -327,12 +328,12 @@ API.interceptors.response.use(
       isRefreshing = true;
 
       // refreshAccessToken() throws a plain Error (no .response) when
-      // there's no refresh token at all — checked explicitly here rather
+      // there's no refresh token at all - checked explicitly here rather
       // than relying on the generic catch below, since that branch only
       // clears the session for errors WITH a server response (see the
       // comment on that branch). Without this check, "no refresh token"
       // would fall through as a silent rejection instead of the
-      // immediate logout it deserves — there's no session to recover.
+      // immediate logout it deserves - there's no session to recover.
       if (!getRefreshToken()) {
         isRefreshing = false;
         clearTokens();
@@ -342,13 +343,13 @@ API.interceptors.response.use(
 
       // BUGFIX: the refresh call and the retried original request used to
       // share one try/catch. That meant ANY error response from the
-      // *retried* request — not just a failed refresh — fell into the
+      // *retried* request - not just a failed refresh - fell into the
       // catch block below and was treated as "the session is really
       // over," which cleared tokens and hard-redirected to /login. In
       // practice this fired for perfectly legitimate, non-auth 403s: e.g.
       // a Starter-plan user hitting "create business" gets a genuine
-      // PlanLimitExceededException (403) from the backend — nothing wrong
-      // with their token — but because this was the SECOND 403 for the
+      // PlanLimitExceededException (403) from the backend - nothing wrong
+      // with their token - but because this was the SECOND 403 for the
       // same request, the refresh-and-retry path above had already run,
       // gotten a fresh token, retried, and the retried call failed with
       // that same business-rule 403 again. That failure landed here and
@@ -364,18 +365,18 @@ API.interceptors.response.use(
         accessToken = await refreshAccessToken();
       } catch (err) {
         // Ensures every request queued behind this failed refresh is
-        // rejected — not left hanging — so the UI can show an error
+        // rejected - not left hanging - so the UI can show an error
         // instead of spinning forever.
         processQueue(err, null);
         isRefreshing = false;
 
         // FIX: only treat this as "the session is really over" when the
-        // server actually said so (a real HTTP response — e.g. 401 from
+        // server actually said so (a real HTTP response - e.g. 401 from
         // GlobalExceptionHandler when the refresh token is genuinely
         // invalid/expired/reused). err.response is undefined for a
         // network-level failure: request timeout, connection dropped,
-        // DNS hiccup, or — the common real-world case on a Render free
-        // tier — the backend was asleep and didn't finish waking up
+        // DNS hiccup, or - the common real-world case on a Render free
+        // tier - the backend was asleep and didn't finish waking up
         // within the 15s axios timeout. That kind of failure says
         // nothing about whether the refresh token is still valid, so it
         // must not wipe a perfectly good session and force a fresh
@@ -397,7 +398,7 @@ API.interceptors.response.use(
       processQueue(null, accessToken);
 
       // The retry itself is intentionally NOT wrapped into the refresh's
-      // catch above — see the BUGFIX comment. Whatever this returns
+      // catch above - see the BUGFIX comment. Whatever this returns
       // (success or a genuine business-rule error like a plan-limit 403)
       // just propagates to the original caller as-is; it never implies
       // the session is invalid.
@@ -408,12 +409,12 @@ API.interceptors.response.use(
   }
 );
 
-// identifier = email OR phone number — Identity supports dual-identifier
+// identifier = email OR phone number - Identity supports dual-identifier
 // login (see LoginRequestDTO / IdentityUserDetailsService).
 //
 // When the account has Two-Factor Authentication enabled, the backend
 // returns { requiresTwoFactor: true, twoFactorToken } instead of real
-// tokens — there is nothing to persist yet. The caller (Login.jsx) is
+// tokens - there is nothing to persist yet. The caller (Login.jsx) is
 // responsible for collecting a fresh OTP and calling
 // phoneAuthApi.verifyTwoFactorLogin(), which DOES save the session once
 // it comes back with real tokens.
@@ -433,7 +434,7 @@ export const login = async (identifier, password) => {
 // Switches the session's active workspace (business + role) without a
 // full re-login. `type` is "EMPLOYER" or "EMPLOYEE"; `membershipId` must
 // be one the caller's Identity actually holds (the backend re-verifies
-// this — see AuthController#switchContext).
+// this - see AuthController#switchContext).
 export const switchContext = async (type, membershipId) => {
   const { data } = await API.post("/auth/context", { type, membershipId });
   saveSession(data);
@@ -441,7 +442,7 @@ export const switchContext = async (type, membershipId) => {
 };
 
 // Every workspace (business) the authenticated Identity currently holds a
-// live membership at — powers the "My Accounts" nav section.
+// live membership at - powers the "My Accounts" nav section.
 export const getMyAccounts = async () => {
   const { data } = await API.get("/auth/my-accounts");
   return data;

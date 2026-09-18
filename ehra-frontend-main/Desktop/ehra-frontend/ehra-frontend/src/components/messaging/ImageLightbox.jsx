@@ -4,7 +4,7 @@ import styles from "./ImageLightbox.module.css";
 
 // Full-screen in-app image viewer. Exists specifically so tapping a photo
 // message never navigates the browser to the raw Cloudinary CDN URL
-// (res.cloudinary.com in the address bar looks like leaving the app) —
+// (res.cloudinary.com in the address bar looks like leaving the app) -
 // everything, including the download, stays inside Ehral's own UI.
 export default function ImageLightbox({ url, caption, onClose }) {
   const [downloading, setDownloading] = useState(false);

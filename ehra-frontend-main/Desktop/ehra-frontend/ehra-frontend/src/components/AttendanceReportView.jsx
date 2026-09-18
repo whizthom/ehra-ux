@@ -55,7 +55,7 @@ function presetRange(preset) {
 }
 
 function formatDate(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d + "T00:00:00").toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
@@ -63,7 +63,7 @@ function formatDate(d) {
 }
 
 function formatDateFull(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d + "T00:00:00").toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
@@ -72,7 +72,7 @@ function formatDateFull(d) {
 }
 
 function fmtRate(v) {
-  return v === null || v === undefined ? "—" : `${v}%`;
+  return v === null || v === undefined ? "-" : `${v}%`;
 }
 
 function fmtDelta(v, { invertColor = false, suffix = "" } = {}) {

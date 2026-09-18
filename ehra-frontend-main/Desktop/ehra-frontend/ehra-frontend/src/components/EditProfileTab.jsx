@@ -24,13 +24,13 @@ function formatSalary(value) {
  *
  * Lets the employer or the employee's HOD change:
  *   - Employment type (Full-time / Part-time)
- *   - Department — employer only
- *   - Salary — employer only, employee is notified of increases/decreases
+ *   - Department - employer only
+ *   - Salary - employer only, employee is notified of increases/decreases
  *   - Position (job title)
  *
  * Every change here takes effect immediately (no approval queue) for both
  * the employer and an HOD, except an HOD can never edit these fields for a
- * fellow HOD — the server enforces this and this component mirrors it for
+ * fellow HOD - the server enforces this and this component mirrors it for
  * the employment type and position controls (department and salary are
  * hidden from HODs entirely, per business rule).
  */
@@ -146,7 +146,7 @@ export default function EditProfileTab({
             ? "Decreased"
             : "Set";
       setSalarySavedMsg(
-        `${label} — ${profile.firstName || "employee"} notified`,
+        `${label} - ${profile.firstName || "employee"} notified`,
       );
       setTimeout(() => setSalarySavedMsg(""), 3000);
     } catch (err) {
@@ -230,7 +230,7 @@ export default function EditProfileTab({
         <div className={empStyles.infoBanner}>
           <i className="ti ti-shield-lock" aria-hidden="true" />
           <span>
-            {profile.firstName} is a Head of Department — only the employer can
+            {profile.firstName} is a Head of Department - only the employer can
             change these fields for a fellow HOD.
           </span>
         </div>
@@ -301,7 +301,7 @@ export default function EditProfileTab({
         {savingType && <span className={empStyles.savingTag}>Saving…</span>}
       </div>
 
-      {/* ── Department — employer only ── */}
+      {/* ── Department - employer only ── */}
       {isEmployer && (
         <div className={empStyles.section}>
           <h4 className={empStyles.sectionTitle}>Department</h4>
@@ -325,14 +325,14 @@ export default function EditProfileTab({
         </div>
       )}
 
-      {/* ── Salary — employer only ── */}
+      {/* ── Salary - employer only ── */}
       {isEmployer && (
         <div className={empStyles.section}>
           <h4 className={empStyles.sectionTitle}>Salary</h4>
           <p className={empStyles.sectionDesc}>
             {profile.firstName || "This employee"}'s salary. Applies
             immediately, and they're notified right away whenever it's increased
-            or decreased. Only visible to you — never to an HOD.
+            or decreased. Only visible to you - never to an HOD.
           </p>
 
           {salaryError && (
@@ -414,7 +414,7 @@ export default function EditProfileTab({
         <h4 className={empStyles.sectionTitle}>Position</h4>
         <p className={empStyles.sectionDesc}>
           {profile.firstName || "This employee"}'s job title. Applies
-          immediately — no approval needed.
+          immediately - no approval needed.
         </p>
 
         {positionError && (

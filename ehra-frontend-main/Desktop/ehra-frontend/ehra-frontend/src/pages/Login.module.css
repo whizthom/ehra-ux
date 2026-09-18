@@ -1,12 +1,12 @@
 /* ────────────────────────────────────────────────────────────────────────
-   Ehra — Sign in
+   Ehra - Sign in
    Tokens:
-   ink      #0B1F1A  near-black forest — hero background
+   ink      #0B1F1A  near-black forest - hero background
    forest   #0F6E56  brand primary (shared with the rest of the app)
    forest-d #085041  brand primary, pressed/hover
-   mint     #55E0AE  bright accent — glow, links, live-state dot
+   mint     #55E0AE  bright accent - glow, links, live-state dot
    sage     #F3F8F6  right-panel canvas (green-tinted off-white, not cream)
-   brass    #C6A15B  single warm accent — used only for the signature rule
+   brass    #C6A15B  single warm accent - used only for the signature rule
    ink-soft #8FA8A0  muted text on dark
    line     #E1E8E5  hairline borders on the light side
    Display face: Fraunces (serif, set large, used with restraint)
@@ -21,7 +21,7 @@
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-/* ── Left panel — brand thesis ─────────────────────────────────────────── */
+/* ── Left panel - brand thesis ─────────────────────────────────────────── */
 .left {
     position: relative;
     width: 56%;
@@ -233,8 +233,8 @@
     font-size: 12px;
 }
 
-/* ── Right panel — the form, plain on the canvas ───────────────────────
-   No card, no border, no drop shadow — the sign-in form sits directly on
+/* ── Right panel - the form, plain on the canvas ───────────────────────
+   No card, no border, no drop shadow - the sign-in form sits directly on
    the sage canvas. Depth comes from two soft, out-of-focus brand-colour
    glows (mint + brass) instead of a container edge, so it still reads as
    considered rather than bare. ──────────────────────────────────────── */
@@ -326,7 +326,7 @@
     box-shadow: none;
 }
 
-/* Staggered reveal — each direct child of the form rises and fades in
+/* Staggered reveal - each direct child of the form rises and fades in
    just slightly after the one before it, instead of the whole form
    appearing as a single flat block. */
 .card>* {
@@ -683,11 +683,11 @@
     text-decoration: underline;
 }
 
-/* ── Responsive — mobile gets its own shape, not a shrunk desktop ──────
+/* ── Responsive - mobile gets its own shape, not a shrunk desktop ──────
    The split-screen brand panel doesn't survive a narrow viewport, so
    instead of just hiding it, its dark canvas becomes a curved hero band
    that carries the logo and drops a soft shadow onto the plain form
-   below — a distinct, deliberately mobile composition. ───────────────── */
+   below - a distinct, deliberately mobile composition. ───────────────── */
 @media (max-width: 900px) {
     .wrap {
         display: flex;

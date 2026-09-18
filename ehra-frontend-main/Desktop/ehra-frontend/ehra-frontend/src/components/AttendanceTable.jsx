@@ -7,7 +7,7 @@ const STATUS_STYLES = {
   ABSENT: { label: "Absent", cls: "pillAbsent" },
 };
 
-// Offline attendance reconciliation state (spec §58/§59) — a SEPARATE
+// Offline attendance reconciliation state (spec §58/§59) - a SEPARATE
 // badge from the status pill above, never merged into it. Most rows have
 // no syncStatus at all (recorded directly online), in which case nothing
 // extra renders here.
@@ -20,7 +20,7 @@ const SYNC_STYLES = {
 };
 
 function formatTime(isoString) {
-  if (!isoString) return "—";
+  if (!isoString) return "-";
   const d = new Date(isoString);
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
@@ -29,7 +29,7 @@ function formatTime(isoString) {
 // (rather than `new Date(dateStr)`) so a plain "yyyy-MM-dd" string from the
 // backend can't shift a day off in timezones behind UTC.
 function formatDate(dateStr) {
-  if (!dateStr) return "—";
+  if (!dateStr) return "-";
   const datePart = String(dateStr).split("T")[0];
   const [year, month, day] = datePart.split("-").map(Number);
   if (!year || !month || !day) return dateStr;
@@ -53,7 +53,7 @@ export default function AttendanceTable({
   // Mobile-only: hides the Employee and Department columns, leaving just
   // Date/Clock in/Clock out/Status. Meant for self-scoped views (e.g. the
   // employee's own "My attendance" tab) where every row is already known
-  // to be the signed-in person — those columns are safe to keep on
+  // to be the signed-in person - those columns are safe to keep on
   // desktop but redundant clutter on a narrow phone screen.
   hideIdentityMobile = false,
 }) {

@@ -47,7 +47,7 @@ function keyForContext({ businessId }) {
    * AttendanceDeviceBinding.
    *
    * Offline attendance builds on top of this same device identity, but
-   * offline TRUST is additionally employee-bound — see
+   * offline TRUST is additionally employee-bound - see
    * OfflineAttendanceAuthorization on the backend and
    * offlineAttendanceJournal.js on the frontend, which key by employee
    * as well as by this device.
@@ -342,24 +342,24 @@ export function getAttendanceDeviceContext(
 //
 // Offline transactions are NOT signed the same way as an online scan.
 // Online signs `${challenge}:${membershipId}:${action}` where `challenge`
-// is a short-lived nonce fetched from the server just before signing —
+// is a short-lived nonce fetched from the server just before signing -
 // there is no server round trip available while offline to fetch one.
 //
 // Instead, an offline transaction signs the FULL canonical transaction
 // payload itself. Both sides must build byte-identical strings or every
-// signature/hash check will fail — see
+// signature/hash check will fail - see
 // OfflineAttendanceSyncService#canonicalPayload on the backend, which
 // this function mirrors field-for-field.
 // ─────────────────────────────────────────────────────────────────────────
 
 /**
  * Formats a Date as "yyyy-MM-ddTHH:mm:ss" using the DEVICE'S LOCAL wall
- * clock (not UTC, no milliseconds, no timezone suffix) — deliberately NOT
+ * clock (not UTC, no milliseconds, no timezone suffix) - deliberately NOT
  * `date.toISOString()`, which is UTC and would silently shift every
  * timestamp by Nigeria's UTC+1 offset relative to what the backend's
  * BusinessClock assumes. Deliberately whole-seconds only (no
  * milliseconds): Java's LocalDateTime formatter omits the fractional part
- * entirely when nanoseconds are zero, but prints it when they're not — so
+ * entirely when nanoseconds are zero, but prints it when they're not - so
  * sending milliseconds here would only match the backend's re-formatted
  * string when they happen to be exactly 000. Dropping sub-second
  * precision entirely (irrelevant for attendance anyway) avoids that whole
@@ -404,7 +404,7 @@ export function buildOfflineCanonicalPayload({
   ].join("|");
 }
 
-/** Lowercase hex SHA-256 digest — matches Java's HexFormat.formatHex output. */
+/** Lowercase hex SHA-256 digest - matches Java's HexFormat.formatHex output. */
 export async function sha256HexDigest(text) {
   const digest = await window.crypto.subtle.digest(
     "SHA-256",
@@ -418,7 +418,7 @@ export async function sha256HexDigest(text) {
 
 /**
  * Signs the canonical offline transaction payload directly (no nonce
- * prefix — see the section comment above). Same ECDSA P-256 /
+ * prefix - see the section comment above). Same ECDSA P-256 /
  * SHA256withECDSA primitive as the online challenge signature, so the
  * backend's single `verifySignature` helper verifies both.
  */

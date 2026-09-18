@@ -24,7 +24,7 @@
 
 /* ── Mobile: full-screen sheet, same convention as BusinessReportModal ──
    so the invite popup gets a real, comfortable mobile layout instead of
-   a shrunk-down desktop card — fixed header, independently scrolling
+   a shrunk-down desktop card - fixed header, independently scrolling
    body, no wasted overlay padding, and safe-area-aware bottom spacing
    for devices with a home indicator. */
 @media (max-width: 640px) {
@@ -77,7 +77,7 @@
         padding: 16px 16px 12px;
     }
 
-    /* Bigger tap target — comfortably inside the 44px minimum for a
+    /* Bigger tap target - comfortably inside the 44px minimum for a
        reliable thumb tap on a phone. */
     .closeBtn {
         width: 40px;
@@ -145,7 +145,7 @@
     }
 
     /* Let each tab size to its label instead of squeezing three tabs
-       into equal thirds — "Reusable link" and "Invite by email" no
+       into equal thirds - "Reusable link" and "Invite by email" no
        longer wrap or truncate on a narrow phone screen. */
     .tab {
         flex: none;
@@ -272,7 +272,7 @@
     }
 
     /* 16px is the iOS Safari threshold below which focusing an input
-       triggers an automatic viewport zoom — bumping these up keeps the
+       triggers an automatic viewport zoom - bumping these up keeps the
        layout from jumping the moment someone taps in. */
     .linkInput {
         font-size: 16px;

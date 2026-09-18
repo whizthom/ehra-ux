@@ -14,7 +14,7 @@ const MODE_OPTIONS = [
 ];
 
 /**
- * Branch-level attendance-zone override — mirrors the business-wide
+ * Branch-level attendance-zone override - mirrors the business-wide
  * AttendanceSettingsPanel's zone section, but this is one of three states
  * instead of a plain on/off:
  *   - "Inherit business default" (zoneEnabled cleared to null server-side)
@@ -100,7 +100,7 @@ export default function BranchAttendanceSettingsPanel({ branchId }) {
     if (mode === "custom" && customEnabled && (lat == null || lng == null)) {
       showToast(
         "error",
-        'Set this branch\'s location before saving — tap "Use current location".',
+        'Set this branch\'s location before saving - tap "Use current location".',
       );
       return;
     }
@@ -145,7 +145,7 @@ export default function BranchAttendanceSettingsPanel({ branchId }) {
       <p className={styles.desc}>
         By default this branch follows your business-wide attendance zone
         setting. Override it here if this branch needs its own location or
-        radius — or no zone requirement at all.
+        radius - or no zone requirement at all.
       </p>
 
       {businessDefaults && (
@@ -195,7 +195,7 @@ export default function BranchAttendanceSettingsPanel({ branchId }) {
                     onChange={(e) =>
                       setLat(e.target.value ? Number(e.target.value) : null)
                     }
-                    placeholder="—"
+                    placeholder="-"
                   />
                 </div>
                 <div className={styles.field}>
@@ -206,7 +206,7 @@ export default function BranchAttendanceSettingsPanel({ branchId }) {
                     onChange={(e) =>
                       setLng(e.target.value ? Number(e.target.value) : null)
                     }
-                    placeholder="—"
+                    placeholder="-"
                   />
                 </div>
               </div>

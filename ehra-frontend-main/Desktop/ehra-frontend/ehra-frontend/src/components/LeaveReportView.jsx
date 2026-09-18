@@ -55,7 +55,7 @@ function presetRange(preset) {
 }
 
 function formatDateFull(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d + "T00:00:00").toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
@@ -64,7 +64,7 @@ function formatDateFull(d) {
 }
 
 function formatDateShort(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d + "T00:00:00").toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
@@ -72,7 +72,7 @@ function formatDateShort(d) {
 }
 
 function formatMonthLabel(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d + "T00:00:00").toLocaleDateString(undefined, {
     month: "short",
     year: "2-digit",
@@ -80,7 +80,7 @@ function formatMonthLabel(d) {
 }
 
 function fmtHours(v) {
-  if (v === null || v === undefined) return "—";
+  if (v === null || v === undefined) return "-";
   if (v < 48) return `${v} hrs`;
   return `${Math.round((v / 24) * 10) / 10} days`;
 }
@@ -97,7 +97,7 @@ function fmtDelta(v, { invertColor = false, suffix = "" } = {}) {
 }
 
 function leaveTypeLabel(t) {
-  if (!t) return "—";
+  if (!t) return "-";
   return t
     .toLowerCase()
     .split("_")

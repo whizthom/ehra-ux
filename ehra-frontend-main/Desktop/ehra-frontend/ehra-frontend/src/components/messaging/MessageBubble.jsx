@@ -65,11 +65,11 @@ export default function MessageBubble({
   const [openingDocument, setOpeningDocument] = useState(false);
   const [downloadingDocument, setDownloadingDocument] = useState(false);
   // One ref covering the WHOLE bubble (trigger buttons + both popups
-  // together) — clicking either trigger button is "inside" this ref, so
+  // together) - clicking either trigger button is "inside" this ref, so
   // it doesn't get misread as an outside click and cause the popup to
   // close-then-instantly-reopen on every toggle tap. Clicking literally
-  // anywhere else on screen — another message, the composer, empty
-  // space — closes whichever of these two is open.
+  // anywhere else on screen - another message, the composer, empty
+  // space - closes whichever of these two is open.
   const bubbleRef = useRef(null);
   const closeAllPopovers = useCallback(() => {
     setShowReactionPicker(false);
@@ -230,7 +230,7 @@ export default function MessageBubble({
               className={styles.retryBtn}
               onClick={() => onRetry(message)}
             >
-              <i className="ti ti-refresh" /> Failed — tap to retry
+              <i className="ti ti-refresh" /> Failed - tap to retry
             </button>
           )}
 

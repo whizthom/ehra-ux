@@ -27,7 +27,7 @@ function formatMoney(value) {
 }
 
 function formatDate(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   return new Date(iso + "T00:00:00").toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
@@ -36,7 +36,7 @@ function formatDate(iso) {
 }
 
 function formatDateShort(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   return new Date(iso + "T00:00:00").toLocaleDateString(undefined, {
     weekday: "short",
     month: "short",
@@ -45,7 +45,7 @@ function formatDateShort(iso) {
 }
 
 function formatTime(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   return new Date(iso).toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
@@ -90,7 +90,7 @@ export default function PenaltyPayrollPanel({ viewer, employeeId }) {
         : await getEmployeePenaltyHistory(employeeId);
       setHistory(data || []);
     } catch {
-      // Non-fatal — the current period still loads on its own.
+      // Non-fatal - the current period still loads on its own.
     } finally {
       setLoading(false);
     }
@@ -272,7 +272,7 @@ export default function PenaltyPayrollPanel({ viewer, employeeId }) {
                     {summary.finalized ? "Net pay" : "Projected net pay"}
                   </span>
                   <span className={styles.statValue}>
-                    {summary.salarySet ? formatMoney(summary.netPay) : "—"}
+                    {summary.salarySet ? formatMoney(summary.netPay) : "-"}
                   </span>
                 </div>
               </>
@@ -295,7 +295,7 @@ export default function PenaltyPayrollPanel({ viewer, employeeId }) {
           {summary.canViewPay && !summary.salarySet && (
             <p className={styles.hodNote}>
               <i className="ti ti-info-circle" aria-hidden="true" />
-              No salary has been set for this employee yet — deductions are
+              No salary has been set for this employee yet - deductions are
               still tracked, but there's nothing to net them against.
             </p>
           )}
@@ -385,13 +385,13 @@ export default function PenaltyPayrollPanel({ viewer, employeeId }) {
                             <td data-label="Effect on pay">
                               {ev.onApprovedLeave ? (
                                 <span className={styles.effectNeutral}>
-                                  On approved leave — no charge
+                                  On approved leave - no charge
                                 </span>
                               ) : ev.pardoned ? (
                                 <span className={styles.effectGood}>
                                   Excused
                                   {ev.pardonReason
-                                    ? ` — ${ev.pardonReason}`
+                                    ? ` - ${ev.pardonReason}`
                                     : ""}
                                 </span>
                               ) : ev.penalized ? (
@@ -399,7 +399,7 @@ export default function PenaltyPayrollPanel({ viewer, employeeId }) {
                                   −{formatMoney(ev.deductionAmount)}
                                 </span>
                               ) : (
-                                <span className={styles.effectNeutral}>—</span>
+                                <span className={styles.effectNeutral}>-</span>
                               )}
                             </td>
                             {isEmployer && (
@@ -436,7 +436,7 @@ export default function PenaltyPayrollPanel({ viewer, employeeId }) {
                                 <div className={styles.pardonForm}>
                                   <input
                                     type="text"
-                                    placeholder="Reason (optional) — e.g. approved verbally"
+                                    placeholder="Reason (optional) - e.g. approved verbally"
                                     value={pardonReason}
                                     onChange={(e) =>
                                       setPardonReason(e.target.value)

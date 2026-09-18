@@ -26,7 +26,7 @@
 }
 
 /* Sits inside shellStyles.sbFooter (same dark sidebar footer both
-   dashboards use) — this page has no "current user" profile data loaded
+   dashboards use) - this page has no "current user" profile data loaded
    to build the usual name/avatar footer card from, so it's just the
    logout action on its own rather than a partial identity card. */
 .sidebarLogoutBtn {
@@ -58,7 +58,7 @@
 /* ── Back button ──────────────────────────────────────────────────────
    Replaces the old static "Employee profile" title. Label text ("Back to
    Workforce" / "Back to Departments" / etc.) reflects wherever the user
-   actually came from — see the BACK_TARGETS map in the component. */
+   actually came from - see the BACK_TARGETS map in the component. */
 .backBtn {
     display: flex;
     align-items: center;
@@ -109,7 +109,7 @@
 }
 
 /* Below ~380px (small phones), "Back to Departments" etc. starts
-   crowding out the message/bell/theme icons on the right — drop to just
+   crowding out the message/bell/theme icons on the right - drop to just
    "Back", the arrow icon still carries the "go back" meaning, and the
    full destination stays available via the button's title/aria-label. */
 @media (max-width: 380px) {
@@ -247,11 +247,11 @@
 }
 
 /* A flat solid block reads fine in light mode but goes muddy against a
-   dark surface — the inset top highlight plus a soft dark glow (rather
+   dark surface - the inset top highlight plus a soft dark glow (rather
    than a light-mode-tuned shadow) is what gives it a lifted, "real
    button" feel on a dark card instead of looking like a flat rectangle.
    Sized by padding, not a fixed height, and never longer than its
-   content — see .heroActions above for why it doesn't stretch on mobile. */
+   content - see .heroActions above for why it doesn't stretch on mobile. */
 .msgBtn {
     display: inline-flex;
     align-items: center;
@@ -289,7 +289,7 @@
 }
 
 /* The send icon sits in its own translucent chip rather than floating
-   bare next to the label — a small bit of depth that also gives the
+   bare next to the label - a small bit of depth that also gives the
    hover state somewhere to put its "sent" nudge (see below). */
 .msgBtnIcon {
     display: flex;
@@ -311,7 +311,7 @@
     transform: translateX(2px);
 }
 
-/* Deliberately quieter than .msgBtn — a ghost pill, not a second
+/* Deliberately quieter than .msgBtn - a ghost pill, not a second
    equally-weighted CTA, so "Send message" stays the obvious primary
    action instead of the two competing for attention. */
 .idCardBtn {
@@ -344,12 +344,12 @@
 /* ── Tabs ──────────────────────────────────────────────────────────────
    The tab row itself (previously .tabs/.tab/.tabActive/.tabsScrollTrack/
    .tabsScrollThumb) is now styled inline directly in the JSX, on
-   purpose — see the comment above the <nav> in EmployeeProfilePage.jsx.
+   purpose - see the comment above the <nav> in EmployeeProfilePage.jsx.
    Nothing to define here anymore. */
 
 /* ── Tab content ──────────────────────────────────────────────────────
    Was referenced in the JSX (styles.tabContent) but never actually
-   defined here — className ended up undefined, so this wrapper had no
+   defined here - className ended up undefined, so this wrapper had no
    width constraint of its own at all. Also a flex item of .contentFull,
    so it needs the same min-width: 0 as .tabs above, otherwise a wide
    child further down (e.g. .tableWrap/.table) can push it past the

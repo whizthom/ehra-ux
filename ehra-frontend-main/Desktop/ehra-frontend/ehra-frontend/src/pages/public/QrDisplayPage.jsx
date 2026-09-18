@@ -5,11 +5,11 @@ import { getCurrentQrTokenPublic } from "../../api/attendanceApi";
 import styles from "./QrDisplayPage.module.css";
 
 /**
- * PUBLIC, unauthenticated page — reachable at /qr-display/:token with no
+ * PUBLIC, unauthenticated page - reachable at /qr-display/:token with no
  * login required. This is the "share a link instead of admin access"
  * feature: an employer generates a display link from the Live QR tab
- * (QrDisplayLinkPanel.jsx) and can hand this exact URL to anyone — a
- * receptionist's tablet, a second device propped at the entrance — so
+ * (QrDisplayLinkPanel.jsx) and can hand this exact URL to anyone - a
+ * receptionist's tablet, a second device propped at the entrance - so
  * they can display the live rotating attendance QR without ever touching
  * the actual admin dashboard.
  *
@@ -17,12 +17,12 @@ import styles from "./QrDisplayPage.module.css";
  * logic rather than a shared component: that panel is one card among many
  * on the authenticated dashboard, while this is a full, standalone,
  * kiosk-style screen meant to be glanced at from a few feet away (e.g.
- * propped up at a front desk) — different layout concerns entirely, and
+ * propped up at a front desk) - different layout concerns entirely, and
  * this one calls the PUBLIC endpoint (token in the URL) instead of the
  * authenticated one (JWT + active business context).
  *
  * If the employer revokes the link, the next poll gets a 400 and this
- * shows a clear "this link no longer works" state — it does not keep
+ * shows a clear "this link no longer works" state - it does not keep
  * retrying forever, since a revoked link is a deliberate, permanent stop,
  * not a transient blip like a dropped network request.
  */
@@ -58,7 +58,7 @@ export default function QrDisplayPage() {
       refreshTimeoutRef.current = setTimeout(fetchAndRender, Math.max(1000, data.expiresInMs - 5000));
     } catch (err) {
       // A revoked/unknown link comes back as a 4xx and will never start
-      // working again on its own — the employer has to issue a new one.
+      // working again on its own - the employer has to issue a new one.
       // Stop polling entirely instead of hammering the server forever.
       const status = err?.response?.status;
       if (status && status >= 400 && status < 500) {
@@ -115,7 +115,7 @@ export default function QrDisplayPage() {
           {transientError ? (
             <div className={styles.placeholderError}>
               <i className="ti ti-alert-circle" aria-hidden="true" />
-              Couldn't load QR code — retrying…
+              Couldn't load QR code - retrying…
             </div>
           ) : (
             <>
@@ -139,7 +139,7 @@ export default function QrDisplayPage() {
             />
           </div>
           <p className={styles.hint}>
-            Refreshes every {totalSeconds ?? "—"} seconds · Open your Ehra app
+            Refreshes every {totalSeconds ?? "-"} seconds · Open your Ehra app
             camera to scan
           </p>
         </div>

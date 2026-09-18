@@ -2,7 +2,7 @@ import useMessageSearch from "../../hooks/useMessageSearch";
 import styles from "./SearchResultsPanel.module.css";
 
 // Replaces the normal (tab-filtered, date-grouped) conversation list
-// while a search query is active — a message-text match isn't really "a
+// while a search query is active - a message-text match isn't really "a
 // conversation in a date group", it's a specific hit that should jump
 // straight to that conversation (and, where possible, that exact
 // message). See useMessageSearch's doc for why this needs its own

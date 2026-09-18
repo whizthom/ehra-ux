@@ -7,7 +7,7 @@ const DISMISSED_KEY = "ehral:installPromptDismissed";
  * Detects whether the app is already running as an installed PWA.
  *
  * - `display-mode: standalone` covers Android/desktop Chrome, Edge, etc.
- * - `navigator.standalone` is Safari/iOS's own (non-standards) flag —
+ * - `navigator.standalone` is Safari/iOS's own (non-standards) flag -
  *   iOS never fires `beforeinstallprompt` at all, so this is the only
  *   signal we get there.
  */
@@ -19,7 +19,7 @@ function isRunningStandalone() {
 /**
  * Beautiful, dismissible "Install Ehral" card. Renders nothing until the
  * browser tells us installation is actually possible (`beforeinstallprompt`),
- * and never renders again once the app is installed — checked both at
+ * and never renders again once the app is installed - checked both at
  * mount (already installed) and on `appinstalled` (installed just now).
  *
  * Dismissing the card ("Not now") remembers that choice in localStorage
@@ -66,7 +66,7 @@ export default function InstallPrompt() {
       if (outcome === "accepted") {
         setVisible(false);
       } else {
-        // They saw the native prompt and said no — respect that like a
+        // They saw the native prompt and said no - respect that like a
         // dismissal so we don't immediately show our card again.
         localStorage.setItem(DISMISSED_KEY, "1");
         setVisible(false);

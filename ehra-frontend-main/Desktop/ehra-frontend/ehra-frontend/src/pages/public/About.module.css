@@ -31,7 +31,7 @@
 /* ── Nav ──
    Fixed (not sticky-in-flow) so it floats directly over the hero,
    starting transparent and turning solid/blurred once the page has
-   scrolled past the hero — see .navTransparent / .navScrolled below.
+   scrolled past the hero - see .navTransparent / .navScrolled below.
    Because it's taken out of flow, nothing needs top padding to
    compensate: the hero is meant to sit flush behind it. Anchor targets
    further down the page get scroll-margin-top (see .section) so they
@@ -398,7 +398,7 @@
     overflow: hidden;
 }
 
-/* Small pill above the eyebrow — a concrete, clickable trust signal
+/* Small pill above the eyebrow - a concrete, clickable trust signal
    sitting right at the top of the hero, the way a product-grade SaaS
    hero opens with a stat or headline chip before the H1. */
 .heroChip {
@@ -436,7 +436,7 @@
     box-shadow: 0 0 0 3px rgba(85, 224, 174, 0.18);
 }
 
-/* ── Capability ticker — infinite horizontal scroll strip, directly
+/* ── Capability ticker - infinite horizontal scroll strip, directly
    under the hero. Mirrors the "stat belt" pattern of clean product
    marketing sites: a thin, dark, always-moving strip of concrete
    proof points before the page settles into its editorial sections. ── */
@@ -710,7 +710,7 @@
     scroll-margin-top: 96px;
 }
 
-/* ── Story behind Ehral — stacked editorial layout, right after hero.
+/* ── Story behind Ehral - stacked editorial layout, right after hero.
    Header centered on top; body reads as a single "spine-railed" column
    with the two key lines pulled out as standalone statements; visual
    sits full-width underneath. Same treatment at every breakpoint, so
@@ -733,11 +733,11 @@
    breakpoint, so the "100%" widths on its children below resolve
    reliably against it. Without this, .storyLeft is sized by flex
    fit-content (because .storySection uses align-items: center), which
-   is not a definite width — and percentage children resolving against
+   is not a definite width - and percentage children resolving against
    an indefinite container is what was causing .storyHeader (short
    content) to shrink to its own content and then get centered by its
    `margin: auto`, while .storyText (long paragraphs) stayed full width
-   — a misaligned heading, on mobile as much as desktop. */
+   - a misaligned heading, on mobile as much as desktop. */
 .storyLeft {
     width: 100%;
 }
@@ -790,7 +790,7 @@
     border-radius: 0;
 }
 
-/* ── Grow your business with Ehral — two-column section directly below
+/* ── Grow your business with Ehral - two-column section directly below
    the story: a confident, minimal invitation (headline + CTA) on the
    left, the orbit animation on the right. Mirrors the hero's two-column
    proportions for visual consistency with the rest of the page. ── */
@@ -881,7 +881,7 @@
     max-width: none;
 }
 
-/* The two lines that carry the section's real weight — broken out of
+/* The two lines that carry the section's real weight - broken out of
    the paragraph rail entirely so they land as their own beat rather
    than blending into the surrounding prose. */
 .storyPullQuote {
@@ -954,7 +954,7 @@
     }
 }
 
-/* ── The real problem — a magazine-spread layout. Deliberately
+/* ── The real problem - a magazine-spread layout. Deliberately
    different from the hero/grow section's plain left-right split used
    elsewhere on the page: newspaper-style two-column body copy builds
    up to one oversized pull-statement as the section's visual climax,
@@ -985,7 +985,7 @@
     margin: 0;
 }
 
-/* Newspaper-style body copy — a technique used nowhere else on this
+/* Newspaper-style body copy - a technique used nowhere else on this
    page, giving the section its own distinct texture. Caps at a
    comfortable max-width so columns don't stretch edge-to-edge and
    become unreadable on ultra-wide screens. */
@@ -1001,7 +1001,7 @@
     break-inside: avoid;
 }
 
-/* The dramatic climax of the section — the point the whole layout is
+/* The dramatic climax of the section - the point the whole layout is
    building toward, so it gets real scale instead of blending in with
    the surrounding paragraphs. */
 .problemBigStatement {
@@ -1052,7 +1052,7 @@
     margin: 40px auto 0;
 }
 
-/* A quiet, compact echo of the old tools-to-Ehral idea — a supporting
+/* A quiet, compact echo of the old tools-to-Ehral idea - a supporting
    detail now, not the section's main visual. */
 .problemTrail {
     display: flex;
@@ -1316,7 +1316,7 @@
     border: 1px solid var(--border, #e1e8e5);
 }
 
-/* ── "Every business starts somewhere" — a quiet, premium editorial
+/* ── "Every business starts somewhere" - a quiet, premium editorial
    panel in a deep green (distinct from both the light story section
    above it and the near-black sections used elsewhere on the page),
    built for one idea to land: a business can start small without
@@ -1369,7 +1369,7 @@
     margin: 0 auto;
 }
 
-/* The emotional core of the section — set apart from the surrounding
+/* The emotional core of the section - set apart from the surrounding
    prose with its own spacing, a much larger italic serif setting and
    the brand's light accent color, so it reads as a standalone beat
    rather than another sentence in the paragraph flow. */
@@ -1520,7 +1520,7 @@
     font-size: 26px;
 }
 
-/* ── "Built for this environment" card — bordered white container,
+/* ── "Built for this environment" card - bordered white container,
    text on the left and the reality checklist as chips on the right. ── */
 .envCard {
     display: grid;
@@ -1542,7 +1542,7 @@
     margin-bottom: 0;
 }
 
-/* ── Nigerian/regional list — bordered chip boxes ── */
+/* ── Nigerian/regional list - bordered chip boxes ── */
 .ngList {
     list-style: none;
     display: grid;
@@ -1571,7 +1571,7 @@
     flex-shrink: 0;
 }
 
-/* ── Dotted-pattern section background — a faint dot grid that fades
+/* ── Dotted-pattern section background - a faint dot grid that fades
    out toward the top/bottom edges via a mask, used behind sections
    that want a bit of texture without competing with the content. ── */
 .sectionDotted {
@@ -1595,7 +1595,7 @@
     z-index: 1;
 }
 
-/* ── Why Ehral — single bordered container, six cells sharing internal
+/* ── Why Ehral - single bordered container, six cells sharing internal
    dividers instead of six floating cards. Numbered 01–06 like a spec
    sheet rather than a marketing grid. ── */
 .whyGrid {
@@ -1715,7 +1715,7 @@
     margin: 0;
 }
 
-/* ── Founder credit — a small, quiet coda at the end of the Story
+/* ── Founder credit - a small, quiet coda at the end of the Story
    section rather than a full standalone section: the origin story is
    already told in full above, so this is just a face and a name
    attached to it, not a second retelling. ── */
@@ -1777,10 +1777,10 @@
 }
 
 .founderCreditRole::before {
-    content: "— ";
+    content: "- ";
 }
 
-/* ── Final CTA banner — a rounded, contained dark card (not full-bleed)
+/* ── Final CTA banner - a rounded, contained dark card (not full-bleed)
    with a soft radial glow, echoing the reference design's closing
    banner rather than another full-width dark section. ── */
 .ctaBanner {
@@ -1794,7 +1794,7 @@
     padding: 72px 32px;
 }
 
-/* Tag + button-row modifiers for the final CTA banner specifically —
+/* Tag + button-row modifiers for the final CTA banner specifically -
    scoped so they don't affect the shared .tagVisionLight / .heroCtas
    styling used elsewhere (Vision section, hero). Desktop keeps the
    original gold tag and left-set button row; tablet/mobile switch the

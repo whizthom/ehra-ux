@@ -2,7 +2,7 @@
 .dash {
     display: flex;
     height: 100vh;
-    /* dvh matches the browser's actual visible viewport on mobile — see
+    /* dvh matches the browser's actual visible viewport on mobile - see
        Dashboard.module.css's .dash for the full reasoning (this file was
        previously missing both the dvh fallback and the keyboard-aware
        var below, which is very likely why the chat header on this
@@ -11,7 +11,7 @@
     height: 100dvh;
     /* --app-vh (see useVisualViewportHeight.js) additionally tracks the
        on-screen keyboard, which dvh alone doesn't reliably do on every
-       device — falls straight back to the 100dvh above on any browser
+       device - falls straight back to the 100dvh above on any browser
        that doesn't support visualViewport. */
     height: var(--app-vh, 100dvh);
     width: 100vw;
@@ -156,7 +156,7 @@
     padding: 22px 28px;
     /* Pushes title/icons below the iOS status bar (viewport-fit=cover in
        index.html means content draws all the way to the physical top of
-       the screen) — independent of background color, so this still
+       the screen) - independent of background color, so this still
        matters even with the transparent mobile override below. */
     padding-top: calc(22px + env(safe-area-inset-top, 0px));
     background: var(--bg-surface);
@@ -164,7 +164,7 @@
     flex-shrink: 0;
 }
 
-/* Matches Dashboard.module.css's mobile treatment (the admin dashboard) —
+/* Matches Dashboard.module.css's mobile treatment (the admin dashboard) -
    a borderless header that blends into the page background instead of
    sitting in its own bordered panel. .dash's background: var(--bg-page)
    (plus the html/body backstop in theme.css) is what actually shows
@@ -268,7 +268,7 @@
     overflow-x: hidden;
 }
 
-/* ── Brand footer — sits at the very end of the scrollable content,
+/* ── Brand footer - sits at the very end of the scrollable content,
    same spot regardless of which tab is active. Full opacity, no mobile
    shrink, so it stays clearly visible on every screen size. Matches
    Dashboard.module.css's employer-side footer. */
@@ -730,7 +730,7 @@
     color: var(--danger-text);
 }
 
-/* ── Undo bar — floats above the bottom of the list whenever one or more
+/* ── Undo bar - floats above the bottom of the list whenever one or more
    deletes are pending, so it always "pops" into view instead of being
    pushed below the fold by a long notification list. ── */
 .undoBar {

@@ -2,7 +2,7 @@ import styles from "./pricing.module.css";
 import { BILLING_CYCLES } from "../../data/pricingPlans";
 
 /**
- * Monthly / Yearly switch. Purely controlled — the parent owns `cycle`
+ * Monthly / Yearly switch. Purely controlled - the parent owns `cycle`
  * state so PricingCard, ComparisonTable, etc. can all react to it too.
  */
 export default function BillingToggle({ cycle, onChange }) {

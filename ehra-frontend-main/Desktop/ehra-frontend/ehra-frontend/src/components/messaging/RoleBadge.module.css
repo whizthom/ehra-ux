@@ -35,7 +35,7 @@
     height: 5px;
 }
 
-/* The "beeping/pulsing" signal — a soft ring that expands outward and
+/* The "beeping/pulsing" signal - a soft ring that expands outward and
    fades, radar-ping style, repeating continuously. Deliberately a FIXED
    color per role rather than one that cycles through colors: the whole
    point is that a person learns "gold = Employer" at a glance, which a

@@ -1,4 +1,4 @@
-// Shared display helpers for the leave workflow — kept in one place so the
+// Shared display helpers for the leave workflow - kept in one place so the
 // employee, HOD, and employer views never drift out of sync with each
 // other or with the backend's LeaveType / LeaveStatus enums.
 
@@ -106,13 +106,13 @@ export function leaveStageDescription(leave) {
     case "COVER_DECLINED":
       return "The cover person declined. Choose someone else to continue.";
     case "PENDING_HOD":
-      return "Cover accepted — waiting on the Head of Department.";
+      return "Cover accepted - waiting on the Head of Department.";
     case "PENDING_EMPLOYER":
       return leave.hodDecidedById
-        ? "HOD approved — waiting on final employer sign-off."
+        ? "HOD approved - waiting on final employer sign-off."
         : "Waiting on the employer's decision.";
     case "APPROVED":
-      return "Approved — leave is confirmed.";
+      return "Approved - leave is confirmed.";
     case "REJECTED":
       return "This leave request was rejected.";
     case "CANCELLED":
@@ -123,7 +123,7 @@ export function leaveStageDescription(leave) {
 }
 
 export function formatDate(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d).toLocaleDateString([], {
     day: "numeric",
     month: "short",

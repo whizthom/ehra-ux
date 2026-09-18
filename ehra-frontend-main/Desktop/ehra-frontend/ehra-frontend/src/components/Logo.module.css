@@ -1,4 +1,4 @@
-/* Purely layout — all color lives in Logo.jsx via CSS variables so it
+/* Purely layout - all color lives in Logo.jsx via CSS variables so it
    tracks [data-theme] automatically. Background is always transparent;
    this never paints its own surface. */
 

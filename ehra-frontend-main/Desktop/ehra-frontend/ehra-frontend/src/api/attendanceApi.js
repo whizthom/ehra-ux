@@ -16,14 +16,14 @@ export const getCurrentQrToken = () => API.get("/attendance/qr/current");
 
 // ── QR public display link (admin controls) ─────────────────────────────────
 // Lets an employer share a link (e.g. to a reception tablet) that shows the
-// live rotating QR without needing to log into the dashboard. Admin-only —
+// live rotating QR without needing to log into the dashboard. Admin-only -
 // generating/revoking requires the normal authenticated `API` instance.
 export const getQrDisplayLink = () => API.get("/attendance/qr/display-link");
 export const generateQrDisplayLink = () => API.post("/attendance/qr/display-link");
 export const revokeQrDisplayLink = () => API.delete("/attendance/qr/display-link");
 
 // ── QR public display link (the shared link itself) ─────────────────────────
-// Called from the PUBLIC display page (see pages/QrDisplayPage.jsx) — no
+// Called from the PUBLIC display page (see pages/QrDisplayPage.jsx) - no
 // login, so this deliberately uses a bare axios call instead of the shared
 // `API` instance: `API`'s interceptors assume an authenticated session (auto
 // token-refresh on 401, Bearer header injection) which doesn't apply here and
@@ -178,7 +178,7 @@ export async function submitScanWithDeviceProof(token, coords, action) {
 export const getTodayAttendance = () =>
   API.get("/attendance/today");
 
-// from/to are optional — omit both (or pass undefined) to get the
+// from/to are optional - omit both (or pass undefined) to get the
 // business's complete attendance history, past to present, for every
 // employee. Pass both to narrow to a date range.
 export const getAttendanceHistory = (from, to) =>

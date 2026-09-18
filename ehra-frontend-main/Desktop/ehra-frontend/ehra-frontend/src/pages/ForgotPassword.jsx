@@ -128,7 +128,7 @@ export default function ForgotPassword() {
     } catch (err) {
       if (!err.response) {
         setError(
-          "We couldn't reach the server — it may be waking up after being idle. Please wait a few seconds and try again.",
+          "We couldn't reach the server - it may be waking up after being idle. Please wait a few seconds and try again.",
         );
       } else {
         setError(
@@ -152,7 +152,7 @@ export default function ForgotPassword() {
           <span className={styles.eyebrow}>Account recovery</span>
           <h1 className={styles.headline}>Let's get you back in.</h1>
           <p className={styles.desc}>
-            Verify your phone number and set a new password — no email required.
+            Verify your phone number and set a new password - no email required.
           </p>
         </div>
         <p className={styles.leftFooter}>© 2026 Ehra. All rights reserved.</p>
@@ -179,7 +179,7 @@ export default function ForgotPassword() {
                 "Enter the phone number linked to your account."}
               {step === "otp" && `We sent a 6-digit code to ${phone}`}
               {step === "newPassword" &&
-                `Verified — ${maskedPhone}. Choose a new password.`}
+                `Verified - ${maskedPhone}. Choose a new password.`}
               {step === "done" &&
                 "Your password has been changed. Please sign in again."}
             </p>
@@ -364,14 +364,14 @@ function friendlyFirebaseError(err) {
   // errors now come from Ehra's own backend via api/phoneAuthApi.js, not
   // the Firebase SDK, so the friendly message is whatever
   // PhoneVerificationException / OtpDeliveryException put in
-  // ErrorResponseDTO.message (see GlobalExceptionHandler) — surfaced
+  // ErrorResponseDTO.message (see GlobalExceptionHandler) - surfaced
   // here first, ahead of any generic fallback.
   const backendMessage = err?.response?.data?.message;
   if (backendMessage) {
     return backendMessage;
   }
   if (err?.code === "ERR_NETWORK") {
-    return "Network error — please check your connection and try again.";
+    return "Network error - please check your connection and try again.";
   }
   return err?.message || "Something went wrong. Please try again.";
 }

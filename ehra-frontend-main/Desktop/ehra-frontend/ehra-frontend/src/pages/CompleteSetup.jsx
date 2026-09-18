@@ -46,7 +46,7 @@ export default function CompleteProfile() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Same draft-persistence approach as step 1 — so bouncing back and forth
+  // Same draft-persistence approach as step 1 - so bouncing back and forth
   // between the two steps never costs the person their progress.
   useEffect(() => {
     try {
