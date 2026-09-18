@@ -116,12 +116,11 @@ function SelectMenu({
   );
 }
 
-function HistoryModal({ products, onClose }) {
+function InventoryHistory({ products, onBack }) {
   const [productId, setProductId] = useState("");
   const [type, setType] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const [cursor, setCursor] = useState(null);
   const [rows, setRows] = useState([]);
   const [nextCursor, setNextCursor] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -142,14 +141,13 @@ function HistoryModal({ products, onClose }) {
       const { data } = await getMovementHistory(params);
       setRows(data?.items || []);
       setNextCursor(data?.nextCursor || null);
-      setCursor(next);
       setPage(targetPage);
       if (targetPage === 1) setPageCursors([null]);
       else
         setPageCursors((prev) => {
-          const nextStack = prev.slice(0, targetPage);
-          nextStack[targetPage - 1] = next;
-          return nextStack;
+          const stack = prev.slice(0, targetPage);
+          stack[targetPage - 1] = next;
+          return stack;
         });
     } catch (e) {
       setError(
@@ -161,6 +159,7 @@ function HistoryModal({ products, onClose }) {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     setPageCursors([null]);
     load(null, 1);
@@ -171,31 +170,26 @@ function HistoryModal({ products, onClose }) {
     setType("");
     setFrom("");
     setTo("");
-    setCursor(null);
-    setPage(1);
-    setPageCursors([null]);
   };
   return (
-    <div
-      className={s.modalBackdrop}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Inventory movement history"
-    >
-      <section className={`${s.modal} ${s.movementHistoryModal}`}>
-        <header className={s.modalHead}>
-          <div>
-            <span className={s.kicker}>INVENTORY HISTORY</span>
-            <h2>All stock movements</h2>
-            <p>
-              Browse your complete inventory record 50 movements at a time. Use
-              filters or date ranges to locate older records.
-            </p>
-          </div>
-          <button className={s.iconBtn} onClick={onClose} aria-label="Close">
-            <i className="ti ti-x" />
-          </button>
-        </header>
+    <section className={s.historyPage} aria-label="Inventory movement history">
+      <div className={s.historyPageHead}>
+        <div>
+          <span className={s.kicker}>INVENTORY HISTORY</span>
+          <h2>All stock movements</h2>
+          <p>
+            Browse your complete inventory record 50 movements at a time. Use
+            filters or date ranges to locate older records.
+          </p>
+        </div>
+        <button type="button" className={s.outline} onClick={onBack}>
+          ← Back to inventory
+        </button>
+      </div>
+      <Panel
+        title="Find a movement"
+        sub="Filter the complete inventory record without loading the entire history into the browser."
+      >
         <div className={s.movementHistoryFilters}>
           <SelectMenu
             label="Product"
@@ -228,7 +222,18 @@ function HistoryModal({ products, onClose }) {
             Reset filters
           </button>
         </div>
-        {error && <div className={s.errorBox}>{error}</div>}
+      </Panel>
+      {error && <div className={s.errorBox}>{error}</div>}
+      <Panel
+        title="Movement history"
+        sub={
+          loading
+            ? "Loading…"
+            : rows.length
+              ? `Page ${page} · Showing ${rows.length} records`
+              : `Page ${page} · No movements found`
+        }
+      >
         <div className={s.movementHistoryTableWrap}>
           {loading ? (
             <div className={s.modalLoading}>Loading movement history…</div>
@@ -295,19 +300,18 @@ function HistoryModal({ products, onClose }) {
             </button>
           </div>
         </footer>
-      </section>
-    </div>
+      </Panel>
+    </section>
   );
 }
 
-function Inventory({ data, products, onAdjust, money }) {
+function Inventory({ data, products, onAdjust, money, onViewHistory }) {
   const [p, setP] = useState(products[0]);
   const [qty, setQty] = useState(1);
   const [type, setType] = useState("CORRECTION");
   const [note, setNote] = useState("");
   const [stockSearch, setStockSearch] = useState("");
   const [stockPage, setStockPage] = useState(1);
-  const [historyOpen, setHistoryOpen] = useState(false);
   const STOCK_PAGE_SIZE = 12;
   const filteredProducts = useMemo(
     () =>
@@ -340,7 +344,7 @@ function Inventory({ data, products, onAdjust, money }) {
         showSearch={false}
         action={
           <button
-            className={`${s.primary} ${s.inventorySaveDesktop}`}
+            className={s.primary}
             onClick={() => onAdjust(p, type, qty, note)}
           >
             Save adjustment
@@ -437,19 +441,13 @@ function Inventory({ data, products, onAdjust, money }) {
               placeholder="Reason or reference"
             />
           </div>
-          <button
-            className={`${s.primary} ${s.inventorySaveMobile}`}
-            onClick={() => onAdjust(p, type, qty, note)}
-          >
-            Save adjustment
-          </button>
         </Panel>
       </div>
       <Panel
         title="Recent movement history"
         sub="Latest 200 recorded movements"
         action={
-          <button className={s.outline} onClick={() => setHistoryOpen(true)}>
+          <button className={s.outline} onClick={onViewHistory}>
             View all history
           </button>
         }
@@ -484,14 +482,8 @@ function Inventory({ data, products, onAdjust, money }) {
           </table>
         </div>
       </Panel>
-      {historyOpen && (
-        <HistoryModal
-          products={products}
-          onClose={() => setHistoryOpen(false)}
-        />
-      )}
     </>
   );
 }
 
-export { Inventory };
+export { Inventory, InventoryHistory };

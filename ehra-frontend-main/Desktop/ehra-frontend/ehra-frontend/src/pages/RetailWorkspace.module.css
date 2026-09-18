@@ -3672,30 +3672,48 @@ td small {
   }
 }
 
-/* Inventory actions: desktop keeps the primary action in the page toolbar;
-   mobile places it directly inside the Record movement panel. */
-.inventorySaveMobile {
-  display: none
+
+/* Full-page inventory history view */
+.historyPage {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+  min-width: 0
 }
 
-.panelHeadAction {
-  flex: 0 0 auto
+.historyPageHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 4px
+}
+
+.historyPageHead h2 {
+  margin: 4px 0 6px;
+  font-size: 28px;
+  line-height: 1.15
+}
+
+.historyPageHead p {
+  margin: 0;
+  max-width: 760px;
+  color: var(--muted, #667085);
+  line-height: 1.5
 }
 
 @media(max-width:680px) {
-  .inventorySaveDesktop {
-    display: none
+  .historyPageHead {
+    flex-direction: column;
+    gap: 14px
   }
 
-  .inventorySaveMobile {
-    display: block;
-    width: 100%;
-    margin-top: 14px;
-    min-height: 46px;
-    font-size: 13px
+  .historyPageHead h2 {
+    font-size: 24px
   }
 
-  .panelHeadAction {
-    max-width: 100%
+  .historyPageHead>.outline {
+    width: 100%
   }
 }
