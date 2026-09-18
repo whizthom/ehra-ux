@@ -28,5 +28,4 @@ export {
   ReceiptModal,
   CustomerModal,
   SupplierModal,
-  ConfirmModal,
 } from "./sections/modals";

@@ -6,7 +6,6 @@ import {
   getOrderPayments,
   getPurchasePayments,
 } from "../../../api/retailApi";
-
 const RETAIL_CATEGORIES = [
   "Clothing & Fashion",
   "Electronics",
@@ -25,13 +24,11 @@ const RETAIL_CATEGORIES = [
   "Books & Media",
   "Other",
 ];
-
 const today = () => new Date().toISOString().slice(0, 10);
-
-function Modal({ title, onClose, children, className = "" }) {
+function Modal({ title, onClose, children }) {
   return (
     <div className={s.overlay}>
-      <div className={`${s.modal} ${className}`}>
+      <div className={s.modal}>
         <div className={s.modalHead}>
           <div>
             <span className={s.kicker}>RETAIL WORKSPACE</span>
@@ -46,7 +43,6 @@ function Modal({ title, onClose, children, className = "" }) {
     </div>
   );
 }
-
 function Field({ label, ...p }) {
   return (
     <label className={s.field}>
@@ -55,7 +51,6 @@ function Field({ label, ...p }) {
     </label>
   );
 }
-
 function Empty({ title, text, action }) {
   return (
     <div className={s.empty}>
@@ -66,7 +61,6 @@ function Empty({ title, text, action }) {
     </div>
   );
 }
-
 function Metric({ label, value, trend }) {
   return (
     <div className={s.metric}>
@@ -76,7 +70,6 @@ function Metric({ label, value, trend }) {
     </div>
   );
 }
-
 function Panel({ title, sub, children }) {
   return (
     <section className={s.panel}>
@@ -90,7 +83,6 @@ function Panel({ title, sub, children }) {
     </section>
   );
 }
-
 function Toolbar({ title, sub, query, setQuery, action }) {
   return (
     <div className={s.toolbar}>
@@ -109,7 +101,6 @@ function Toolbar({ title, sub, query, setQuery, action }) {
     </div>
   );
 }
-
 function filteredRows(arr, q, fields) {
   const needle = String(q || "")
     .toLowerCase()
@@ -124,13 +115,11 @@ function filteredRows(arr, q, fields) {
         ),
       );
 }
-
 function PaymentHistory({ kind, id, money, canFinance = false }) {
   const [items, setItems] = useState([]);
   const [error, setError] = useState("");
   const [voidTarget, setVoidTarget] = useState(null);
   const [voidReason, setVoidReason] = useState("");
-
   const load = () => {
     const run =
       kind === "sale"
@@ -146,7 +135,6 @@ function PaymentHistory({ kind, id, money, canFinance = false }) {
         ),
       );
   };
-
   useEffect(() => {
     let live = true;
     const run =
@@ -169,7 +157,6 @@ function PaymentHistory({ kind, id, money, canFinance = false }) {
       live = false;
     };
   }, [kind, id]);
-
   const voidPayment = async () => {
     if (!voidReason.trim()) return;
     try {
@@ -181,7 +168,6 @@ function PaymentHistory({ kind, id, money, canFinance = false }) {
       setError(e?.response?.data?.message || "Could not void payment.");
     }
   };
-
   return (
     <div className={s.tableWrap}>
       <h3>Payment history</h3>
@@ -242,9 +228,7 @@ function PaymentHistory({ kind, id, money, canFinance = false }) {
           ))}
         </tbody>
       </table>
-
       {!items.length && !error && <p>No payment transactions recorded.</p>}
-
       {voidTarget && (
         <Modal title="Void payment" onClose={() => setVoidTarget(null)}>
           <p>

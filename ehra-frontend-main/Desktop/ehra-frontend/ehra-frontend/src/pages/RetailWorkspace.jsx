@@ -17,7 +17,6 @@ import {
   PurchaseModal,
   CustomerModal,
   SupplierModal,
-  ConfirmModal,
 } from "./retail/RetailSections";
 import {
   getProducts,
@@ -101,7 +100,6 @@ export default function RetailWorkspace() {
     [editing, setEditing] = useState(null),
     [query, setQuery] = useState(""),
     [mobileMore, setMobileMore] = useState(false);
-  const [archiveTarget, setArchiveTarget] = useState(null);
   const money = (n) =>
     `${businessCurrency} ${Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const allowed = useMemo(() => {
@@ -340,9 +338,11 @@ export default function RetailWorkspace() {
                 setEditing(p);
                 setModal("product");
               }}
-              onDelete={(p) => {
-                setArchiveTarget(p);
-                setModal("archive");
+              onDelete={async (p) => {
+                if (confirm(`Archive ${p.name}?`)) {
+                  await deleteProduct(p.id);
+                  runLoad();
+                }
               }}
               money={money}
             />
@@ -473,32 +473,6 @@ export default function RetailWorkspace() {
           )}
         </div>
       </main>
-      {modal === "archive" && archiveTarget && (
-        <ConfirmModal
-          title="Archive product"
-          eyebrow="ARCHIVE PRODUCT"
-          confirmLabel="Archive product"
-          onClose={() => {
-            setModal(null);
-            setArchiveTarget(null);
-          }}
-          onConfirm={async () => {
-            await deleteProduct(archiveTarget.id);
-            setModal(null);
-            setArchiveTarget(null);
-            runLoad();
-          }}
-        >
-          <p>
-            <strong>{archiveTarget.name}</strong> will be moved out of your
-            active catalogue.
-          </p>
-          <p>
-            Your existing records remain preserved. You can manage archived
-            products separately.
-          </p>
-        </ConfirmModal>
-      )}
       {modal === "product" && (
         <ProductModal
           item={editing}

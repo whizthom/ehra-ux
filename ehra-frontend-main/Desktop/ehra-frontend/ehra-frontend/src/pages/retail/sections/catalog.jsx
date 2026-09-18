@@ -13,40 +13,20 @@ import {
   RETAIL_CATEGORIES,
   today,
 } from "./shared";
-
 function Products({ items, query, setQuery, onAdd, onEdit, onDelete, money }) {
   return (
     <>
-      <div className={s.productsToolbar}>
-        <div>
-          <h2>Product catalogue</h2>
-          <p>Create and manage the products customers can buy.</p>
-        </div>
-        <div className={s.productsToolbarControls}>
-          <div className={s.productsSearch}>
-            <span>⌕</span>
-            <input
-              aria-label="Search products"
-              placeholder="Search products, SKU, category or brand…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            {query && (
-              <button
-                type="button"
-                onClick={() => setQuery("")}
-                aria-label="Clear search"
-              >
-                ×
-              </button>
-            )}
-          </div>
+      <Toolbar
+        title="Product catalogue"
+        sub="Create and manage the products customers can buy."
+        query={query}
+        setQuery={setQuery}
+        action={
           <button className={s.primary} onClick={onAdd}>
             ＋ Add Product
           </button>
-        </div>
-      </div>
-
+        }
+      />
       <Panel
         title={`${items.length} products`}
         sub="Selling prices are customer-facing. Cost information stays inside the business workspace."
@@ -97,7 +77,6 @@ function Products({ items, query, setQuery, onAdd, onEdit, onDelete, money }) {
               ))}
             </tbody>
           </table>
-
           {!items.length && (
             <Empty
               title="No products yet"
@@ -114,7 +93,6 @@ function Products({ items, query, setQuery, onAdd, onEdit, onDelete, money }) {
     </>
   );
 }
-
 function Customers({ items, onAdd, onEdit, onDelete }) {
   return (
     <>
@@ -127,7 +105,6 @@ function Customers({ items, onAdd, onEdit, onDelete }) {
           </button>
         }
       />
-
       <Panel
         title={`${items.length} customers`}
         sub="Customer identities are global, while this business relationship remains private."
@@ -157,7 +134,6 @@ function Customers({ items, onAdd, onEdit, onDelete }) {
             </div>
           ))}
         </div>
-
         {!items.length && (
           <Empty
             title="No customers yet"
@@ -173,7 +149,6 @@ function Customers({ items, onAdd, onEdit, onDelete }) {
     </>
   );
 }
-
 function Expenses({ items, onAdd, onEdit, onDelete, money }) {
   return (
     <>
@@ -186,7 +161,6 @@ function Expenses({ items, onAdd, onEdit, onDelete, money }) {
           </button>
         }
       />
-
       <Panel
         title="Expense ledger"
         sub="Rent, salaries, utilities, marketing, repairs and other operating costs."
@@ -234,7 +208,6 @@ function Expenses({ items, onAdd, onEdit, onDelete, money }) {
               ))}
             </tbody>
           </table>
-
           {!items.length && (
             <Empty
               title="No expenses yet"

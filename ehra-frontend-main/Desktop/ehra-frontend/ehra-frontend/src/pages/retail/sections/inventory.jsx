@@ -37,6 +37,85 @@ function formatMovementTime(value) {
   });
 }
 
+function SearchField({ value, onChange, placeholder = "Search products..." }) {
+  return (
+    <div className={`${s.productsSearch} ${s.inventoryStockSearch}`}>
+      <span aria-hidden="true">⌕</span>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        aria-label={placeholder}
+      />
+      {value && (
+        <button
+          type="button"
+          onClick={() => onChange("")}
+          aria-label="Clear search"
+        >
+          ×
+        </button>
+      )}
+    </div>
+  );
+}
+
+function SelectMenu({
+  label,
+  value,
+  onChange,
+  options,
+  placeholder = "Select",
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const selected = options.find((o) => String(o[0]) === String(value));
+  useEffect(() => {
+    const close = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, []);
+  return (
+    <div className={s.customSelect} ref={ref}>
+      <span className={s.customSelectLabel}>{label}</span>
+      <button
+        type="button"
+        className={`${s.customSelectButton} ${open ? s.customSelectOpen : ""}`}
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        <span>{selected?.[1] || placeholder}</span>
+        <span className={s.selectChevron}>⌄</span>
+      </button>
+      {open && (
+        <div className={s.customSelectMenu} role="listbox">
+          {options.map(([key, text]) => (
+            <button
+              type="button"
+              role="option"
+              aria-selected={String(key) === String(value)}
+              className={`${s.customSelectOption} ${String(key) === String(value) ? s.customSelectSelected : ""}`}
+              key={key}
+              onClick={() => {
+                onChange(key);
+                setOpen(false);
+              }}
+            >
+              <span>{text}</span>
+              {String(key) === String(value) && (
+                <span className={s.selectCheck}>✓</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function HistoryModal({ products, onClose }) {
   const [productId, setProductId] = useState("");
   const [type, setType] = useState("");
@@ -108,30 +187,21 @@ function HistoryModal({ products, onClose }) {
           </button>
         </header>
         <div className={s.movementHistoryFilters}>
-          <label className={s.field}>
-            <span>Product</span>
-            <select
-              value={productId}
-              onChange={(e) => setProductId(e.target.value)}
-            >
-              <option value="">All products</option>
-              {products.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className={s.field}>
-            <span>Movement</span>
-            <select value={type} onChange={(e) => setType(e.target.value)}>
-              {MOVEMENT_TYPES.map(([v, l]) => (
-                <option key={v} value={v}>
-                  {l}
-                </option>
-              ))}
-            </select>
-          </label>
+          <SelectMenu
+            label="Product"
+            value={productId}
+            onChange={setProductId}
+            options={[
+              ["", "All products"],
+              ...products.map((p) => [String(p.id), p.name]),
+            ]}
+          />
+          <SelectMenu
+            label="Movement"
+            value={type}
+            onChange={setType}
+            options={MOVEMENT_TYPES}
+          />
           <Field
             label="From"
             type="date"
@@ -216,9 +286,35 @@ function HistoryModal({ products, onClose }) {
 function Inventory({ data, products, onAdjust, money }) {
   const [p, setP] = useState(products[0]);
   const [qty, setQty] = useState(1);
-  const [type, setType] = useState("CORRECTION_IN");
+  const [type, setType] = useState("CORRECTION");
   const [note, setNote] = useState("");
+  const [stockSearch, setStockSearch] = useState("");
+  const [stockPage, setStockPage] = useState(1);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const STOCK_PAGE_SIZE = 12;
+  const filteredProducts = useMemo(
+    () =>
+      products.filter((x) =>
+        String(x.name || "")
+          .toLowerCase()
+          .includes(stockSearch.trim().toLowerCase()),
+      ),
+    [products, stockSearch],
+  );
+  const stockPages = Math.max(
+    1,
+    Math.ceil(filteredProducts.length / STOCK_PAGE_SIZE),
+  );
+  const visibleProducts = filteredProducts.slice(
+    (stockPage - 1) * STOCK_PAGE_SIZE,
+    stockPage * STOCK_PAGE_SIZE,
+  );
+  useEffect(() => {
+    setStockPage(1);
+  }, [stockSearch]);
+  useEffect(() => {
+    if (p && !products.some((x) => x.id === p.id)) setP(products[0]);
+  }, [products, p]);
   return (
     <>
       <Toolbar
@@ -234,9 +330,13 @@ function Inventory({ data, products, onAdjust, money }) {
         }
       />
       <div className={s.grid2}>
-        <Panel title="Stock levels" sub="Live quantities by product">
+        <Panel
+          title="Stock levels"
+          sub={`${products.length} product${products.length === 1 ? "" : "s"} · quantities update as movements are recorded`}
+        >
+          <SearchField value={stockSearch} onChange={setStockSearch} />
           <div className={s.stockGrid}>
-            {products.map((x) => (
+            {visibleProducts.map((x) => (
               <div
                 key={x.id}
                 className={
@@ -257,39 +357,54 @@ function Inventory({ data, products, onAdjust, money }) {
                 </small>
               </div>
             ))}
+            {!visibleProducts.length && (
+              <div className={s.stockEmpty}>No products match your search.</div>
+            )}
           </div>
+          {stockPages > 1 && (
+            <div className={s.stockPagination}>
+              <button
+                type="button"
+                className={s.pageButton}
+                disabled={stockPage === 1}
+                onClick={() => setStockPage((v) => v - 1)}
+              >
+                Previous
+              </button>
+              <span>
+                Page <strong>{stockPage}</strong> of{" "}
+                <strong>{stockPages}</strong>
+              </span>
+              <button
+                type="button"
+                className={s.pageButton}
+                disabled={stockPage === stockPages}
+                onClick={() => setStockPage((v) => v + 1)}
+              >
+                Next
+              </button>
+            </div>
+          )}
         </Panel>
         <Panel
           title="Record movement"
           sub="Use positive quantities. Ehral calculates the resulting stock."
         >
           <div className={s.formGrid}>
-            <label className={s.field}>
-              <span>Product</span>
-              <select
-                value={p?.id || ""}
-                onChange={(e) =>
-                  setP(products.find((x) => x.id === Number(e.target.value)))
-                }
-              >
-                {products.map((x) => (
-                  <option key={x.id} value={x.id}>
-                    {x.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className={s.field}>
-              <span>Movement</span>
-              <select value={type} onChange={(e) => setType(e.target.value)}>
-                <option value="CORRECTION">Correction in</option>
-                <option value="CORRECTION_OUT">Correction out</option>
-                <option value="DAMAGED">Damaged</option>
-                <option value="LOST">Lost</option>
-                <option value="THEFT">Theft</option>
-                <option value="INTERNAL_USE">Internal use</option>
-              </select>
-            </label>
+            <SelectMenu
+              label="Product"
+              value={p?.id || ""}
+              onChange={(id) =>
+                setP(products.find((x) => String(x.id) === String(id)))
+              }
+              options={products.map((x) => [String(x.id), x.name])}
+            />
+            <SelectMenu
+              label="Movement"
+              value={type}
+              onChange={setType}
+              options={MOVEMENT_TYPES.slice(1)}
+            />
             <Field
               label="Quantity"
               type="number"
@@ -354,4 +469,5 @@ function Inventory({ data, products, onAdjust, money }) {
     </>
   );
 }
+
 export { Inventory };
