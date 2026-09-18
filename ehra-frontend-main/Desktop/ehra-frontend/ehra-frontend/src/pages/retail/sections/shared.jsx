@@ -70,7 +70,7 @@ function Metric({ label, value, trend }) {
     </div>
   );
 }
-function Panel({ title, sub, children }) {
+function Panel({ title, sub, children, action }) {
   return (
     <section className={s.panel}>
       <div className={s.panelHead}>
@@ -78,6 +78,7 @@ function Panel({ title, sub, children }) {
           <h3>{title}</h3>
           <p>{sub}</p>
         </div>
+        {action && <div className={s.panelHeadAction}>{action}</div>}
       </div>
       {children}
     </section>

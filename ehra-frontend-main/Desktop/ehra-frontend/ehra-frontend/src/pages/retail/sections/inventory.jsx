@@ -340,7 +340,7 @@ function Inventory({ data, products, onAdjust, money }) {
         showSearch={false}
         action={
           <button
-            className={s.primary}
+            className={`${s.primary} ${s.inventorySaveDesktop}`}
             onClick={() => onAdjust(p, type, qty, note)}
           >
             Save adjustment
@@ -437,6 +437,12 @@ function Inventory({ data, products, onAdjust, money }) {
               placeholder="Reason or reference"
             />
           </div>
+          <button
+            className={`${s.primary} ${s.inventorySaveMobile}`}
+            onClick={() => onAdjust(p, type, qty, note)}
+          >
+            Save adjustment
+          </button>
         </Panel>
       </div>
       <Panel
