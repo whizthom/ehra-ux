@@ -2743,27 +2743,35 @@ td small {
 }
 
 @media(max-width:680px) {
+
+  /* Product forms: one scroll surface on mobile. The footer travels with the form instead of being hidden by a nested scroll area. */
   .productModal {
-    max-height: calc(100dvh - 12px);
-    overflow: auto;
+    width: calc(100vw - 24px);
+    height: min(82dvh, 760px);
+    max-height: min(82dvh, 760px);
+    overflow-y: auto;
+    overflow-x: hidden;
     display: block;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+    scroll-padding-bottom: 24px;
   }
 
   .productModalBody {
     overflow: visible;
     max-height: none;
-    padding-bottom: 34px;
+    padding-bottom: 18px;
   }
 
   .productModalFoot {
     position: static;
     box-shadow: none;
-    padding: 13px 14px calc(16px + env(safe-area-inset-bottom, 0px));
+    padding: 13px 14px calc(20px + env(safe-area-inset-bottom, 0px));
     margin: 0;
     display: flex;
     gap: 9px;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-color);
   }
 
   .productModalFoot button {
