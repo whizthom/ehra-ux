@@ -45,7 +45,7 @@
     transform: translateY(-50%) translateX(4px);
     white-space: nowrap;
     padding: 7px 10px;
-    border-radius: 8px;
+    border-radius: 9px;
     background: #101317;
     color: #fff;
     font-size: 11px;
@@ -82,8 +82,8 @@
 }
 
 .aiLogo {
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
     display: block;
     object-fit: contain;
     object-position: center;

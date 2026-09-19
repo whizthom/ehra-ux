@@ -100,7 +100,7 @@ export default function EmployerFloatingActions() {
         >
           <img
             className={styles.aiLogo}
-            src="/ehral-ai-logo.ico"
+            src="/favicon.svg"
             alt=""
             aria-hidden="true"
           />
