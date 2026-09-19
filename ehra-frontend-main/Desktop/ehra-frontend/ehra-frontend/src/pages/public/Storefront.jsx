@@ -1,1086 +1,352 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import {
-  createPublicOrder,
-  getPublicProducts,
-  getPublicStorefront,
-} from "../../api/commerceApi";
+import { createPublicOrder, getPublicProducts, getPublicStorefront } from "../../api/commerceApi";
 import { buildWhatsAppLink } from "../../api/whatsappApi";
-import {
-  sendOtp,
-  verifyOtp,
-  registerCustomerWithPhone,
-} from "../../api/phoneAuthApi";
+import { sendOtp, verifyOtp, registerCustomerWithPhone } from "../../api/phoneAuthApi";
 import { getMyAccounts, switchContext } from "../../api/authApi";
 import { useAuth } from "../../context/AuthContext";
 import styles from "./Storefront.module.css";
 
+const CART_KEY = (slug) => `ehral:storefront:cart:${slug || "unknown"}`;
+const WISHLIST_KEY = (slug) => `ehral:storefront:wishlist:${slug || "unknown"}`;
+const RECENT_KEY = (slug) => `ehral:storefront:recent:${slug || "unknown"}`;
+const readJson = (key, fallback) => {
+  try {
+    const value = JSON.parse(localStorage.getItem(key));
+    return value ?? fallback;
+  } catch {
+    return fallback;
+  }
+};
+const writeJson = (key, value) => {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* storage may be unavailable */ }
+};
+
+const money = (currency, value) => `${currency || "NGN"} ${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+const getCategory = (p) => p?.category || p?.productCategory || "Product";
+const effectivePrice = (p) => Math.max(0, Number(p?.price || 0) - Number(p?.discount || 0));
+const imagesOf = (p) => {
+  try {
+    const parsed = p?.imagesJson ? JSON.parse(p.imagesJson) : [];
+    if (Array.isArray(parsed) && parsed.length) return parsed.filter(Boolean);
+  } catch { /* fall back to imageUrl */ }
+  return p?.imageUrl ? [p.imageUrl] : [];
+};
+
+function ProductCard({ product, onOpen, onAdd, wished, onWishlist, compact = false }) {
+  const image = imagesOf(product)[0];
+  const discounted = Number(product?.discount || 0) > 0;
+  return (
+    <article className={`${styles.product} ${compact ? styles.productCompact : ""}`}>
+      <div className={styles.productVisual}>
+        <button type="button" className={styles.productImageButton} onClick={() => onOpen(product)} aria-label={`View ${product.name}`}>
+          <div className={styles.imageWrap}>
+            {image ? <img src={image} alt={product.name} loading="lazy" /> : <div className={styles.imagePlaceholder}><i className="ti ti-package" /></div>}
+            {discounted && <span className={styles.saleBadge}>SALE</span>}
+            {!product.available && <span className={styles.soldBadge}>SOLD OUT</span>}
+            <span className={styles.quickView}>Quick view <i className="ti ti-arrow-up-right" /></span>
+          </div>
+        </button>
+        <button type="button" className={`${styles.wishlistButton} ${wished ? styles.wished : ""}`} onClick={() => onWishlist(product)} aria-label={wished ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}>
+          <i className={wished ? "ti ti-heart-filled" : "ti ti-heart"} />
+        </button>
+      </div>
+      <div className={styles.productBody}>
+        <div className={styles.productMeta}><span>{getCategory(product)}</span>{product.available ? <span className={styles.available}><i /> In stock</span> : <span className={styles.unavailable}>Out of stock</span>}</div>
+        <button type="button" className={styles.productNameButton} onClick={() => onOpen(product)}><h3>{product.name}</h3></button>
+        {!compact && <p>{product.description || ""}</p>}
+        <div className={styles.priceRow}>
+          <div><strong>{money(product.currency, effectivePrice(product))}</strong>{discounted && <del>{money(product.currency, product.price)}</del>}</div>
+          <button disabled={!product.available} onClick={() => onAdd(product)} aria-label={`Add ${product.name} to order`}><i className="ti ti-plus" /><span>Add</span></button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function ProductRail({ title, kicker, products, onOpen, onAdd, wishlist, onWishlist }) {
+  if (!products?.length) return null;
+  return (
+    <section className={styles.railSection}>
+      <div className={styles.railHead}><div><span className={styles.sectionKicker}>{kicker}</span><h2>{title}</h2></div><span>{products.length} item{products.length === 1 ? "" : "s"}</span></div>
+      <div className={styles.productRail}>{products.slice(0, 8).map((p) => <ProductCard key={p.id} product={p} compact onOpen={onOpen} onAdd={onAdd} wished={wishlist.has(String(p.id))} onWishlist={onWishlist} />)}</div>
+    </section>
+  );
+}
+
+function CustomerGate({ store, slug, gate, setGate, onComplete }) {
+  const close = () => setGate((g) => ({ ...g, open: false, pending: null }));
+  const submitPhone = async () => {
+    try {
+      setGate((g) => ({ ...g, step: "sending", message: "Sending verification code…" }));
+      const r = await sendOtp(gate.phone);
+      setGate((g) => ({ ...g, step: "verify", pinId: r?.pinId, message: r?.developmentOtp ? `Development OTP: ${r.developmentOtp}` : "Verification code sent to your phone." }));
+    } catch (e) {
+      setGate((g) => ({ ...g, step: "form", message: e?.response?.data?.message || "Could not send verification code." }));
+    }
+  };
+  const verify = async () => {
+    try {
+      setGate((g) => ({ ...g, step: "verifying", message: "Creating your customer account…" }));
+      const v = await verifyOtp(gate.pinId, gate.otp);
+      await registerCustomerWithPhone(v.phoneVerificationToken, {
+        businessSlug: slug,
+        firstName: gate.firstName,
+        lastName: gate.lastName,
+        email: gate.email,
+      });
+      onComplete({
+        name: [gate.firstName, gate.lastName].filter(Boolean).join(" "),
+        phone: gate.phone,
+        email: gate.email,
+        action: gate.pending,
+      });
+    } catch (e) {
+      setGate((g) => ({ ...g, step: "verify", message: e?.response?.data?.message || "Could not create your customer account." }));
+    }
+  };
+  if (!gate.open) return null;
+  return (
+    <div className={styles.overlay} role="dialog" aria-modal="true" aria-label="Customer account">
+      <div className={styles.accountModal}>
+        <button className={styles.close} onClick={close} aria-label="Close">×</button>
+        <div className={styles.accountIcon}><i className="ti ti-user-check" /></div>
+        <span className={styles.sectionKicker}>ALMOST THERE</span>
+        <h2>Create your customer account</h2>
+        <p>You can browse freely. To place an order or contact this store, Ehral connects you to a customer account for <b>{store?.businessName || store?.name}</b>.</p>
+        {gate.step === "form" && <div className={styles.accountForm}>
+          <div className={styles.twoCol}><input required placeholder="First name" value={gate.firstName} onChange={(e) => setGate((g) => ({ ...g, firstName: e.target.value }))} /><input placeholder="Last name" value={gate.lastName} onChange={(e) => setGate((g) => ({ ...g, lastName: e.target.value }))} /></div>
+          <input required placeholder="Phone number" value={gate.phone} onChange={(e) => setGate((g) => ({ ...g, phone: e.target.value }))} />
+          <input type="email" placeholder="Email (optional)" value={gate.email} onChange={(e) => setGate((g) => ({ ...g, email: e.target.value }))} />
+          <button disabled={!gate.firstName.trim() || !gate.phone.trim()} onClick={submitPhone}>Continue <i className="ti ti-arrow-right" /></button>
+        </div>}
+        {gate.step === "sending" && <div className={styles.gateLoading}>Sending your verification code…</div>}
+        {gate.step === "verify" && <div className={styles.accountForm}>
+          <input inputMode="numeric" autoComplete="one-time-code" placeholder="Enter verification code" value={gate.otp} onChange={(e) => setGate((g) => ({ ...g, otp: e.target.value.replace(/\D/g, "").slice(0, 8) }))} />
+          <button disabled={!gate.otp} onClick={verify}>Verify & continue <i className="ti ti-check" /></button>
+        </div>}
+        {gate.step === "verifying" && <div className={styles.gateLoading}>Creating your customer account…</div>}
+        {gate.message && <small className={styles.formMessage}>{gate.message}</small>}
+        <small className={styles.privacyNote}><i className="ti ti-lock" /> Your information is used to manage your customer relationship with this store.</small>
+      </div>
+    </div>
+  );
+}
+
 export default function Storefront() {
   const { slug } = useParams();
   const { refreshSession } = useAuth();
-  const pendingActionRef = useRef(null);
-  const [store, setStore] = useState(null),
-    [products, setProducts] = useState([]),
-    [cart, setCart] = useState({}),
-    [loading, setLoading] = useState(true),
-    [error, setError] = useState(""),
-    [checkout, setCheckout] = useState(false),
-    [cartOpen, setCartOpen] = useState(false),
-    [form, setForm] = useState({
-      customerName: "",
-      customerPhone: "",
-      customerEmail: "",
-      deliveryAddress: "",
-      customerNote: "",
-      fulfillmentMethod: "",
-    }),
-    [placed, setPlaced] = useState(null),
-    [submitting, setSubmitting] = useState(false),
-    [selectedProduct, setSelectedProduct] = useState(null),
-    [search, setSearch] = useState(""),
-    [category, setCategory] = useState("All"),
-    [customerGate, setCustomerGate] = useState({
-      open: false,
-      step: "form",
-      pending: null,
-      firstName: "",
-      lastName: "",
-      phone: "",
-      email: "",
-      pinId: "",
-      otp: "",
-      message: "",
-    });
+  const pendingAction = useRef(null);
+  const [store, setStore] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [cart, setCart] = useState(() => readJson(CART_KEY(slug), {}));
+  const [wishlist, setWishlist] = useState(() => new Set(readJson(WISHLIST_KEY(slug), []).map(String)));
+  const [recentIds, setRecentIds] = useState(() => readJson(RECENT_KEY(slug), []).map(String));
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [actionError, setActionError] = useState("");
+  const [checkout, setCheckout] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [search, setSearch] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [category, setCategory] = useState("All");
+  const [sort, setSort] = useState("featured");
+  const [mobileMenu, setMobileMenu] = useState(false);
+  const [placed, setPlaced] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({ customerName: "", customerPhone: "", customerEmail: "", deliveryAddress: "", customerNote: "", fulfillmentMethod: "" });
+  const [customerGate, setCustomerGate] = useState({ open: false, step: "form", pending: null, firstName: "", lastName: "", phone: "", email: "", pinId: "", otp: "", message: "" });
 
   useEffect(() => {
-    let active = true;
+    let alive = true;
     setLoading(true);
     setError("");
     Promise.all([getPublicStorefront(slug), getPublicProducts(slug)])
-      .then(([s, p]) => {
-        if (!active) return;
-        setStore(s.data);
-        setProducts(p.data || []);
-      })
-      .catch((e) => {
-        if (active)
-          setError(e?.response?.data?.message || "Storefront not found.");
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
+      .then(([s, p]) => { if (!alive) return; setStore(s?.data || null); setProducts(Array.isArray(p?.data) ? p.data : []); })
+      .catch((e) => { if (alive) setError(e?.response?.data?.message || "Storefront not found."); })
+      .finally(() => { if (alive) setLoading(false); });
+    return () => { alive = false; };
   }, [slug]);
 
-  const effectivePrice = (p) =>
-    Math.max(0, Number(p.price || 0) - Number(p.discount || 0));
-  const imagesOf = (p) => {
-    try {
-      const a = p?.imagesJson ? JSON.parse(p.imagesJson) : [];
-      return Array.isArray(a) && a.length
-        ? a.filter(Boolean)
-        : p?.imageUrl
-          ? [p.imageUrl]
-          : [];
-    } catch {
-      return p?.imageUrl ? [p.imageUrl] : [];
-    }
-  };
-  const categories = useMemo(
-    () => [
-      "All",
-      ...Array.from(
-        new Set(
-          products.map((p) => p.category || p.productCategory).filter(Boolean),
-        ),
-      ),
-    ],
-    [products],
-  );
+  useEffect(() => writeJson(CART_KEY(slug), cart), [cart, slug]);
+  useEffect(() => writeJson(WISHLIST_KEY(slug), Array.from(wishlist)), [wishlist, slug]);
+  useEffect(() => writeJson(RECENT_KEY(slug), recentIds.slice(0, 12)), [recentIds, slug]);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setSearchOpen(true); document.getElementById("store-search")?.focus(); }
+      if (e.key === "Escape") { setSearchOpen(false); setMobileMenu(false); setSelectedProduct(null); if (cartOpen) setCartOpen(false); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [cartOpen]);
+
+  const categories = useMemo(() => ["All", ...Array.from(new Set(products.map(getCategory).filter((x) => x && x !== "Product")))], [products]);
+  const availableProducts = useMemo(() => products.filter((p) => p.available), [products]);
+  const deals = useMemo(() => availableProducts.filter((p) => Number(p.discount || 0) > 0).sort((a, b) => Number(b.discount || 0) - Number(a.discount || 0)), [availableProducts]);
+  const popular = useMemo(() => availableProducts.slice(0, 8), [availableProducts]);
+  const recentProducts = useMemo(() => recentIds.map((id) => products.find((p) => String(p.id) === String(id))).filter(Boolean), [recentIds, products]);
+  const wishedProducts = useMemo(() => Array.from(wishlist).map((id) => products.find((p) => String(p.id) === String(id))).filter(Boolean), [wishlist, products]);
   const filteredProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return products.filter((p) => {
-      const matchesCategory =
-        category === "All" || (p.category || p.productCategory) === category;
-      const matchesSearch =
-        !q ||
-        [p.name, p.description, p.category, p.productCategory]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase()
-          .includes(q);
-      return matchesCategory && matchesSearch;
+    const result = products.filter((p) => {
+      const matchesCategory = category === "All" || getCategory(p) === category;
+      const haystack = [p.name, p.description, p.category, p.productCategory, p.sku].filter(Boolean).join(" ").toLowerCase();
+      return matchesCategory && (!q || haystack.includes(q));
     });
-  }, [products, search, category]);
-  const cartItems = useMemo(
-    () =>
-      products
-        .filter((p) => cart[p.id])
-        .map((p) => ({
-          ...p,
-          quantity: cart[p.id],
-          lineTotal: effectivePrice(p) * cart[p.id],
-          lineTax: Number(p.tax || 0) * cart[p.id],
-        })),
-    [products, cart],
-  );
-  const subtotal = cartItems.reduce((n, x) => n + Number(x.lineTotal || 0), 0),
-    taxTotal = cartItems.reduce((n, x) => n + Number(x.lineTax || 0), 0),
-    total = subtotal + taxTotal,
-    cartCount = cartItems.reduce((n, x) => n + x.quantity, 0);
-  const featured =
-    products.find((p) => p.available && imagesOf(p).length) ||
-    products.find((p) => p.available) ||
-    products[0];
-  const add = (p) =>
-    setCart((c) => ({ ...c, [p.id]: Math.min((c[p.id] || 0) + 1, 1000) }));
-  const remove = (p) =>
-    setCart((c) => {
-      const n = { ...c };
-      if ((n[p.id] || 0) <= 1) delete n[p.id];
-      else n[p.id]--;
-      return n;
-    });
-  const requireCustomer = useCallback(
-    async (action) => {
-      if (!store?.businessId || typeof action !== "function") return;
-      const type = localStorage.getItem("contextType"),
-        bid = localStorage.getItem("businessId");
-      if (type === "CUSTOMER" && String(bid) === String(store.businessId)) {
-        action();
-        return;
-      }
-      try {
-        if (localStorage.getItem("accessToken")) {
-          const accounts = await getMyAccounts();
-          const existing = (
-            Array.isArray(accounts) ? accounts : accounts?.data || []
-          ).find(
-            (a) =>
-              a.type === "CUSTOMER" &&
-              String(a.businessId) === String(store.businessId),
-          );
-          if (existing) {
-            await switchContext("CUSTOMER", existing.membershipId);
-            await refreshSession?.();
-            action();
-            return;
-          }
-        }
-      } catch {}
-      pendingActionRef.current = action;
-      setCustomerGate((g) => ({
-        ...g,
-        open: true,
-        pending: null,
-        step: "form",
-        message: "",
-      }));
-    },
-    [store?.businessId, refreshSession],
-  );
-  const chat = (p) => {
-    if (!store?.whatsappNumber) return;
-    requireCustomer(() => {
-      const msg = `Hello, I am interested in:\n\nProduct: ${p.name}\nPrice: ${p.currency} ${Number(p.price).toLocaleString()}`;
-      window.location.href = buildWhatsAppLink(store.whatsappNumber, msg);
-    });
-  };
-  const openCheckout = () =>
-    requireCustomer(() => {
-      setCartOpen(false);
-      setCheckout(true);
-    });
-  const submit = async (e) => {
-    e.preventDefault();
-    if (!cartItems.length) return;
-    setSubmitting(true);
-    setError("");
+    if (sort === "price-low") return [...result].sort((a, b) => effectivePrice(a) - effectivePrice(b));
+    if (sort === "price-high") return [...result].sort((a, b) => effectivePrice(b) - effectivePrice(a));
+    if (sort === "name") return [...result].sort((a, b) => String(a.name).localeCompare(String(b.name)));
+    if (sort === "sale") return [...result].sort((a, b) => Number(b.discount || 0) - Number(a.discount || 0));
+    return result;
+  }, [products, category, search, sort]);
+  const searchResults = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return products.slice(0, 6);
+    return products.filter((p) => [p.name, p.description, getCategory(p)].join(" ").toLowerCase().includes(q)).slice(0, 7);
+  }, [products, search]);
+  const cartItems = useMemo(() => products.filter((p) => Number(cart[p.id]) > 0).map((p) => ({ ...p, quantity: Math.min(1000, Math.max(1, Number(cart[p.id]))), lineTotal: effectivePrice(p) * Number(cart[p.id]), lineTax: Number(p.tax || 0) * Number(cart[p.id]) })), [products, cart]);
+  const subtotal = cartItems.reduce((n, x) => n + x.lineTotal, 0);
+  const taxTotal = cartItems.reduce((n, x) => n + x.lineTax, 0);
+  const total = subtotal + taxTotal;
+  const cartCount = cartItems.reduce((n, x) => n + x.quantity, 0);
+  const featured = availableProducts.find((p) => imagesOf(p).length) || availableProducts[0] || products[0];
+  const currency = store?.currency || cartItems[0]?.currency || "NGN";
+
+  const rememberProduct = useCallback((product) => {
+    if (!product?.id) return;
+    setRecentIds((ids) => [String(product.id), ...ids.filter((id) => String(id) !== String(product.id))].slice(0, 12));
+  }, []);
+  const openProduct = useCallback((product) => { rememberProduct(product); setSelectedProduct(product); setSearchOpen(false); }, [rememberProduct]);
+  const add = useCallback((product) => setCart((c) => ({ ...c, [product.id]: Math.min((Number(c[product.id]) || 0) + 1, 1000) })), []);
+  const remove = useCallback((product) => setCart((c) => { const next = { ...c }; if ((Number(next[product.id]) || 0) <= 1) delete next[product.id]; else next[product.id] = Number(next[product.id]) - 1; return next; }), []);
+  const toggleWishlist = useCallback((product) => setWishlist((current) => { const next = new Set(current); const id = String(product.id); if (next.has(id)) next.delete(id); else next.add(id); return next; }), []);
+
+  const completeCustomerGate = async ({ name, phone, email, action }) => {
     try {
-      const r = await createPublicOrder(slug, {
-        ...form,
-        items: cartItems.map((i) => ({
-          productId: i.id,
-          quantity: i.quantity,
-        })),
-      });
-      setPlaced(r.data);
-      setCart({});
-      setCheckout(false);
-      setCartOpen(false);
-    } catch (e) {
-      setError(e?.response?.data?.message || "Could not place your order.");
-    } finally {
-      setSubmitting(false);
-    }
+      await Promise.resolve(refreshSession?.());
+    } catch { /* the account was still created; the next authenticated API call will surface any issue */ }
+    setForm((f) => ({ ...f, customerName: name, customerPhone: phone, customerEmail: email || f.customerEmail }));
+    setCustomerGate((g) => ({ ...g, open: false, pending: null, step: "done", message: "" }));
+    if (action) action();
   };
 
-  if (loading)
-    return (
-      <div className={styles.center}>
-        <div className={styles.loader}>
-          <span></span>
-          <span></span>
-          <span></span>
-          <p>Loading store</p>
-        </div>
-      </div>
-    );
-  if (error && !store)
-    return (
-      <div className={styles.center}>
-        <div className={styles.notFound}>
-          <i className="ti ti-store-off" />
-          <h2>Store unavailable</h2>
-          <p>{error}</p>
-        </div>
-      </div>
-    );
+  const requireCustomer = async (action) => {
+    if (!store) return;
+    const type = localStorage.getItem("contextType");
+    const businessId = localStorage.getItem("businessId");
+    if (type === "CUSTOMER" && String(businessId) === String(store.businessId)) { action(); return; }
+    try {
+      if (localStorage.getItem("accessToken")) {
+        const response = await getMyAccounts();
+        const accounts = Array.isArray(response) ? response : (Array.isArray(response?.data) ? response.data : (Array.isArray(response?.data?.accounts) ? response.data.accounts : []));
+        const existing = accounts.find((a) => a?.type === "CUSTOMER" && String(a?.businessId) === String(store.businessId));
+        if (existing?.membershipId) {
+          await switchContext("CUSTOMER", existing.membershipId);
+          await Promise.resolve(refreshSession?.());
+          action();
+          return;
+        }
+      }
+    } catch (e) {
+      setActionError(e?.response?.data?.message || "We could not verify your customer account. Please continue below.");
+    }
+    pendingAction.current = action;
+    setCustomerGate((g) => ({ ...g, open: true, pending: action, step: "form", message: "" }));
+  };
+
+  const chat = (product) => requireCustomer(() => {
+    const message = `Hello, I am interested in:\n\nProduct: ${product.name}\nPrice: ${money(product.currency, effectivePrice(product))}`;
+    window.location.href = buildWhatsAppLink(store.whatsappNumber, message);
+  });
+  const generalChat = () => requireCustomer(() => { window.location.href = buildWhatsAppLink(store.whatsappNumber, "Hello, I found your store on Ehral and would like to make an enquiry."); });
+  const openCheckout = () => {
+    if (!cartItems.length) { setActionError("Your shopping bag is empty."); return; }
+    requireCustomer(() => { setCartOpen(false); setCheckout(true); });
+  };
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!cartItems.length) { setActionError("Your shopping bag is empty."); return; }
+    if (!form.fulfillmentMethod && (store?.pickupEnabled || store?.deliveryEnabled)) { setActionError("Choose a fulfilment method before placing your order."); return; }
+    setSubmitting(true); setActionError("");
+    try {
+      const response = await createPublicOrder(slug, { ...form, items: cartItems.map((i) => ({ productId: i.id, quantity: i.quantity })) });
+      setPlaced(response.data); setCart({}); setCheckout(false); setCartOpen(false);
+    } catch (e2) {
+      setActionError(e2?.response?.data?.message || "Could not place your order.");
+    } finally { setSubmitting(false); }
+  };
+
+  if (loading) return <div className={styles.center}><div className={styles.loader}><span /><span /><span /><p>Loading store</p></div></div>;
+  if (error && !store) return <div className={styles.center}><div className={styles.notFound}><i className="ti ti-store-off" /><h2>Store unavailable</h2><p>{error}</p></div></div>;
 
   return (
     <div className={styles.page}>
+      <div className={styles.announcement}> <span>Shop directly from {store?.name}</span><span>Powered by Ehral commerce</span></div>
       <header className={styles.navbar}>
-        <a
-          href="#top"
-          className={styles.brandMark}
-          aria-label={`${store.name} home`}
-        >
-          {store.businessLogo ? (
-            <img src={store.businessLogo} alt="" />
-          ) : (
-            <span className={styles.logoFallback}>
-              {String(store.name || "S")
-                .charAt(0)
-                .toUpperCase()}
-            </span>
-          )}
-          <span>{store.name}</span>
-        </a>
-        <div className={styles.searchBox}>
-          <i className="ti ti-search" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search products..."
-            aria-label="Search products"
-          />
-          <kbd>⌘ K</kbd>
+        <a href="#top" className={styles.brandMark} aria-label={`${store.name} home`}><span className={styles.brandLogo}>{store.businessLogo ? <img src={store.businessLogo} alt="" /> : <span className={styles.logoFallback}>{String(store.name || "S").charAt(0).toUpperCase()}</span>}</span><span>{store.name}</span></a>
+        <div className={`${styles.searchBox} ${searchOpen ? styles.searchFocused : ""}`}>
+          <i className="ti ti-search" /><input id="store-search" value={search} onFocus={() => setSearchOpen(true)} onChange={(e) => { setSearch(e.target.value); setSearchOpen(true); }} placeholder="Search products, categories..." aria-label="Search products" /><kbd>⌘ K</kbd>
+          {searchOpen && <div className={styles.searchPanel}>{searchResults.length ? searchResults.map((p) => <button key={p.id} onMouseDown={(e) => e.preventDefault()} onClick={() => openProduct(p)}><span>{imagesOf(p)[0] ? <img src={imagesOf(p)[0]} alt="" /> : <i className="ti ti-package" />}</span><div><strong>{p.name}</strong><small>{getCategory(p)} · {money(p.currency, effectivePrice(p))}</small></div><i className="ti ti-arrow-up-right" /></button>) : <div className={styles.searchEmpty}>No products match your search.</div>}<button className={styles.searchAll} onMouseDown={(e) => e.preventDefault()} onClick={() => { setSearchOpen(false); document.getElementById("products")?.scrollIntoView({ behavior: "smooth" }); }}>View all results <i className="ti ti-arrow-right" /></button></div>}
         </div>
         <div className={styles.navActions}>
-          {store.whatsappNumber && (
-            <button
-              className={styles.iconAction}
-              onClick={() =>
-                requireCustomer(
-                  () =>
-                    (window.location.href = buildWhatsAppLink(
-                      store.whatsappNumber,
-                      "Hello, I found your store on Ehral and would like to make an enquiry.",
-                    )),
-                )
-              }
-            >
-              <i className="ti ti-brand-whatsapp" />
-              <span>Chat</span>
-            </button>
-          )}
-          <button
-            className={styles.cartAction}
-            onClick={() => setCartOpen(true)}
-          >
-            <i className="ti ti-shopping-bag" />
-            <span>Cart</span>
-            {cartCount > 0 && <b>{cartCount}</b>}
-          </button>
+          {store.whatsappNumber && <button className={styles.iconAction} onClick={generalChat}><i className="ti ti-brand-whatsapp" /><span>Chat</span></button>}
+          <button className={styles.cartAction} onClick={() => setCartOpen(true)}><i className="ti ti-shopping-bag" /><span>Bag</span>{cartCount > 0 && <b>{cartCount}</b>}</button>
+          <button className={styles.mobileMenuButton} onClick={() => setMobileMenu((v) => !v)} aria-label="Open menu"><i className="ti ti-menu-2" /></button>
         </div>
       </header>
+      {mobileMenu && <nav className={styles.mobileMenu}><a href="#products" onClick={() => setMobileMenu(false)}>Shop all</a>{categories.slice(1, 7).map((c) => <button key={c} onClick={() => { setCategory(c); setMobileMenu(false); document.getElementById("products")?.scrollIntoView({ behavior: "smooth" }); }}>{c}</button>)}{store.whatsappNumber && <button onClick={generalChat}>Chat with store</button>}</nav>}
 
       <main id="top">
-        <section
-          className={styles.hero}
-          style={
-            store.coverImage
-              ? {
-                  backgroundImage: `linear-gradient(100deg,rgba(9,12,20,.88) 0%,rgba(9,12,20,.66) 48%,rgba(9,12,20,.28) 100%),url(${store.coverImage})`,
-                }
-              : {}
-          }
-        >
+        <section className={styles.hero} style={store.coverImage ? { backgroundImage: `linear-gradient(100deg,rgba(9,12,20,.9) 0%,rgba(9,12,20,.7) 45%,rgba(9,12,20,.24) 100%),url(${store.coverImage})` } : {}}>
+          <div className={styles.heroOrbOne} /><div className={styles.heroOrbTwo} />
           <div className={styles.heroContent}>
-            <div className={styles.heroEyebrow}>
-              <span className={styles.liveDot}></span>
-              {store.businessType || "Store"}
-              {store.businessCategory && (
-                <>
-                  <span>•</span>
-                  {store.businessCategory}
-                </>
-              )}
-            </div>
-            <h1>{store.name}</h1>
-            <p>{store.description || "Discover products selected for you."}</p>
-            <div className={styles.heroActions}>
-              <a href="#products" className={styles.primaryCta}>
-                Shop now <i className="ti ti-arrow-right" />
-              </a>
-              {store.whatsappNumber && (
-                <button
-                  className={styles.secondaryCta}
-                  onClick={() =>
-                    requireCustomer(
-                      () =>
-                        (window.location.href = buildWhatsAppLink(
-                          store.whatsappNumber,
-                          "Hello, I found your store on Ehral and would like to make an enquiry.",
-                        )),
-                    )
-                  }
-                >
-                  <i className="ti ti-brand-whatsapp" /> Chat with us
-                </button>
-              )}
-            </div>
+            <div className={styles.heroEyebrow}><span className={styles.liveDot} /> {store.businessType || "Store"}{store.businessCategory && <><span>•</span>{store.businessCategory}</>}</div>
+            <h1>{store.name}</h1><p>{store.description || "Discover products selected for you."}</p>
+            <div className={styles.heroActions}><a href="#products" className={styles.primaryCta}>Shop the collection <i className="ti ti-arrow-right" /></a>{store.whatsappNumber && <button className={styles.secondaryCta} onClick={generalChat}><i className="ti ti-brand-whatsapp" /> Chat with us</button>}</div>
+            <div className={styles.heroStats}><span><b>{products.length}</b> products</span><span><b>{categories.length - 1}</b> categories</span><span><b>{store.pickupEnabled || store.deliveryEnabled ? "Flexible" : "Direct"}</b> fulfilment</span></div>
           </div>
-          {featured && (
-            <button
-              className={styles.featuredFloat}
-              onClick={() => setSelectedProduct(featured)}
-            >
-              <span>Featured</span>
-              <div className={styles.featuredInner}>
-                {imagesOf(featured)[0] ? (
-                  <img src={imagesOf(featured)[0]} alt="" />
-                ) : (
-                  <div className={styles.imagePlaceholder}>
-                    <i className="ti ti-package" />
-                  </div>
-                )}
-                <div>
-                  <small>{featured.category || "Popular choice"}</small>
-                  <strong>{featured.name}</strong>
-                  <b>
-                    {featured.currency}{" "}
-                    {effectivePrice(featured).toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                    })}
-                  </b>
-                </div>
-                <i className="ti ti-chevron-right" />
-              </div>
-            </button>
-          )}
+          {featured && <button className={styles.featuredFloat} onClick={() => openProduct(featured)}><span>Featured selection</span><div className={styles.featuredInner}>{imagesOf(featured)[0] ? <img src={imagesOf(featured)[0]} alt="" /> : <div className={styles.imagePlaceholder}><i className="ti ti-package" /></div>}<div><small>{getCategory(featured)}</small><strong>{featured.name}</strong><b>{money(featured.currency, effectivePrice(featured))}</b></div><i className="ti ti-chevron-right" /></div></button>}
         </section>
 
-        <section className={styles.trustBar}>
-          <div>
-            <i className="ti ti-shield-check" />
-            <span>
-              <b>Shop with confidence</b>
-              <small>Secure ordering</small>
-            </span>
-          </div>
-          <div>
-            <i className="ti ti-truck-delivery" />
-            <span>
-              <b>Flexible fulfilment</b>
-              <small>Pickup or delivery</small>
-            </span>
-          </div>
-          <div>
-            <i className="ti ti-message-circle" />
-            <span>
-              <b>Need help?</b>
-              <small>Chat with the store</small>
-            </span>
-          </div>
+        <section className={styles.trustBar}><div><i className="ti ti-shield-check" /><span><b>Shop with confidence</b><small>Secure ordering through Ehral</small></span></div><div><i className="ti ti-truck-delivery" /><span><b>Flexible fulfilment</b><small>{store.pickupEnabled && store.deliveryEnabled ? "Pickup or delivery" : store.pickupEnabled ? "Store pickup" : store.deliveryEnabled ? "Delivery available" : "Contact store"}</small></span></div><div><i className="ti ti-message-circle" /><span><b>Need help?</b><small>{store.whatsappNumber ? "Chat directly with the store" : "Contact the store"}</small></span></div></section>
+
+        <section className={styles.discoverySection}>
+          <div className={styles.discoveryIntro}><span className={styles.sectionKicker}>DISCOVER</span><h2>Find your next favourite.</h2><p>Browse by collection, explore offers, or return to products you have viewed.</p></div>
+          <div className={styles.categoryTiles}>{categories.slice(1, 5).map((c, i) => <button key={c} onClick={() => { setCategory(c); document.getElementById("products")?.scrollIntoView({ behavior: "smooth" }); }}><span>0{i + 1}</span><strong>{c}</strong><i className="ti ti-arrow-up-right" /></button>)}</div>
         </section>
+
+        <ProductRail title="Popular right now" kicker="CURATED PICKS" products={popular} onOpen={openProduct} onAdd={(p) => requireCustomer(() => add(p))} wishlist={wishlist} onWishlist={toggleWishlist} />
+        <ProductRail title="Special offers" kicker="LIMITED OFFERS" products={deals} onOpen={openProduct} onAdd={(p) => requireCustomer(() => add(p))} wishlist={wishlist} onWishlist={toggleWishlist} />
 
         <section className={styles.catalog} id="products">
-          <div className={styles.catalogHead}>
-            <div>
-              <span className={styles.sectionKicker}>THE COLLECTION</span>
-              <h2>Shop all products</h2>
-              <p>
-                {filteredProducts.length}{" "}
-                {filteredProducts.length === 1 ? "product" : "products"}{" "}
-                available
-              </p>
-            </div>
-            {cartCount > 0 && (
-              <button
-                className={styles.desktopCart}
-                onClick={() => setCartOpen(true)}
-              >
-                <i className="ti ti-shopping-bag" /> View cart{" "}
-                <span>
-                  {store.currency || "NGN"} {total.toLocaleString()}
-                </span>
-              </button>
-            )}
-          </div>
-          <div className={styles.filters}>
-            {categories.map((c) => (
-              <button
-                key={c}
-                className={category === c ? styles.activeFilter : ""}
-                onClick={() => setCategory(c)}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
+          <div className={styles.catalogHead}><div><span className={styles.sectionKicker}>THE COLLECTION</span><h2>Shop all products</h2><p>{filteredProducts.length} {filteredProducts.length === 1 ? "product" : "products"} {search || category !== "All" ? "matching your selection" : "in this store"}</p></div>{cartCount > 0 && <button className={styles.desktopCart} onClick={() => setCartOpen(true)}><i className="ti ti-shopping-bag" /> View bag <span>{money(currency, total)}</span></button>}</div>
+          <div className={styles.catalogToolbar}><div className={styles.filters}>{categories.map((c) => <button key={c} className={category === c ? styles.activeFilter : ""} onClick={() => setCategory(c)}>{c}</button>)}</div><select className={styles.sortSelect} value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Sort products"><option value="featured">Featured</option><option value="sale">Best offers</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="name">Name</option></select></div>
+          {actionError && <div className={styles.error}>{actionError}<button onClick={() => setActionError("")} aria-label="Dismiss">×</button></div>}
           {error && <div className={styles.error}>{error}</div>}
-          {filteredProducts.length ? (
-            <div className={styles.grid}>
-              {filteredProducts.map((p) => {
-                const image = imagesOf(p)[0],
-                  discount = Number(p.discount || 0) > 0;
-                return (
-                  <article className={styles.product} key={p.id}>
-                    <button
-                      type="button"
-                      className={styles.productImageButton}
-                      onClick={() => setSelectedProduct(p)}
-                      aria-label={`View ${p.name}`}
-                    >
-                      <div className={styles.imageWrap}>
-                        {image ? (
-                          <img src={image} alt={p.name} />
-                        ) : (
-                          <div className={styles.imagePlaceholder}>
-                            <i className="ti ti-package" />
-                          </div>
-                        )}
-                        {discount && (
-                          <span className={styles.saleBadge}>SALE</span>
-                        )}{" "}
-                        {!p.available && (
-                          <span className={styles.soldBadge}>SOLD OUT</span>
-                        )}
-                        <span className={styles.quickView}>
-                          Quick view <i className="ti ti-arrow-up-right" />
-                        </span>
-                      </div>
-                    </button>
-                    <div className={styles.productBody}>
-                      <div className={styles.productMeta}>
-                        <span>
-                          {p.category || p.productCategory || "Product"}
-                        </span>
-                        {p.available ? (
-                          <span className={styles.available}>
-                            <i /> In stock
-                          </span>
-                        ) : (
-                          <span className={styles.unavailable}>
-                            Out of stock
-                          </span>
-                        )}
-                      </div>
-                      <h3>{p.name}</h3>
-                      <p>{p.description || ""}</p>
-                      <div className={styles.priceRow}>
-                        <div>
-                          <strong>
-                            {p.currency}{" "}
-                            {effectivePrice(p).toLocaleString(undefined, {
-                              minimumFractionDigits: 2,
-                            })}
-                          </strong>
-                          {discount && (
-                            <del>
-                              {p.currency}{" "}
-                              {Number(p.price).toLocaleString(undefined, {
-                                minimumFractionDigits: 2,
-                              })}
-                            </del>
-                          )}
-                        </div>
-                        <button
-                          disabled={!p.available}
-                          onClick={() => requireCustomer(() => add(p))}
-                          aria-label={`Add ${p.name} to order`}
-                        >
-                          <i className="ti ti-plus" /> Add
-                        </button>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          ) : (
-            <div className={styles.empty}>
-              <i className="ti ti-search-off" />
-              <h3>No products found</h3>
-              <p>Try a different search or category.</p>
-              <button
-                onClick={() => {
-                  setSearch("");
-                  setCategory("All");
-                }}
-              >
-                Clear filters
-              </button>
-            </div>
-          )}
+          {filteredProducts.length ? <div className={styles.grid}>{filteredProducts.map((p) => <ProductCard key={p.id} product={p} onOpen={openProduct} onAdd={(x) => requireCustomer(() => add(x))} wished={wishlist.has(String(p.id))} onWishlist={toggleWishlist} />)}</div> : <div className={styles.empty}><i className="ti ti-search-off" /><h3>No products found</h3><p>Try a different search or category.</p><button onClick={() => { setSearch(""); setCategory("All"); setSort("featured"); }}>Clear filters</button></div>}
         </section>
 
-        <section className={styles.aboutStore}>
-          <div className={styles.aboutCard}>
-            <div>
-              <span className={styles.sectionKicker}>ABOUT THE STORE</span>
-              <h2>More than a storefront.</h2>
-              <p>
-                {store.description ||
-                  `Welcome to ${store.name}. Browse our collection and place your order directly through this store.`}
-              </p>
-            </div>
-            <div className={styles.storeDetails}>
-              <div>
-                <i className="ti ti-clock" />
-                <span>
-                  <b>Store hours</b>
-                  <small>Check with the store for today's hours</small>
-                </span>
-              </div>
-              <div>
-                <i className="ti ti-map-pin" />
-                <span>
-                  <b>Fulfilment</b>
-                  <small>
-                    {[
-                      store.pickupEnabled && "Pickup",
-                      store.deliveryEnabled && "Delivery",
-                    ]
-                      .filter(Boolean)
-                      .join(" · ") || "Order fulfilment available"}
-                  </small>
-                </span>
-              </div>
-            </div>
-          </div>
-        </section>
+        <section className={styles.discoveryBand}><div><span className={styles.sectionKicker}>SHOP YOUR WAY</span><h2>Need a little help choosing?</h2><p>Save favourites, revisit recently viewed products, or speak directly with the store.</p></div><div><button onClick={() => setCategory(deals.length ? getCategory(deals[0]) : "All")} className={styles.bandButton}>Explore offers <i className="ti ti-arrow-right" /></button>{store.whatsappNumber && <button onClick={generalChat} className={styles.bandButtonSecondary}>Talk to the store</button>}</div></section>
+        <ProductRail title="Recently viewed" kicker="YOUR HISTORY" products={recentProducts} onOpen={openProduct} onAdd={(p) => requireCustomer(() => add(p))} wishlist={wishlist} onWishlist={toggleWishlist} />
+        <ProductRail title="Your wishlist" kicker="SAVED FOR LATER" products={wishedProducts} onOpen={openProduct} onAdd={(p) => requireCustomer(() => add(p))} wishlist={wishlist} onWishlist={toggleWishlist} />
+
+        <section className={styles.aboutStore}><div className={styles.aboutCard}><div><span className={styles.sectionKicker}>ABOUT THE STORE</span><h2>More than a storefront.</h2><p>{store.description || `Welcome to ${store.name}. Browse our collection and place your order directly through this store.`}</p></div><div className={styles.storeDetails}><div><i className="ti ti-clock" /><span><b>Store hours</b><small>Check with the store for today's hours</small></span></div><div><i className="ti ti-map-pin" /><span><b>Fulfilment</b><small>{[store.pickupEnabled && "Pickup", store.deliveryEnabled && "Delivery"].filter(Boolean).join(" · ") || "Contact store"}</small></span></div></div></div></section>
       </main>
 
-      <footer className={styles.footer}>
-        <div className={styles.footerBrand}>
-          {store.businessLogo ? (
-            <img src={store.businessLogo} alt="" />
-          ) : (
-            <span className={styles.logoFallback}>
-              {String(store.name || "S")
-                .charAt(0)
-                .toUpperCase()}
-            </span>
-          )}
-          <div>
-            <strong>{store.name}</strong>
-            <span>Online storefront</span>
-          </div>
-        </div>
-        <span>
-          Powered by <b>Ehral</b>
-        </span>
-      </footer>
+      <footer className={styles.footer}><div className={styles.footerBrand}>{store.businessLogo ? <img src={store.businessLogo} alt="" /> : <span className={styles.logoFallback}>{String(store.name || "S").charAt(0).toUpperCase()}</span>}<div><strong>{store.name}</strong><span>Online storefront</span></div></div><div className={styles.footerLinks}><a href="#products">Shop</a>{store.whatsappNumber && <button onClick={generalChat}>Contact</button>}<span>Powered by <b>Ehral</b></span></div></footer>
+      <nav className={styles.mobileBottomNav}><a href="#top"><i className="ti ti-home-2" /><span>Home</span></a><button onClick={() => { setSearchOpen(true); setTimeout(() => document.getElementById("store-search")?.focus(), 0); }}><i className="ti ti-search" /><span>Search</span></button><a href="#products"><i className="ti ti-layout-grid" /><span>Shop</span></a><button onClick={() => setCartOpen(true)}><i className="ti ti-shopping-bag" /><span>Bag{cartCount ? ` (${cartCount})` : ""}</span></button></nav>
 
-      {cartOpen && (
-        <div
-          className={styles.overlay}
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) setCartOpen(false);
-          }}
-        >
-          <aside className={styles.cartDrawer}>
-            <div className={styles.drawerHead}>
-              <div>
-                <span className={styles.sectionKicker}>YOUR ORDER</span>
-                <h2>
-                  Shopping bag <small>{cartCount}</small>
-                </h2>
-              </div>
-              <button
-                className={styles.close}
-                onClick={() => setCartOpen(false)}
-              >
-                ×
-              </button>
-            </div>
-            {cartItems.length ? (
-              <>
-                <div className={styles.cartList}>
-                  {cartItems.map((i) => (
-                    <div className={styles.cartItem} key={i.id}>
-                      {imagesOf(i)[0] ? (
-                        <img src={imagesOf(i)[0]} alt="" />
-                      ) : (
-                        <div className={styles.cartThumb}>
-                          <i className="ti ti-package" />
-                        </div>
-                      )}
-                      <div className={styles.cartInfo}>
-                        <strong>{i.name}</strong>
-                        <span>
-                          {i.currency} {effectivePrice(i).toLocaleString()}
-                        </span>
-                        <div className={styles.qty}>
-                          <button onClick={() => remove(i)}>−</button>
-                          <b>{i.quantity}</b>
-                          <button onClick={() => add(i)}>+</button>
-                        </div>
-                      </div>
-                      <b className={styles.lineTotal}>
-                        {i.currency} {i.lineTotal.toLocaleString()}
-                      </b>
-                    </div>
-                  ))}
-                </div>
-                <div className={styles.cartBottom}>
-                  <div>
-                    <span>Subtotal</span>
-                    <strong>
-                      {store.currency || cartItems[0]?.currency || "NGN"}{" "}
-                      {subtotal.toLocaleString()}
-                    </strong>
-                  </div>
-                  {taxTotal > 0 && (
-                    <div>
-                      <span>Tax</span>
-                      <strong>
-                        {store.currency || cartItems[0]?.currency || "NGN"}{" "}
-                        {taxTotal.toLocaleString()}
-                      </strong>
-                    </div>
-                  )}
-                  <div className={styles.totalLine}>
-                    <span>Total</span>
-                    <strong>
-                      {store.currency || cartItems[0]?.currency || "NGN"}{" "}
-                      {total.toLocaleString()}
-                    </strong>
-                  </div>
-                  <button className={styles.checkoutCta} onClick={openCheckout}>
-                    Continue to checkout <i className="ti ti-arrow-right" />
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div className={styles.emptyCart}>
-                <div>
-                  <i className="ti ti-shopping-bag" />
-                </div>
-                <h3>Your bag is empty</h3>
-                <p>Add products to your order and they will appear here.</p>
-                <button onClick={() => setCartOpen(false)}>
-                  Continue shopping
-                </button>
-              </div>
-            )}
-          </aside>
-        </div>
-      )}
+      {cartOpen && <div className={styles.overlay} onMouseDown={(e) => { if (e.target === e.currentTarget) setCartOpen(false); }}><aside className={styles.cartDrawer}><div className={styles.drawerHead}><div><span className={styles.sectionKicker}>YOUR ORDER</span><h2>Shopping bag <small>{cartCount}</small></h2></div><button className={styles.close} onClick={() => setCartOpen(false)} aria-label="Close">×</button></div>{cartItems.length ? <><div className={styles.cartList}>{cartItems.map((i) => <div className={styles.cartItem} key={i.id}>{imagesOf(i)[0] ? <img src={imagesOf(i)[0]} alt="" /> : <div className={styles.cartThumb}><i className="ti ti-package" /></div>}<div className={styles.cartInfo}><strong>{i.name}</strong><span>{money(i.currency, effectivePrice(i))}</span><div className={styles.qty}><button onClick={() => remove(i)}>−</button><b>{i.quantity}</b><button onClick={() => add(i)}>+</button></div></div><b className={styles.lineTotal}>{money(i.currency, i.lineTotal)}</b></div>)}</div><div className={styles.cartBottom}><div><span>Subtotal</span><strong>{money(currency, subtotal)}</strong></div>{taxTotal > 0 && <div><span>Tax</span><strong>{money(currency, taxTotal)}</strong></div>}<div className={styles.totalLine}><span>Total</span><strong>{money(currency, total)}</strong></div><button className={styles.checkoutCta} onClick={openCheckout}>Continue to checkout <i className="ti ti-arrow-right" /></button></div></> : <div className={styles.emptyCart}><div><i className="ti ti-shopping-bag" /></div><h3>Your bag is empty</h3><p>Add products to your order and they will appear here.</p><button onClick={() => setCartOpen(false)}>Continue shopping</button></div>}</aside></div>}
 
-      {selectedProduct && (
-        <div
-          className={styles.overlay}
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) setSelectedProduct(null);
-          }}
-        >
-          <div className={styles.productModal}>
-            <button
-              className={styles.close}
-              onClick={() => setSelectedProduct(null)}
-            >
-              ×
-            </button>
-            <div className={styles.modalGallery}>
-              {imagesOf(selectedProduct).length ? (
-                imagesOf(selectedProduct).map((u, i) => (
-                  <img
-                    key={u + i}
-                    src={u}
-                    alt={`${selectedProduct.name} ${i + 1}`}
-                  />
-                ))
-              ) : (
-                <div className={styles.imagePlaceholder}>
-                  <i className="ti ti-package" />
-                </div>
-              )}
-            </div>
-            <div className={styles.modalInfo}>
-              <span className={styles.sectionKicker}>
-                {selectedProduct.category ||
-                  selectedProduct.productCategory ||
-                  "PRODUCT"}
-              </span>
-              <h2>{selectedProduct.name}</h2>
-              <p>{selectedProduct.description || ""}</p>
-              <div className={styles.modalPrice}>
-                {selectedProduct.currency}{" "}
-                {effectivePrice(selectedProduct).toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                })}
-              </div>
-              <span
-                className={
-                  selectedProduct.available
-                    ? styles.modalStock
-                    : styles.unavailable
-                }
-              >
-                {selectedProduct.available
-                  ? "In stock"
-                  : "Currently unavailable"}
-              </span>
-              <div className={styles.modalActions}>
-                <button
-                  disabled={!selectedProduct.available}
-                  onClick={() =>
-                    requireCustomer(() => {
-                      add(selectedProduct);
-                      setSelectedProduct(null);
-                      setCartOpen(true);
-                    })
-                  }
-                >
-                  Add to order <i className="ti ti-plus" />
-                </button>
-                {store.whatsappNumber && (
-                  <button
-                    className={styles.outlineCta}
-                    onClick={() => {
-                      setSelectedProduct(null);
-                      chat(selectedProduct);
-                    }}
-                  >
-                    <i className="ti ti-brand-whatsapp" /> Ask a question
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {selectedProduct && <div className={styles.overlay} onMouseDown={(e) => { if (e.target === e.currentTarget) setSelectedProduct(null); }}><div className={styles.productModal}><button className={styles.close} onClick={() => setSelectedProduct(null)} aria-label="Close">×</button><div className={styles.modalGallery}>{imagesOf(selectedProduct).length ? imagesOf(selectedProduct).map((u, i) => <img key={`${u}-${i}`} src={u} alt={`${selectedProduct.name} ${i + 1}`} />) : <div className={styles.imagePlaceholder}><i className="ti ti-package" /></div>}</div><div className={styles.modalInfo}><div className={styles.modalTopline}><span className={styles.sectionKicker}>{getCategory(selectedProduct)}</span><button onClick={() => toggleWishlist(selectedProduct)} className={`${styles.modalWishlist} ${wishlist.has(String(selectedProduct.id)) ? styles.wished : ""}`} aria-label="Wishlist"><i className={wishlist.has(String(selectedProduct.id)) ? "ti ti-heart-filled" : "ti ti-heart"} /></button></div><h2>{selectedProduct.name}</h2><p>{selectedProduct.description || ""}</p><div className={styles.modalPrice}>{money(selectedProduct.currency, effectivePrice(selectedProduct))}</div><span className={selectedProduct.available ? styles.modalStock : styles.unavailable}>{selectedProduct.available ? "In stock" : "Currently unavailable"}</span><div className={styles.modalActions}><button disabled={!selectedProduct.available} onClick={() => requireCustomer(() => { add(selectedProduct); setSelectedProduct(null); setCartOpen(true); })}>Add to order <i className="ti ti-plus" /></button>{store.whatsappNumber && <button className={styles.outlineCta} onClick={() => { setSelectedProduct(null); chat(selectedProduct); }}><i className="ti ti-brand-whatsapp" /> Ask a question</button>}</div></div></div></div>}
 
-      {customerGate.open && (
-        <div className={styles.overlay}>
-          <div className={styles.accountModal}>
-            <button
-              className={styles.close}
-              onClick={() => setCustomerGate((g) => ({ ...g, open: false }))}
-            >
-              ×
-            </button>
-            <div className={styles.accountIcon}>
-              <i className="ti ti-user-check" />
-            </div>
-            <span className={styles.sectionKicker}>ALMOST THERE</span>
-            <h2>Create your customer account</h2>
-            <p>
-              You can browse freely. To place an order or contact this store,
-              Ehral connects you to a customer account for{" "}
-              <b>{store.businessName}</b>.
-            </p>
-            {customerGate.step === "form" && (
-              <div className={styles.accountForm}>
-                <div className={styles.twoCol}>
-                  <input
-                    required
-                    placeholder="First name"
-                    value={customerGate.firstName}
-                    onChange={(e) =>
-                      setCustomerGate((g) => ({
-                        ...g,
-                        firstName: e.target.value,
-                      }))
-                    }
-                  />
-                  <input
-                    placeholder="Last name"
-                    value={customerGate.lastName}
-                    onChange={(e) =>
-                      setCustomerGate((g) => ({
-                        ...g,
-                        lastName: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-                <input
-                  required
-                  placeholder="Phone number"
-                  value={customerGate.phone}
-                  onChange={(e) =>
-                    setCustomerGate((g) => ({ ...g, phone: e.target.value }))
-                  }
-                />
-                <input
-                  type="email"
-                  placeholder="Email (optional)"
-                  value={customerGate.email}
-                  onChange={(e) =>
-                    setCustomerGate((g) => ({ ...g, email: e.target.value }))
-                  }
-                />
-                <button
-                  disabled={!customerGate.firstName || !customerGate.phone}
-                  onClick={async () => {
-                    try {
-                      setCustomerGate((g) => ({
-                        ...g,
-                        step: "sending",
-                        message: "Sending verification code…",
-                      }));
-                      const r = await sendOtp(customerGate.phone);
-                      setCustomerGate((g) => ({
-                        ...g,
-                        step: "verify",
-                        pinId: r.pinId,
-                        message: r.developmentOtp
-                          ? `Development OTP: ${r.developmentOtp}`
-                          : "Verification code sent to your phone.",
-                      }));
-                    } catch (e) {
-                      setCustomerGate((g) => ({
-                        ...g,
-                        step: "form",
-                        message:
-                          e?.response?.data?.message ||
-                          "Could not send verification code.",
-                      }));
-                    }
-                  }}
-                >
-                  Continue <i className="ti ti-arrow-right" />
-                </button>
-              </div>
-            )}
-            {customerGate.step === "verify" && (
-              <div className={styles.accountForm}>
-                <input
-                  inputMode="numeric"
-                  placeholder="Enter verification code"
-                  value={customerGate.otp}
-                  onChange={(e) =>
-                    setCustomerGate((g) => ({ ...g, otp: e.target.value }))
-                  }
-                />
-                <button
-                  disabled={!customerGate.otp}
-                  onClick={async () => {
-                    try {
-                      setCustomerGate((g) => ({
-                        ...g,
-                        step: "verifying",
-                        message: "Creating your customer account…",
-                      }));
-                      const v = await verifyOtp(
-                        customerGate.pinId,
-                        customerGate.otp,
-                      );
-                      await registerCustomerWithPhone(
-                        v.phoneVerificationToken,
-                        {
-                          businessSlug: slug,
-                          firstName: customerGate.firstName,
-                          lastName: customerGate.lastName,
-                          email: customerGate.email,
-                        },
-                      );
-                      refreshSession?.();
-                      setForm((f) => ({
-                        ...f,
-                        customerName: [
-                          customerGate.firstName,
-                          customerGate.lastName,
-                        ]
-                          .filter(Boolean)
-                          .join(" "),
-                        customerPhone: customerGate.phone,
-                        customerEmail: customerGate.email,
-                      }));
-                      const action = pendingActionRef.current;
-                      pendingActionRef.current = null;
-                      setCustomerGate((g) => ({
-                        ...g,
-                        open: false,
-                        step: "done",
-                        message: "",
-                        pending: null,
-                      }));
-                      if (action) action();
-                    } catch (e) {
-                      setCustomerGate((g) => ({
-                        ...g,
-                        step: "verify",
-                        message:
-                          e?.response?.data?.message ||
-                          "Could not create your customer account.",
-                      }));
-                    }
-                  }}
-                >
-                  Verify & continue <i className="ti ti-check" />
-                </button>
-              </div>
-            )}
-            {customerGate.message && (
-              <small className={styles.formMessage}>
-                {customerGate.message}
-              </small>
-            )}
-            <small className={styles.privacyNote}>
-              <i className="ti ti-lock" /> Your information is used to manage
-              your customer relationship with this store.
-            </small>
-          </div>
-        </div>
-      )}
+      <CustomerGate store={store} slug={slug} gate={customerGate} setGate={setCustomerGate} onComplete={completeCustomerGate} />
 
-      {checkout && (
-        <div className={styles.overlay}>
-          <div className={styles.checkoutModal}>
-            <button className={styles.close} onClick={() => setCheckout(false)}>
-              ×
-            </button>
-            <div className={styles.checkoutHead}>
-              <span className={styles.sectionKicker}>CHECKOUT</span>
-              <h2>Complete your order</h2>
-              <p>
-                Review your items and tell the store how to fulfil your order.
-              </p>
-            </div>
-            <div className={styles.checkoutSummary}>
-              {cartItems.map((i) => (
-                <div key={i.id}>
-                  <span>
-                    {i.name} × {i.quantity}
-                  </span>
-                  <b>
-                    {i.currency} {i.lineTotal.toLocaleString()}
-                  </b>
-                </div>
-              ))}
-              <div className={styles.summaryTotal}>
-                <span>Total</span>
-                <b>
-                  {cartItems[0]?.currency || store.currency || "NGN"}{" "}
-                  {total.toLocaleString()}
-                </b>
-              </div>
-            </div>
-            <form onSubmit={submit} className={styles.checkoutForm}>
-              <div className={styles.twoCol}>
-                <input
-                  required
-                  placeholder="Full name"
-                  value={form.customerName}
-                  onChange={(e) =>
-                    setForm({ ...form, customerName: e.target.value })
-                  }
-                />
-                <input
-                  required
-                  placeholder="WhatsApp / phone number"
-                  value={form.customerPhone}
-                  onChange={(e) =>
-                    setForm({ ...form, customerPhone: e.target.value })
-                  }
-                />
-              </div>
-              <input
-                type="email"
-                placeholder="Email (optional)"
-                value={form.customerEmail}
-                onChange={(e) =>
-                  setForm({ ...form, customerEmail: e.target.value })
-                }
-              />
-              <div>
-                <label>Fulfilment method</label>
-                <select
-                  required
-                  value={form.fulfillmentMethod || ""}
-                  onChange={(e) =>
-                    setForm({ ...form, fulfillmentMethod: e.target.value })
-                  }
-                >
-                  <option value="">Choose fulfilment</option>
-                  {store.pickupEnabled && (
-                    <option value="PICKUP">Pickup</option>
-                  )}
-                  {store.deliveryEnabled && (
-                    <option value="DELIVERY">Delivery</option>
-                  )}
-                </select>
-              </div>
-              {form.fulfillmentMethod === "DELIVERY" && (
-                <textarea
-                  required
-                  placeholder="Delivery address"
-                  value={form.deliveryAddress}
-                  onChange={(e) =>
-                    setForm({ ...form, deliveryAddress: e.target.value })
-                  }
-                />
-              )}
-              <textarea
-                placeholder="Order note (optional)"
-                value={form.customerNote}
-                onChange={(e) =>
-                  setForm({ ...form, customerNote: e.target.value })
-                }
-              />
-              <button className={styles.checkoutCta} disabled={submitting}>
-                {submitting ? "Placing order…" : "Place order"}
-                <i className="ti ti-arrow-right" />
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+      {checkout && <div className={styles.overlay}><div className={styles.checkoutModal}><button className={styles.close} onClick={() => setCheckout(false)} aria-label="Close">×</button><div className={styles.checkoutHead}><span className={styles.sectionKicker}>CHECKOUT</span><h2>Complete your order</h2><p>Review your items and tell the store how to fulfil your order.</p></div><div className={styles.checkoutSummary}>{cartItems.map((i) => <div key={i.id}><span>{i.name} × {i.quantity}</span><b>{money(i.currency, i.lineTotal)}</b></div>)}<div className={styles.summaryTotal}><span>Total</span><b>{money(currency, total)}</b></div></div><form onSubmit={submit} className={styles.checkoutForm}><div className={styles.twoCol}><input required placeholder="Full name" value={form.customerName} onChange={(e) => setForm({ ...form, customerName: e.target.value })} /><input required placeholder="WhatsApp / phone number" value={form.customerPhone} onChange={(e) => setForm({ ...form, customerPhone: e.target.value })} /></div><input type="email" placeholder="Email (optional)" value={form.customerEmail} onChange={(e) => setForm({ ...form, customerEmail: e.target.value })} />{(store.pickupEnabled || store.deliveryEnabled) ? <div><label>Fulfilment method</label><select required value={form.fulfillmentMethod} onChange={(e) => setForm({ ...form, fulfillmentMethod: e.target.value })}><option value="">Choose fulfilment</option>{store.pickupEnabled && <option value="PICKUP">Pickup</option>}{store.deliveryEnabled && <option value="DELIVERY">Delivery</option>}</select></div> : <div className={styles.fulfilmentNotice}><i className="ti ti-info-circle" /> The store will contact you to arrange fulfilment.</div>}{form.fulfillmentMethod === "DELIVERY" && <textarea required placeholder="Delivery address" value={form.deliveryAddress} onChange={(e) => setForm({ ...form, deliveryAddress: e.target.value })} />}<textarea placeholder="Order note (optional)" value={form.customerNote} onChange={(e) => setForm({ ...form, customerNote: e.target.value })} />{actionError && <div className={styles.error}>{actionError}</div>}<button className={styles.checkoutCta} disabled={submitting || !cartItems.length}>{submitting ? "Placing order…" : "Place order"}<i className="ti ti-arrow-right" /></button></form></div></div>}
 
-      {placed && (
-        <div className={styles.overlay}>
-          <div className={styles.successModal}>
-            <div className={styles.successIcon}>
-              <i className="ti ti-check" />
-            </div>
-            <span className={styles.sectionKicker}>ORDER CONFIRMED</span>
-            <h2>Thank you for your order.</h2>
-            <p>
-              Your order <b>#{placed.orderNumber}</b> has been created
-              successfully.
-            </p>
-            <div className={styles.orderTotal}>
-              <span>Total</span>
-              <strong>
-                {placed.currency} {Number(placed.total).toLocaleString()}
-              </strong>
-            </div>
-            {store.whatsappNumber && (
-              <button
-                className={styles.checkoutCta}
-                onClick={() =>
-                  (window.location.href = buildWhatsAppLink(
-                    store.whatsappNumber,
-                    `Hello, I just placed order #${placed.orderNumber} through Ehral and would like to follow up.`,
-                  ))
-                }
-              >
-                Continue on WhatsApp <i className="ti ti-brand-whatsapp" />
-              </button>
-            )}
-            <button className={styles.textCta} onClick={() => setPlaced(null)}>
-              Continue shopping
-            </button>
-          </div>
-        </div>
-      )}
+      {placed && <div className={styles.overlay}><div className={styles.successModal}><div className={styles.successIcon}><i className="ti ti-check" /></div><span className={styles.sectionKicker}>ORDER CONFIRMED</span><h2>Thank you for your order.</h2><p>Your order <b>#{placed.orderNumber}</b> has been created successfully.</p><div className={styles.orderTotal}><span>Total</span><strong>{money(placed.currency, placed.total)}</strong></div>{store.whatsappNumber && <button className={styles.checkoutCta} onClick={() => window.location.href = buildWhatsAppLink(store.whatsappNumber, `Hello, I just placed order #${placed.orderNumber} through Ehral and would like to follow up.`)}>Continue on WhatsApp <i className="ti ti-brand-whatsapp" /></button>}<button className={styles.textCta} onClick={() => setPlaced(null)}>Continue shopping</button></div></div>}
     </div>
   );
 }
