@@ -51,7 +51,6 @@ import PlanBadge from "../components/plan/PlanBadge";
 import PlanExpiryReminder from "../components/plan/PlanExpiryReminder";
 import WelcomeCard from "../components/WelcomeCard";
 import OnboardingChecklist from "../components/OnboardingChecklist";
-import BusinessWorkspaceButton from "../components/BusinessWorkspaceButton";
 import InviteEmployeeModal from "../components/InviteEmployeeModal";
 import {
   getAllProfileEdits,
@@ -1430,7 +1429,6 @@ export default function Dashboard() {
           </div>
 
           <div className={styles.topbarRight}>
-            <BusinessWorkspaceButton />
             {/* ── Current plan — desktop only. On mobile/tablet this moves
                 into the Settings dropdown's "My account" section instead
                 (see ThemeToggleMenu below) rather than crowding this
@@ -1465,9 +1463,6 @@ export default function Dashboard() {
                 </span>
               )}
             </div>
-
-            {/* ── Ehral Agent — right after the message shortcut, as requested ── */}
-            <AiAgentWidget onOpen={() => setActiveNav("Ehral Intelligence")} />
 
             {/* ── Bell button + dropdown panel ── */}
             <div className={styles.notifWrapper} ref={notifRef}>

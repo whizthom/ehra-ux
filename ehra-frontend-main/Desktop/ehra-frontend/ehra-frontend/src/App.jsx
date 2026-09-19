@@ -12,6 +12,7 @@ import UpdateToast from "./pwa/UpdateToast";
 import OfflineBanner from "./pwa/OfflineBanner";
 import ThemeColorSync from "./theme/ThemeColorSync";
 import PushNotificationPrompt from "./pwa/PushNotificationPrompt";
+import EmployerFloatingActions from "./components/EmployerFloatingActions";
 
 // Auth/public entry pages stay eagerly bundled - one of these is always
 // the very first thing an unauthenticated visitor paints, so splitting
@@ -283,6 +284,8 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
+
+        <EmployerFloatingActions />
 
         <InstallPrompt />
       </BrowserRouter>
