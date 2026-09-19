@@ -65,8 +65,8 @@
 
 .aiAction {
     border: 1px solid color-mix(in srgb, var(--accent) 42%, #0b1713);
-    background: #0b1713;
-    color: #fff;
+    background: #ffffff;
+    color: var(--accent);
     box-shadow: 0 9px 24px color-mix(in srgb, var(--accent) 22%, transparent);
     overflow: visible;
 }
@@ -75,7 +75,7 @@
     content: "";
     position: absolute;
     inset: -4px;
-    border: 1px solid rgba(173, 125, 255, 0.22);
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
     border-radius: 19px;
     pointer-events: none;
     animation: aiPulse 2.8s ease-out infinite;
@@ -87,7 +87,7 @@
     display: block;
     object-fit: contain;
     object-position: center;
-    border-radius: 10px;
+    border-radius: 8px;
 }
 
 .switchAction {
