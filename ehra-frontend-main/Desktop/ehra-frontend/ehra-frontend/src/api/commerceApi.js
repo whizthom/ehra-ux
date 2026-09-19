@@ -5,6 +5,7 @@ export const updateProduct = (id,data) => API.put(`/products/${id}`, data);
 export const deleteProduct = (id) => API.delete(`/products/${id}`);
 export const getStorefront = () => API.get("/business/storefront");
 export const saveStorefront = (data) => API.put("/business/storefront", data);
+export const getStorefrontSlugAvailability = (slug) => API.get("/business/storefront/slug-availability", { params: { slug } });
 export const getOrders = () => API.get("/orders");
 export const getOrder = (id) => API.get(`/orders/${id}`);
 export const updateOrderStatus = (id,status) => API.patch(`/orders/${id}/status`, { status });
