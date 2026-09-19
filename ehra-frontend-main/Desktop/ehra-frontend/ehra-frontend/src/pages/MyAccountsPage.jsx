@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getMyAccounts } from "../api/authApi";
 import { getMyProfile } from "../api/employeeApi";
+import { getCustomerOverview } from "../api/commerceApi";
+import { getMySubscription } from "../api/subscriptionApi";
+import Logo from "../components/Logo";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
 import LogoutConfirmModal from "../components/LogoutConfirmModal";
 import dash from "./Dashboard.module.css";
@@ -31,6 +34,16 @@ const EMPLOYEE_NAV = [
     section: "account",
     isFullPage: true,
   },
+];
+
+const CUSTOMER_NAV = [
+  { icon: "ti-layout-dashboard", label: "Dashboard", section: "main", customerTab: "home" },
+  { icon: "ti-compass", label: "Discover", section: "main", customerTab: "discover" },
+  { icon: "ti-building-store", label: "My Businesses", section: "main", customerTab: "businesses" },
+  { icon: "ti-shopping-bag", label: "Orders", section: "main", customerTab: "orders" },
+  { icon: "ti-message-circle", label: "Messages", section: "main", customerTab: "messages" },
+  { icon: "ti-user-circle", label: "Account", section: "account", customerTab: "account" },
+  { icon: "ti-switch-horizontal", label: "My Accounts", section: "account", isFullPage: true },
 ];
 
 const ADMIN_NAV = [
@@ -164,8 +177,8 @@ const TABS = [
 
 // The "My Accounts" nav destination - every workspace (business) the
 // logged-in Identity currently holds a membership at: as owner (EMPLOYER),
-// as staff (EMPLOYEE), or as a customer (CUSTOMER - tab stays hidden until
-// someone actually has one; see CustomerMembership's backend class doc).
+// as staff (EMPLOYEE), or as a customer (CUSTOMER). Customer is always
+// available as an identity-wide context, even before the first connection.
 // Split into sections/tabs so each role's accounts are easy to scan on
 // their own. Lets the person switch between them without logging out, and
 // start a brand-new business under the same Identity from the Employer
@@ -178,12 +191,15 @@ export default function MyAccountsPage() {
   const bottomNavScrollRef = useRef(null);
 
   const [profile, setProfile] = useState(null);
+  const [customerProfile, setCustomerProfile] = useState(null);
+  const [subscription, setSubscription] = useState(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
   const isAdmin = user?.role === "ROLE_ADMIN";
-  const dashboardPath = isAdmin ? "/dashboard" : "/my-dashboard";
-  const NAV = isAdmin ? ADMIN_NAV : EMPLOYEE_NAV;
+  const isCustomer = user?.role === "ROLE_CUSTOMER";
+  const dashboardPath = isCustomer ? "/customer-dashboard" : isAdmin ? "/dashboard" : "/my-dashboard";
+  const NAV = isCustomer ? CUSTOMER_NAV : isAdmin ? ADMIN_NAV : EMPLOYEE_NAV;
   const bottomNavThumb = useScrollThumb(bottomNavScrollRef);
 
   // Matches the save/restore effect in Dashboard.jsx / EmployeeDashboard.jsx.
@@ -196,9 +212,11 @@ export default function MyAccountsPage() {
   useEffect(() => {
     const el = bottomNavScrollRef.current;
     if (!el) return undefined;
-    const key = isAdmin
-      ? "employerBottomNavScrollLeft"
-      : "employeeBottomNavScrollLeft";
+    const key = isCustomer
+      ? "customerBottomNavScrollLeft"
+      : isAdmin
+        ? "employerBottomNavScrollLeft"
+        : "employeeBottomNavScrollLeft";
     const saved = sessionStorage.getItem(key);
     if (saved !== null) el.scrollLeft = Number(saved) || 0;
     const onScroll = () => {
@@ -206,22 +224,35 @@ export default function MyAccountsPage() {
     };
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
-  }, [isAdmin]);
+  }, [isAdmin, isCustomer]);
 
   // Best-effort profile fetch, purely to dress the shared shell (business
   // logo/name, avatar, HOD-gated nav items) the same way the dashboards
   // do. Never blocks the accounts list if it fails or is slow.
   useEffect(() => {
     let cancelled = false;
-    getMyProfile()
-      .then(({ data }) => {
-        if (!cancelled) setProfile(data);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    if (isCustomer) {
+      getCustomerOverview()
+        .then(({ data }) => {
+          if (!cancelled) setCustomerProfile(data);
+        })
+        .catch(() => {});
+    } else {
+      getMyProfile()
+        .then(({ data }) => {
+          if (!cancelled) setProfile(data);
+        })
+        .catch(() => {});
+    }
+    return () => { cancelled = true; };
+  }, [isCustomer]);
+
+  useEffect(() => {
+    if (isCustomer) return undefined;
+    let cancelled = false;
+    getMySubscription().then((data) => { if (!cancelled) setSubscription(data); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [isCustomer]);
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -238,6 +269,10 @@ export default function MyAccountsPage() {
       // Already here - nothing to navigate to.
       return;
     }
+    if (isCustomer && n.customerTab) {
+      navigate(`/customer-dashboard?tab=${encodeURIComponent(n.customerTab)}`);
+      return;
+    }
     navigate(dashboardPath, { state: { activeNav: n.label } });
   };
 
@@ -247,7 +282,7 @@ export default function MyAccountsPage() {
   const [switchingId, setSwitchingId] = useState(null);
 
   const [activeTab, setActiveTab] = useState(
-    user?.contextType === "EMPLOYEE" ? "EMPLOYEE" : "EMPLOYER",
+    user?.contextType === "CUSTOMER" ? "CUSTOMER" : user?.contextType === "EMPLOYEE" ? "EMPLOYEE" : "EMPLOYER",
   );
 
   const [showCreate, setShowCreate] = useState(false);
@@ -272,12 +307,8 @@ export default function MyAccountsPage() {
     return byType;
   }, [accounts]);
 
-  // Customer memberships are created by the public storefront registration flow, so the Customer tab is shown whenever memberships exist.
-  const visibleTabs = useMemo(
-    () =>
-      TABS.filter((t) => t.key !== "CUSTOMER" || grouped.CUSTOMER.length > 0),
-    [grouped],
-  );
+  // Customer is an identity-wide context, so the Customer tab is always available even before the first business connection.
+  const visibleTabs = useMemo(() => TABS, []);
 
   const pick = async (acc) => {
     if (acc.active) return;
@@ -331,6 +362,9 @@ export default function MyAccountsPage() {
 
   const list = grouped[activeTab] || [];
   const activeTabMeta = TABS.find((t) => t.key === activeTab);
+  const maxBusinesses = Number(subscription?.maxBusinesses || 0);
+  const employerBusinessCount = grouped.EMPLOYER.length;
+  const canCreateBusiness = maxBusinesses > 0 ? employerBusinessCount < maxBusinesses : true;
 
   const firstName = profile?.firstName || "";
   const lastName = profile?.lastName || "";
@@ -341,18 +375,14 @@ export default function MyAccountsPage() {
       {/* ── Sidebar (desktop) ── */}
       <aside className={dash.sidebar}>
         <div className={dash.sbLogo}>
-          {profile?.businessLogo ? (
-            <img
-              src={profile.businessLogo}
-              alt={profile?.businessName || "Business logo"}
-              className={dash.sbLogoImg}
-            />
+          {isCustomer ? (
+            <Logo variant="horizontal" size={108} tone="brand" title="Ehral" />
+          ) : profile?.businessLogo ? (
+            <img src={profile.businessLogo} alt={profile?.businessName || "Business logo"} className={dash.sbLogoImg} />
           ) : (
             <div className={dash.sbLogoIcon}>💼</div>
           )}
-          <span className={dash.sbLogoText}>
-            {profile?.businessName || "Ehra"}
-          </span>
+          <span className={dash.sbLogoText}>{isCustomer ? "My Ehral" : profile?.businessName || "Ehra"}</span>
         </div>
 
         <nav className={dash.sbNav}>
@@ -378,7 +408,9 @@ export default function MyAccountsPage() {
         <div className={dash.sbFooter}>
           <div className={dash.sbUser}>
             <div className={dash.sbAvatar}>
-              {profile?.profilePictureUrl ? (
+              {isCustomer ? (
+                customerProfile?.profileImage ? <img src={customerProfile.profileImage} alt="" className={dash.sbAvatarImg} /> : personInitials(customerProfile?.firstName, customerProfile?.lastName)
+              ) : profile?.profilePictureUrl ? (
                 <img
                   src={profile.profilePictureUrl}
                   alt=""
@@ -391,14 +423,10 @@ export default function MyAccountsPage() {
             <div className={dash.sbUserRow}>
               <div>
                 <div className={dash.sbUserName}>
-                  {displayName || (isAdmin ? "Admin" : "Employee")}
+                  {isCustomer ? `${customerProfile?.firstName || "Customer"} ${customerProfile?.lastName || ""}`.trim() : displayName || (isAdmin ? "Admin" : "Employee")}
                 </div>
                 <div className={dash.sbUserRole}>
-                  {isAdmin
-                    ? "Employer"
-                    : profile?.isHod
-                      ? "Employee · HOD"
-                      : "Employee"}
+                  {isCustomer ? "Customer" : isAdmin ? "Employer" : profile?.isHod ? "Employee · HOD" : "Employee"}
                 </div>
               </div>
               <button
@@ -424,7 +452,7 @@ export default function MyAccountsPage() {
               <span className={dash.topbarTitleShort}>Accounts</span>
             </h1>
             <p className={dash.topbarSub}>
-              Switch between every business you own or work for.
+              {isCustomer ? "Switch between Employer, Employee and Customer experiences from one Ehral identity." : "Switch between every business you own or work for."}
             </p>
           </div>
 
@@ -530,15 +558,41 @@ export default function MyAccountsPage() {
                     </div>
                   )}
 
+                  {activeTab === "CUSTOMER" && (
+                    <div className={styles.customerActions}>
+                      <button
+                        type="button"
+                        className={styles.createTrigger}
+                        onClick={async () => {
+                          setError("");
+                          try {
+                            const data = await switchContext("CUSTOMER", null);
+                            navigate(destinationFor(data.contextType) + "?tab=discover");
+                          } catch (err) {
+                            const msg = err?.response?.data?.message || "Couldn't open the Customer experience.";
+                            setError(typeof msg === "string" ? msg : "Something went wrong.");
+                          }
+                        }}
+                      >
+                        <i className="ti ti-compass" />
+                        Discover businesses on Ehral
+                      </button>
+                    </div>
+                  )}
+
                   {activeTab === "EMPLOYER" && (
-                    <button
-                      type="button"
-                      className={styles.createTrigger}
-                      onClick={() => setShowCreate(true)}
-                    >
-                      <i className="ti ti-plus" />
-                      Create a business under this account
-                    </button>
+                    canCreateBusiness ? (
+                      <button type="button" className={styles.createTrigger} onClick={() => setShowCreate(true)}>
+                        <i className="ti ti-plus" />
+                        Create a business under this account
+                      </button>
+                    ) : (
+                      <div className={styles.planLimitNotice}>
+                        <i className="ti ti-lock" />
+                        <span><strong>Business limit reached</strong><small>Your current plan allows {maxBusinesses} {maxBusinesses === 1 ? "business" : "businesses"}. Upgrade your plan to create another.</small></span>
+                        <button type="button" onClick={() => navigate("/pricing")}>View plans</button>
+                      </div>
+                    )
                   )}
                 </>
               )}

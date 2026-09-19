@@ -53,6 +53,8 @@ export default function SelectWorkspace() {
   const [error, setError] = useState("");
   const [switching, setSwitching] = useState(null);
 
+  const customerEntry = { type: "CUSTOMER", membershipId: null, businessId: null, businessName: "Customer", businessLogo: null, role: "CUSTOMER", status: null, active: false, discovery: true };
+
   useEffect(() => {
     getMyAccounts()
       .then(setAccounts)
@@ -61,7 +63,7 @@ export default function SelectWorkspace() {
   }, []);
 
   const pick = async (acc) => {
-    setSwitching(acc.membershipId);
+    setSwitching(acc.membershipId ?? acc.type);
     setError("");
     try {
       const data = await switchContext(acc.type, acc.membershipId);
@@ -140,6 +142,22 @@ export default function SelectWorkspace() {
                 )}
               </button>
             ))}
+
+            {!accounts.some((acc) => acc.type === "CUSTOMER") && (
+              <button
+                type="button"
+                className={styles.item}
+                disabled={switching !== null}
+                onClick={() => pick(customerEntry)}
+              >
+                <div className={styles.avatar}><i className="ti ti-compass" /></div>
+                <div className={styles.itemBody}>
+                  <span className={styles.itemName}>Customer</span>
+                  <span className={styles.itemMeta}>Discover businesses and services on Ehral</span>
+                </div>
+                {switching === "CUSTOMER" ? <span className={styles.itemSpinner} /> : <i className={`ti ti-chevron-right ${styles.itemChevron}`} />}
+              </button>
+            )}
 
             {accounts.length === 0 && !loading && (
               <p className={styles.empty}>

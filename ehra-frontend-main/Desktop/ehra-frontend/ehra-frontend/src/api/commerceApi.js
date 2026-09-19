@@ -23,3 +23,18 @@ export const getCustomerOrders = () => API.get("/customer/orders");
 export const getCustomerOverview = () => API.get("/customer/overview");
 export const connectCustomerToBusiness = (businessSlug) => API.post(`/customer/connect/${encodeURIComponent(businessSlug)}`);
 export const getCustomerReceiptPdf = (orderId) => API.get(`/customer/orders/${orderId}/receipt`, { responseType: "blob" });
+
+// Identity-level Customer discovery and authenticated business view. These
+// remain inside the My Ehral application and do not redirect to the public
+// /store/{slug} experience.
+export const discoverCustomerBusinesses = (params = {}) =>
+  API.get("/customer/discover", { params });
+export const getCustomerBusinessTypes = () => API.get("/customer/discover/types");
+
+export const getCustomerBusinessView = (businessId) =>
+  API.get(`/customer/businesses/${businessId}`);
+
+export const connectCustomerToBusinessId = (businessId) =>
+  API.post(`/customer/businesses/${businessId}/connect`);
+export const getCustomerProfile = () => API.get("/customer/profile");
+export const updateCustomerProfile = (data) => API.put("/customer/profile", data);

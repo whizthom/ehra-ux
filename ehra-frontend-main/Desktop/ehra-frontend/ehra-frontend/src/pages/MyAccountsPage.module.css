@@ -466,3 +466,5 @@
         border-radius: 12px;
     }
 }
+.planLimitNotice{display:flex;align-items:center;gap:12px;margin-top:16px;padding:14px 15px;border:1px solid rgba(180,90,30,.2);border-radius:13px;background:rgba(180,90,30,.06)}
+.planLimitNotice>i{font-size:20px}.planLimitNotice span{flex:1;min-width:0}.planLimitNotice strong,.planLimitNotice small{display:block}.planLimitNotice strong{font-size:12px}.planLimitNotice small{margin-top:3px;color:var(--muted,#687684);font-size:11px;line-height:1.45}.planLimitNotice button{border:0;background:transparent;color:var(--accent,#1f7a5c);font-weight:800;cursor:pointer;white-space:nowrap}

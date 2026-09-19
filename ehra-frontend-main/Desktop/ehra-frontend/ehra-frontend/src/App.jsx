@@ -47,6 +47,7 @@ const ScanAttendance = lazy(() => import("./pages/ScanAttendance"));
 const EmployeeDashboard = lazy(() => import("./pages/EmployeeDashboard"));
 const EmployeeProfilePage = lazy(() => import("./pages/EmployeeProfilePage"));
 const MyAccountsPage = lazy(() => import("./pages/MyAccountsPage"));
+const CustomerBusinessView = lazy(() => import("./pages/CustomerBusinessView"));
 const Support = lazy(() => import("./pages/Support"));
 const BusinessSetup = lazy(() => import("./pages/BusinessSetup"));
 const RetailWorkspace = lazy(() => import("./pages/RetailWorkspace"));
@@ -200,6 +201,15 @@ function App() {
             />
 
             <Route
+              path="/customer/business/:businessId"
+              element={
+                <ProtectedRoute roles={["ROLE_CUSTOMER"]}>
+                  <CustomerBusinessView />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
               path="/my-dashboard"
               element={
                 <ProtectedRoute roles={["ROLE_EMPLOYEE"]}>
@@ -246,7 +256,7 @@ function App() {
             <Route
               path="/my-accounts"
               element={
-                <ProtectedRoute roles={["ROLE_ADMIN", "ROLE_EMPLOYEE"]}>
+                <ProtectedRoute>
                   <MyAccountsPage />
                 </ProtectedRoute>
               }

@@ -329,3 +329,4 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+.planLimitNotice{display:flex;align-items:center;gap:10px;margin-top:14px;padding:12px;border:1px solid rgba(180,90,30,.2);border-radius:12px;background:rgba(180,90,30,.06)}.planLimitNotice>i{font-size:18px}.planLimitNotice span{flex:1;min-width:0}.planLimitNotice strong,.planLimitNotice small{display:block}.planLimitNotice strong{font-size:11px}.planLimitNotice small{margin-top:3px;color:var(--muted,#687684);font-size:10px}.planLimitNotice button{border:0;background:transparent;color:var(--accent,#1f7a5c);font-weight:800;cursor:pointer;white-space:nowrap}

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Logo from "../components/Logo";
-import { getCustomerOverview, getCustomerReceiptPdf } from "../api/commerceApi";
+import { getCustomerOverview, getCustomerReceiptPdf, discoverCustomerBusinesses, getCustomerBusinessTypes, getCustomerProfile, updateCustomerProfile } from "../api/commerceApi";
 import {
   createCustomerBusinessConversation,
   getMessages,
@@ -259,7 +259,7 @@ function BusinessCard({ business, onVisit, onChat, detailed }) {
       )}
       <div className={styles.cardActions}>
         <button onClick={() => onVisit(business)} disabled={!business.businessSlug || business.storefrontActive === false}>
-          Visit store <i className="ti ti-arrow-up-right" />
+          View business <i className="ti ti-arrow-up-right" />
         </button>
         <button className={styles.secondaryAction} onClick={() => onChat(business)}>
           Message <i className="ti ti-message-circle" />
@@ -334,6 +334,37 @@ function ConversationList({ conversations, onOpen, large }) {
   );
 }
 
+
+function DiscoveryCard({ business, onView }) {
+  return (
+    <article className={styles.businessCard}>
+      <div className={styles.businessIdentity}>
+        <div className={styles.businessLogo}>
+          {business.businessLogo ? <img src={business.businessLogo} alt="" /> : initials(business.businessName)}
+        </div>
+        <div className={styles.businessNameBlock}>
+          <strong>{business.businessName}</strong>
+          <small>{business.businessTypeLabel || business.businessType || "Ehral business"}{business.businessCategory ? ` · ${business.businessCategory}` : ""}</small>
+        </div>
+        <span className={`${styles.connectedBadge} ${business.connected ? "" : styles.connectedBadgeMuted}`}>
+          <i className={business.connected ? "ti ti-circle-check-filled" : "ti ti-compass"} />
+          {business.connected ? "Connected" : "Discoverable"}
+        </span>
+      </div>
+      <div className={styles.businessMeta}>
+        {business.address && <span><i className="ti ti-map-pin" /> {business.address}</span>}
+        {business.storefrontActive && <span><i className="ti ti-building-store" /> Store available</span>}
+      </div>
+      {business.description && <p className={styles.discoveryDescription}>{business.description}</p>}
+      <div className={styles.cardActions}>
+        <button onClick={() => onView(business)}>
+          View business <i className="ti ti-arrow-up-right" />
+        </button>
+      </div>
+    </article>
+  );
+}
+
 export default function CustomerDashboard() {
   const nav = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -349,6 +380,14 @@ export default function CustomerDashboard() {
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
+  const [discovery, setDiscovery] = useState([]);
+  const [discoveryLoading, setDiscoveryLoading] = useState(false);
+  const [discoveryQuery, setDiscoveryQuery] = useState("");
+  const [discoveryType, setDiscoveryType] = useState("");
+  const [businessTypes, setBusinessTypes] = useState([]);
+  const [profileForm, setProfileForm] = useState(null);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -374,9 +413,22 @@ export default function CustomerDashboard() {
     }
   }, []);
 
+  const loadDiscovery = useCallback(async (q = discoveryQuery, type = discoveryType) => {
+    setDiscoveryLoading(true);
+    try {
+      const r = await discoverCustomerBusinesses({ q: q.trim() || undefined, type: type || undefined });
+      setDiscovery(r.data || []);
+    } catch (e) {
+      setNotice(e?.response?.data?.message || "We could not load businesses on Ehral.");
+    } finally {
+      setDiscoveryLoading(false);
+    }
+  }, [discoveryQuery, discoveryType]);
+
   useEffect(() => {
     load();
     loadMessages();
+    getCustomerBusinessTypes().then(({ data: types }) => setBusinessTypes(types || [])).catch(() => {});
   }, [load, loadMessages]);
 
   useEffect(() => {
@@ -385,6 +437,33 @@ export default function CustomerDashboard() {
       if (["CONVERSATION_CREATED", "CONVERSATION_UPDATED", "NEW_MESSAGE_NOTIFICATION", "MESSAGE_MENTION"].includes(event.type)) loadMessages();
     });
   }, [loadMessages]);
+
+  useEffect(() => {
+    const requestedTab = searchParams.get("tab");
+    if (requestedTab && ["home", "discover", "businesses", "orders", "receipts", "messages", "spending", "account"].includes(requestedTab)) {
+      setTab(requestedTab);
+      if (requestedTab === "discover") loadDiscovery();
+    }
+  }, [searchParams, loadDiscovery]);
+
+  useEffect(() => {
+    if (tab === "discover" && !discovery.length) loadDiscovery();
+  }, [tab]);
+
+  useEffect(() => {
+    if (tab !== "account" || profileForm) return undefined;
+    let cancelled = false;
+    getCustomerProfile().then(({ data: profile }) => {
+      if (!cancelled) setProfileForm(profile);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [tab, profileForm]);
+
+  useEffect(() => {
+    if (tab !== "discover") return undefined;
+    const timer = window.setTimeout(() => loadDiscovery(), 250);
+    return () => window.clearTimeout(timer);
+  }, [discoveryQuery, discoveryType]);
 
   useEffect(() => {
     const conversationId = searchParams.get("chat");
@@ -437,11 +516,12 @@ export default function CustomerDashboard() {
     setTab(id);
     setMobileMoreOpen(false);
     if (id === "messages") loadMessages();
+    if (id === "discover") loadDiscovery();
   };
 
   const visitBusiness = (business) => {
-    if (business.businessSlug && business.storefrontActive !== false) nav(`/store/${business.businessSlug}`);
-    else setNotice("This business has not published a storefront yet.");
+    if (business?.businessId) nav(`/customer/business/${business.businessId}`);
+    else setNotice("This business could not be opened.");
   };
 
   const openBusinessChat = async (business) => {
@@ -472,6 +552,23 @@ export default function CustomerDashboard() {
     }
   };
 
+  const saveProfile = async () => {
+    if (!profileForm || savingProfile) return;
+    setSavingProfile(true);
+    setNotice("");
+    try {
+      const r = await updateCustomerProfile(profileForm);
+      setProfileForm(r.data);
+      setEditingProfile(false);
+      await load();
+      setNotice("Your Ehral profile has been updated.");
+    } catch (e) {
+      setNotice(e?.response?.data?.message || "We could not update your profile.");
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
   const signOut = async () => {
     try {
       await contextLogout();
@@ -492,6 +589,7 @@ export default function CustomerDashboard() {
 
   const navItems = [
     ["home", "Dashboard", "layout-dashboard"],
+    ["discover", "Discover", "compass"],
     ["businesses", "My businesses", "building-store"],
     ["orders", "Orders", "shopping-bag"],
     ["receipts", "Receipts", "receipt"],
@@ -548,7 +646,7 @@ export default function CustomerDashboard() {
                   <h2>Good to see you, {data?.firstName || "there"}.</h2>
                   <p>One Ehral account for your stores, orders, receipts, conversations and spending history.</p>
                   <div className={styles.heroActions}>
-                    <button onClick={() => changeTab("businesses")} className={styles.heroPrimary}>Explore my businesses <i className="ti ti-arrow-up-right" /></button>
+                    <button onClick={() => changeTab("discover")} className={styles.heroPrimary}>Discover businesses <i className="ti ti-arrow-up-right" /></button>
                     <button onClick={() => changeTab("messages")} className={styles.heroSecondary}><i className="ti ti-message-circle" /> Messages {unread > 0 && <span>{unread}</span>}</button>
                   </div>
                 </div>
@@ -564,7 +662,7 @@ export default function CustomerDashboard() {
 
               <section className={styles.section}>
                 <div className={styles.sectionHead}><div><span className={styles.eyebrow}>YOUR NETWORK</span><h2>Businesses you use</h2></div><button onClick={() => changeTab("businesses")}>View all <i className="ti ti-arrow-right" /></button></div>
-                {businesses.length ? <div className={styles.businessGrid}>{businesses.slice(0, 4).map((b) => <BusinessCard key={b.membershipId} business={b} onVisit={visitBusiness} onChat={openBusinessChat} />)}</div> : <div className={styles.emptyState}><i className="ti ti-building-store" /><h3>No connected businesses yet</h3><p>When you create an account through an Ehral storefront, that business appears here.</p></div>}
+                {businesses.length ? <div className={styles.businessGrid}>{businesses.slice(0, 4).map((b) => <BusinessCard key={b.membershipId} business={b} onVisit={visitBusiness} onChat={openBusinessChat} />)}</div> : <div className={styles.emptyState}><i className="ti ti-building-store" /><h3>No connected businesses yet</h3><p>Connect with businesses on Ehral and they will appear here as part of your customer network.</p></div>}
               </section>
 
               <section className={styles.twoPanel}>
@@ -585,6 +683,34 @@ export default function CustomerDashboard() {
                 </div>
               </section>
             </>
+          )}
+
+          {tab === "discover" && (
+            <section className={styles.section}>
+              <div className={styles.sectionIntro}>
+                <span className={styles.eyebrow}>DISCOVER ON EHRAL</span>
+                <h2>Find businesses and services</h2>
+                <p>Search Ehral for businesses you need, explore their information, and connect with the ones you choose.</p>
+              </div>
+              <div className={styles.discoveryToolbar}>
+                <label className={styles.discoverySearch}>
+                  <i className="ti ti-search" />
+                  <input value={discoveryQuery} onChange={(e) => setDiscoveryQuery(e.target.value)} placeholder="Search business, category, or location…" aria-label="Search businesses" />
+                  {discoveryQuery && <button type="button" onClick={() => setDiscoveryQuery("")} aria-label="Clear search"><i className="ti ti-x" /></button>}
+                </label>
+                <div className={styles.discoveryTypes}>
+                  <button className={!discoveryType ? styles.discoveryTypeActive : ""} onClick={() => setDiscoveryType("")}>All</button>
+                  {businessTypes.map((type) => <button key={type} className={discoveryType === type ? styles.discoveryTypeActive : ""} onClick={() => setDiscoveryType(type)}>{type.replaceAll("_", " ").replace(/\b\w/g, (m) => m.toUpperCase())}</button>)}
+                </div>
+              </div>
+              {discoveryLoading ? (
+                <div className={styles.inlineLoading}><span /> Finding businesses on Ehral…</div>
+              ) : discovery.length ? (
+                <div className={styles.businessGrid}>{discovery.map((b) => <DiscoveryCard key={b.businessId} business={b} onView={(business) => nav(`/customer/business/${business.businessId}`)} />)}</div>
+              ) : (
+                <div className={styles.emptyState}><i className="ti ti-compass-off" /><h3>No matching businesses yet</h3><p>Try another business name, category, or location.</p></div>
+              )}
+            </section>
           )}
 
           {tab === "businesses" && (
@@ -629,7 +755,28 @@ export default function CustomerDashboard() {
           {tab === "account" && (
             <section className={styles.section}>
               <div className={styles.sectionIntro}><span className={styles.eyebrow}>ACCOUNT & SECURITY</span><h2>Your Ehral profile</h2><p>Your identity follows you across every Ehral business relationship.</p></div>
-              <div className={styles.accountCard}><div className={styles.accountAvatar}>{initials(`${data?.firstName || ""} ${data?.lastName || ""}`)}</div><div><h3>{data?.firstName} {data?.lastName}</h3><p>{data?.email || "No email added"}</p><p>{data?.phone} <span className={styles.verifiedPill}><i className="ti ti-circle-check-filled" /> Verified</span></p></div><button onClick={() => nav("/forgot-password")} className={styles.accountAction}>Change password <i className="ti ti-arrow-up-right" /></button></div>
+              <div className={styles.accountCard}>
+                <div className={styles.accountAvatar}>{initials(`${profileForm?.firstName || data?.firstName || ""} ${profileForm?.lastName || data?.lastName || ""}`)}</div>
+                <div><h3>{profileForm?.firstName || data?.firstName} {profileForm?.lastName || data?.lastName}</h3><p>{profileForm?.email || data?.email || "No email added"}</p><p>{profileForm?.phone || data?.phone} <span className={styles.verifiedPill}><i className="ti ti-circle-check-filled" /> Verified</span></p></div>
+                <div className={styles.accountActions}>
+                  <button onClick={() => setEditingProfile((v) => !v)} className={styles.accountAction}><i className="ti ti-user-edit" /> {editingProfile ? "Close editor" : "Edit profile"}</button>
+                  <button onClick={() => nav("/forgot-password")} className={styles.accountAction}>Change password <i className="ti ti-arrow-up-right" /></button>
+                </div>
+              </div>
+              {editingProfile && profileForm && (
+                <div className={styles.profileEditor}>
+                  <div className={styles.profileEditorGrid}>
+                    {[["firstName","First name"],["middleName","Middle name"],["lastName","Last name"],["email","Email"]].map(([key,label]) => <label key={key}><span>{label}</span><input type={key === "email" ? "email" : "text"} value={profileForm[key] || ""} onChange={(e) => setProfileForm((p) => ({ ...p, [key]: e.target.value }))} /></label>)}
+                    <label><span>Phone</span><input value={profileForm.phone || ""} readOnly /><small>Your phone is your verified identity anchor and cannot be changed from this form.</small></label>
+                    <label><span>Date of birth</span><input type="date" value={profileForm.dateOfBirth || ""} onChange={(e) => setProfileForm((p) => ({ ...p, dateOfBirth: e.target.value }))} /></label>
+                    <label><span>Gender</span><input value={profileForm.gender || ""} onChange={(e) => setProfileForm((p) => ({ ...p, gender: e.target.value }))} /></label>
+                    <label className={styles.profileEditorWide}><span>Address</span><textarea value={profileForm.address || ""} onChange={(e) => setProfileForm((p) => ({ ...p, address: e.target.value }))} rows={2} /></label>
+                    <label><span>Emergency contact name</span><input value={profileForm.emergencyContactName || ""} onChange={(e) => setProfileForm((p) => ({ ...p, emergencyContactName: e.target.value }))} /></label>
+                    <label><span>Emergency contact phone</span><input value={profileForm.emergencyContactPhone || ""} onChange={(e) => setProfileForm((p) => ({ ...p, emergencyContactPhone: e.target.value }))} /></label>
+                  </div>
+                  <div className={styles.profileEditorFooter}><span>Changes apply to your Ehral identity and follow you across your relationships.</span><button className={styles.heroPrimary} onClick={saveProfile} disabled={savingProfile}>{savingProfile ? "Saving…" : "Save profile"}</button></div>
+                </div>
+              )}
               <div className={styles.securityGrid}><div><i className="ti ti-lock" /><strong>Password protected</strong><span>Your account uses your Ehral password.</span></div><div><i className="ti ti-device-mobile-check" /><strong>Phone verified</strong><span>Your phone is your verified identity anchor.</span></div><div><i className="ti ti-building-store" /><strong>{businesses.length} connected businesses</strong><span>One identity, many relationships.</span></div></div>
               <div className={styles.accountInfo}><span className={styles.eyebrow}>YOUR EHRAL IDENTITY</span><h3>One secure account across your commerce life.</h3><p>Your customer identity, orders, receipts and conversations stay connected while each business keeps control of its own products and operations.</p><button onClick={signOut} className={styles.dangerAction}><i className="ti ti-logout-2" /> Sign out of Ehral</button></div>
             </section>
@@ -642,7 +789,7 @@ export default function CustomerDashboard() {
         <button className={mobileMoreOpen ? styles.mobileNavActive : ""} onClick={() => setMobileMoreOpen((v) => !v)}><i className="ti ti-dots" /><span>More</span></button>
       </nav>
 
-      {mobileMoreOpen && <div className={styles.mobileMoreBackdrop} onClick={() => setMobileMoreOpen(false)}><div className={styles.mobileMoreSheet} onClick={(e) => e.stopPropagation()}><div className={styles.mobileSheetHandle} /><div className={styles.mobileSheetBrand}><Logo size={90} variant="horizontal" tone="brand" title="Ehral" /><span>My Ehral</span></div>{[["receipts","Receipts","receipt"],["spending","Spending","chart-donut"],["account","Account","user-circle"]].map(([id,label,icon]) => <button key={id} onClick={() => changeTab(id)}><i className={`ti ti-${icon}`} /><span>{label}</span><i className="ti ti-chevron-right" /></button>)}<button className={styles.mobileSignOut} onClick={signOut}><i className="ti ti-logout-2" /><span>Sign out</span></button></div></div>}
+      {mobileMoreOpen && <div className={styles.mobileMoreBackdrop} onClick={() => setMobileMoreOpen(false)}><div className={styles.mobileMoreSheet} onClick={(e) => e.stopPropagation()}><div className={styles.mobileSheetHandle} /><div className={styles.mobileSheetBrand}><Logo size={90} variant="horizontal" tone="brand" title="Ehral" /><span>My Ehral</span></div>{[["receipts","Receipts","receipt"],["spending","Spending","chart-donut"],["account","Account","user-circle"]].map(([id,label,icon]) => <button key={id} onClick={() => changeTab(id)}><i className={`ti ti-${icon}`} /><span>{label}</span><i className="ti ti-chevron-right" /></button>)}<button onClick={() => nav("/my-accounts")}><i className="ti ti-switch-horizontal" /><span>My Accounts</span><i className="ti ti-chevron-right" /></button><button className={styles.mobileSignOut} onClick={signOut}><i className="ti ti-logout-2" /><span>Sign out</span></button></div></div>}
 
       {selectedOrder && <ReceiptView order={selectedOrder} onClose={() => setSelectedOrder(null)} onDownload={downloadReceipt} />}
       {activeChat && <div className={styles.chatOverlay}><MessagePanel conversation={activeChat} initialDraft={activeChat.initialDraft || ""} onClose={() => setActiveChat(null)} onSent={loadMessages} /></div>}

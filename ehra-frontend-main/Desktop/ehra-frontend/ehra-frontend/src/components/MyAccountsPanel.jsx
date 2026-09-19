@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getMyAccounts } from "../api/authApi";
+import { getMySubscription } from "../api/subscriptionApi";
 import styles from "./MyAccountsPanel.module.css";
 
 function initials(name) {
@@ -50,6 +51,7 @@ export default function MyAccountsPanel({ open, onClose }) {
   const navigate = useNavigate();
 
   const [accounts, setAccounts] = useState([]);
+  const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [switchingId, setSwitchingId] = useState(null);
@@ -63,8 +65,8 @@ export default function MyAccountsPanel({ open, onClose }) {
     if (!open) return;
     setLoading(true);
     setError("");
-    getMyAccounts()
-      .then(setAccounts)
+    Promise.all([getMyAccounts(), getMySubscription().catch(() => null)])
+      .then(([accountRows, subscriptionData]) => { setAccounts(accountRows); setSubscription(subscriptionData); })
       .catch(() => setError("Couldn't load your accounts. Please try again."))
       .finally(() => setLoading(false));
   }, [open]);
@@ -90,6 +92,10 @@ export default function MyAccountsPanel({ open, onClose }) {
       setSwitchingId(null);
     }
   };
+
+  const employerCount = accounts.filter((a) => a.type === "EMPLOYER").length;
+  const maxBusinesses = Number(subscription?.maxBusinesses || 0);
+  const canCreateBusiness = maxBusinesses > 0 ? employerCount < maxBusinesses : true;
 
   const handleCreate = async () => {
     setCreateError("");
@@ -201,19 +207,52 @@ export default function MyAccountsPanel({ open, onClose }) {
                   ))}
 
                   {accounts.length === 0 && (
-                    <p className={styles.empty}>No accounts found.</p>
+                    <p className={styles.empty}>No business memberships found yet.</p>
+                  )}
+
+                  {!accounts.some((a) => a.type === "CUSTOMER") && (
+                    <button
+                      type="button"
+                      className={styles.item}
+                      disabled={switchingId !== null}
+                      onClick={async () => {
+                        setSwitchingId("CUSTOMER");
+                        setError("");
+                        try {
+                          const data = await switchContext("CUSTOMER", null);
+                          onClose();
+                          navigate(`${destinationFor(data.contextType)}?tab=discover`);
+                        } catch (err) {
+                          const msg = err?.response?.data?.message || "Couldn't open the Customer experience.";
+                          setError(typeof msg === "string" ? msg : "Something went wrong.");
+                        } finally {
+                          setSwitchingId(null);
+                        }
+                      }}
+                    >
+                      <div className={styles.avatar}><i className="ti ti-compass" /></div>
+                      <div className={styles.itemBody}>
+                        <span className={styles.itemName}>Customer</span>
+                        <span className={styles.itemMeta}>Discover businesses and services on Ehral</span>
+                      </div>
+                      {switchingId === "CUSTOMER" ? <span className={styles.spinner} /> : <i className={`ti ti-chevron-right ${styles.itemChevron}`} />}
+                    </button>
                   )}
                 </div>
               )}
 
-              <button
-                type="button"
-                className={styles.createTrigger}
-                onClick={() => setShowCreate(true)}
-              >
-                <i className="ti ti-plus" />
-                Create a business under this account
-              </button>
+              {canCreateBusiness ? (
+                <button type="button" className={styles.createTrigger} onClick={() => setShowCreate(true)}>
+                  <i className="ti ti-plus" />
+                  Create a business under this account
+                </button>
+              ) : (
+                <div className={styles.planLimitNotice}>
+                  <i className="ti ti-lock" />
+                  <span><strong>Business limit reached</strong><small>Your current plan allows {maxBusinesses} {maxBusinesses === 1 ? "business" : "businesses"}.</small></span>
+                  <button type="button" onClick={() => { onClose(); navigate("/pricing"); }}>View plans</button>
+                </div>
+              )}
             </>
           )}
 
