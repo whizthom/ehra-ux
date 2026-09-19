@@ -60,3 +60,5 @@ export const uploadAttachment = (file, kind, onUploadProgress) => {
     onUploadProgress,
   });
 };
+export const listCustomerConversations = () => API.get("/messaging/conversations/customer");
+export const createCustomerBusinessConversation = (businessId) => API.post(`/messaging/conversations/customer/business/${businessId}`);

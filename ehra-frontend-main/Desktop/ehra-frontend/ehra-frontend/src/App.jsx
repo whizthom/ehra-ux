@@ -55,6 +55,8 @@ function RootEntry() {
   const { user } = useAuth();
 
   if (!user) return <Register />;
+  if (user.role === "ROLE_CUSTOMER")
+    return <Navigate to="/customer-dashboard" replace />;
   if (user.needsContextSelection)
     return <Navigate to="/select-workspace" replace />;
   if (user.role === "ROLE_ADMIN") return <Navigate to="/dashboard" replace />;

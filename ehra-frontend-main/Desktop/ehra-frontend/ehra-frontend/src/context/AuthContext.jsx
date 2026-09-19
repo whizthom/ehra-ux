@@ -26,10 +26,10 @@ function userFromSession(session) {
   return {
     identityId: session.identityId,
     needsContextSelection: session.needsContextSelection,
-    contextType: session.contextType, // "EMPLOYER" | "EMPLOYEE" | null
+    contextType: session.contextType, // "EMPLOYER" | "EMPLOYEE" | "CUSTOMER" | null
     businessId: session.businessId,
     membershipId: session.membershipId,
-    membershipRole: session.role, // "ADMIN" | "EMPLOYEE" | "HOD" | null
+    membershipRole: session.role, // "ADMIN" | "EMPLOYEE" | "HOD" | "CUSTOMER" | null
     role: authRoleFor(session.contextType), // "ROLE_ADMIN" | "ROLE_EMPLOYEE" | null
   };
 }

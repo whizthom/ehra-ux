@@ -1,2 +1,651 @@
-import {useEffect,useState} from "react"; import {useNavigate} from "react-router-dom"; import {getMyAccounts} from "../api/authApi"; import {getCustomerOrders} from "../api/commerceApi"; import styles from "./CustomerDashboard.module.css";
-export default function CustomerDashboard(){const nav=useNavigate();const [accounts,setAccounts]=useState([]),[orders,setOrders]=useState([]);useEffect(()=>{getMyAccounts().then(setAccounts).catch(()=>{});getCustomerOrders().then(r=>setOrders(r.data||[])).catch(()=>{})},[]);const customers=accounts.filter(a=>a.type==="CUSTOMER");return <div className={styles.wrap}><header><h1>Your Ehral Customer Account</h1><p>Businesses where you have a customer relationship.</p></header>{customers.map(a=><div className={styles.card} key={a.membershipId}><div><h2>{a.businessName}</h2><span>Customer account</span></div><button onClick={()=>nav(a.businessSlug?`/store/${a.businessSlug}`:`/store/${a.businessName.toLowerCase().replace(/[^a-z0-9]+/g,"-")}`)}>Visit storefront</button></div>)}<section><h2>Your recent activity</h2>{orders.length?<div className={styles.list}>{orders.slice(0,20).map(o=><div className={styles.card} key={o.id}><div><strong>#{o.orderNumber}</strong><span>{o.businessName}</span><span>{o.status} · {o.paymentStatus}</span></div><b>{o.currency} {Number(o.total||0).toLocaleString()}</b></div>)}</div>:<p className={styles.empty}>Your customer orders will appear here.</p>}</section>{!customers.length&&<div className={styles.empty}>You do not have a customer workspace yet. Visit a public Ehral storefront and create a customer account when you want to take an action.</div>}</div>}
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import Logo from "../components/Logo";
+import { getCustomerOverview, getCustomerReceiptPdf } from "../api/commerceApi";
+import {
+  createCustomerBusinessConversation,
+  getMessages,
+  listCustomerConversations,
+  markRead,
+  sendMessage,
+} from "../api/messagingApi";
+import { useAuth } from "../context/AuthContext";
+import useMessagingConnection from "../hooks/useMessagingConnection";
+import { subscribeToConversation, subscribeToUserQueue } from "../services/messagingSocket";
+import styles from "./CustomerDashboard.module.css";
+
+const money = (currency, value) =>
+  `${currency || "NGN"} ${Number(value || 0).toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+const date = (v) =>
+  v
+    ? new Date(v).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "";
+const time = (v) =>
+  v
+    ? new Date(v).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    : "";
+const initials = (name = "Ehral") =>
+  name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((x) => x[0])
+    .join("")
+    .toUpperCase();
+
+function Toast({ message, onClose }) {
+  if (!message) return null;
+  return (
+    <div className={styles.toast} role="status">
+      <span className={styles.toastIcon}>
+        <i className="ti ti-sparkles" />
+      </span>
+      <span>{message}</span>
+      <button onClick={onClose} aria-label="Dismiss notification">
+        <i className="ti ti-x" />
+      </button>
+    </div>
+  );
+}
+
+function ReceiptView({ order, onClose, onDownload }) {
+  if (!order) return null;
+  const receiptReady = Boolean(order.receiptAvailable);
+  const paid = Number(order.amountPaid || 0);
+  const paymentStatus = String(order.paymentStatus || "UNPAID").toUpperCase();
+  return (
+    <div className={styles.overlay} role="dialog" aria-modal="true" aria-label={receiptReady ? "Purchase receipt" : "Order confirmation"}>
+      <section className={styles.receiptModal}>
+        <button className={styles.modalClose} onClick={onClose} aria-label="Close receipt"><i className="ti ti-x" /></button>
+        <div className={styles.receiptTop}>
+          <div className={styles.receiptBrandRow}>
+            <Logo size={112} variant="horizontal" tone="brand" title="Ehral" />
+            <span className={styles.receiptSecure}><i className="ti ti-shield-check" /> Secure record</span>
+          </div>
+          <div className={styles.receiptTitleBlock}>
+            <div><span className={styles.receiptKicker}>{receiptReady ? "OFFICIAL PURCHASE RECEIPT" : "ORDER CONFIRMATION"}</span><h2>{order.businessName}</h2></div>
+            <div className={styles.receiptNumberBlock}><small>{receiptReady ? "Receipt number" : "Order number"}</small><strong>{receiptReady ? order.receiptNumber : `#${order.orderNumber}`}</strong></div>
+          </div>
+        </div>
+        <div className={styles.receiptBody}>
+          <div className={styles.receiptBusiness}>
+            <div className={styles.avatar}>{order.businessLogo ? <img src={order.businessLogo} alt="" /> : initials(order.businessName)}</div>
+            <div className={styles.businessNameBlock}><strong>{order.businessName}</strong><small>Order #{order.orderNumber} · {date(order.createdAt)}</small></div>
+            <div className={styles.receiptStatus}><span className={`${styles.statusPill} ${paymentStatus === "PAID" ? styles.status_paid : ""}`}>{paymentStatus.replaceAll("_", " ")}</span><small>{receiptReady ? `Issued ${date(order.receiptIssuedAt || order.createdAt)}` : "Awaiting full payment"}</small></div>
+          </div>
+
+          <div className={styles.receiptInfoGrid}>
+            <div><span>Customer</span><strong>{order.customerName || "Ehral customer"}</strong><small>{order.customerEmail || "No email on order"}</small><small>{order.customerPhone || "No phone on order"}</small></div>
+            <div><span>Fulfilment</span><strong>{String(order.fulfillmentMethod || "Recorded").replaceAll("_", " ")}</strong>{order.deliveryAddress ? <small>{order.deliveryAddress}</small> : <small>Store collection or recorded order</small>}</div>
+            <div><span>Payment</span><strong>{order.paymentMethod || "Recorded payment"}</strong><small>{receiptReady ? `${money(order.currency, paid)} paid` : `${money(order.currency, paid)} received`}</small></div>
+            <div><span>Issued</span><strong>{date(order.receiptIssuedAt || order.createdAt)}</strong><small>{time(order.receiptIssuedAt || order.createdAt)}</small></div>
+          </div>
+
+          <div className={styles.receiptSectionLabel}><span>Purchase details</span><small>{(order.items || []).length} line {(order.items || []).length === 1 ? "item" : "items"}</small></div>
+          <div className={styles.receiptLines}>
+            {(order.items || []).map((item) => (
+              <div key={item.id || item.productId} className={styles.receiptLine}>
+                <div><strong>{item.productName}</strong><small>{item.quantity} × {money(order.currency, item.unitPrice)}</small></div>
+                <b>{money(order.currency, item.lineTotal)}</b>
+              </div>
+            ))}
+          </div>
+
+          <div className={styles.receiptTotals}>
+            <div><span>Subtotal</span><b>{money(order.currency, order.subtotal)}</b></div>
+            <div><span>Delivery</span><b>{money(order.currency, order.deliveryFee)}</b></div>
+            <div><span>Tax</span><b>{money(order.currency, order.tax)}</b></div>
+            <div className={styles.receiptGrand}><span>Total</span><b>{money(order.currency, order.total)}</b></div>
+            <div className={styles.receiptPaid}><span>{receiptReady ? "Amount paid" : "Amount received"}</span><b>{money(order.currency, paid)}</b></div>
+          </div>
+
+          {order.customerNote && <div className={styles.receiptNote}><i className="ti ti-note" /><div><strong>Order note</strong><span>{order.customerNote}</span></div></div>}
+          <div className={styles.receiptFooter}><span><i className="ti ti-shield-check" /> Verified payment record</span><span>{receiptReady ? "Receipt stored in My Ehral" : "Receipt issued after full payment"}</span></div>
+          <div className={styles.receiptActions}>
+            <button className={styles.secondaryAction} onClick={onClose}>Close</button>
+            {receiptReady ? <button className={styles.heroPrimary} onClick={() => onDownload(order)}><i className="ti ti-file-download" /> Download premium PDF</button> : <span className={styles.receiptPending}><i className="ti ti-clock" /> Receipt available after full payment</span>}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function MessagePanel({ conversation, onClose, onSent, initialDraft = "" }) {
+  const [messages, setMessages] = useState([]);
+  const [text, setText] = useState(initialDraft);
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+
+  const load = useCallback(async () => {
+    if (!conversation) return;
+    setLoading(true);
+    setError("");
+    try {
+      const r = await getMessages(conversation.conversationId, { limit: 80 });
+      setMessages(r.data || []);
+      await markRead(conversation.conversationId);
+    } catch (e) {
+      setError(e?.response?.data?.message || "We could not load this conversation.");
+    } finally {
+      setLoading(false);
+    }
+  }, [conversation]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  useEffect(() => {
+    if (!conversation?.conversationId) return undefined;
+    return subscribeToConversation(conversation.conversationId, (event) => {
+      if (!event) return;
+      if (["MESSAGE_CREATED", "MESSAGE_UPDATED", "MESSAGE_DELETED", "MESSAGE_REACTION_UPDATED"].includes(event.type)) {
+        const incoming = event.payload;
+        if (!incoming) return;
+        setMessages((current) => {
+          const exists = current.some((m) => String(m.id) === String(incoming.id));
+          if (exists) return current.map((m) => String(m.id) === String(incoming.id) ? incoming : m);
+          return [...current, incoming];
+        });
+        if (event.type === "MESSAGE_CREATED") markRead(conversation.conversationId).catch(() => {});
+      }
+    });
+  }, [conversation?.conversationId]);
+
+  const send = async () => {
+    if (!text.trim() || sending) return;
+    setSending(true);
+    const body = text.trim();
+    setText("");
+    setError("");
+    try {
+      await sendMessage(conversation.conversationId, { messageType: "TEXT", body });
+      await load();
+      onSent?.();
+    } catch (e) {
+      setText(body);
+      setError(e?.response?.data?.message || "Your message could not be sent.");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className={styles.chatShell}>
+      <div className={styles.chatHead}>
+        <div className={styles.chatIdentity}>
+          <div className={styles.avatar}>
+            {conversation?.businessLogo ? <img src={conversation.businessLogo} alt="" /> : initials(conversation?.businessName)}
+          </div>
+          <div>
+            <strong>{conversation?.businessName}</strong>
+            <small><span className={styles.onlineDot} /> Ehral native messaging</small>
+          </div>
+        </div>
+        <button className={styles.iconButton} onClick={onClose} aria-label="Close chat">
+          <i className="ti ti-x" />
+        </button>
+      </div>
+      <div className={styles.chatMessages}>
+        {loading ? (
+          <div className={styles.inlineLoading}><span /> Loading conversation…</div>
+        ) : messages.length ? (
+          messages.map((m) => (
+            <div key={m.id} className={`${styles.bubbleRow} ${m.senderIdentityId === conversation.myIdentityId ? styles.mine : ""}`}>
+              <div className={styles.bubble}>
+                <span>{m.body}</span>
+                <small>{time(m.createdAt)}</small>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className={styles.emptyChat}>
+            <i className="ti ti-message-circle-2" />
+            <strong>Start the conversation</strong>
+            <span>Ask about products, orders, delivery, availability or anything else.</span>
+          </div>
+        )}
+      </div>
+      {error && <div className={styles.chatError}>{error}</div>}
+      <div className={styles.chatComposer}>
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              send();
+            }
+          }}
+          placeholder="Write a message…"
+          rows={1}
+          aria-label="Message"
+        />
+        <button onClick={send} disabled={!text.trim() || sending} aria-label="Send message">
+          <i className={sending ? "ti ti-loader-2" : "ti ti-send"} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function BusinessCard({ business, onVisit, onChat, detailed }) {
+  return (
+    <article className={styles.businessCard}>
+      <div className={styles.businessIdentity}>
+        <div className={styles.businessLogo}>
+          {business.businessLogo ? <img src={business.businessLogo} alt="" /> : initials(business.businessName)}
+        </div>
+        <div className={styles.businessNameBlock}>
+          <strong>{business.businessName}</strong>
+          <small>{business.ordersCount} order{business.ordersCount === 1 ? "" : "s"} · {money(business.currency, business.totalSpent)} spent</small>
+        </div>
+        <span className={`${styles.connectedBadge} ${business.storefrontActive === false ? styles.connectedBadgeMuted : ""}`}><i className={business.storefrontActive === false ? "ti ti-info-circle" : "ti ti-circle-check-filled"} /> {business.storefrontActive === false ? "Connected · Store unavailable" : "Connected"}</span>
+      </div>
+      {detailed && (
+        <div className={styles.businessMeta}>
+          <span><i className="ti ti-user-check" /> Customer relationship</span>
+          <span><i className="ti ti-shield-check" /> Protected by Ehral</span>
+        </div>
+      )}
+      <div className={styles.cardActions}>
+        <button onClick={() => onVisit(business)} disabled={!business.businessSlug || business.storefrontActive === false}>
+          Visit store <i className="ti ti-arrow-up-right" />
+        </button>
+        <button className={styles.secondaryAction} onClick={() => onChat(business)}>
+          Message <i className="ti ti-message-circle" />
+        </button>
+      </div>
+    </article>
+  );
+}
+
+function OrderList({ orders, onReceipt }) {
+  if (!orders.length) {
+    return (
+      <div className={styles.emptyState}>
+        <i className="ti ti-shopping-bag" />
+        <h3>No orders yet</h3>
+        <p>Your purchases will appear here once you shop through Ehral.</p>
+      </div>
+    );
+  }
+  return (
+    <div className={styles.orderList}>
+      {orders.map((o) => (
+        <article className={styles.orderRow} key={o.id}>
+          <div className={styles.orderStore}>
+            <div className={styles.avatar}>{o.businessLogo ? <img src={o.businessLogo} alt="" /> : initials(o.businessName)}</div>
+            <div><strong>{o.businessName}</strong><small>#{o.orderNumber} · {date(o.createdAt)}</small></div>
+          </div>
+          <div className={styles.orderItems}>
+            {(o.items || []).slice(0, 2).map((i) => <span key={i.id || i.productId}>{i.productName} × {i.quantity}</span>)}
+            {(o.items || []).length > 2 && <span>+{o.items.length - 2} more</span>}
+          </div>
+          <div className={styles.orderStatus}>
+            <span className={`${styles.statusPill} ${styles[`status_${String(o.status || "").toLowerCase()}`] || ""}`}>{String(o.status || "RECORDED").replaceAll("_", " ")}</span>
+            <strong>{money(o.currency, o.total)}</strong>
+          </div>
+          <button className={styles.receiptButton} onClick={() => onReceipt(o)} disabled={!o.receiptAvailable}><i className="ti ti-receipt" /> {o.receiptAvailable ? "Receipt" : "Payment pending"}</button>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function ConversationList({ conversations, onOpen, large }) {
+  if (!conversations.length) {
+    return (
+      <div className={styles.emptyState}>
+        <i className="ti ti-message-off" />
+        <h3>No conversations yet</h3>
+        <p>Open a business and start a conversation with its team.</p>
+      </div>
+    );
+  }
+  return (
+    <div className={`${styles.conversationList} ${large ? styles.conversationListLarge : ""}`}>
+      {conversations.map((c) => {
+        const s = c.summary || c;
+        return (
+          <button className={styles.conversationRow} key={c.conversationId || s.id} onClick={() => onOpen(c)}>
+            <div className={styles.avatar}>{c.businessLogo ? <img src={c.businessLogo} alt="" /> : initials(c.businessName || s.name)}</div>
+            <div className={styles.conversationCopy}>
+              <strong>{c.businessName || s.name}</strong>
+              <span>{s.lastMessagePreview || "Start a conversation with this business"}</span>
+            </div>
+            <div className={styles.conversationMeta}>
+              {s.lastMessageAt && <small>{date(s.lastMessageAt)}</small>}
+              {s.unreadCount > 0 && <em>{s.unreadCount}</em>}
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+export default function CustomerDashboard() {
+  const nav = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { user, logout: contextLogout } = useAuth();
+  useMessagingConnection();
+  const [tab, setTab] = useState("home");
+  const [data, setData] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [messageLoading, setMessageLoading] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [activeChat, setActiveChat] = useState(null);
+  const [query, setQuery] = useState("");
+  const [notice, setNotice] = useState("");
+  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const r = await getCustomerOverview();
+      setData(r.data);
+    } catch (e) {
+      setNotice(e?.response?.data?.message || "We could not load your Ehral account.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadMessages = useCallback(async () => {
+    setMessageLoading(true);
+    try {
+      const r = await listCustomerConversations();
+      setMessages(r.data || []);
+    } catch (e) {
+      setNotice(e?.response?.data?.message || "We could not load your conversations.");
+    } finally {
+      setMessageLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+    loadMessages();
+  }, [load, loadMessages]);
+
+  useEffect(() => {
+    return subscribeToUserQueue((event) => {
+      if (!event) return;
+      if (["CONVERSATION_CREATED", "CONVERSATION_UPDATED", "NEW_MESSAGE_NOTIFICATION", "MESSAGE_MENTION"].includes(event.type)) loadMessages();
+    });
+  }, [loadMessages]);
+
+  useEffect(() => {
+    const conversationId = searchParams.get("chat");
+    if (!conversationId || !messages.length) return;
+    const found = messages.find((m) => String(m.conversationId) === String(conversationId));
+    if (found) {
+      const draft = sessionStorage.getItem(`ehral:pending-chat:${conversationId}`) || "";
+      sessionStorage.removeItem(`ehral:pending-chat:${conversationId}`);
+      setActiveChat({ ...found, conversationId: found.conversationId, businessName: found.businessName, businessLogo: found.businessLogo, myIdentityId: user?.identityId, initialDraft: draft });
+      setTab("messages");
+      setSearchParams({}, { replace: true });
+    }
+  }, [messages, searchParams, setSearchParams, user?.identityId]);
+
+  const businesses = data?.businesses || [];
+  const orders = data?.orders || [];
+  const filteredOrders = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return orders;
+    return orders.filter((o) => [o.businessName, o.orderNumber, o.status, ...(o.items || []).map((i) => i.productName)].join(" ").toLowerCase().includes(q));
+  }, [orders, query]);
+  const completed = orders.filter((o) => String(o.paymentStatus || "").toUpperCase() === "PAID");
+  const average = completed.length ? Number(data?.totalSpent || 0) / completed.length : 0;
+  const unread = messages.reduce((sum, c) => sum + Number(c.summary?.unreadCount || c.unreadCount || 0), 0);
+
+  const activity = useMemo(() => {
+    const orderActivity = orders.slice(0, 5).map((o) => ({
+      id: `order-${o.id}`,
+      icon: "shopping-bag",
+      title: `Order ${o.orderNumber}`,
+      text: `${o.businessName} · ${money(o.currency, o.total)}`,
+      date: o.createdAt,
+      action: () => setSelectedOrder(o),
+    }));
+    const messageActivity = messages.slice(0, 5).map((m) => {
+      const s = m.summary || m;
+      return {
+        id: `message-${m.conversationId || s.id}`,
+        icon: "message-circle",
+        title: m.businessName || s.name || "Business message",
+        text: s.lastMessagePreview || "Conversation updated",
+        date: s.lastMessageAt,
+        action: () => setActiveChat({ ...m, myIdentityId: user?.identityId }),
+      };
+    });
+    return [...orderActivity, ...messageActivity].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0)).slice(0, 6);
+  }, [orders, messages, user?.identityId]);
+
+  const changeTab = (id) => {
+    setTab(id);
+    setMobileMoreOpen(false);
+    if (id === "messages") loadMessages();
+  };
+
+  const visitBusiness = (business) => {
+    if (business.businessSlug && business.storefrontActive !== false) nav(`/store/${business.businessSlug}`);
+    else setNotice("This business has not published a storefront yet.");
+  };
+
+  const openBusinessChat = async (business) => {
+    try {
+      const r = await createCustomerBusinessConversation(business.businessId);
+      await loadMessages();
+      setActiveChat({ conversationId: r.data.id, businessId: business.businessId, businessName: business.businessName, businessLogo: business.businessLogo, myIdentityId: user?.identityId });
+      setTab("messages");
+    } catch (e) {
+      setNotice(e?.response?.data?.message || "Messaging is temporarily unavailable for this business.");
+    }
+  };
+
+  const downloadReceipt = async (order) => {
+    try {
+      const response = await getCustomerReceiptPdf(order.id);
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Ehral-${order.orderNumber}-receipt.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setNotice(e?.response?.data?.message || "The receipt PDF is not available yet.");
+    }
+  };
+
+  const signOut = async () => {
+    try {
+      await contextLogout();
+      nav("/login", { replace: true });
+    } catch (e) {
+      setNotice("We could not sign you out cleanly. Please try again.");
+    }
+  };
+
+  if (loading && !data) {
+    return (
+      <div className={styles.loadingScreen}>
+        <div className={styles.loadingBrand}><Logo size={126} variant="horizontal" tone="brand" title="Ehral" /></div>
+        <span>Preparing your customer hub…</span>
+      </div>
+    );
+  }
+
+  const navItems = [
+    ["home", "Dashboard", "layout-dashboard"],
+    ["businesses", "My businesses", "building-store"],
+    ["orders", "Orders", "shopping-bag"],
+    ["receipts", "Receipts", "receipt"],
+    ["messages", "Messages", "messages"],
+    ["spending", "Spending", "chart-donut"],
+    ["account", "Account", "user-circle"],
+  ];
+  const title = navItems.find((x) => x[0] === tab)?.[1] || "Dashboard";
+
+  return (
+    <div className={styles.shell}>
+      <aside className={styles.sidebar}>
+        <div className={styles.brand}><Logo size={116} variant="horizontal" tone="brand" title="Ehral" /><span>Customer</span></div>
+        <div className={styles.profileMini}>
+          <div className={styles.profileAvatar}>{initials(`${data?.firstName || ""} ${data?.lastName || ""}`)}</div>
+          <div><strong>{data?.firstName || "Customer"}</strong><small>{data?.phone || "Ehral account"}</small></div>
+        </div>
+        <nav>
+          {navItems.map(([id, label, icon]) => (
+            <button key={id} className={tab === id ? styles.navActive : ""} onClick={() => changeTab(id)}>
+              <i className={`ti ti-${icon}`} /><span>{label}</span>
+              {id === "messages" && unread > 0 && <em>{unread > 9 ? "9+" : unread}</em>}
+            </button>
+          ))}
+        </nav>
+        <div className={styles.sidebarBottom}>
+          <button onClick={() => changeTab("account")}><i className="ti ti-settings" /> Account settings</button>
+          <button onClick={signOut}><i className="ti ti-logout-2" /> Sign out</button>
+        </div>
+      </aside>
+
+      <main className={styles.main}>
+        <header className={styles.topbar}>
+          <button className={styles.mobileBrand} onClick={() => changeTab("home")}><Logo size={96} variant="horizontal" tone="brand" title="Ehral" /></button>
+          <div className={styles.topTitle}><span>MY EHRAL</span><h1>{title}</h1></div>
+          <div className={styles.topActions}>
+            <label className={styles.searchButton}>
+              <i className="ti ti-search" />
+              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search your orders…" aria-label="Search orders" />
+              {query && <button type="button" onClick={() => setQuery("")} aria-label="Clear search"><i className="ti ti-x" /></button>}
+            </label>
+            <button className={styles.avatarButton} onClick={() => changeTab("account")} aria-label="Open account">{initials(`${data?.firstName || ""} ${data?.lastName || ""}`)}</button>
+          </div>
+        </header>
+
+        <Toast message={notice} onClose={() => setNotice("")} />
+
+        <div className={styles.content}>
+          {tab === "home" && (
+            <>
+              <section className={styles.hero}>
+                <div className={styles.heroCopy}>
+                  <span className={styles.eyebrow}>YOUR PERSONAL COMMERCE HUB</span>
+                  <h2>Good to see you, {data?.firstName || "there"}.</h2>
+                  <p>One Ehral account for your stores, orders, receipts, conversations and spending history.</p>
+                  <div className={styles.heroActions}>
+                    <button onClick={() => changeTab("businesses")} className={styles.heroPrimary}>Explore my businesses <i className="ti ti-arrow-up-right" /></button>
+                    <button onClick={() => changeTab("messages")} className={styles.heroSecondary}><i className="ti ti-message-circle" /> Messages {unread > 0 && <span>{unread}</span>}</button>
+                  </div>
+                </div>
+                <div className={styles.heroOrb}><span /><span /><i className="ti ti-sparkles" /></div>
+              </section>
+
+              <section className={styles.stats}>
+                <div><span>Total spent</span><strong>{money(data?.currency, data?.totalSpent)}</strong><small>Across connected businesses</small></div>
+                <div><span>Orders</span><strong>{data?.totalOrders || 0}</strong><small>Purchase history</small></div>
+                <div><span>Businesses</span><strong>{businesses.length}</strong><small>Your Ehral network</small></div>
+                <div><span>Average order</span><strong>{money(data?.currency, average)}</strong><small>Based on recorded orders</small></div>
+              </section>
+
+              <section className={styles.section}>
+                <div className={styles.sectionHead}><div><span className={styles.eyebrow}>YOUR NETWORK</span><h2>Businesses you use</h2></div><button onClick={() => changeTab("businesses")}>View all <i className="ti ti-arrow-right" /></button></div>
+                {businesses.length ? <div className={styles.businessGrid}>{businesses.slice(0, 4).map((b) => <BusinessCard key={b.membershipId} business={b} onVisit={visitBusiness} onChat={openBusinessChat} />)}</div> : <div className={styles.emptyState}><i className="ti ti-building-store" /><h3>No connected businesses yet</h3><p>When you create an account through an Ehral storefront, that business appears here.</p></div>}
+              </section>
+
+              <section className={styles.twoPanel}>
+                <div className={styles.section}>
+                  <div className={styles.sectionHead}><div><span className={styles.eyebrow}>LATEST</span><h2>Recent orders</h2></div><button onClick={() => changeTab("orders")}>See all</button></div>
+                  <OrderList orders={orders.slice(0, 5)} onReceipt={setSelectedOrder} />
+                </div>
+                <div className={styles.section}>
+                  <div className={styles.sectionHead}><div><span className={styles.eyebrow}>MESSAGES</span><h2>Business conversations</h2></div><button onClick={() => changeTab("messages")}>Open inbox</button></div>
+                  <ConversationList conversations={messages.slice(0, 4)} onOpen={(c) => setActiveChat({ ...c, myIdentityId: user?.identityId })} />
+                </div>
+              </section>
+
+              <section className={styles.section}>
+                <div className={styles.sectionHead}><div><span className={styles.eyebrow}>LIVE ACTIVITY</span><h2>Recent activity</h2></div></div>
+                <div className={styles.activityList}>
+                  {activity.length ? activity.map((a) => <button key={a.id} className={styles.activityRow} onClick={a.action}><span className={styles.activityIcon}><i className={`ti ti-${a.icon}`} /></span><span className={styles.activityCopy}><strong>{a.title}</strong><small>{a.text}</small></span><span className={styles.activityDate}>{date(a.date)} {time(a.date)}</span><i className="ti ti-chevron-right" /></button>) : <div className={styles.emptyState}><i className="ti ti-sparkles" /><h3>Your activity will appear here</h3><p>Orders and business conversations will build your Ehral timeline.</p></div>}
+                </div>
+              </section>
+            </>
+          )}
+
+          {tab === "businesses" && (
+            <section className={styles.section}>
+              <div className={styles.sectionIntro}><span className={styles.eyebrow}>CONNECTED TO EHRAL</span><h2>Your businesses</h2><p>Every business where you have an active customer relationship. One account, many stores.</p></div>
+              <div className={styles.businessGrid}>{businesses.map((b) => <BusinessCard key={b.membershipId} business={b} onVisit={visitBusiness} onChat={openBusinessChat} detailed />)}</div>
+            </section>
+          )}
+
+          {tab === "orders" && (
+            <section className={styles.section}>
+              <div className={styles.sectionIntro}><span className={styles.eyebrow}>PURCHASE HISTORY</span><h2>Your orders</h2><p>Everything you have bought through your Ehral customer account.</p></div>
+              <OrderList orders={filteredOrders} onReceipt={setSelectedOrder} />
+            </section>
+          )}
+
+          {tab === "receipts" && (
+            <section className={styles.section}>
+              <div className={styles.sectionIntro}><span className={styles.eyebrow}>YOUR PAPER TRAIL</span><h2>Receipts</h2><p>Receipts generated from your Ehral purchases remain available here, even after you leave a store.</p></div>
+              <div className={styles.receiptGrid}>
+                {filteredOrders.filter((o) => o.receiptAvailable).map((o) => <button key={o.id} className={styles.receiptCard} onClick={() => setSelectedOrder(o)}><div className={styles.receiptCardTop}><div className={styles.avatar}>{o.businessLogo ? <img src={o.businessLogo} alt="" /> : initials(o.businessName)}</div><span>{o.paymentStatus || "RECORDED"}</span></div><strong>{o.businessName}</strong><small>#{o.orderNumber} · {date(o.createdAt)}</small><b>{money(o.currency, o.total)}</b><em>View receipt <i className="ti ti-arrow-up-right" /></em></button>)}
+              </div>
+              {!filteredOrders.some((o) => o.receiptAvailable) && <div className={styles.emptyState}><i className="ti ti-receipt-off" /><h3>No receipts yet</h3><p>Your completed Ehral purchases will appear here.</p></div>}
+            </section>
+          )}
+
+          {tab === "messages" && (
+            <section className={styles.section}>
+              <div className={styles.sectionIntro}><span className={styles.eyebrow}>EHRAL NATIVE MESSAGING</span><h2>Your conversations</h2><p>Talk directly with businesses you are connected to without leaving Ehral.</p></div>
+              <div className={styles.messageList}>{messageLoading ? <div className={styles.inlineLoading}><span /> Loading conversations…</div> : <ConversationList conversations={messages} onOpen={(c) => setActiveChat({ ...c, myIdentityId: user?.identityId })} large />}</div>
+            </section>
+          )}
+
+          {tab === "spending" && (
+            <section className={styles.section}>
+              <div className={styles.sectionIntro}><span className={styles.eyebrow}>YOUR MONEY TRAIL</span><h2>Spending</h2><p>A clear view of payments completed across your Ehral businesses, net of recorded refunds.</p></div>
+              <div className={styles.spendingHero}><div><span>Total recorded spend</span><strong>{money(data?.currency, data?.totalSpent)}</strong><small>{completed.length} fully paid orders</small></div><div className={styles.spendingRing}><i className="ti ti-chart-donut" /></div></div>
+              <div className={styles.spendingList}>{businesses.map((b) => { const share = data?.totalSpent ? Math.min(100, Number(b.totalSpent || 0) / Number(data.totalSpent) * 100) : 0; return <div className={styles.spendRow} key={b.membershipId}><div className={styles.spendIdentity}><div className={styles.avatar}>{b.businessLogo ? <img src={b.businessLogo} alt="" /> : initials(b.businessName)}</div><div><strong>{b.businessName}</strong><small>{b.ordersCount} order{b.ordersCount === 1 ? "" : "s"}</small></div></div><div className={styles.spendValue}><strong>{money(b.currency, b.totalSpent)}</strong><div><span style={{ width: `${share}%` }} /></div><small>{share.toFixed(1)}% of total spend</small></div></div>; })}</div>
+            </section>
+          )}
+
+          {tab === "account" && (
+            <section className={styles.section}>
+              <div className={styles.sectionIntro}><span className={styles.eyebrow}>ACCOUNT & SECURITY</span><h2>Your Ehral profile</h2><p>Your identity follows you across every Ehral business relationship.</p></div>
+              <div className={styles.accountCard}><div className={styles.accountAvatar}>{initials(`${data?.firstName || ""} ${data?.lastName || ""}`)}</div><div><h3>{data?.firstName} {data?.lastName}</h3><p>{data?.email || "No email added"}</p><p>{data?.phone} <span className={styles.verifiedPill}><i className="ti ti-circle-check-filled" /> Verified</span></p></div><button onClick={() => nav("/forgot-password")} className={styles.accountAction}>Change password <i className="ti ti-arrow-up-right" /></button></div>
+              <div className={styles.securityGrid}><div><i className="ti ti-lock" /><strong>Password protected</strong><span>Your account uses your Ehral password.</span></div><div><i className="ti ti-device-mobile-check" /><strong>Phone verified</strong><span>Your phone is your verified identity anchor.</span></div><div><i className="ti ti-building-store" /><strong>{businesses.length} connected businesses</strong><span>One identity, many relationships.</span></div></div>
+              <div className={styles.accountInfo}><span className={styles.eyebrow}>YOUR EHRAL IDENTITY</span><h3>One secure account across your commerce life.</h3><p>Your customer identity, orders, receipts and conversations stay connected while each business keeps control of its own products and operations.</p><button onClick={signOut} className={styles.dangerAction}><i className="ti ti-logout-2" /> Sign out of Ehral</button></div>
+            </section>
+          )}
+        </div>
+      </main>
+
+      <nav className={styles.mobileNav} aria-label="Customer navigation">
+        {["home", "businesses", "orders", "messages"].map((id) => { const item = navItems.find((n) => n[0] === id); return <button key={id} className={tab === id ? styles.mobileNavActive : ""} onClick={() => changeTab(id)}><i className={`ti ti-${item[2]}`} /><span>{item[1].replace("My ", "")}</span>{id === "messages" && unread > 0 && <em>{unread > 9 ? "9+" : unread}</em>}</button>; })}
+        <button className={mobileMoreOpen ? styles.mobileNavActive : ""} onClick={() => setMobileMoreOpen((v) => !v)}><i className="ti ti-dots" /><span>More</span></button>
+      </nav>
+
+      {mobileMoreOpen && <div className={styles.mobileMoreBackdrop} onClick={() => setMobileMoreOpen(false)}><div className={styles.mobileMoreSheet} onClick={(e) => e.stopPropagation()}><div className={styles.mobileSheetHandle} /><div className={styles.mobileSheetBrand}><Logo size={90} variant="horizontal" tone="brand" title="Ehral" /><span>My Ehral</span></div>{[["receipts","Receipts","receipt"],["spending","Spending","chart-donut"],["account","Account","user-circle"]].map(([id,label,icon]) => <button key={id} onClick={() => changeTab(id)}><i className={`ti ti-${icon}`} /><span>{label}</span><i className="ti ti-chevron-right" /></button>)}<button className={styles.mobileSignOut} onClick={signOut}><i className="ti ti-logout-2" /><span>Sign out</span></button></div></div>}
+
+      {selectedOrder && <ReceiptView order={selectedOrder} onClose={() => setSelectedOrder(null)} onDownload={downloadReceipt} />}
+      {activeChat && <div className={styles.chatOverlay}><MessagePanel conversation={activeChat} initialDraft={activeChat.initialDraft || ""} onClose={() => setActiveChat(null)} onSent={loadMessages} /></div>}
+    </div>
+  );
+}

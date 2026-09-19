@@ -12,4 +12,3 @@ export const getLedger=(from,to)=>API.get("/retail/ledger",{params:{from,to}});
 export const updatePaymentStatus=(id,status,reason)=>API.put(`/retail/payments/${id}/status`,null,{params:{status,reason}});
 
 export const getRetailContext=()=>API.get("/retail/context");
-export const getMovementHistory=(params={})=>API.get('/retail/inventory/movements/history',{params});

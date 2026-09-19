@@ -33,8 +33,8 @@ export const checkPhone = (idToken) =>
 // EmailVerificationService). Returns an AuthResponseDTO shape, same as
 // login().
 
-export const registerCustomerWithPhone = async (idToken, { businessSlug, firstName, lastName, email }) => {
-  const { data } = await API.post("/auth/phone/customer-register", { idToken, businessSlug, firstName, lastName, email });
+export const registerCustomerWithPhone = async (idToken, { businessSlug, firstName, lastName, email, password }) => {
+  const { data } = await API.post("/auth/phone/customer-register", { idToken, businessSlug, firstName, lastName, email, password });
   saveSession(data);
   return data;
 };

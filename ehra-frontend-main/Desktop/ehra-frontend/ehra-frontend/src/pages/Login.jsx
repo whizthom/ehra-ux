@@ -131,6 +131,10 @@ export default function Login() {
       return;
     }
 
+    if (data.contextType === "CUSTOMER") {
+      navigate("/customer-dashboard");
+      return;
+    }
     navigate(data.contextType === "EMPLOYEE" ? "/my-dashboard" : "/dashboard");
   };
 
