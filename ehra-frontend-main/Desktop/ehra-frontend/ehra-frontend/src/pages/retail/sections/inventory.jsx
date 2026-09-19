@@ -127,6 +127,8 @@ function InventoryHistory({ products, onBack }) {
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [pageCursors, setPageCursors] = useState([null]);
+  const [view, setView] = useState("table");
+  const [density, setDensity] = useState("comfortable");
 
   const load = async (next = null, targetPage = 1) => {
     setLoading(true);
@@ -164,33 +166,54 @@ function InventoryHistory({ products, onBack }) {
     setPageCursors([null]);
     load(null, 1);
   }, [productId, type, from, to]);
-
   const reset = () => {
     setProductId("");
     setType("");
     setFrom("");
     setTo("");
   };
+  const activeFilters = [
+    productId && "Product",
+    type && "Movement",
+    from && "From",
+    to && "To",
+  ].filter(Boolean).length;
+
   return (
     <section className={s.historyPage} aria-label="Inventory movement history">
       <div className={s.historyPageHead}>
-        <div>
+        <div className={s.historyTitleBlock}>
+          <button type="button" className={s.historyBack} onClick={onBack}>
+            ← Inventory
+          </button>
           <span className={s.kicker}>INVENTORY HISTORY</span>
           <h2>All stock movements</h2>
           <p>
-            Browse your complete inventory record 50 movements at a time. Use
-            filters or date ranges to locate older records.
+            Your complete inventory activity, with 50 movements per page.
+            Search, filter, and move through the record without leaving this
+            workspace.
           </p>
         </div>
-        <button type="button" className={s.outline} onClick={onBack}>
-          ← Back to inventory
-        </button>
+        <div className={s.historyHeadMeta}>
+          <span>
+            {loading
+              ? "Updating history"
+              : `${rows.length} movements on this page`}
+          </span>
+          {activeFilters > 0 && (
+            <button type="button" className={s.historyClearTop} onClick={reset}>
+              {activeFilters} filter{activeFilters === 1 ? "" : "s"} · Clear
+            </button>
+          )}
+        </div>
       </div>
-      <Panel
-        title="Find a movement"
-        sub="Filter the complete inventory record without loading the entire history into the browser."
-      >
-        <div className={s.movementHistoryFilters}>
+
+      <div className={s.historyFilterBar}>
+        <div className={s.historyFilterIntro}>
+          <strong>Find a movement</strong>
+          <span>Refine the record by product, movement type, or date.</span>
+        </div>
+        <div className={s.historyFilterControls}>
           <SelectMenu
             label="Product"
             value={productId}
@@ -218,35 +241,82 @@ function InventoryHistory({ products, onBack }) {
             value={to}
             onChange={(e) => setTo(e.target.value)}
           />
-          <button type="button" className={s.outline} onClick={reset}>
-            Reset filters
+          <button type="button" className={s.historyReset} onClick={reset}>
+            Reset
           </button>
         </div>
-      </Panel>
+      </div>
+
       {error && <div className={s.errorBox}>{error}</div>}
-      <Panel
-        title="Movement history"
-        sub={
-          loading
-            ? "Loading…"
-            : rows.length
-              ? `Page ${page} · Showing ${rows.length} records`
-              : `Page ${page} · No movements found`
-        }
-      >
-        <div className={s.movementHistoryTableWrap}>
-          {loading ? (
-            <div className={s.modalLoading}>Loading movement history…</div>
-          ) : rows.length === 0 ? (
-            <div className={s.emptyState}>
-              <strong>No movements found</strong>
-              <span>Try changing the filters or date range.</span>
+
+      <div className={s.historyRecordsHead}>
+        <div>
+          <span className={s.kicker}>ACTIVITY LOG</span>
+          <h3>Movement history</h3>
+        </div>
+        <div className={s.historyViewTools}>
+          <div className={s.historyViewToggle} aria-label="History view">
+            <button
+              type="button"
+              className={view === "table" ? s.historyViewActive : ""}
+              onClick={() => setView("table")}
+            >
+              Table
+            </button>
+            <button
+              type="button"
+              className={view === "timeline" ? s.historyViewActive : ""}
+              onClick={() => setView("timeline")}
+            >
+              Timeline
+            </button>
+          </div>
+          {view === "table" && (
+            <div className={s.historyDensity} aria-label="Table density">
+              <button
+                type="button"
+                className={
+                  density === "comfortable" ? s.historyDensityActive : ""
+                }
+                onClick={() => setDensity("comfortable")}
+              >
+                Comfortable
+              </button>
+              <button
+                type="button"
+                className={density === "compact" ? s.historyDensityActive : ""}
+                onClick={() => setDensity("compact")}
+              >
+                Compact
+              </button>
             </div>
-          ) : (
+          )}
+        </div>
+      </div>
+
+      <div
+        className={`${s.historyRecords} ${density === "compact" ? s.historyCompact : ""}`}
+      >
+        {loading ? (
+          <div className={s.historyLoading}>
+            <span></span>
+            <strong>Loading movement history</strong>
+            <small>Fetching the latest records…</small>
+          </div>
+        ) : rows.length === 0 ? (
+          <div className={s.historyEmpty}>
+            <strong>No movements found</strong>
+            <span>Try changing the filters or date range.</span>
+            <button type="button" className={s.outline} onClick={reset}>
+              Clear filters
+            </button>
+          </div>
+        ) : view === "table" ? (
+          <div className={s.historyTableWrap}>
             <table>
               <thead>
                 <tr>
-                  <th>Date</th>
+                  <th>Date & time</th>
                   <th>Product</th>
                   <th>Movement</th>
                   <th>Quantity</th>
@@ -260,51 +330,82 @@ function InventoryHistory({ products, onBack }) {
                       <strong>{formatMovementDate(m.createdAt)}</strong>
                       <small>{formatMovementTime(m.createdAt)}</small>
                     </td>
-                    <td>{m.productName}</td>
                     <td>
-                      <span className={s.badge}>{m.type}</span>
+                      <span className={s.historyProduct}>{m.productName}</span>
                     </td>
-                    <td>{m.quantity}</td>
-                    <td>{m.reference || "—"}</td>
+                    <td>
+                      <span className={s.historyMovementBadge}>{m.type}</span>
+                    </td>
+                    <td>
+                      <strong className={s.historyQuantity}>
+                        {m.quantity}
+                      </strong>
+                    </td>
+                    <td className={s.historyReference}>{m.reference || "—"}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          )}
-        </div>
-        <footer className={s.movementHistoryFooter}>
-          <span>
-            {rows.length ? `Page ${page} · Showing ${rows.length} records` : ""}
-          </span>
-          <div>
-            <button
-              className={s.outline}
-              disabled={page <= 1 || loading}
-              onClick={() => load(pageCursors[page - 2] || null, page - 1)}
-            >
-              Previous
-            </button>
-            <button
-              className={s.outline}
-              disabled={page <= 1 || loading}
-              onClick={() => load(null, 1)}
-            >
-              First page
-            </button>
-            <button
-              className={s.primary}
-              disabled={!nextCursor || loading}
-              onClick={() => load(nextCursor, page + 1)}
-            >
-              Next 50
-            </button>
           </div>
-        </footer>
-      </Panel>
+        ) : (
+          <div className={s.historyTimeline}>
+            {rows.map((m) => (
+              <article className={s.historyTimelineItem} key={m.id}>
+                <div className={s.historyTimelineRail}>
+                  <span></span>
+                </div>
+                <div className={s.historyTimelineContent}>
+                  <div className={s.historyTimelineTop}>
+                    <strong>{m.productName}</strong>
+                    <time>
+                      {formatMovementDate(m.createdAt)} ·{" "}
+                      {formatMovementTime(m.createdAt)}
+                    </time>
+                  </div>
+                  <div className={s.historyTimelineDetails}>
+                    <span className={s.historyMovementBadge}>{m.type}</span>
+                    <strong>Quantity: {m.quantity}</strong>
+                    {m.reference && <span>Reference: {m.reference}</span>}
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <footer className={s.historyPagination}>
+        <div>
+          <strong>{rows.length ? `Page ${page}` : ""}</strong>
+          {rows.length && <span>Showing {rows.length} records</span>}
+        </div>
+        <div className={s.historyPaginationButtons}>
+          <button
+            className={s.outline}
+            disabled={page <= 1 || loading}
+            onClick={() => load(pageCursors[page - 2] || null, page - 1)}
+          >
+            Previous
+          </button>
+          <button
+            className={s.outline}
+            disabled={page <= 1 || loading}
+            onClick={() => load(null, 1)}
+          >
+            First page
+          </button>
+          <button
+            className={s.primary}
+            disabled={!nextCursor || loading}
+            onClick={() => load(nextCursor, page + 1)}
+          >
+            Next 50&nbsp; →
+          </button>
+        </div>
+      </footer>
     </section>
   );
 }
-
 function Inventory({ data, products, onAdjust, money, onViewHistory }) {
   const [p, setP] = useState(products[0]);
   const [qty, setQty] = useState(1);
