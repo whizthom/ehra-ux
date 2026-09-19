@@ -98,7 +98,12 @@ export default function EmployerFloatingActions() {
           aria-label="Open Ehral Intelligence"
           title="Ehral Intelligence"
         >
-          <i className="ti ti-sparkles" aria-hidden="true" />
+          <img
+            className={styles.aiLogo}
+            src="/ehral-ai-logo.ico"
+            alt=""
+            aria-hidden="true"
+          />
         </button>
 
         <button
