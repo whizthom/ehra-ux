@@ -36,23 +36,25 @@ const writeJson = (key, value) => {
 
 const money = (currency, value) =>
   `${currency || "NGN"} ${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-const getCategory = (p) => p?.category || p?.productCategory || "Product";
+const getCategory = (p) => {
+  const value =
+    p?.category ?? p?.productCategory ?? p?.categoryName ?? p?.category?.name;
+  return typeof value === "string" && value.trim()
+    ? value.trim()
+    : "Uncategorized";
+};
+const stockOf = (p) => {
+  const value = Number(p?.stockQuantity);
+  return Number.isFinite(value) ? Math.max(0, value) : 0;
+};
 const effectivePrice = (p) =>
   Math.max(0, Number(p?.price || 0) - Number(p?.discount || 0));
-const stockOf = (p) =>
-  p?.trackInventory
-    ? Math.max(
-        0,
-        Number.isFinite(Number(p?.stockQuantity)) ? Number(p.stockQuantity) : 0,
-      )
-    : null;
 const stockState = (p) => {
   const n = stockOf(p);
   if (!p?.available || n === 0) return { label: "Out of stock", tone: "empty" };
-  if (n !== null && n <= Number(p?.lowStockThreshold || 5))
+  if (n <= Number(p?.lowStockThreshold || 5))
     return { label: `${n} left`, tone: "low" };
-  if (n !== null) return { label: `${n} in stock`, tone: "good" };
-  return { label: "Available", tone: "good" };
+  return { label: `${n} in stock`, tone: "good" };
 };
 const imagesOf = (p) => {
   try {
@@ -104,7 +106,15 @@ function ProductCard({
       </button>
       <div className={styles.productBody}>
         <div className={styles.productMeta}>
-          <span>{getCategory(product)}</span>
+          <span className={styles.categoryLabel}>
+            <i className="ti ti-tag" />
+            {getCategory(product)}
+          </span>
+          <span
+            className={`${styles.cardStockText} ${styles[`stock${stock.tone}`]}`}
+          >
+            {stock.label}
+          </span>
           <button
             type="button"
             className={`${styles.heart} ${wished ? styles.wished : ""}`}
@@ -443,11 +453,20 @@ export default function Storefront() {
   const categories = useMemo(
     () => [
       "All",
-      ...Array.from(
-        new Set(products.map(getCategory).filter((x) => x && x !== "Product")),
-      ),
+      ...Array.from(new Set(products.map(getCategory).filter(Boolean))),
     ],
     [products],
+  );
+  const categoryGroups = useMemo(
+    () =>
+      categories
+        .slice(1)
+        .map((name) => ({
+          name,
+          products: products.filter((p) => getCategory(p) === name),
+        }))
+        .filter((g) => g.products.length),
+    [categories, products],
   );
   const availableProducts = useMemo(
     () => products.filter((p) => p.available),
@@ -1098,18 +1117,55 @@ export default function Storefront() {
           )}
           {error && <div className={styles.error}>{error}</div>}
           {filteredProducts.length ? (
-            <div className={styles.grid}>
-              {filteredProducts.map((p) => (
-                <ProductCard
-                  key={p.id}
-                  product={p}
-                  onOpen={openProduct}
-                  onAdd={(x) => requireCustomer(() => add(x))}
-                  wished={wishlist.has(String(p.id))}
-                  onWishlist={toggleWishlist}
-                />
-              ))}
-            </div>
+            category === "All" && !search.trim() ? (
+              <div className={styles.categoryGroups}>
+                {categoryGroups.map((group) => (
+                  <section className={styles.categoryGroup} key={group.name}>
+                    <div className={styles.categoryGroupHead}>
+                      <div>
+                        <span className={styles.categoryOverline}>
+                          COLLECTION
+                        </span>
+                        <h3>{group.name}</h3>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setCategory(group.name)}
+                      >
+                        {group.products.length}{" "}
+                        {group.products.length === 1 ? "product" : "products"}
+                        <i className="ti ti-arrow-right" />
+                      </button>
+                    </div>
+                    <div className={styles.grid}>
+                      {group.products.map((p) => (
+                        <ProductCard
+                          key={p.id}
+                          product={p}
+                          onOpen={openProduct}
+                          onAdd={(x) => requireCustomer(() => add(x))}
+                          wished={wishlist.has(String(p.id))}
+                          onWishlist={toggleWishlist}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            ) : (
+              <div className={styles.grid}>
+                {filteredProducts.map((p) => (
+                  <ProductCard
+                    key={p.id}
+                    product={p}
+                    onOpen={openProduct}
+                    onAdd={(x) => requireCustomer(() => add(x))}
+                    wished={wishlist.has(String(p.id))}
+                    onWishlist={toggleWishlist}
+                  />
+                ))}
+              </div>
+            )
           ) : (
             <div className={styles.empty}>
               <i className="ti ti-search-off" />
@@ -1356,14 +1412,14 @@ export default function Storefront() {
           const gallery = imagesOf(selectedProduct);
           const stock = stockOf(selectedProduct);
           const state = stockState(selectedProduct);
-          const maxQty = stock === null ? 99 : Math.max(1, stock);
+          const maxQty = Math.max(1, stock);
           const meter =
-            stock === null
-              ? 70
+            stock === 0
+              ? 4
               : Math.min(
                   100,
                   Math.max(
-                    8,
+                    10,
                     (stock /
                       Math.max(
                         stock,
@@ -1482,28 +1538,32 @@ export default function Storefront() {
                     {selectedProduct.description ||
                       "A carefully selected product from this store."}
                   </p>
-                  {selectedProduct.trackInventory && (
-                    <div className={styles.stockPanel}>
-                      <div className={styles.stockPanelTop}>
-                        <span>Availability</span>
-                        <strong>
-                          {stock > 0
-                            ? `${stock} ${stock === 1 ? "unit" : "units"} available`
-                            : "Currently unavailable"}
-                        </strong>
-                      </div>
-                      <div className={styles.stockMeter}>
-                        <span style={{ width: `${meter}%` }} />
-                      </div>
-                      {stock > 0 &&
-                        stock <=
-                          Number(selectedProduct.lowStockThreshold || 5) && (
-                          <small>
-                            Low stock. Order soon while it is available.
-                          </small>
-                        )}
+                  <div className={styles.stockPanel}>
+                    <div className={styles.stockPanelTop}>
+                      <span>Current availability</span>
+                      <strong>
+                        {stock > 0
+                          ? `${stock} ${stock === 1 ? "unit" : "units"} in stock`
+                          : "Currently out of stock"}
+                      </strong>
                     </div>
-                  )}
+                    <div className={styles.stockMeter}>
+                      <span style={{ width: `${meter}%` }} />
+                    </div>
+                    {stock > 0 &&
+                    stock <= Number(selectedProduct.lowStockThreshold || 5) ? (
+                      <small>
+                        Only {stock} {stock === 1 ? "unit" : "units"} remaining.
+                        Order soon while available.
+                      </small>
+                    ) : (
+                      <small>
+                        {selectedProduct.trackInventory
+                          ? "Live inventory count from the store."
+                          : "Stock availability is supplied by the store."}
+                      </small>
+                    )}
+                  </div>
                   <div className={styles.detailPerks}>
                     <span>
                       <i className="ti ti-shield-check" /> Secure order

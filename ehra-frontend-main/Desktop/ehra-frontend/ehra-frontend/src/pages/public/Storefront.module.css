@@ -2978,3 +2978,188 @@
         animation: none
     }
 }
+
+/* Ehral commerce refinement: owner-defined categories and live inventory */
+.categoryLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 68%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase
+}
+
+.categoryLabel i {
+    font-size: 13px;
+    opacity: .65
+}
+
+.cardStockText {
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    margin-left: auto;
+    margin-right: 8px
+}
+
+.stockgood {
+    color: #167a50
+}
+
+.stocklow {
+    color: #a15a00
+}
+
+.stockempty {
+    color: #b42318
+}
+
+.categoryGroups {
+    display: flex;
+    flex-direction: column;
+    gap: 64px
+}
+
+.categoryGroup {
+    scroll-margin-top: 140px
+}
+
+.categoryGroupHead {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    margin: 0 0 22px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(15, 23, 42, .09)
+}
+
+.categoryOverline {
+    display: block;
+    font-size: 10px;
+    letter-spacing: .14em;
+    font-weight: 800;
+    color: #8a94a6;
+    margin-bottom: 6px
+}
+
+.categoryGroupHead h3 {
+    margin: 0;
+    font-size: 26px;
+    line-height: 1.05;
+    letter-spacing: -.035em;
+    color: #111827
+}
+
+.categoryGroupHead button {
+    border: 0;
+    background: none;
+    color: #5b6473;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 8px 0
+}
+
+.categoryGroupHead button:hover {
+    color: #111827
+}
+
+.categoryGroupHead button i {
+    font-size: 15px;
+    transition: transform .2s ease
+}
+
+.categoryGroupHead button:hover i {
+    transform: translateX(3px)
+}
+
+.stockPanel {
+    border: 1px solid rgba(17, 24, 39, .09);
+    background: linear-gradient(180deg, #fbfcfd, #f6f8fa);
+    border-radius: 18px;
+    padding: 16px 17px;
+    margin: 22px 0
+}
+
+.stockPanelTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 11px
+}
+
+.stockPanelTop span {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #7b8492
+}
+
+.stockPanelTop strong {
+    font-size: 15px;
+    color: #111827
+}
+
+.stockMeter {
+    height: 6px;
+    background: #e8ebef;
+    border-radius: 999px;
+    overflow: hidden
+}
+
+.stockMeter span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: #18212f;
+    transition: width .3s ease
+}
+
+.stockPanel small {
+    display: block;
+    margin-top: 9px;
+    color: #7b8492;
+    font-size: 11px;
+    line-height: 1.45
+}
+
+.detailEyebrow {
+    align-items: center
+}
+
+@media (max-width:760px) {
+    .categoryGroups {
+        gap: 42px
+    }
+
+    .categoryGroupHead {
+        margin-bottom: 16px
+    }
+
+    .categoryGroupHead h3 {
+        font-size: 22px
+    }
+
+    .categoryGroupHead button {
+        font-size: 11px
+    }
+
+    .categoryLabel {
+        max-width: 54%
+    }
+
+    .cardStockText {
+        font-size: 10px
+    }
+}
