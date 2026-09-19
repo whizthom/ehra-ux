@@ -1797,6 +1797,7 @@ export default function CustomerDashboard() {
         setActiveNav={changeTab}
         navigate={nav}
         badges={{ Messages: unread }}
+        onLogout={signOut}
       />
 
       {selectedOrder && (

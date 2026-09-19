@@ -337,6 +337,8 @@ export default function MobileNavHub({
 }) {
   const [hub, setHub] = useState(null);
 
+  // Always derive the active hub from the current destination. This keeps the
+  // five-item mobile navigation synchronized when the parent changes tabs.
   useEffect(() => {
     setHub(null);
   }, [activeNav]);
@@ -387,12 +389,13 @@ export default function MobileNavHub({
   const openPrimary = (destination) => {
     if (destination === "Home") {
       setHub(null);
-      setActiveNav("Dashboard");
+      const homeKey = role === "customer" ? "home" : "Dashboard";
+      if (activeNav !== homeKey) setActiveNav(homeKey);
       return;
     }
     if (destination === "Messages") {
       setHub(null);
-      setActiveNav("Messages");
+      setActiveNav(role === "customer" ? "messages" : "Messages");
       return;
     }
     setHub((current) => (current === destination ? null : destination));

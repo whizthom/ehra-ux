@@ -80,7 +80,7 @@
   gap: 8px;
 }
 
-.brand span {
+.brand>.brandLabel {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.16em;
@@ -2901,8 +2901,12 @@
   justify-content: center;
 }
 
-.brand span {
-  display: none;
+.brand>* {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative;
+  z-index: 2;
 }
 
 .profileMini {
