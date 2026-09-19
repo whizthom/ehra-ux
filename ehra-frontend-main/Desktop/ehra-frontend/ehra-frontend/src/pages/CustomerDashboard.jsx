@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Logo from "../components/Logo";
-import MobileNavHub from "../components/MobileNavHub";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
 import {
   getCustomerOverview,
@@ -25,46 +24,6 @@ import {
   subscribeToUserQueue,
 } from "../services/messagingSocket";
 import styles from "./CustomerDashboard.module.css";
-
-// Matches Ehral\'s employer/employee mobile navigation behavior.
-function useScrollThumb(ref) {
-  const [thumb, setThumb] = useState({ left: 0, width: 100 });
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return undefined;
-
-    const update = () => {
-      const { scrollWidth, clientWidth, scrollLeft } = el;
-      if (scrollWidth <= clientWidth + 1) {
-        setThumb({ left: 0, width: 100 });
-        return;
-      }
-      const width = Math.max((clientWidth / scrollWidth) * 100, 15);
-      const maxScroll = scrollWidth - clientWidth;
-      const left = maxScroll > 0 ? (scrollLeft / maxScroll) * (100 - width) : 0;
-      setThumb({ left, width });
-    };
-
-    update();
-    el.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    const settle = setTimeout(update, 400);
-    let observer;
-    if (typeof ResizeObserver !== "undefined") {
-      observer = new ResizeObserver(update);
-      observer.observe(el);
-    }
-    return () => {
-      el.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-      clearTimeout(settle);
-      observer?.disconnect();
-    };
-  }, [ref]);
-
-  return thumb;
-}
 
 const money = (currency, value) =>
   `${currency || "NGN"} ${Number(value || 0).toLocaleString(undefined, {
@@ -707,6 +666,7 @@ export default function CustomerDashboard() {
   const [activeChat, setActiveChat] = useState(null);
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
+  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
   const [discovery, setDiscovery] = useState([]);
   const [discoveryLoading, setDiscoveryLoading] = useState(false);
   const [discoveryQuery, setDiscoveryQuery] = useState("");
@@ -767,15 +727,17 @@ export default function CustomerDashboard() {
 
   useEffect(() => {
     load();
-    loadMessages();
     getCustomerBusinessTypes()
       .then(({ data: types }) => setBusinessTypes(types || []))
       .catch(() => {});
-  }, [load, loadMessages]);
+  }, [load]);
 
+  // Conversations are intentionally loaded on demand. The dashboard no longer
+  // depends on the messaging endpoint, so a temporary messaging failure cannot
+  // block or toast the customer while they are simply viewing Home.
   useEffect(() => {
     return subscribeToUserQueue((event) => {
-      if (!event) return;
+      if (!event || tab !== "messages") return;
       if (
         [
           "CONVERSATION_CREATED",
@@ -786,7 +748,7 @@ export default function CustomerDashboard() {
       )
         loadMessages();
     });
-  }, [loadMessages]);
+  }, [loadMessages, tab]);
 
   useEffect(() => {
     const requestedTab = searchParams.get("tab");
@@ -805,8 +767,9 @@ export default function CustomerDashboard() {
     ) {
       setTab(requestedTab);
       if (requestedTab === "discover") loadDiscovery();
+      if (requestedTab === "messages") loadMessages();
     }
-  }, [searchParams, loadDiscovery]);
+  }, [searchParams, loadDiscovery, loadMessages]);
 
   useEffect(() => {
     if (tab === "discover" && !discovery.length) loadDiscovery();
@@ -881,65 +844,6 @@ export default function CustomerDashboard() {
     (sum, c) => sum + Number(c.summary?.unreadCount || c.unreadCount || 0),
     0,
   );
-
-  const attentionItems = useMemo(() => {
-    const items = [];
-    const pendingOrders = orders.filter((o) =>
-      [
-        "PENDING",
-        "PROCESSING",
-        "CONFIRMED",
-        "READY",
-        "READY_FOR_PICKUP",
-        "OUT_FOR_DELIVERY",
-      ].includes(String(o.status || "").toUpperCase()),
-    );
-    pendingOrders.slice(0, 2).forEach((o) => {
-      items.push({
-        id: `order-${o.id}`,
-        icon: "shopping-bag",
-        title: `Order #${o.orderNumber} is ${String(o.status || "processing")
-          .replaceAll("_", " ")
-          .toLowerCase()}`,
-        text: `${o.businessName} · ${money(o.currency, o.total)}`,
-        action: () => setSelectedOrder(o),
-        actionLabel: "View order",
-      });
-    });
-    if (unread > 0) {
-      const firstUnread = messages.find(
-        (m) => Number((m.summary || m).unreadCount || 0) > 0,
-      );
-      items.push({
-        id: "messages",
-        icon: "message-circle",
-        title: `${unread} unread business message${unread === 1 ? "" : "s"}`,
-        text: firstUnread?.businessName
-          ? `From ${firstUnread.businessName}`
-          : "A business is waiting for your response",
-        action: () => {
-          setTab("messages");
-          loadMessages();
-        },
-        actionLabel: "Open messages",
-      });
-    }
-    const unpaid = orders.find(
-      (o) =>
-        !o.receiptAvailable && Number(o.amountPaid || 0) < Number(o.total || 0),
-    );
-    if (unpaid && !pendingOrders.some((o) => o.id === unpaid.id)) {
-      items.push({
-        id: `payment-${unpaid.id}`,
-        icon: "receipt",
-        title: `Receipt pending for order #${unpaid.orderNumber}`,
-        text: `${unpaid.businessName} · Receipt becomes available after full payment`,
-        action: () => setSelectedOrder(unpaid),
-        actionLabel: "Review order",
-      });
-    }
-    return items.slice(0, 3);
-  }, [orders, messages, unread, loadMessages]);
 
   const activity = useMemo(() => {
     const orderActivity = orders.slice(0, 5).map((o) => ({
@@ -1072,7 +976,8 @@ export default function CustomerDashboard() {
     <div className={styles.shell}>
       <aside className={styles.sidebar}>
         <div className={styles.brand}>
-          <Logo size={62} variant="horizontal" tone="sidebar" title="Ehral" />
+          <Logo size={116} variant="horizontal" tone="brand" title="Ehral" />
+          <span>Customer</span>
         </div>
         <div className={styles.profileMini}>
           <div className={styles.profileAvatar}>
@@ -1080,7 +985,7 @@ export default function CustomerDashboard() {
           </div>
           <div>
             <strong>{data?.firstName || "Customer"}</strong>
-            <small>Customer account</small>
+            <small>{data?.phone || "Ehral account"}</small>
           </div>
         </div>
         <nav>
@@ -1114,7 +1019,7 @@ export default function CustomerDashboard() {
             className={styles.mobileBrand}
             onClick={() => changeTab("home")}
           >
-            <Logo size={48} variant="horizontal" tone="brand" title="Ehral" />
+            <Logo size={96} variant="horizontal" tone="brand" title="Ehral" />
           </button>
           <div className={styles.topTitle}>
             <span>MY EHRAL</span>
@@ -1126,7 +1031,7 @@ export default function CustomerDashboard() {
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search orders…"
+                placeholder="Search your orders…"
                 aria-label="Search orders"
               />
               {query && (
@@ -1214,51 +1119,6 @@ export default function CustomerDashboard() {
                 </div>
               </section>
 
-              <section
-                className={styles.attentionSection}
-                aria-label="Needs your attention"
-              >
-                <div className={styles.attentionHead}>
-                  <div>
-                    <span className={styles.eyebrow}>RIGHT NOW</span>
-                    <h2>Needs your attention</h2>
-                  </div>
-                  {attentionItems.length === 0 && (
-                    <span className={styles.allCaughtUp}>
-                      <i className="ti ti-circle-check-filled" /> All caught up
-                    </span>
-                  )}
-                </div>
-                {attentionItems.length ? (
-                  <div className={styles.attentionList}>
-                    {attentionItems.map((item) => (
-                      <button
-                        key={item.id}
-                        className={styles.attentionItem}
-                        onClick={item.action}
-                      >
-                        <span className={styles.attentionIcon}>
-                          <i className={`ti ti-${item.icon}`} />
-                        </span>
-                        <span className={styles.attentionCopy}>
-                          <strong>{item.title}</strong>
-                          <small>{item.text}</small>
-                        </span>
-                        <span className={styles.attentionAction}>
-                          {item.actionLabel}
-                          <i className="ti ti-arrow-right" />
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <p className={styles.attentionEmpty}>
-                    Your orders, messages and receipts do not need any action
-                    right now.
-                  </p>
-                )}
-              </section>
-
               <section className={styles.section}>
                 <div className={styles.sectionHead}>
                   <div>
@@ -1292,18 +1152,37 @@ export default function CustomerDashboard() {
                 )}
               </section>
 
-              <section className={styles.section}>
-                <div className={styles.sectionHead}>
-                  <div>
-                    <span className={styles.eyebrow}>LATEST</span>
-                    <h2>Recent orders</h2>
+              <section className={styles.twoPanel}>
+                <div className={styles.section}>
+                  <div className={styles.sectionHead}>
+                    <div>
+                      <span className={styles.eyebrow}>LATEST</span>
+                      <h2>Recent orders</h2>
+                    </div>
+                    <button onClick={() => changeTab("orders")}>See all</button>
                   </div>
-                  <button onClick={() => changeTab("orders")}>See all</button>
+                  <OrderList
+                    orders={orders.slice(0, 5)}
+                    onReceipt={setSelectedOrder}
+                  />
                 </div>
-                <OrderList
-                  orders={orders.slice(0, 5)}
-                  onReceipt={setSelectedOrder}
-                />
+                <div className={styles.section}>
+                  <div className={styles.sectionHead}>
+                    <div>
+                      <span className={styles.eyebrow}>MESSAGES</span>
+                      <h2>Business conversations</h2>
+                    </div>
+                    <button onClick={() => changeTab("messages")}>
+                      Open inbox
+                    </button>
+                  </div>
+                  <ConversationList
+                    conversations={messages.slice(0, 4)}
+                    onOpen={(c) =>
+                      setActiveChat({ ...c, myIdentityId: user?.identityId })
+                    }
+                  />
+                </div>
               </section>
 
               <section className={styles.section}>
@@ -1791,14 +1670,69 @@ export default function CustomerDashboard() {
         </div>
       </main>
 
-      <MobileNavHub
-        role="customer"
-        activeNav={tab}
-        setActiveNav={changeTab}
-        navigate={nav}
-        badges={{ Messages: unread }}
-        onLogout={signOut}
-      />
+      <nav className={styles.mobileNav} aria-label="Customer navigation">
+        {["home", "businesses", "orders", "messages"].map((id) => {
+          const item = navItems.find((n) => n[0] === id);
+          return (
+            <button
+              key={id}
+              className={tab === id ? styles.mobileNavActive : ""}
+              onClick={() => changeTab(id)}
+            >
+              <i className={`ti ti-${item[2]}`} />
+              <span>{item[1].replace("My ", "")}</span>
+              {id === "messages" && unread > 0 && (
+                <em>{unread > 9 ? "9+" : unread}</em>
+              )}
+            </button>
+          );
+        })}
+        <button
+          className={mobileMoreOpen ? styles.mobileNavActive : ""}
+          onClick={() => setMobileMoreOpen((v) => !v)}
+        >
+          <i className="ti ti-dots" />
+          <span>More</span>
+        </button>
+      </nav>
+
+      {mobileMoreOpen && (
+        <div
+          className={styles.mobileMoreBackdrop}
+          onClick={() => setMobileMoreOpen(false)}
+        >
+          <div
+            className={styles.mobileMoreSheet}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.mobileSheetHandle} />
+            <div className={styles.mobileSheetBrand}>
+              <Logo size={90} variant="horizontal" tone="brand" title="Ehral" />
+              <span>My Ehral</span>
+            </div>
+            {[
+              ["receipts", "Receipts", "receipt"],
+              ["spending", "Spending", "chart-donut"],
+              ["account", "Account", "user-circle"],
+            ].map(([id, label, icon]) => (
+              <button key={id} onClick={() => changeTab(id)}>
+                <i className={`ti ti-${icon}`} />
+                <span>{label}</span>
+                <i className="ti ti-chevron-right" />
+              </button>
+            ))}
+            <button onClick={() => nav("/my-accounts")}>
+              <i className="ti ti-switch-horizontal" />
+              <span>My Accounts</span>
+              <i className="ti ti-chevron-right" />
+            </button>
+            <button className={styles.mobileSignOut} onClick={signOut}>
+              <i className="ti ti-logout-2" />
+              <span>Sign out</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {selectedOrder && (
         <ReceiptView
