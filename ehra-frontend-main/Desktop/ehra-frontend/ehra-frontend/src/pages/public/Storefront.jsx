@@ -36,6 +36,11 @@ const writeJson = (key, value) => {
 
 const money = (currency, value) =>
   `${currency || "NGN"} ${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+const effectivePrice = (p) => {
+  const price = Number(p?.price || 0);
+  const discount = Number(p?.discount || 0);
+  return Math.max(0, price - (Number.isFinite(discount) ? discount : 0));
+};
 const getCategory = (p) => {
   const raw =
     p?.category ??
