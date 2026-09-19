@@ -10,9 +10,10 @@ import {
 } from "../../api/commerceApi";
 import { buildWhatsAppLink } from "../../api/whatsappApi";
 import {
-  sendOtp,
   verifyOtp,
   checkPhone,
+  checkPhoneBeforeOtp,
+  sendCustomerRegistrationOtp,
   registerCustomerWithPhone,
 } from "../../api/phoneAuthApi";
 import {
@@ -220,6 +221,7 @@ function ProductRail({
 }
 
 function CustomerGate({ store, slug, gate, setGate, onComplete }) {
+  const navigate = useNavigate();
   const close = () =>
     setGate((g) => ({ ...g, open: false, pending: null, message: "" }));
   const setMessage = (message) => setGate((g) => ({ ...g, message }));
@@ -231,12 +233,33 @@ function CustomerGate({ store, slug, gate, setGate, onComplete }) {
       return;
     }
     try {
+      // IMPORTANT: registration must not send an OTP to an existing Ehral
+      // identity. Check first, then branch to login or registration OTP.
+      setGate((g) => ({
+        ...g,
+        step: "checking",
+        message: "Checking your Ehral account…",
+      }));
+      const check = await checkPhoneBeforeOtp(phone);
+      if (check?.exists) {
+        setGate((g) => ({
+          ...g,
+          phone: check.phoneNumber || phone,
+          step: "existingLogin",
+          pinId: "",
+          otp: "",
+          phoneVerificationToken: "",
+          message:
+            "This phone number already has an Ehral account. Please sign in instead, or use Forgot password if you need to reset it.",
+        }));
+        return;
+      }
       setGate((g) => ({
         ...g,
         step: "sending",
         message: "Sending verification code…",
       }));
-      const r = await sendOtp(phone);
+      const r = await sendCustomerRegistrationOtp(phone);
       setGate((g) => ({
         ...g,
         phone,
@@ -248,12 +271,24 @@ function CustomerGate({ store, slug, gate, setGate, onComplete }) {
           : "Verification code sent to your phone.",
       }));
     } catch (e) {
-      setGate((g) => ({
-        ...g,
-        step: "phone",
-        message:
-          e?.response?.data?.message || "Could not send verification code.",
-      }));
+      if (e?.response?.status === 409) {
+        setGate((g) => ({
+          ...g,
+          phone,
+          step: "existingLogin",
+          password: "",
+          message:
+            e?.response?.data?.message ||
+            "This phone number already has an Ehral account. Please sign in or use Forgot password.",
+        }));
+      } else {
+        setGate((g) => ({
+          ...g,
+          step: "phone",
+          message:
+            e?.response?.data?.message || "Could not check this phone number.",
+        }));
+      }
     }
   };
 
@@ -405,7 +440,7 @@ function CustomerGate({ store, slug, gate, setGate, onComplete }) {
   };
 
   if (!gate.open) return null;
-  const stepNumber = ["phone", "sending"].includes(gate.step)
+  const stepNumber = ["phone", "checking", "sending"].includes(gate.step)
     ? 1
     : ["verify", "verifying"].includes(gate.step)
       ? 2
@@ -534,6 +569,11 @@ function CustomerGate({ store, slug, gate, setGate, onComplete }) {
             >
               Continue securely <i className="ti ti-arrow-right" />
             </button>
+          </div>
+        )}
+        {gate.step === "checking" && (
+          <div className={styles.gateLoading}>
+            <span className={styles.gateSpinner} /> Checking your Ehral account…
           </div>
         )}
         {gate.step === "sending" && (
@@ -724,9 +764,9 @@ function CustomerGate({ store, slug, gate, setGate, onComplete }) {
         {(gate.step === "existingLogin" || gate.step === "signingIn") && (
           <div className={styles.accountForm}>
             <div className={styles.verifiedPhone}>
-              <i className="ti ti-circle-check-filled" />
+              <i className="ti ti-user-check" />
               <span>{gate.phone}</span>
-              <b>Phone verified</b>
+              <b>Ehral account found</b>
             </div>
             <label className={styles.customerGateLabel}>Password</label>
             <input

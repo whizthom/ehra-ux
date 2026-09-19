@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import {
@@ -17,10 +17,12 @@ const RESEND_COOLDOWN_SECONDS = 30;
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const initialPhone = location.state?.phone || "";
 
   // step: "phone" -> "otp" -> "newPassword" -> "done"
   const [step, setStep] = useState("phone");
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(initialPhone);
   const [otp, setOtp] = useState("");
   const [confirmationResult, setConfirmationResult] = useState(null);
 
