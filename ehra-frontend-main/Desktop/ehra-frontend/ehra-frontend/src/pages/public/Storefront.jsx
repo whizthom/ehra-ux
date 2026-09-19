@@ -39,6 +39,21 @@ const money = (currency, value) =>
 const getCategory = (p) => p?.category || p?.productCategory || "Product";
 const effectivePrice = (p) =>
   Math.max(0, Number(p?.price || 0) - Number(p?.discount || 0));
+const stockOf = (p) =>
+  p?.trackInventory
+    ? Math.max(
+        0,
+        Number.isFinite(Number(p?.stockQuantity)) ? Number(p.stockQuantity) : 0,
+      )
+    : null;
+const stockState = (p) => {
+  const n = stockOf(p);
+  if (!p?.available || n === 0) return { label: "Out of stock", tone: "empty" };
+  if (n !== null && n <= Number(p?.lowStockThreshold || 5))
+    return { label: `${n} left`, tone: "low" };
+  if (n !== null) return { label: `${n} in stock`, tone: "good" };
+  return { label: "Available", tone: "good" };
+};
 const imagesOf = (p) => {
   try {
     const parsed = p?.imagesJson ? JSON.parse(p.imagesJson) : [];
@@ -59,85 +74,72 @@ function ProductCard({
 }) {
   const image = imagesOf(product)[0];
   const discounted = Number(product?.discount || 0) > 0;
+  const stock = stockState(product);
   return (
     <article
       className={`${styles.product} ${compact ? styles.productCompact : ""}`}
     >
-      <div className={styles.productVisual}>
-        <button
-          type="button"
-          className={styles.productImageButton}
-          onClick={() => onOpen(product)}
-          aria-label={`View ${product.name}`}
-        >
-          <div className={styles.imageWrap}>
-            {image ? (
-              <img src={image} alt={product.name} loading="lazy" />
-            ) : (
-              <div className={styles.imagePlaceholder}>
-                <i className="ti ti-package" />
-              </div>
-            )}
-            {discounted && <span className={styles.saleBadge}>SALE</span>}
-            {!product.available && (
-              <span className={styles.soldBadge}>SOLD OUT</span>
-            )}
-            <span className={styles.quickView}>
-              Quick view <i className="ti ti-arrow-up-right" />
-            </span>
+      <button
+        type="button"
+        className={styles.productVisual}
+        onClick={() => onOpen(product)}
+        aria-label={`View ${product.name}`}
+      >
+        {image ? (
+          <img src={image} alt={product.name} loading="lazy" />
+        ) : (
+          <div className={styles.imagePlaceholder}>
+            <i className="ti ti-package" />
           </div>
-        </button>
-        <button
-          type="button"
-          className={`${styles.wishlistButton} ${wished ? styles.wished : ""}`}
-          onClick={() => onWishlist(product)}
-          aria-label={
-            wished
-              ? `Remove ${product.name} from wishlist`
-              : `Add ${product.name} to wishlist`
-          }
+        )}
+        <span
+          className={`${styles.stockBadge} ${styles[`stock${stock.tone}`]}`}
         >
-          <i className={wished ? "ti ti-heart-filled" : "ti ti-heart"} />
-        </button>
-      </div>
+          {stock.label}
+        </span>
+        {discounted && <span className={styles.saleBadge}>Offer</span>}
+        <span className={styles.quickView}>
+          Quick view <i className="ti ti-arrow-up-right" />
+        </span>
+      </button>
       <div className={styles.productBody}>
         <div className={styles.productMeta}>
           <span>{getCategory(product)}</span>
-          {product.available ? (
-            <span className={styles.available}>
-              <i /> In stock
-            </span>
-          ) : (
-            <span className={styles.unavailable}>Out of stock</span>
-          )}
+          <button
+            type="button"
+            className={`${styles.heart} ${wished ? styles.wished : ""}`}
+            onClick={() => onWishlist(product)}
+          >
+            <i className={wished ? "ti ti-heart-filled" : "ti ti-heart"} />
+          </button>
         </div>
         <button
           type="button"
-          className={styles.productNameButton}
+          className={styles.productName}
           onClick={() => onOpen(product)}
         >
-          <h3>{product.name}</h3>
+          {product.name}
         </button>
-        {!compact && <p>{product.description || ""}</p>}
-        <div className={styles.priceRow}>
+        {!compact && product.description && (
+          <p className={styles.productDescription}>{product.description}</p>
+        )}
+        <div className={styles.productFoot}>
           <div>
             <strong>{money(product.currency, effectivePrice(product))}</strong>
             {discounted && <del>{money(product.currency, product.price)}</del>}
           </div>
           <button
-            disabled={!product.available}
+            className={styles.addButton}
+            disabled={!product.available || stockOf(product) === 0}
             onClick={() => onAdd(product)}
-            aria-label={`Add ${product.name} to order`}
           >
             <i className="ti ti-plus" />
-            <span>Add</span>
           </button>
         </div>
       </div>
     </article>
   );
 }
-
 function ProductRail({
   title,
   kicker,
@@ -358,6 +360,8 @@ export default function Storefront() {
   const [checkout, setCheckout] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [productQty, setProductQty] = useState(1);
+  const [productImageIndex, setProductImageIndex] = useState(0);
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [category, setCategory] = useState("All");
@@ -551,6 +555,8 @@ export default function Storefront() {
     (product) => {
       rememberProduct(product);
       setSelectedProduct(product);
+      setProductQty(1);
+      setProductImageIndex(0);
       setSearchOpen(false);
     },
     [rememberProduct],
@@ -1345,103 +1351,229 @@ export default function Storefront() {
         </div>
       )}
 
-      {selectedProduct && (
-        <div
-          className={styles.overlay}
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) setSelectedProduct(null);
-          }}
-        >
-          <div className={styles.productModal}>
-            <button
-              className={styles.close}
-              onClick={() => setSelectedProduct(null)}
-              aria-label="Close"
+      {selectedProduct &&
+        (() => {
+          const gallery = imagesOf(selectedProduct);
+          const stock = stockOf(selectedProduct);
+          const state = stockState(selectedProduct);
+          const maxQty = stock === null ? 99 : Math.max(1, stock);
+          const meter =
+            stock === null
+              ? 70
+              : Math.min(
+                  100,
+                  Math.max(
+                    8,
+                    (stock /
+                      Math.max(
+                        stock,
+                        Number(selectedProduct.lowStockThreshold || 5) * 4,
+                      )) *
+                      100,
+                  ),
+                );
+          return (
+            <div
+              className={styles.productOverlay}
+              onMouseDown={(e) => {
+                if (e.target === e.currentTarget) setSelectedProduct(null);
+              }}
             >
-              ×
-            </button>
-            <div className={styles.modalGallery}>
-              {imagesOf(selectedProduct).length ? (
-                imagesOf(selectedProduct).map((u, i) => (
-                  <img
-                    key={`${u}-${i}`}
-                    src={u}
-                    alt={`${selectedProduct.name} ${i + 1}`}
-                  />
-                ))
-              ) : (
-                <div className={styles.imagePlaceholder}>
-                  <i className="ti ti-package" />
-                </div>
-              )}
-            </div>
-            <div className={styles.modalInfo}>
-              <div className={styles.modalTopline}>
-                <span className={styles.sectionKicker}>
-                  {getCategory(selectedProduct)}
-                </span>
-                <button
-                  onClick={() => toggleWishlist(selectedProduct)}
-                  className={`${styles.modalWishlist} ${wishlist.has(String(selectedProduct.id)) ? styles.wished : ""}`}
-                  aria-label="Wishlist"
-                >
-                  <i
-                    className={
-                      wishlist.has(String(selectedProduct.id))
-                        ? "ti ti-heart-filled"
-                        : "ti ti-heart"
-                    }
-                  />
-                </button>
-              </div>
-              <h2>{selectedProduct.name}</h2>
-              <p>{selectedProduct.description || ""}</p>
-              <div className={styles.modalPrice}>
-                {money(
-                  selectedProduct.currency,
-                  effectivePrice(selectedProduct),
-                )}
-              </div>
-              <span
-                className={
-                  selectedProduct.available
-                    ? styles.modalStock
-                    : styles.unavailable
-                }
+              <section
+                className={styles.productSheet}
+                role="dialog"
+                aria-modal="true"
+                aria-label={selectedProduct.name}
               >
-                {selectedProduct.available
-                  ? "In stock"
-                  : "Currently unavailable"}
-              </span>
-              <div className={styles.modalActions}>
                 <button
-                  disabled={!selectedProduct.available}
-                  onClick={() =>
-                    requireCustomer(() => {
-                      add(selectedProduct);
-                      setSelectedProduct(null);
-                      setCartOpen(true);
-                    })
-                  }
+                  className={styles.productClose}
+                  onClick={() => setSelectedProduct(null)}
+                  aria-label="Close"
                 >
-                  Add to order <i className="ti ti-plus" />
+                  <i className="ti ti-x" />
                 </button>
-                {store.whatsappNumber && (
-                  <button
-                    className={styles.outlineCta}
-                    onClick={() => {
-                      setSelectedProduct(null);
-                      chat(selectedProduct);
-                    }}
-                  >
-                    <i className="ti ti-brand-whatsapp" /> Ask a question
-                  </button>
-                )}
-              </div>
+                <div className={styles.productMedia}>
+                  <div className={styles.mainProductImage}>
+                    {gallery.length ? (
+                      <img
+                        src={
+                          gallery[
+                            Math.min(productImageIndex, gallery.length - 1)
+                          ]
+                        }
+                        alt={selectedProduct.name}
+                      />
+                    ) : (
+                      <div className={styles.imagePlaceholder}>
+                        <i className="ti ti-package" />
+                      </div>
+                    )}
+                    <span
+                      className={`${styles.detailStockPill} ${styles[`stock${state.tone}`]}`}
+                    >
+                      <i />
+                      {state.label}
+                    </span>
+                  </div>
+                  {gallery.length > 1 && (
+                    <div className={styles.thumbRail}>
+                      {gallery.map((u, i) => (
+                        <button
+                          type="button"
+                          key={`${u}-${i}`}
+                          className={
+                            i === productImageIndex ? styles.thumbActive : ""
+                          }
+                          onClick={() => setProductImageIndex(i)}
+                        >
+                          <img src={u} alt="" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className={styles.productDetail}>
+                  <div className={styles.detailEyebrow}>
+                    <span>{getCategory(selectedProduct)}</span>
+                    {selectedProduct.sku && (
+                      <span>SKU {selectedProduct.sku}</span>
+                    )}
+                    <button
+                      type="button"
+                      className={`${styles.detailHeart} ${wishlist.has(String(selectedProduct.id)) ? styles.wished : ""}`}
+                      onClick={() => toggleWishlist(selectedProduct)}
+                    >
+                      <i
+                        className={
+                          wishlist.has(String(selectedProduct.id))
+                            ? "ti ti-heart-filled"
+                            : "ti ti-heart"
+                        }
+                      />
+                    </button>
+                  </div>
+                  <h2>{selectedProduct.name}</h2>
+                  <div className={styles.detailPriceRow}>
+                    <strong>
+                      {money(
+                        selectedProduct.currency,
+                        effectivePrice(selectedProduct),
+                      )}
+                    </strong>
+                    {Number(selectedProduct.discount || 0) > 0 && (
+                      <>
+                        <del>
+                          {money(
+                            selectedProduct.currency,
+                            selectedProduct.price,
+                          )}
+                        </del>
+                        <span>
+                          Save{" "}
+                          {money(
+                            selectedProduct.currency,
+                            selectedProduct.discount,
+                          )}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  <p className={styles.detailDescription}>
+                    {selectedProduct.description ||
+                      "A carefully selected product from this store."}
+                  </p>
+                  {selectedProduct.trackInventory && (
+                    <div className={styles.stockPanel}>
+                      <div className={styles.stockPanelTop}>
+                        <span>Availability</span>
+                        <strong>
+                          {stock > 0
+                            ? `${stock} ${stock === 1 ? "unit" : "units"} available`
+                            : "Currently unavailable"}
+                        </strong>
+                      </div>
+                      <div className={styles.stockMeter}>
+                        <span style={{ width: `${meter}%` }} />
+                      </div>
+                      {stock > 0 &&
+                        stock <=
+                          Number(selectedProduct.lowStockThreshold || 5) && (
+                          <small>
+                            Low stock. Order soon while it is available.
+                          </small>
+                        )}
+                    </div>
+                  )}
+                  <div className={styles.detailPerks}>
+                    <span>
+                      <i className="ti ti-shield-check" /> Secure order
+                    </span>
+                    {store.pickupEnabled && (
+                      <span>
+                        <i className="ti ti-building-store" /> Pickup available
+                      </span>
+                    )}
+                    {store.deliveryEnabled && (
+                      <span>
+                        <i className="ti ti-truck-delivery" /> Delivery
+                        available
+                      </span>
+                    )}
+                  </div>
+                  <div className={styles.detailPurchase}>
+                    <div className={styles.quantityControl}>
+                      <button
+                        type="button"
+                        onClick={() => setProductQty((q) => Math.max(1, q - 1))}
+                        disabled={productQty <= 1}
+                      >
+                        −
+                      </button>
+                      <b>{productQty}</b>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setProductQty((q) => Math.min(maxQty, q + 1))
+                        }
+                        disabled={productQty >= maxQty}
+                      >
+                        +
+                      </button>
+                    </div>
+                    <button
+                      className={styles.primaryPurchase}
+                      disabled={!selectedProduct.available || stock === 0}
+                      onClick={() =>
+                        requireCustomer(() => {
+                          for (let i = 0; i < productQty; i++)
+                            add(selectedProduct);
+                          setSelectedProduct(null);
+                          setCartOpen(true);
+                        })
+                      }
+                    >
+                      Add {productQty > 1 ? `${productQty} items` : "to bag"}
+                      <i className="ti ti-arrow-right" />
+                    </button>
+                  </div>
+                  {store.whatsappNumber && (
+                    <button
+                      type="button"
+                      className={styles.questionCta}
+                      onClick={() => {
+                        setSelectedProduct(null);
+                        chat(selectedProduct);
+                      }}
+                    >
+                      <i className="ti ti-brand-whatsapp" /> Have a question
+                      about this product?
+                    </button>
+                  )}
+                </div>
+              </section>
             </div>
-          </div>
-        </div>
-      )}
+          );
+        })()}
 
       <CustomerGate
         store={store}
