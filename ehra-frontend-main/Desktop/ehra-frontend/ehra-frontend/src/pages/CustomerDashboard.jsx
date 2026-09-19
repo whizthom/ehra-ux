@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Logo from "../components/Logo";
+import MobileNavHub from "../components/MobileNavHub";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
 import {
   getCustomerOverview,
@@ -706,9 +707,6 @@ export default function CustomerDashboard() {
   const [activeChat, setActiveChat] = useState(null);
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
-  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
-  const bottomNavScrollRef = useRef(null);
-  const bottomNavThumb = useScrollThumb(bottomNavScrollRef);
   const [discovery, setDiscovery] = useState([]);
   const [discoveryLoading, setDiscoveryLoading] = useState(false);
   const [discoveryQuery, setDiscoveryQuery] = useState("");
@@ -1074,7 +1072,7 @@ export default function CustomerDashboard() {
     <div className={styles.shell}>
       <aside className={styles.sidebar}>
         <div className={styles.brand}>
-          <Logo size={44} variant="horizontal" tone="sidebar" title="Ehral" />
+          <Logo size={62} variant="horizontal" tone="sidebar" title="Ehral" />
         </div>
         <div className={styles.profileMini}>
           <div className={styles.profileAvatar}>
@@ -1793,86 +1791,13 @@ export default function CustomerDashboard() {
         </div>
       </main>
 
-      <nav className={styles.bottomNav} aria-label="Primary">
-        <div className={styles.bottomNavScroll} ref={bottomNavScrollRef}>
-          {navItems.map(([id, label, icon]) => (
-            <button
-              key={id}
-              type="button"
-              className={`${styles.bottomNavItem} ${tab === id ? styles.bottomNavActive : ""}`}
-              onClick={() => changeTab(id)}
-            >
-              <div className={styles.bottomNavIconWrap}>
-                <i className={`ti ti-${icon}`} aria-hidden="true" />
-                {id === "messages" && unread > 0 && (
-                  <span
-                    className={styles.bottomNavDot}
-                    aria-label={`${unread} unread messages`}
-                  />
-                )}
-              </div>
-              <span>{label.replace("My ", "")}</span>
-            </button>
-          ))}
-          <button
-            type="button"
-            className={styles.bottomNavItem}
-            onClick={signOut}
-          >
-            <div className={styles.bottomNavIconWrap}>
-              <i className="ti ti-logout" aria-hidden="true" />
-            </div>
-            <span>Log out</span>
-          </button>
-        </div>
-        <div className={styles.bottomNavScrollTrack} aria-hidden="true">
-          <div
-            className={styles.bottomNavScrollThumb}
-            style={{
-              width: `${bottomNavThumb.width}%`,
-              left: `${bottomNavThumb.left}%`,
-            }}
-          />
-        </div>
-      </nav>
-
-      {mobileMoreOpen && (
-        <div
-          className={styles.mobileMoreBackdrop}
-          onClick={() => setMobileMoreOpen(false)}
-        >
-          <div
-            className={styles.mobileMoreSheet}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className={styles.mobileSheetHandle} />
-            <div className={styles.mobileSheetBrand}>
-              <Logo size={48} variant="horizontal" tone="brand" title="Ehral" />
-              <span>My Ehral</span>
-            </div>
-            {[
-              ["receipts", "Receipts", "receipt"],
-              ["spending", "Spending", "chart-donut"],
-              ["account", "Account", "user-circle"],
-            ].map(([id, label, icon]) => (
-              <button key={id} onClick={() => changeTab(id)}>
-                <i className={`ti ti-${icon}`} />
-                <span>{label}</span>
-                <i className="ti ti-chevron-right" />
-              </button>
-            ))}
-            <button onClick={() => nav("/my-accounts")}>
-              <i className="ti ti-switch-horizontal" />
-              <span>My Accounts</span>
-              <i className="ti ti-chevron-right" />
-            </button>
-            <button className={styles.mobileSignOut} onClick={signOut}>
-              <i className="ti ti-logout-2" />
-              <span>Sign out</span>
-            </button>
-          </div>
-        </div>
-      )}
+      <MobileNavHub
+        role="customer"
+        activeNav={tab}
+        setActiveNav={changeTab}
+        navigate={nav}
+        badges={{ Messages: unread }}
+      />
 
       {selectedOrder && (
         <ReceiptView
