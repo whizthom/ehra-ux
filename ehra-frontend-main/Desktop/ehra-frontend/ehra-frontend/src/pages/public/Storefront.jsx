@@ -37,24 +37,38 @@ const writeJson = (key, value) => {
 const money = (currency, value) =>
   `${currency || "NGN"} ${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 const getCategory = (p) => {
-  const value =
-    p?.category ?? p?.productCategory ?? p?.categoryName ?? p?.category?.name;
-  return typeof value === "string" && value.trim()
-    ? value.trim()
-    : "Uncategorized";
+  const raw =
+    p?.category ??
+    p?.productCategory ??
+    p?.categoryName ??
+    (typeof p?.category === "object" ? p.category?.name : null);
+  if (typeof raw === "string" && raw.trim()) return raw.trim();
+  return "Other products";
 };
 const stockOf = (p) => {
-  const value = Number(p?.stockQuantity);
-  return Number.isFinite(value) ? Math.max(0, value) : 0;
+  const raw = p?.stockQuantity;
+  if (raw === null || raw === undefined || raw === "") return null;
+  const value = Number(raw);
+  return Number.isFinite(value) ? Math.max(0, value) : null;
 };
-const effectivePrice = (p) =>
-  Math.max(0, Number(p?.price || 0) - Number(p?.discount || 0));
+const inventoryTracked = (p) => p?.trackInventory !== false;
+const hasStockData = (p) => stockOf(p) !== null;
+const isInStock = (p) => {
+  const stock = stockOf(p);
+  return stock !== null ? stock > 0 : Boolean(p?.available);
+};
 const stockState = (p) => {
   const n = stockOf(p);
-  if (!p?.available || n === 0) return { label: "Out of stock", tone: "empty" };
-  if (n <= Number(p?.lowStockThreshold || 5))
-    return { label: `${n} left`, tone: "low" };
-  return { label: `${n} in stock`, tone: "good" };
+  if (n !== null) {
+    if (n <= 0) return { label: "Out of stock", tone: "empty", quantity: 0 };
+    const threshold = Number(p?.lowStockThreshold);
+    if (Number.isFinite(threshold) && threshold > 0 && n <= threshold)
+      return { label: `${n} left in stock`, tone: "low", quantity: n };
+    return { label: `${n} in stock`, tone: "good", quantity: n };
+  }
+  return isInStock(p)
+    ? { label: "Available", tone: "good", quantity: null }
+    : { label: "Out of stock", tone: "empty", quantity: 0 };
 };
 const imagesOf = (p) => {
   try {
@@ -140,7 +154,7 @@ function ProductCard({
           </div>
           <button
             className={styles.addButton}
-            disabled={!product.available || stockOf(product) === 0}
+            disabled={!isInStock(product)}
             onClick={() => onAdd(product)}
           >
             <i className="ti ti-plus" />
@@ -469,7 +483,7 @@ export default function Storefront() {
     [categories, products],
   );
   const availableProducts = useMemo(
-    () => products.filter((p) => p.available),
+    () => products.filter(isInStock),
     [products],
   );
   const deals = useMemo(
@@ -545,7 +559,10 @@ export default function Storefront() {
         .filter((p) => Number(cart[p.id]) > 0)
         .map((p) => ({
           ...p,
-          quantity: Math.min(1000, Math.max(1, Number(cart[p.id]))),
+          quantity: Math.min(
+            stockOf(p) !== null ? Math.floor(stockOf(p)) : 1000,
+            Math.max(1, Number(cart[p.id])),
+          ),
           lineTotal: effectivePrice(p) * Number(cart[p.id]),
           lineTax: Number(p.tax || 0) * Number(cart[p.id]),
         })),
@@ -582,10 +599,13 @@ export default function Storefront() {
   );
   const add = useCallback(
     (product) =>
-      setCart((c) => ({
-        ...c,
-        [product.id]: Math.min((Number(c[product.id]) || 0) + 1, 1000),
-      })),
+      setCart((c) => {
+        const current = Number(c[product.id]) || 0;
+        const stock = stockOf(product);
+        const limit = stock !== null ? Math.floor(stock) : 1000;
+        if (limit <= 0 || current >= limit) return c;
+        return { ...c, [product.id]: Math.min(current + 1, limit) };
+      }),
     [],
   );
   const remove = useCallback(
@@ -1412,7 +1432,12 @@ export default function Storefront() {
           const gallery = imagesOf(selectedProduct);
           const stock = stockOf(selectedProduct);
           const state = stockState(selectedProduct);
-          const maxQty = Math.max(1, stock);
+          const maxQty =
+            stock !== null
+              ? Math.max(1, Math.floor(stock))
+              : isInStock(selectedProduct)
+                ? 1000
+                : 0;
           const meter =
             stock === 0
               ? 4
@@ -1602,7 +1627,7 @@ export default function Storefront() {
                     </div>
                     <button
                       className={styles.primaryPurchase}
-                      disabled={!selectedProduct.available || stock === 0}
+                      disabled={!isInStock(selectedProduct) || maxQty === 0}
                       onClick={() =>
                         requireCustomer(() => {
                           for (let i = 0; i < productQty; i++)
