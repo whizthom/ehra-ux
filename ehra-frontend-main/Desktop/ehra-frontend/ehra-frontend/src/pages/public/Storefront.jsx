@@ -332,7 +332,12 @@ function CustomerGate({ store, slug, gate, setGate, onComplete }) {
         </button>
 
         <div className={styles.customerGateBrand}>
-          <Logo size={118} variant="horizontal" title="Ehral" />
+          <div className={styles.customerGateEhral}>
+            <Logo size={112} variant="horizontal" title="Ehral" tone="brand" />
+            <span className={styles.customerGatePowered}>
+              SECURE CUSTOMER ACCOUNT
+            </span>
+          </div>
           {store?.businessLogo && (
             <>
               <span
@@ -344,6 +349,12 @@ function CustomerGate({ store, slug, gate, setGate, onComplete }) {
               </span>
             </>
           )}
+        </div>
+
+        <div className={styles.customerGateBrandRule} aria-hidden="true">
+          <span />
+          <i />
+          <span />
         </div>
 
         <div
@@ -972,7 +983,16 @@ export default function Storefront() {
     );
 
   return (
-    <div className={styles.page}>
+    <div
+      className={styles.page}
+      style={{
+        "--ehral-primary": "#0f6e56",
+        "--ehral-primary-dark": "#0b1f1a",
+        "--ehral-accent": "#55e0ae",
+        "--ehral-mint": "#eaf6f1",
+        "--ehral-line": "#b8ccc5",
+      }}
+    >
       <div className={styles.announcement}>
         {" "}
         <span>Shop directly from {store?.name}</span>
@@ -1499,8 +1519,9 @@ export default function Storefront() {
           {store.whatsappNumber && (
             <button onClick={generalChat}>Contact</button>
           )}
-          <span>
-            Powered by <b>Ehral</b>
+          <span className={styles.ehralFooterBrand}>
+            <small>POWERED BY</small>
+            <Logo size={48} variant="horizontal" title="Ehral" tone="brand" />
           </span>
         </div>
       </footer>
