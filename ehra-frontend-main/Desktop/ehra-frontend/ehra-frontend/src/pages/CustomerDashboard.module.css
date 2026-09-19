@@ -3300,3 +3300,147 @@
     display: none;
   }
 }
+
+
+/* --------------------------------------------------------------------------
+   Ehral shared mobile navigation
+   Matches the employer/employee dashboard bottom-nav pattern: horizontal
+   scroll, fixed 72px items, active accent state, and scroll-position track.
+   -------------------------------------------------------------------------- */
+.mobileNav {
+  display: none !important;
+}
+
+/* Desktop customer brand: keep the canonical Ehral sidebar treatment visible. */
+.brand {
+  position: relative;
+  padding: 4px 12px 22px;
+  min-height: 50px;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.bottomNav {
+  display: none;
+}
+
+.bottomNavScrollTrack {
+  display: none;
+}
+
+.bottomNavScroll {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  min-width: 0;
+}
+
+.bottomNavScroll::-webkit-scrollbar {
+  display: none;
+}
+
+.bottomNavItem {
+  flex: 0 0 auto;
+  width: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  min-height: 60px;
+  padding: 8px 4px 6px;
+  transition: color 0.15s;
+  white-space: nowrap;
+}
+
+.bottomNavIconWrap {
+  position: relative;
+  display: flex;
+  padding: 3px 10px;
+  border-radius: 999px;
+  transition: background 0.15s;
+}
+
+.bottomNavItem i {
+  font-size: 20px;
+}
+
+.bottomNavDot {
+  position: absolute;
+  top: 1px;
+  right: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--danger);
+  border: 1.5px solid var(--bg-surface);
+}
+
+.bottomNavActive {
+  color: var(--accent);
+}
+
+.bottomNavActive .bottomNavIconWrap {
+  background: var(--bg-soft-accent);
+}
+
+@media (max-width: 900px) {
+  .bottomNav {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 70;
+    background: var(--bg-surface);
+    border-top: 0.5px solid var(--border-color);
+    box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.06);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .bottomNavScrollTrack {
+    display: block;
+    position: relative;
+    height: 2.5px;
+    margin: 2px 16px 8px;
+    border-radius: 999px;
+    background: var(--border-color);
+    overflow: hidden;
+  }
+
+  .bottomNavScrollThumb {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    min-width: 24px;
+    border-radius: 999px;
+    background: var(--accent);
+    opacity: 0.45;
+    transition: left 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+      width 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .main {
+    padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .content {
+    padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .bottomNavIconWrap,
+  .bottomNavItem,
+  .bottomNavScrollThumb {
+    transition: none !important;
+  }
+}

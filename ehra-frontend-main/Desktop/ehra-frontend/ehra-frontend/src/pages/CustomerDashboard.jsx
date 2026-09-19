@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Logo from "../components/Logo";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
@@ -24,6 +24,46 @@ import {
   subscribeToUserQueue,
 } from "../services/messagingSocket";
 import styles from "./CustomerDashboard.module.css";
+
+// Matches Ehral\'s employer/employee mobile navigation behavior.
+function useScrollThumb(ref) {
+  const [thumb, setThumb] = useState({ left: 0, width: 100 });
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+
+    const update = () => {
+      const { scrollWidth, clientWidth, scrollLeft } = el;
+      if (scrollWidth <= clientWidth + 1) {
+        setThumb({ left: 0, width: 100 });
+        return;
+      }
+      const width = Math.max((clientWidth / scrollWidth) * 100, 15);
+      const maxScroll = scrollWidth - clientWidth;
+      const left = maxScroll > 0 ? (scrollLeft / maxScroll) * (100 - width) : 0;
+      setThumb({ left, width });
+    };
+
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    const settle = setTimeout(update, 400);
+    let observer;
+    if (typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(update);
+      observer.observe(el);
+    }
+    return () => {
+      el.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+      clearTimeout(settle);
+      observer?.disconnect();
+    };
+  }, [ref]);
+
+  return thumb;
+}
 
 const money = (currency, value) =>
   `${currency || "NGN"} ${Number(value || 0).toLocaleString(undefined, {
@@ -667,6 +707,8 @@ export default function CustomerDashboard() {
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
+  const bottomNavScrollRef = useRef(null);
+  const bottomNavThumb = useScrollThumb(bottomNavScrollRef);
   const [discovery, setDiscovery] = useState([]);
   const [discoveryLoading, setDiscoveryLoading] = useState(false);
   const [discoveryQuery, setDiscoveryQuery] = useState("");
@@ -1032,8 +1074,7 @@ export default function CustomerDashboard() {
     <div className={styles.shell}>
       <aside className={styles.sidebar}>
         <div className={styles.brand}>
-          <Logo size={30} variant="horizontal" tone="sidebar" title="Ehral" />
-          <span>Customer</span>
+          <Logo size={44} variant="horizontal" tone="sidebar" title="Ehral" />
         </div>
         <div className={styles.profileMini}>
           <div className={styles.profileAvatar}>
@@ -1253,37 +1294,18 @@ export default function CustomerDashboard() {
                 )}
               </section>
 
-              <section className={styles.twoPanel}>
-                <div className={styles.section}>
-                  <div className={styles.sectionHead}>
-                    <div>
-                      <span className={styles.eyebrow}>LATEST</span>
-                      <h2>Recent orders</h2>
-                    </div>
-                    <button onClick={() => changeTab("orders")}>See all</button>
+              <section className={styles.section}>
+                <div className={styles.sectionHead}>
+                  <div>
+                    <span className={styles.eyebrow}>LATEST</span>
+                    <h2>Recent orders</h2>
                   </div>
-                  <OrderList
-                    orders={orders.slice(0, 5)}
-                    onReceipt={setSelectedOrder}
-                  />
+                  <button onClick={() => changeTab("orders")}>See all</button>
                 </div>
-                <div className={styles.section}>
-                  <div className={styles.sectionHead}>
-                    <div>
-                      <span className={styles.eyebrow}>MESSAGES</span>
-                      <h2>Business conversations</h2>
-                    </div>
-                    <button onClick={() => changeTab("messages")}>
-                      Open inbox
-                    </button>
-                  </div>
-                  <ConversationList
-                    conversations={messages.slice(0, 4)}
-                    onOpen={(c) =>
-                      setActiveChat({ ...c, myIdentityId: user?.identityId })
-                    }
-                  />
-                </div>
+                <OrderList
+                  orders={orders.slice(0, 5)}
+                  onReceipt={setSelectedOrder}
+                />
               </section>
 
               <section className={styles.section}>
@@ -1771,30 +1793,47 @@ export default function CustomerDashboard() {
         </div>
       </main>
 
-      <nav className={styles.mobileNav} aria-label="Customer navigation">
-        {["home", "businesses", "orders", "messages"].map((id) => {
-          const item = navItems.find((n) => n[0] === id);
-          return (
+      <nav className={styles.bottomNav} aria-label="Primary">
+        <div className={styles.bottomNavScroll} ref={bottomNavScrollRef}>
+          {navItems.map(([id, label, icon]) => (
             <button
               key={id}
-              className={tab === id ? styles.mobileNavActive : ""}
+              type="button"
+              className={`${styles.bottomNavItem} ${tab === id ? styles.bottomNavActive : ""}`}
               onClick={() => changeTab(id)}
             >
-              <i className={`ti ti-${item[2]}`} />
-              <span>{item[1].replace("My ", "")}</span>
-              {id === "messages" && unread > 0 && (
-                <em>{unread > 9 ? "9+" : unread}</em>
-              )}
+              <div className={styles.bottomNavIconWrap}>
+                <i className={`ti ti-${icon}`} aria-hidden="true" />
+                {id === "messages" && unread > 0 && (
+                  <span
+                    className={styles.bottomNavDot}
+                    aria-label={`${unread} unread messages`}
+                  />
+                )}
+              </div>
+              <span>{label.replace("My ", "")}</span>
             </button>
-          );
-        })}
-        <button
-          className={mobileMoreOpen ? styles.mobileNavActive : ""}
-          onClick={() => setMobileMoreOpen((v) => !v)}
-        >
-          <i className="ti ti-dots" />
-          <span>More</span>
-        </button>
+          ))}
+          <button
+            type="button"
+            className={styles.bottomNavItem}
+            onClick={signOut}
+          >
+            <div className={styles.bottomNavIconWrap}>
+              <i className="ti ti-logout" aria-hidden="true" />
+            </div>
+            <span>Log out</span>
+          </button>
+        </div>
+        <div className={styles.bottomNavScrollTrack} aria-hidden="true">
+          <div
+            className={styles.bottomNavScrollThumb}
+            style={{
+              width: `${bottomNavThumb.width}%`,
+              left: `${bottomNavThumb.left}%`,
+            }}
+          />
+        </div>
       </nav>
 
       {mobileMoreOpen && (
