@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 import {
   createPublicOrder,
   getPublicProducts,
@@ -13,6 +15,7 @@ import {
 } from "../../api/phoneAuthApi";
 import { getMyAccounts, switchContext } from "../../api/authApi";
 import { useAuth } from "../../context/AuthContext";
+import Logo from "../../components/Logo";
 import styles from "./Storefront.module.css";
 
 const CART_KEY = (slug) => `ehral:storefront:cart:${slug || "unknown"}`;
@@ -208,19 +211,31 @@ function ProductRail({
 }
 
 function CustomerGate({ store, slug, gate, setGate, onComplete }) {
-  const close = () => setGate((g) => ({ ...g, open: false, pending: null }));
+  const close = () =>
+    setGate((g) => ({ ...g, open: false, pending: null, message: "" }));
+
   const submitPhone = async () => {
+    const phone = gate.phone?.trim();
+    if (!phone || !isValidPhoneNumber(phone)) {
+      setGate((g) => ({
+        ...g,
+        message: "Enter a valid phone number before continuing.",
+      }));
+      return;
+    }
     try {
       setGate((g) => ({
         ...g,
         step: "sending",
         message: "Sending verification code…",
       }));
-      const r = await sendOtp(gate.phone);
+      const r = await sendOtp(phone);
       setGate((g) => ({
         ...g,
+        phone,
         step: "verify",
         pinId: r?.pinId,
+        otp: "",
         message: r?.developmentOtp
           ? `Development OTP: ${r.developmentOtp}`
           : "Verification code sent to your phone.",
@@ -228,25 +243,54 @@ function CustomerGate({ store, slug, gate, setGate, onComplete }) {
     } catch (e) {
       setGate((g) => ({
         ...g,
-        step: "form",
+        step: "phone",
         message:
           e?.response?.data?.message || "Could not send verification code.",
       }));
     }
   };
+
   const verify = async () => {
+    if (!gate.pinId || !gate.otp) return;
     try {
       setGate((g) => ({
         ...g,
         step: "verifying",
-        message: "Creating your customer account…",
+        message: "Verifying your phone number…",
       }));
       const v = await verifyOtp(gate.pinId, gate.otp);
-      await registerCustomerWithPhone(v.phoneVerificationToken, {
+      setGate((g) => ({
+        ...g,
+        step: "details",
+        phoneVerificationToken: v.phoneVerificationToken,
+        phone: v.phoneNumber || g.phone,
+        message:
+          "Phone number verified. Complete your profile to create your customer account.",
+      }));
+    } catch (e) {
+      setGate((g) => ({
+        ...g,
+        step: "verify",
+        message:
+          e?.response?.data?.message ||
+          "The verification code could not be confirmed.",
+      }));
+    }
+  };
+
+  const createAccount = async () => {
+    if (!gate.phoneVerificationToken || !gate.firstName.trim()) return;
+    try {
+      setGate((g) => ({
+        ...g,
+        step: "creating",
+        message: "Creating your customer account…",
+      }));
+      await registerCustomerWithPhone(gate.phoneVerificationToken, {
         businessSlug: slug,
-        firstName: gate.firstName,
-        lastName: gate.lastName,
-        email: gate.email,
+        firstName: gate.firstName.trim(),
+        lastName: gate.lastName.trim(),
+        email: gate.email.trim(),
       });
       onComplete({
         name: [gate.firstName, gate.lastName].filter(Boolean).join(" "),
@@ -257,113 +301,251 @@ function CustomerGate({ store, slug, gate, setGate, onComplete }) {
     } catch (e) {
       setGate((g) => ({
         ...g,
-        step: "verify",
+        step: "details",
         message:
           e?.response?.data?.message ||
           "Could not create your customer account.",
       }));
     }
   };
+
   if (!gate.open) return null;
+
+  const stepNumber =
+    gate.step === "phone" || gate.step === "sending"
+      ? 1
+      : gate.step === "verify" || gate.step === "verifying"
+        ? 2
+        : 3;
+  const storeName = store?.businessName || store?.name || "this store";
+
   return (
     <div
       className={styles.overlay}
       role="dialog"
       aria-modal="true"
-      aria-label="Customer account"
+      aria-label="Create customer account"
     >
-      <div className={styles.accountModal}>
+      <div className={`${styles.accountModal} ${styles.customerGateModal}`}>
         <button className={styles.close} onClick={close} aria-label="Close">
           ×
         </button>
-        <div className={styles.accountIcon}>
-          <i className="ti ti-user-check" />
-        </div>
-        <span className={styles.sectionKicker}>ALMOST THERE</span>
-        <h2>Create your customer account</h2>
-        <p>
-          You can browse freely. To place an order or contact this store, Ehral
-          connects you to a customer account for{" "}
-          <b>{store?.businessName || store?.name}</b>.
-        </p>
-        {gate.step === "form" && (
-          <div className={styles.accountForm}>
-            <div className={styles.twoCol}>
-              <input
-                required
-                placeholder="First name"
-                value={gate.firstName}
-                onChange={(e) =>
-                  setGate((g) => ({ ...g, firstName: e.target.value }))
-                }
+
+        <div className={styles.customerGateBrand}>
+          <Logo size={118} variant="horizontal" title="Ehral" />
+          {store?.businessLogo && (
+            <>
+              <span
+                className={styles.customerGateBrandDivider}
+                aria-hidden="true"
               />
-              <input
-                placeholder="Last name"
-                value={gate.lastName}
-                onChange={(e) =>
-                  setGate((g) => ({ ...g, lastName: e.target.value }))
+              <span className={styles.customerGateStoreLogo}>
+                <img src={store.businessLogo} alt="" />
+              </span>
+            </>
+          )}
+        </div>
+
+        <div
+          className={styles.customerGateProgress}
+          aria-label={`Step ${stepNumber} of 3`}
+        >
+          {[1, 2, 3].map((n) => (
+            <span
+              key={n}
+              className={
+                n <= stepNumber ? styles.customerGateProgressActive : ""
+              }
+            >
+              {n}
+            </span>
+          ))}
+        </div>
+
+        <span className={styles.sectionKicker}>CUSTOMER ACCOUNT</span>
+        <h2>
+          {stepNumber === 1
+            ? "Start with your phone number"
+            : stepNumber === 2
+              ? "Verify your phone number"
+              : "Complete your account"}
+        </h2>
+        <p>
+          {stepNumber === 1 && (
+            <>
+              Use your phone number to securely create your customer account for{" "}
+              <b>{storeName}</b>.
+            </>
+          )}
+          {stepNumber === 2 && (
+            <>
+              We sent a verification code to <b>{gate.phone}</b>. Enter it below
+              to continue.
+            </>
+          )}
+          {stepNumber === 3 && (
+            <>
+              Your phone is verified. Add your name and email so{" "}
+              <b>{storeName}</b> can identify your customer account.
+            </>
+          )}
+        </p>
+
+        {gate.step === "phone" && (
+          <div className={styles.accountForm}>
+            <label className={styles.customerGateLabel}>Phone number</label>
+            <div className={styles.customerPhoneWrap}>
+              <PhoneInput
+                international
+                defaultCountry="NG"
+                countryCallingCodeEditable={false}
+                placeholder="Enter your phone number"
+                value={gate.phone}
+                onChange={(value) =>
+                  setGate((g) => ({ ...g, phone: value || "", message: "" }))
                 }
+                onKeyDown={(e) => e.key === "Enter" && submitPhone()}
+                className={styles.customerPhoneInput}
               />
             </div>
-            <input
-              required
-              placeholder="Phone number"
-              value={gate.phone}
-              onChange={(e) =>
-                setGate((g) => ({ ...g, phone: e.target.value }))
-              }
-            />
-            <input
-              type="email"
-              placeholder="Email (optional)"
-              value={gate.email}
-              onChange={(e) =>
-                setGate((g) => ({ ...g, email: e.target.value }))
-              }
-            />
+            <small className={styles.customerGateHint}>
+              Your phone number will be verified before any account details are
+              requested.
+            </small>
             <button
-              disabled={!gate.firstName.trim() || !gate.phone.trim()}
+              disabled={!gate.phone || !isValidPhoneNumber(gate.phone)}
               onClick={submitPhone}
             >
-              Continue <i className="ti ti-arrow-right" />
+              Send verification code <i className="ti ti-arrow-right" />
             </button>
           </div>
         )}
+
         {gate.step === "sending" && (
           <div className={styles.gateLoading}>
-            Sending your verification code…
+            <span className={styles.gateSpinner} /> Sending your verification
+            code…
           </div>
         )}
-        {gate.step === "verify" && (
+
+        {(gate.step === "verify" || gate.step === "verifying") && (
           <div className={styles.accountForm}>
+            <label className={styles.customerGateLabel}>
+              Verification code
+            </label>
             <input
+              className={styles.otpInput}
               inputMode="numeric"
               autoComplete="one-time-code"
+              autoFocus
               placeholder="Enter verification code"
               value={gate.otp}
               onChange={(e) =>
                 setGate((g) => ({
                   ...g,
                   otp: e.target.value.replace(/\D/g, "").slice(0, 8),
+                  message: "",
                 }))
               }
+              onKeyDown={(e) => e.key === "Enter" && verify()}
             />
-            <button disabled={!gate.otp} onClick={verify}>
-              Verify & continue <i className="ti ti-check" />
+            <button
+              disabled={!gate.otp || gate.step === "verifying"}
+              onClick={verify}
+            >
+              {gate.step === "verifying" ? "Verifying…" : "Verify phone number"}{" "}
+              <i className="ti ti-check" />
+            </button>
+            <button
+              type="button"
+              className={styles.customerBackButton}
+              onClick={() =>
+                setGate((g) => ({
+                  ...g,
+                  step: "phone",
+                  otp: "",
+                  pinId: "",
+                  message: "",
+                }))
+              }
+            >
+              Change phone number
             </button>
           </div>
         )}
-        {gate.step === "verifying" && (
+
+        {gate.step === "details" && (
+          <div className={styles.accountForm}>
+            <div className={styles.verifiedPhone}>
+              <i className="ti ti-circle-check-filled" />
+              <span>{gate.phone}</span>
+              <b>Verified</b>
+            </div>
+            <div className={styles.twoCol}>
+              <div>
+                <label className={styles.customerGateLabel}>First name</label>
+                <input
+                  autoFocus
+                  required
+                  placeholder="First name"
+                  value={gate.firstName}
+                  onChange={(e) =>
+                    setGate((g) => ({
+                      ...g,
+                      firstName: e.target.value,
+                      message: "",
+                    }))
+                  }
+                />
+              </div>
+              <div>
+                <label className={styles.customerGateLabel}>Last name</label>
+                <input
+                  placeholder="Last name"
+                  value={gate.lastName}
+                  onChange={(e) =>
+                    setGate((g) => ({
+                      ...g,
+                      lastName: e.target.value,
+                      message: "",
+                    }))
+                  }
+                />
+              </div>
+            </div>
+            <div>
+              <label className={styles.customerGateLabel}>
+                Email address <span>(optional)</span>
+              </label>
+              <input
+                type="email"
+                placeholder="you@example.com"
+                value={gate.email}
+                onChange={(e) =>
+                  setGate((g) => ({ ...g, email: e.target.value, message: "" }))
+                }
+              />
+            </div>
+            <button disabled={!gate.firstName.trim()} onClick={createAccount}>
+              Create customer account <i className="ti ti-arrow-right" />
+            </button>
+          </div>
+        )}
+
+        {gate.step === "creating" && (
           <div className={styles.gateLoading}>
-            Creating your customer account…
+            <span className={styles.gateSpinner} /> Creating your customer
+            account…
           </div>
         )}
         {gate.message && (
-          <small className={styles.formMessage}>{gate.message}</small>
+          <small className={styles.formMessage} role="status">
+            {gate.message}
+          </small>
         )}
         <small className={styles.privacyNote}>
           <i className="ti ti-lock" /> Your information is used to manage your
-          customer relationship with this store.
+          customer relationship with this store through Ehral.
         </small>
       </div>
     </div>
@@ -408,7 +590,7 @@ export default function Storefront() {
   });
   const [customerGate, setCustomerGate] = useState({
     open: false,
-    step: "form",
+    step: "phone",
     pending: null,
     firstName: "",
     lastName: "",
@@ -701,7 +883,10 @@ export default function Storefront() {
       ...g,
       open: true,
       pending: action,
-      step: "form",
+      step: "phone",
+      pinId: "",
+      otp: "",
+      phoneVerificationToken: "",
       message: "",
     }));
   };
