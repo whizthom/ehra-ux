@@ -67,10 +67,7 @@ const money = (currency, value) =>
   })}`;
 // 1.2K / 3.4M style labels for the little numbers above the spending bars.
 const compactMoney = (value) =>
-  Number(value || 0).toLocaleString(undefined, {
-    notation: "compact",
-    maximumFractionDigits: 1,
-  });
+  Number(value || 0).toLocaleString(undefined, { notation: "compact", maximumFractionDigits: 1 });
 const date = (v) =>
   v
     ? new Date(v).toLocaleDateString(undefined, {
@@ -92,20 +89,7 @@ const initials = (name = "Ehral") =>
     .join("")
     .toUpperCase();
 
-const MONTHS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 const greetingFor = (d = new Date()) => {
   const h = d.getHours();
@@ -122,12 +106,8 @@ const greetingFor = (d = new Date()) => {
 // in a footnote instead.
 function buildSpending(orders, businesses, data, now = new Date()) {
   const currency = data?.currency;
-  const paid = orders.filter(
-    (o) => String(o.paymentStatus || "").toUpperCase() === "PAID",
-  );
-  const main = paid.filter(
-    (o) => !o.currency || !currency || o.currency === currency,
-  );
+  const paid = orders.filter((o) => String(o.paymentStatus || "").toUpperCase() === "PAID");
+  const main = paid.filter((o) => !o.currency || !currency || o.currency === currency);
   const amountOf = (o) => Number(o.amountPaid) || Number(o.total) || 0;
 
   const months = [];
@@ -145,9 +125,7 @@ function buildSpending(orders, businesses, data, now = new Date()) {
   main.forEach((o) => {
     const d = new Date(o.createdAt);
     if (Number.isNaN(d.getTime())) return;
-    const bucket = months.find(
-      (m) => m.key === `${d.getFullYear()}-${d.getMonth()}`,
-    );
+    const bucket = months.find((m) => m.key === `${d.getFullYear()}-${d.getMonth()}`);
     if (bucket) {
       bucket.value += amountOf(o);
       bucket.count += 1;
@@ -160,11 +138,7 @@ function buildSpending(orders, businesses, data, now = new Date()) {
   const total = Number(data?.totalSpent || 0);
   const ranked = businesses
     .filter((b) => Number(b.totalSpent || 0) > 0)
-    .map((b) => ({
-      ...b,
-      spent: Number(b.totalSpent || 0),
-      share: total > 0 ? (Number(b.totalSpent || 0) / total) * 100 : 0,
-    }))
+    .map((b) => ({ ...b, spent: Number(b.totalSpent || 0), share: total > 0 ? (Number(b.totalSpent || 0) / total) * 100 : 0 }))
     .sort((a, b) => b.spent - a.spent);
 
   return {
@@ -176,9 +150,7 @@ function buildSpending(orders, businesses, data, now = new Date()) {
     largest: main.reduce((n, o) => Math.max(n, amountOf(o)), 0),
     paidCount: paid.length,
     foreignCount: paid.length - main.length,
-    recent: [...paid]
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .slice(0, 6),
+    recent: [...paid].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6),
     ranked,
     top: ranked.slice(0, 5),
     restShare: ranked.slice(5).reduce((n, b) => n + b.share, 0),
@@ -445,10 +417,7 @@ function BusinessCard({ business, onVisit, onChat, detailed }) {
         </div>
       )}
       <div className={styles.cardActions}>
-        <button
-          onClick={() => onVisit(business)}
-          disabled={!business.businessId}
-        >
+        <button onClick={() => onVisit(business)} disabled={!business.businessId}>
           View business <i className="ti ti-arrow-up-right" />
         </button>
         <button
@@ -589,13 +558,11 @@ export default function CustomerDashboard() {
   // engine as everything else (MessagingHub, mode="customer"). This page only
   // keeps the light-weight pieces it needs itself: the conversation summaries
   // (for the home "needs attention" / activity cards) and the unread badge.
-  const { conversations: messages, refresh: loadMessages } =
-    useConversations("CUSTOMER");
+  const { conversations: messages, refresh: loadMessages } = useConversations("CUSTOMER");
   const inbox = useCustomerInboxBadge({ includeAnnouncements: true });
   const [messagesThreadOpen, setMessagesThreadOpen] = useState(false);
   const [messagesDeepLink, setMessagesDeepLink] = useState(null);
-  const [activeMessageConversationId, setActiveMessageConversationId] =
-    useState(null);
+  const [activeMessageConversationId, setActiveMessageConversationId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [query, setQuery] = useState("");
@@ -701,13 +668,9 @@ export default function CustomerDashboard() {
   useEffect(() => {
     const conversationId = searchParams.get("chat");
     if (!conversationId) return;
-    const draft =
-      sessionStorage.getItem(`ehral:pending-chat:${conversationId}`) || "";
+    const draft = sessionStorage.getItem(`ehral:pending-chat:${conversationId}`) || "";
     sessionStorage.removeItem(`ehral:pending-chat:${conversationId}`);
-    setMessagesDeepLink({
-      conversationId: Number(conversationId),
-      draft: draft || undefined,
-    });
+    setMessagesDeepLink({ conversationId: Number(conversationId), draft: draft || undefined });
     setTab("messages");
     setSearchParams({}, { replace: true });
   }, [searchParams, setSearchParams]);
@@ -742,14 +705,9 @@ export default function CustomerDashboard() {
     [orders, businesses, data],
   );
   const inProgressCount = orders.filter((o) =>
-    [
-      "PENDING",
-      "PROCESSING",
-      "CONFIRMED",
-      "READY",
-      "READY_FOR_PICKUP",
-      "OUT_FOR_DELIVERY",
-    ].includes(String(o.status || "").toUpperCase()),
+    ["PENDING", "PROCESSING", "CONFIRMED", "READY", "READY_FOR_PICKUP", "OUT_FOR_DELIVERY"].includes(
+      String(o.status || "").toUpperCase(),
+    ),
   ).length;
 
   const attentionItems = useMemo(() => {
@@ -852,10 +810,7 @@ export default function CustomerDashboard() {
   const visitBusiness = (business) => {
     // Remember which tab this was opened from, so the profile's back arrow can
     // return to exactly here.
-    if (business?.businessId)
-      nav(`/customer/business/${business.businessId}`, {
-        state: { fromTab: tab },
-      });
+    if (business?.businessId) nav(`/customer/business/${business.businessId}`, { state: { fromTab: tab } });
     else setNotice("This business could not be opened.");
   };
 
@@ -1029,128 +984,65 @@ export default function CustomerDashboard() {
 
         <Toast message={notice} onClose={() => setNotice("")} />
 
-        <div
-          className={`${styles.content} ${tab === "messages" ? styles.contentMessages : ""}`}
-        >
+        <div className={`${styles.content} ${tab === "messages" ? styles.contentMessages : ""}`}>
           {tab === "home" && (
             <>
-              <section
-                className={styles.ghHero}
-                aria-label="Your personal commerce hub"
-              >
-                {/* The scene behind the glass: deep Ehral green with slow,
-                    luminous colour blobs. The glass slab in front frosts
-                    whatever passes behind it. */}
-                <div className={styles.ghScene} aria-hidden="true">
-                  <span className={`${styles.ghBlob} ${styles.ghBlobMint}`} />
-                  <span className={`${styles.ghBlob} ${styles.ghBlobTeal}`} />
-                  <span className={`${styles.ghBlob} ${styles.ghBlobGold}`} />
-                  <span className={styles.ghRings} />
+              <section className={styles.ghHero} aria-label="Your personal commerce hub">
+                <div className={styles.ghCopy}>
+                  <span className={styles.ghEyebrow}>
+                    <i className="ti ti-sparkles" aria-hidden="true" /> YOUR PERSONAL COMMERCE HUB
+                  </span>
+                  <h2>
+                    {greetingFor()}, <em>{data?.firstName || "there"}</em>.
+                  </h2>
+                  <p>
+                    One Ehral account for your stores, orders, receipts, conversations and spending history.
+                  </p>
+                  <div className={styles.ghActions}>
+                    <button onClick={() => changeTab("discover")} className={styles.ghPrimary}>
+                      Discover businesses <i className="ti ti-arrow-up-right" aria-hidden="true" />
+                    </button>
+                    <button onClick={() => changeTab("messages")} className={styles.ghGlassBtn}>
+                      <i className="ti ti-message-circle" aria-hidden="true" /> Messages
+                      {unread > 0 && <span className={styles.ghBadge}>{unread}</span>}
+                    </button>
+                  </div>
                 </div>
 
-                <div className={styles.ghSlab}>
-                  <span className={styles.ghSheen} aria-hidden="true" />
-
-                  <div className={styles.ghCopy}>
-                    <span className={styles.ghEyebrow}>
-                      <i className="ti ti-sparkles" aria-hidden="true" /> YOUR
-                      PERSONAL COMMERCE HUB
+                {/* Live numbers - desktop/tablet only; on phones the stats row and
+                    "Needs your attention" just below already say the same. */}
+                <div className={styles.ghChips}>
+                  <button
+                    className={styles.ghChip}
+                    onClick={() => changeTab("businesses")}
+                    aria-label={`${businesses.length} connected businesses`}
+                  >
+                    <span className={styles.ghFaces}>
+                      {businesses.slice(0, 3).map((b) => (
+                        <span key={b.membershipId} className={styles.ghFace} title={b.businessName}>
+                          {b.businessLogo ? <img src={b.businessLogo} alt="" /> : initials(b.businessName)}
+                        </span>
+                      ))}
+                      {businesses.length === 0 && (
+                        <span className={styles.ghFace}>
+                          <i className="ti ti-plus" aria-hidden="true" />
+                        </span>
+                      )}
                     </span>
-                    <h2>
-                      {greetingFor()},<br />
-                      <em>{data?.firstName || "there"}</em>.
-                    </h2>
-                    <p>
-                      One Ehral account for your stores, orders, receipts,
-                      conversations and spending history.
-                    </p>
-                    <div className={styles.ghActions}>
-                      <button
-                        onClick={() => changeTab("discover")}
-                        className={styles.ghPrimary}
-                      >
-                        Discover businesses{" "}
-                        <i
-                          className="ti ti-arrow-up-right"
-                          aria-hidden="true"
-                        />
-                      </button>
-                      <button
-                        onClick={() => changeTab("messages")}
-                        className={styles.ghGlassBtn}
-                      >
-                        <i
-                          className="ti ti-message-circle"
-                          aria-hidden="true"
-                        />{" "}
-                        Messages
-                        {unread > 0 && (
-                          <span className={styles.ghBadge}>{unread}</span>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className={styles.ghStack}>
-                    <button
-                      className={`${styles.ghCard} ${styles.ghCardMain}`}
-                      onClick={() => changeTab("businesses")}
-                      aria-label={`${businesses.length} connected businesses`}
-                    >
-                      <span className={styles.ghCardLabel}>
-                        Your Ehral network
-                      </span>
-                      <span className={styles.ghFaces}>
-                        {businesses.slice(0, 4).map((b) => (
-                          <span
-                            key={b.membershipId}
-                            className={styles.ghFace}
-                            title={b.businessName}
-                          >
-                            {b.businessLogo ? (
-                              <img src={b.businessLogo} alt="" />
-                            ) : (
-                              initials(b.businessName)
-                            )}
-                          </span>
-                        ))}
-                        {businesses.length > 4 && (
-                          <span
-                            className={`${styles.ghFace} ${styles.ghFaceMore}`}
-                          >
-                            +{businesses.length - 4}
-                          </span>
-                        )}
-                        {businesses.length === 0 && (
-                          <span
-                            className={`${styles.ghFace} ${styles.ghFaceMore}`}
-                          >
-                            <i className="ti ti-plus" aria-hidden="true" />
-                          </span>
-                        )}
-                      </span>
-                      <strong>
-                        {businesses.length} business
-                        {businesses.length === 1 ? "" : "es"}
-                      </strong>
-                    </button>
-                    <button
-                      className={`${styles.ghCard} ${styles.ghCardMini}`}
-                      onClick={() => changeTab("orders")}
-                    >
-                      <i className="ti ti-package" aria-hidden="true" />
-                      <b>{inProgressCount}</b>
-                      <span>in progress</span>
-                    </button>
-                    <button
-                      className={`${styles.ghCard} ${styles.ghCardMini}`}
-                      onClick={() => changeTab("messages")}
-                    >
-                      <i className="ti ti-message-2" aria-hidden="true" />
-                      <b>{unread}</b>
-                      <span>unread</span>
-                    </button>
-                  </div>
+                    <strong>
+                      {businesses.length} business{businesses.length === 1 ? "" : "es"}
+                    </strong>
+                  </button>
+                  <button className={styles.ghChip} onClick={() => changeTab("orders")}>
+                    <i className="ti ti-package" aria-hidden="true" />
+                    <b>{inProgressCount}</b>
+                    <span>in progress</span>
+                  </button>
+                  <button className={styles.ghChip} onClick={() => changeTab("messages")}>
+                    <i className="ti ti-message-2" aria-hidden="true" />
+                    <b>{unread}</b>
+                    <span>unread</span>
+                  </button>
                 </div>
               </section>
 
@@ -1374,9 +1266,7 @@ export default function CustomerDashboard() {
                       key={b.businessId}
                       business={b}
                       onView={(business) =>
-                        nav(`/customer/business/${business.businessId}`, {
-                          state: { fromTab: tab },
-                        })
+                        nav(`/customer/business/${business.businessId}`, { state: { fromTab: tab } })
                       }
                     />
                   ))}
@@ -1480,9 +1370,7 @@ export default function CustomerDashboard() {
           )}
 
           {tab === "messages" && (
-            <div
-              className={`${styles.msHost} ${messagesThreadOpen ? styles.msHostThread : ""}`}
-            >
+            <div className={`${styles.msHost} ${messagesThreadOpen ? styles.msHostThread : ""}`}>
               <MessagingHub
                 mode="customer"
                 flat
@@ -1501,32 +1389,19 @@ export default function CustomerDashboard() {
               <header className={styles.spHead}>
                 <span className={styles.eyebrow}>YOUR MONEY TRAIL</span>
                 <h2>Spending</h2>
-                <p>
-                  Payments completed across your Ehral businesses, net of
-                  recorded refunds.
-                </p>
+                <p>Payments completed across your Ehral businesses, net of recorded refunds.</p>
               </header>
 
               <div className={styles.spFigure}>
-                <span className={styles.spFigureLabel}>
-                  Total recorded spend
-                </span>
-                <strong className={styles.spBig}>
-                  {money(data?.currency, data?.totalSpent)}
-                </strong>
+                <span className={styles.spFigureLabel}>Total recorded spend</span>
+                <strong className={styles.spBig}>{money(data?.currency, data?.totalSpent)}</strong>
                 <div className={styles.spFigureMeta}>
                   <span>
-                    {spending.paidCount} fully paid order
-                    {spending.paidCount === 1 ? "" : "s"}
+                    {spending.paidCount} fully paid order{spending.paidCount === 1 ? "" : "s"}
                   </span>
                   {spending.delta !== null && (
-                    <span
-                      className={`${styles.spDelta} ${spending.delta >= 0 ? styles.spUp : styles.spDown}`}
-                    >
-                      <i
-                        className={`ti ${spending.delta >= 0 ? "ti-trending-up" : "ti-trending-down"}`}
-                        aria-hidden="true"
-                      />
+                    <span className={`${styles.spDelta} ${spending.delta >= 0 ? styles.spUp : styles.spDown}`}>
+                      <i className={`ti ${spending.delta >= 0 ? "ti-trending-up" : "ti-trending-down"}`} aria-hidden="true" />
                       {Math.abs(spending.delta).toFixed(0)}% vs last month
                     </span>
                   )}
@@ -1537,16 +1412,9 @@ export default function CustomerDashboard() {
                 <div className={styles.spEmpty}>
                   <i className="ti ti-chart-donut-3" aria-hidden="true" />
                   <h3>Nothing to chart yet</h3>
-                  <p>
-                    Once you complete a payment with a business, your spending
-                    trail appears here.
-                  </p>
-                  <button
-                    className={styles.ghPrimary}
-                    onClick={() => changeTab("discover")}
-                  >
-                    Discover businesses{" "}
-                    <i className="ti ti-arrow-up-right" aria-hidden="true" />
+                  <p>Once you complete a payment with a business, your spending trail appears here.</p>
+                  <button className={styles.ghPrimary} onClick={() => changeTab("discover")}>
+                    Discover businesses <i className="ti ti-arrow-up-right" aria-hidden="true" />
                   </button>
                 </div>
               ) : (
@@ -1570,27 +1438,14 @@ export default function CustomerDashboard() {
                     </div>
                   </div>
 
-                  <section
-                    className={styles.spBlock}
-                    aria-label="Payments by month"
-                  >
+                  <section className={styles.spBlock} aria-label="Payments by month">
                     <div className={styles.spBlockHead}>
                       <h3>Last 6 months</h3>
                       <span>Payments by month</span>
                     </div>
-                    <div
-                      className={styles.spChart}
-                      role="img"
-                      aria-label="Bar chart of payments over the last six months"
-                    >
+                    <div className={styles.spChart} role="img" aria-label="Bar chart of payments over the last six months">
                       {spending.months.map((m) => {
-                        const pct =
-                          spending.max > 0
-                            ? Math.max(
-                                m.value > 0 ? 4 : 0,
-                                (m.value / spending.max) * 100,
-                              )
-                            : 0;
+                        const pct = spending.max > 0 ? Math.max(m.value > 0 ? 4 : 0, (m.value / spending.max) * 100) : 0;
                         const top = m.value > 0 && m.value === spending.max;
                         return (
                           <div
@@ -1598,9 +1453,7 @@ export default function CustomerDashboard() {
                             className={`${styles.spCol} ${m.current ? styles.spColNow : ""} ${top ? styles.spColTop : ""}`}
                             title={`${m.label} ${m.year}: ${money(data?.currency, m.value)} · ${m.count} order${m.count === 1 ? "" : "s"}`}
                           >
-                            <span className={styles.spColValue}>
-                              {m.value > 0 ? compactMoney(m.value) : ""}
-                            </span>
+                            <span className={styles.spColValue}>{m.value > 0 ? compactMoney(m.value) : ""}</span>
                             <span className={styles.spBarTrack}>
                               <i style={{ height: `${pct}%` }} />
                             </span>
@@ -1611,66 +1464,34 @@ export default function CustomerDashboard() {
                     </div>
                     {spending.foreignCount > 0 && (
                       <p className={styles.spNote}>
-                        {spending.foreignCount} payment
-                        {spending.foreignCount === 1 ? "" : "s"} in another
-                        currency
-                        {spending.foreignCount === 1 ? " is" : " are"} not
-                        included in the chart.
+                        {spending.foreignCount} payment{spending.foreignCount === 1 ? "" : "s"} in another currency
+                        {spending.foreignCount === 1 ? " is" : " are"} not included in the chart.
                       </p>
                     )}
                   </section>
 
-                  <section
-                    className={styles.spBlock}
-                    aria-label="Spending by business"
-                  >
+                  <section className={styles.spBlock} aria-label="Spending by business">
                     <div className={styles.spBlockHead}>
                       <h3>Where it went</h3>
                       <span>Share of total spend</span>
                     </div>
-                    <div
-                      className={styles.spSplit}
-                      role="img"
-                      aria-label="Spending split by business"
-                    >
+                    <div className={styles.spSplit} role="img" aria-label="Spending split by business">
                       {spending.top.map((b, i) => (
-                        <span
-                          key={b.membershipId}
-                          style={{
-                            width: `${b.share}%`,
-                            background: `var(--sp-c${i})`,
-                          }}
-                        />
+                        <span key={b.membershipId} style={{ width: `${b.share}%`, background: `var(--sp-c${i})` }} />
                       ))}
-                      {spending.restShare > 0 && (
-                        <span
-                          style={{
-                            width: `${spending.restShare}%`,
-                            background: "var(--sp-c5)",
-                          }}
-                        />
-                      )}
+                      {spending.restShare > 0 && <span style={{ width: `${spending.restShare}%`, background: "var(--sp-c5)" }} />}
                     </div>
                     <ul className={styles.spRows}>
                       {spending.top.map((b, i) => (
                         <li key={b.membershipId}>
-                          <span
-                            className={styles.spSwatch}
-                            style={{ background: `var(--sp-c${i})` }}
-                            aria-hidden="true"
-                          />
+                          <span className={styles.spSwatch} style={{ background: `var(--sp-c${i})` }} aria-hidden="true" />
                           <span className={styles.spAvatar}>
-                            {b.businessLogo ? (
-                              <img src={b.businessLogo} alt="" />
-                            ) : (
-                              initials(b.businessName)
-                            )}
+                            {b.businessLogo ? <img src={b.businessLogo} alt="" /> : initials(b.businessName)}
                           </span>
                           <span className={styles.spWho}>
                             <strong>{b.businessName}</strong>
                             <small>
-                              {b.ordersCount} order
-                              {b.ordersCount === 1 ? "" : "s"}
+                              {b.ordersCount} order{b.ordersCount === 1 ? "" : "s"}
                             </small>
                           </span>
                           <span className={styles.spHow}>
@@ -1681,18 +1502,13 @@ export default function CustomerDashboard() {
                       ))}
                       {spending.restCount > 0 && (
                         <li>
-                          <span
-                            className={styles.spSwatch}
-                            style={{ background: "var(--sp-c5)" }}
-                            aria-hidden="true"
-                          />
+                          <span className={styles.spSwatch} style={{ background: "var(--sp-c5)" }} aria-hidden="true" />
                           <span className={styles.spAvatar}>
                             <i className="ti ti-dots" aria-hidden="true" />
                           </span>
                           <span className={styles.spWho}>
                             <strong>
-                              {spending.restCount} other business
-                              {spending.restCount === 1 ? "" : "es"}
+                              {spending.restCount} other business{spending.restCount === 1 ? "" : "es"}
                             </strong>
                           </span>
                           <span className={styles.spHow}>
@@ -1703,18 +1519,11 @@ export default function CustomerDashboard() {
                     </ul>
                   </section>
 
-                  <section
-                    className={styles.spBlock}
-                    aria-label="Recent payments"
-                  >
+                  <section className={styles.spBlock} aria-label="Recent payments">
                     <div className={styles.spBlockHead}>
                       <h3>Recent payments</h3>
-                      <button
-                        className={styles.spLink}
-                        onClick={() => changeTab("orders")}
-                      >
-                        All orders{" "}
-                        <i className="ti ti-arrow-right" aria-hidden="true" />
+                      <button className={styles.spLink} onClick={() => changeTab("orders")}>
+                        All orders <i className="ti ti-arrow-right" aria-hidden="true" />
                       </button>
                     </div>
                     <ul className={styles.spRecent}>
@@ -1722,10 +1531,7 @@ export default function CustomerDashboard() {
                         <li key={o.id}>
                           <button onClick={() => setSelectedOrder(o)}>
                             <span className={styles.spRecentIcon}>
-                              <i
-                                className="ti ti-receipt-2"
-                                aria-hidden="true"
-                              />
+                              <i className="ti ti-receipt-2" aria-hidden="true" />
                             </span>
                             <span className={styles.spWho}>
                               <strong>{o.businessName}</strong>
@@ -1734,9 +1540,7 @@ export default function CustomerDashboard() {
                               </small>
                             </span>
                             <span className={styles.spHow}>
-                              <strong>
-                                {money(o.currency, o.amountPaid || o.total)}
-                              </strong>
+                              <strong>{money(o.currency, o.amountPaid || o.total)}</strong>
                             </span>
                           </button>
                         </li>
@@ -1763,46 +1567,29 @@ export default function CustomerDashboard() {
                 <div className={styles.acWho}>
                   <span className={styles.eyebrow}>ACCOUNT &amp; SECURITY</span>
                   <h2>
-                    {profileForm?.firstName || data?.firstName}{" "}
-                    {profileForm?.lastName || data?.lastName}
+                    {profileForm?.firstName || data?.firstName} {profileForm?.lastName || data?.lastName}
                   </h2>
                   <ul className={styles.acMeta}>
                     <li>
                       <i className="ti ti-mail" aria-hidden="true" />
-                      <span>
-                        {profileForm?.email || data?.email || "No email added"}
-                      </span>
+                      <span>{profileForm?.email || data?.email || "No email added"}</span>
                     </li>
                     <li>
                       <i className="ti ti-phone" aria-hidden="true" />
                       <span>{profileForm?.phone || data?.phone}</span>
                       <em className={styles.acVerified}>
-                        <i
-                          className="ti ti-circle-check-filled"
-                          aria-hidden="true"
-                        />{" "}
-                        Verified
+                        <i className="ti ti-circle-check-filled" aria-hidden="true" /> Verified
                       </em>
                     </li>
                   </ul>
                 </div>
                 <div className={styles.acActions}>
-                  <button
-                    onClick={() => setEditingProfile((v) => !v)}
-                    className={styles.acPrimary}
-                  >
-                    <i
-                      className={editingProfile ? "ti ti-x" : "ti ti-user-edit"}
-                      aria-hidden="true"
-                    />
+                  <button onClick={() => setEditingProfile((v) => !v)} className={styles.acPrimary}>
+                    <i className={editingProfile ? "ti ti-x" : "ti ti-user-edit"} aria-hidden="true" />
                     {editingProfile ? "Close editor" : "Edit profile"}
                   </button>
-                  <button
-                    onClick={() => nav("/forgot-password")}
-                    className={styles.acGhost}
-                  >
-                    <i className="ti ti-key" aria-hidden="true" /> Change
-                    password
+                  <button onClick={() => nav("/forgot-password")} className={styles.acGhost}>
+                    <i className="ti ti-key" aria-hidden="true" /> Change password
                   </button>
                 </div>
               </header>
@@ -1811,10 +1598,7 @@ export default function CustomerDashboard() {
                 <div className={styles.acEditor}>
                   <div className={styles.acEditorHead}>
                     <h3>Edit your details</h3>
-                    <p>
-                      Changes apply to your Ehral identity and follow you across
-                      your relationships.
-                    </p>
+                    <p>Changes apply to your Ehral identity and follow you across your relationships.</p>
                   </div>
                   <div className={styles.acFields}>
                     {[
@@ -1828,60 +1612,35 @@ export default function CustomerDashboard() {
                         <input
                           type={key === "email" ? "email" : "text"}
                           value={profileForm[key] || ""}
-                          onChange={(e) =>
-                            setProfileForm((p) => ({
-                              ...p,
-                              [key]: e.target.value,
-                            }))
-                          }
+                          onChange={(e) => setProfileForm((p) => ({ ...p, [key]: e.target.value }))}
                         />
                       </label>
                     ))}
                     <label className={styles.acField}>
                       <span>Phone</span>
                       <input value={profileForm.phone || ""} readOnly />
-                      <small>
-                        Your phone is your verified identity anchor and can't be
-                        changed here.
-                      </small>
+                      <small>Your phone is your verified identity anchor and can't be changed here.</small>
                     </label>
                     <label className={styles.acField}>
                       <span>Date of birth</span>
                       <input
                         type="date"
                         value={profileForm.dateOfBirth || ""}
-                        onChange={(e) =>
-                          setProfileForm((p) => ({
-                            ...p,
-                            dateOfBirth: e.target.value,
-                          }))
-                        }
+                        onChange={(e) => setProfileForm((p) => ({ ...p, dateOfBirth: e.target.value }))}
                       />
                     </label>
                     <label className={styles.acField}>
                       <span>Gender</span>
                       <input
                         value={profileForm.gender || ""}
-                        onChange={(e) =>
-                          setProfileForm((p) => ({
-                            ...p,
-                            gender: e.target.value,
-                          }))
-                        }
+                        onChange={(e) => setProfileForm((p) => ({ ...p, gender: e.target.value }))}
                       />
                     </label>
-                    <label
-                      className={`${styles.acField} ${styles.acFieldWide}`}
-                    >
+                    <label className={`${styles.acField} ${styles.acFieldWide}`}>
                       <span>Address</span>
                       <textarea
                         value={profileForm.address || ""}
-                        onChange={(e) =>
-                          setProfileForm((p) => ({
-                            ...p,
-                            address: e.target.value,
-                          }))
-                        }
+                        onChange={(e) => setProfileForm((p) => ({ ...p, address: e.target.value }))}
                         rows={2}
                       />
                     </label>
@@ -1889,39 +1648,22 @@ export default function CustomerDashboard() {
                       <span>Emergency contact name</span>
                       <input
                         value={profileForm.emergencyContactName || ""}
-                        onChange={(e) =>
-                          setProfileForm((p) => ({
-                            ...p,
-                            emergencyContactName: e.target.value,
-                          }))
-                        }
+                        onChange={(e) => setProfileForm((p) => ({ ...p, emergencyContactName: e.target.value }))}
                       />
                     </label>
                     <label className={styles.acField}>
                       <span>Emergency contact phone</span>
                       <input
                         value={profileForm.emergencyContactPhone || ""}
-                        onChange={(e) =>
-                          setProfileForm((p) => ({
-                            ...p,
-                            emergencyContactPhone: e.target.value,
-                          }))
-                        }
+                        onChange={(e) => setProfileForm((p) => ({ ...p, emergencyContactPhone: e.target.value }))}
                       />
                     </label>
                   </div>
                   <div className={styles.acEditorFoot}>
-                    <button
-                      className={styles.acGhost}
-                      onClick={() => setEditingProfile(false)}
-                    >
+                    <button className={styles.acGhost} onClick={() => setEditingProfile(false)}>
                       Cancel
                     </button>
-                    <button
-                      className={styles.acPrimary}
-                      onClick={saveProfile}
-                      disabled={savingProfile}
-                    >
+                    <button className={styles.acPrimary} onClick={saveProfile} disabled={savingProfile}>
                       {savingProfile ? "Saving…" : "Save profile"}
                     </button>
                   </div>
@@ -1932,15 +1674,11 @@ export default function CustomerDashboard() {
               <div className={styles.acGlance}>
                 <div>
                   <strong>{businesses.length}</strong>
-                  <span>
-                    Connected business{businesses.length === 1 ? "" : "es"}
-                  </span>
+                  <span>Connected business{businesses.length === 1 ? "" : "es"}</span>
                 </div>
                 <div>
                   <strong>{data?.totalOrders || 0}</strong>
-                  <span>
-                    Order{(data?.totalOrders || 0) === 1 ? "" : "s"} placed
-                  </span>
+                  <span>Order{(data?.totalOrders || 0) === 1 ? "" : "s"} placed</span>
                 </div>
                 <div>
                   <strong>{money(data?.currency, data?.totalSpent)}</strong>
@@ -1949,10 +1687,7 @@ export default function CustomerDashboard() {
               </div>
 
               <div className={styles.acColumns}>
-                <section
-                  className={styles.acSection}
-                  aria-labelledby="ac-security"
-                >
+                <section className={styles.acSection} aria-labelledby="ac-security">
                   <h3 id="ac-security">Security &amp; privacy</h3>
                   <ul className={styles.acList}>
                     <li>
@@ -1961,70 +1696,43 @@ export default function CustomerDashboard() {
                       </span>
                       <span>
                         <strong>Password protected</strong>
-                        <small>
-                          Your account is secured with your Ehral password.
-                        </small>
+                        <small>Your account is secured with your Ehral password.</small>
                       </span>
-                      <i
-                        className={`ti ti-circle-check-filled ${styles.acTick}`}
-                        aria-hidden="true"
-                      />
+                      <i className={`ti ti-circle-check-filled ${styles.acTick}`} aria-hidden="true" />
                     </li>
                     <li>
                       <span className={styles.acIcon}>
-                        <i
-                          className="ti ti-device-mobile-check"
-                          aria-hidden="true"
-                        />
+                        <i className="ti ti-device-mobile-check" aria-hidden="true" />
                       </span>
                       <span>
                         <strong>Phone verified</strong>
-                        <small>
-                          Your phone is your verified identity anchor.
-                        </small>
+                        <small>Your phone is your verified identity anchor.</small>
                       </span>
-                      <i
-                        className={`ti ti-circle-check-filled ${styles.acTick}`}
-                        aria-hidden="true"
-                      />
+                      <i className={`ti ti-circle-check-filled ${styles.acTick}`} aria-hidden="true" />
                     </li>
                     <li>
                       <span className={styles.acIcon}>
-                        <i
-                          className="ti ti-building-store"
-                          aria-hidden="true"
-                        />
+                        <i className="ti ti-building-store" aria-hidden="true" />
                       </span>
                       <span>
                         <strong>
-                          {businesses.length} connected business
-                          {businesses.length === 1 ? "" : "es"}
+                          {businesses.length} connected business{businesses.length === 1 ? "" : "es"}
                         </strong>
-                        <small>
-                          One identity, many relationships - each business only
-                          sees what you share.
-                        </small>
+                        <small>One identity, many relationships - each business only sees what you share.</small>
                       </span>
                     </li>
                   </ul>
                 </section>
 
-                <section
-                  className={styles.acSection}
-                  aria-labelledby="ac-identity"
-                >
+                <section className={styles.acSection} aria-labelledby="ac-identity">
                   <h3 id="ac-identity">Your Ehral identity</h3>
-                  <p className={styles.acStatement}>
-                    One secure account across your commerce life.
-                  </p>
+                  <p className={styles.acStatement}>One secure account across your commerce life.</p>
                   <p className={styles.acCopy}>
-                    Your customer identity, orders, receipts and conversations
-                    stay connected while each business keeps control of its own
-                    products and operations.
+                    Your customer identity, orders, receipts and conversations stay connected while each business
+                    keeps control of its own products and operations.
                   </p>
                   <button onClick={signOut} className={styles.acSignOut}>
-                    <i className="ti ti-logout-2" aria-hidden="true" /> Sign out
-                    of Ehral
+                    <i className="ti ti-logout-2" aria-hidden="true" /> Sign out of Ehral
                   </button>
                 </section>
               </div>
@@ -2051,9 +1759,7 @@ export default function CustomerDashboard() {
       )}
       <NotificationToastStack
         channel="CUSTOMER"
-        activeConversationId={
-          tab === "messages" ? activeMessageConversationId : null
-        }
+        activeConversationId={tab === "messages" ? activeMessageConversationId : null}
         onNavigate={(conversationId, messageId) => {
           setMessagesDeepLink({ conversationId, messageId });
           setTab("messages");
