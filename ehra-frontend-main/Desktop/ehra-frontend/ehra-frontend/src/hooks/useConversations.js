@@ -20,8 +20,14 @@ import {
 // reload - and only THEN asks the server to reconcile it (see
 // messagingCache.js's doc for why that order is what makes this feel
 // instant instead of "instant but only after the first time").
-export default function useConversations() {
-  const cachedInitial = getCachedConversationsSync();
+//
+// `channel` selects which inbox this hook serves: "STAFF" (the original
+// workplace messaging, the default) or "CUSTOMER" (Business <-> Customer
+// messaging). Each has its own cache and its own list; live events carry a
+// `channel` and are ignored by the other inbox's hook, so a customer's
+// message can never appear in the workplace list or the other way round.
+export default function useConversations(channel = "STAFF") {
+  const cachedInitial = getCachedConversationsSync(channel);
   const [conversations, setConversations] = useState(cachedInitial || []);
   const [loading, setLoading] = useState(!cachedInitial);
   // Surfaced so the UI can tell "genuinely zero conversations" apart from
@@ -38,15 +44,15 @@ export default function useConversations() {
       return new Date(b.lastMessageAt || 0) - new Date(a.lastMessageAt || 0);
     });
     setConversations(sorted);
-    setCachedConversations(sorted);
-  }, []);
+    setCachedConversations(sorted, channel);
+  }, [channel]);
 
   const refresh = useCallback(async () => {
     // Only show the spinner if there's truly nothing on screen yet - a
     // background reconciliation shouldn't ever cause a visible flicker.
     if (conversationsRef.current.length === 0) setLoading(true);
     try {
-      const { data } = await listConversations();
+      const { data } = await listConversations(channel);
       setError(null);
       sortAndSet(data);
     } catch (err) {
@@ -56,14 +62,14 @@ export default function useConversations() {
     } finally {
       setLoading(false);
     }
-  }, [sortAndSet]);
+  }, [sortAndSet, channel]);
 
   useEffect(() => {
     if (!cachedInitial) {
       // Nothing in memory (first load since a page refresh) - try disk
       // before falling back to a bare network fetch, so a hard reload
       // still paints instantly whenever IndexedDB has something.
-      hydrateConversationsFromDisk().then((disk) => {
+      hydrateConversationsFromDisk(channel).then((disk) => {
         if (disk) {
           setConversations(disk);
           setLoading(false);
@@ -81,6 +87,8 @@ export default function useConversations() {
       if (!event) return;
       if (event.type === "CONVERSATION_UPDATED" || event.type === "CONVERSATION_CREATED") {
         const incoming = event.payload;
+        // Events from before channels existed carry no `channel` - those are workplace.
+        if ((incoming?.channel || "STAFF") !== channel) return;
         const existingIndex = conversationsRef.current.findIndex((c) => c.id === incoming.id);
         let next;
         if (existingIndex === -1) {
@@ -94,7 +102,7 @@ export default function useConversations() {
       }
     });
     return unsubscribe;
-  }, [sortAndSet]);
+  }, [sortAndSet, channel]);
 
   // Presence pushed to the personal queue too (see
   // MsgWebSocketEventListener) so a DIRECT conversation's online dot

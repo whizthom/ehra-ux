@@ -190,3 +190,20 @@
 @media(max-width:400px){.historyHeadMeta{align-items:flex-start;flex-direction:column;gap:7px}.historyViewTools{align-items:stretch;flex-direction:column}.historyViewToggle,.historyDensity{width:100%}.historyViewToggle button,.historyDensity button{flex:1}}
 
 @media(max-width:680px){.mobileSaveAdjustment{display:block}}
+
+/* ── Customer messages (Business <-> Customer inbox) ────────────────────
+   The hub needs a fixed-height, padding-free stage - it manages its own
+   scrolling (list column + open chat) - instead of the normal padded,
+   page-scrolling content area. */
+.content.contentMessages{padding:0;max-width:none;width:100%}
+.messagesHost{height:calc(100dvh - 88px);min-height:420px;background:var(--bg-surface);overflow:hidden;border-bottom:1px solid var(--border-color)}
+.navBadge{margin-left:auto;min-width:19px;height:19px;padding:0 6px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:#f5b300;color:#1b1b1b;font-size:10px;font-weight:850;font-style:normal;line-height:1}
+.navBadgeInline{min-width:19px;height:19px;padding:0 6px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:var(--accent);color:#fff;font-size:10px;font-weight:850;font-style:normal;line-height:1}
+.mobileNavDot{position:absolute;top:0;right:1px;width:9px;height:9px;border-radius:50%;background:#e24b4a;border:2px solid var(--bg-surface)}
+@media(max-width:900px){
+  .content.contentMessages{padding:0}
+  .messagesHost{height:calc(100dvh - 78px - 76px - env(safe-area-inset-bottom,0px));min-height:0}
+  /* An open chat takes the whole screen on a phone (over the header and the
+     bottom bar) so the composer sits above the keyboard, like every chat app. */
+  .messagesHostThread{position:fixed;inset:0;z-index:140;height:100dvh;border-bottom:0}
+}

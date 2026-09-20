@@ -11,19 +11,13 @@ import {
   getCustomerProfile,
   updateCustomerProfile,
 } from "../api/commerceApi";
-import {
-  createCustomerBusinessConversation,
-  getMessages,
-  listCustomerConversations,
-  markRead,
-  sendMessage,
-} from "../api/messagingApi";
+import { createCustomerBusinessConversation } from "../api/messagingApi";
 import { useAuth } from "../context/AuthContext";
 import useMessagingConnection from "../hooks/useMessagingConnection";
-import {
-  subscribeToConversation,
-  subscribeToUserQueue,
-} from "../services/messagingSocket";
+import useConversations from "../hooks/useConversations";
+import useCustomerInboxBadge from "../hooks/useCustomerInboxBadge";
+import MessagingHub from "../components/messaging/MessagingHub";
+import NotificationToastStack from "../components/notifications/NotificationToastStack";
 import styles from "./CustomerDashboard.module.css";
 
 // Matches Ehral\'s employer/employee mobile navigation behavior.
@@ -307,166 +301,6 @@ function ReceiptView({ order, onClose, onDownload }) {
   );
 }
 
-function MessagePanel({ conversation, onClose, onSent, initialDraft = "" }) {
-  const [messages, setMessages] = useState([]);
-  const [text, setText] = useState(initialDraft);
-  const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
-  const [error, setError] = useState("");
-
-  const load = useCallback(async () => {
-    if (!conversation) return;
-    setLoading(true);
-    setError("");
-    try {
-      const r = await getMessages(conversation.conversationId, { limit: 80 });
-      setMessages(r.data || []);
-      await markRead(conversation.conversationId);
-    } catch (e) {
-      setError(
-        e?.response?.data?.message || "We could not load this conversation.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [conversation]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
-
-  useEffect(() => {
-    if (!conversation?.conversationId) return undefined;
-    return subscribeToConversation(conversation.conversationId, (event) => {
-      if (!event) return;
-      if (
-        [
-          "MESSAGE_CREATED",
-          "MESSAGE_UPDATED",
-          "MESSAGE_DELETED",
-          "MESSAGE_REACTION_UPDATED",
-        ].includes(event.type)
-      ) {
-        const incoming = event.payload;
-        if (!incoming) return;
-        setMessages((current) => {
-          const exists = current.some(
-            (m) => String(m.id) === String(incoming.id),
-          );
-          if (exists)
-            return current.map((m) =>
-              String(m.id) === String(incoming.id) ? incoming : m,
-            );
-          return [...current, incoming];
-        });
-        if (event.type === "MESSAGE_CREATED")
-          markRead(conversation.conversationId).catch(() => {});
-      }
-    });
-  }, [conversation?.conversationId]);
-
-  const send = async () => {
-    if (!text.trim() || sending) return;
-    setSending(true);
-    const body = text.trim();
-    setText("");
-    setError("");
-    try {
-      await sendMessage(conversation.conversationId, {
-        messageType: "TEXT",
-        body,
-      });
-      await load();
-      onSent?.();
-    } catch (e) {
-      setText(body);
-      setError(e?.response?.data?.message || "Your message could not be sent.");
-    } finally {
-      setSending(false);
-    }
-  };
-
-  return (
-    <div className={styles.chatShell}>
-      <div className={styles.chatHead}>
-        <div className={styles.chatIdentity}>
-          <div className={styles.avatar}>
-            {conversation?.businessLogo ? (
-              <img src={conversation.businessLogo} alt="" />
-            ) : (
-              initials(conversation?.businessName)
-            )}
-          </div>
-          <div>
-            <strong>{conversation?.businessName}</strong>
-            <small>
-              <span className={styles.onlineDot} /> Ehral native messaging
-            </small>
-          </div>
-        </div>
-        <button
-          className={styles.iconButton}
-          onClick={onClose}
-          aria-label="Close chat"
-        >
-          <i className="ti ti-x" />
-        </button>
-      </div>
-      <div className={styles.chatMessages}>
-        {loading ? (
-          <div className={styles.inlineLoading}>
-            <span /> Loading conversation…
-          </div>
-        ) : messages.length ? (
-          messages.map((m) => (
-            <div
-              key={m.id}
-              className={`${styles.bubbleRow} ${m.senderIdentityId === conversation.myIdentityId ? styles.mine : ""}`}
-            >
-              <div className={styles.bubble}>
-                <span>{m.body}</span>
-                <small>{time(m.createdAt)}</small>
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className={styles.emptyChat}>
-            <i className="ti ti-message-circle-2" />
-            <strong>Start the conversation</strong>
-            <span>
-              Ask about products, orders, delivery, availability or anything
-              else.
-            </span>
-          </div>
-        )}
-      </div>
-      {error && <div className={styles.chatError}>{error}</div>}
-      <div className={styles.chatComposer}>
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              send();
-            }
-          }}
-          placeholder="Write a message…"
-          rows={1}
-          aria-label="Message"
-        />
-        <button
-          onClick={send}
-          disabled={!text.trim() || sending}
-          aria-label="Send message"
-        >
-          <i className={sending ? "ti ti-loader-2" : "ti ti-send"} />
-        </button>
-      </div>
-    </div>
-  );
-}
-
 function BusinessCard({ business, onVisit, onChat, detailed }) {
   return (
     <article className={styles.businessCard}>
@@ -591,53 +425,6 @@ function OrderList({ orders, onReceipt }) {
   );
 }
 
-function ConversationList({ conversations, onOpen, large }) {
-  if (!conversations.length) {
-    return (
-      <div className={styles.emptyState}>
-        <i className="ti ti-message-off" />
-        <h3>No conversations yet</h3>
-        <p>Open a business and start a conversation with its team.</p>
-      </div>
-    );
-  }
-  return (
-    <div
-      className={`${styles.conversationList} ${large ? styles.conversationListLarge : ""}`}
-    >
-      {conversations.map((c) => {
-        const s = c.summary || c;
-        return (
-          <button
-            className={styles.conversationRow}
-            key={c.conversationId || s.id}
-            onClick={() => onOpen(c)}
-          >
-            <div className={styles.avatar}>
-              {c.businessLogo ? (
-                <img src={c.businessLogo} alt="" />
-              ) : (
-                initials(c.businessName || s.name)
-              )}
-            </div>
-            <div className={styles.conversationCopy}>
-              <strong>{c.businessName || s.name}</strong>
-              <span>
-                {s.lastMessagePreview ||
-                  "Start a conversation with this business"}
-              </span>
-            </div>
-            <div className={styles.conversationMeta}>
-              {s.lastMessageAt && <small>{date(s.lastMessageAt)}</small>}
-              {s.unreadCount > 0 && <em>{s.unreadCount}</em>}
-            </div>
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
 function DiscoveryCard({ business, onView }) {
   return (
     <article className={styles.businessCard}>
@@ -696,15 +483,21 @@ function DiscoveryCard({ business, onView }) {
 export default function CustomerDashboard() {
   const nav = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { user, logout: contextLogout } = useAuth();
+  const { logout: contextLogout } = useAuth();
   useMessagingConnection();
   const [tab, setTab] = useState("home");
   const [data, setData] = useState(null);
-  const [messages, setMessages] = useState([]);
+  // The customer's chats with businesses now run on the same messaging
+  // engine as everything else (MessagingHub, mode="customer"). This page only
+  // keeps the light-weight pieces it needs itself: the conversation summaries
+  // (for the home "needs attention" / activity cards) and the unread badge.
+  const { conversations: messages, refresh: loadMessages } = useConversations("CUSTOMER");
+  const inbox = useCustomerInboxBadge({ includeAnnouncements: true });
+  const [messagesThreadOpen, setMessagesThreadOpen] = useState(false);
+  const [messagesDeepLink, setMessagesDeepLink] = useState(null);
+  const [activeMessageConversationId, setActiveMessageConversationId] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [messageLoading, setMessageLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [activeChat, setActiveChat] = useState(null);
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
   const [discovery, setDiscovery] = useState([]);
@@ -727,20 +520,6 @@ export default function CustomerDashboard() {
       );
     } finally {
       setLoading(false);
-    }
-  }, []);
-
-  const loadMessages = useCallback(async () => {
-    setMessageLoading(true);
-    try {
-      const r = await listCustomerConversations();
-      setMessages(r.data || []);
-    } catch (e) {
-      setNotice(
-        e?.response?.data?.message || "We could not load your conversations.",
-      );
-    } finally {
-      setMessageLoading(false);
     }
   }, []);
 
@@ -767,26 +546,10 @@ export default function CustomerDashboard() {
 
   useEffect(() => {
     load();
-    loadMessages();
     getCustomerBusinessTypes()
       .then(({ data: types }) => setBusinessTypes(types || []))
       .catch(() => {});
-  }, [load, loadMessages]);
-
-  useEffect(() => {
-    return subscribeToUserQueue((event) => {
-      if (!event) return;
-      if (
-        [
-          "CONVERSATION_CREATED",
-          "CONVERSATION_UPDATED",
-          "NEW_MESSAGE_NOTIFICATION",
-          "MESSAGE_MENTION",
-        ].includes(event.type)
-      )
-        loadMessages();
-    });
-  }, [loadMessages]);
+  }, [load]);
 
   useEffect(() => {
     const requestedTab = searchParams.get("tab");
@@ -831,28 +594,19 @@ export default function CustomerDashboard() {
     return () => window.clearTimeout(timer);
   }, [discoveryQuery, discoveryType]);
 
+  // /customer-dashboard?chat=<conversationId> - sent here by the storefront
+  // ("Message the store" / "Ask about this product"), which may also have
+  // stashed a first message to pre-fill. Opens that chat in the Messages tab;
+  // the hub reloads its list itself if the thread is brand new.
   useEffect(() => {
     const conversationId = searchParams.get("chat");
-    if (!conversationId || !messages.length) return;
-    const found = messages.find(
-      (m) => String(m.conversationId) === String(conversationId),
-    );
-    if (found) {
-      const draft =
-        sessionStorage.getItem(`ehral:pending-chat:${conversationId}`) || "";
-      sessionStorage.removeItem(`ehral:pending-chat:${conversationId}`);
-      setActiveChat({
-        ...found,
-        conversationId: found.conversationId,
-        businessName: found.businessName,
-        businessLogo: found.businessLogo,
-        myIdentityId: user?.identityId,
-        initialDraft: draft,
-      });
-      setTab("messages");
-      setSearchParams({}, { replace: true });
-    }
-  }, [messages, searchParams, setSearchParams, user?.identityId]);
+    if (!conversationId) return;
+    const draft = sessionStorage.getItem(`ehral:pending-chat:${conversationId}`) || "";
+    sessionStorage.removeItem(`ehral:pending-chat:${conversationId}`);
+    setMessagesDeepLink({ conversationId: Number(conversationId), draft: draft || undefined });
+    setTab("messages");
+    setSearchParams({}, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   const businesses = data?.businesses || [];
   const orders = data?.orders || [];
@@ -877,10 +631,8 @@ export default function CustomerDashboard() {
   const average = completed.length
     ? Number(data?.totalSpent || 0) / completed.length
     : 0;
-  const unread = messages.reduce(
-    (sum, c) => sum + Number(c.summary?.unreadCount || c.unreadCount || 0),
-    0,
-  );
+  // Unread chats + unread business announcements, one badge for the Messages tab.
+  const unread = inbox.total;
 
   const attentionItems = useMemo(() => {
     const items = [];
@@ -958,13 +710,16 @@ export default function CustomerDashboard() {
         title: m.businessName || s.name || "Business message",
         text: s.lastMessagePreview || "Conversation updated",
         date: s.lastMessageAt,
-        action: () => setActiveChat({ ...m, myIdentityId: user?.identityId }),
+        action: () => {
+          setMessagesDeepLink({ conversationId: m.id });
+          setTab("messages");
+        },
       };
     });
     return [...orderActivity, ...messageActivity]
       .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
       .slice(0, 6);
-  }, [orders, messages, user?.identityId]);
+  }, [orders, messages]);
 
   const changeTab = (id) => {
     setTab(id);
@@ -981,14 +736,7 @@ export default function CustomerDashboard() {
   const openBusinessChat = async (business) => {
     try {
       const r = await createCustomerBusinessConversation(business.businessId);
-      await loadMessages();
-      setActiveChat({
-        conversationId: r.data.id,
-        businessId: business.businessId,
-        businessName: business.businessName,
-        businessLogo: business.businessLogo,
-        myIdentityId: user?.identityId,
-      });
+      setMessagesDeepLink({ conversationId: r.data.id });
       setTab("messages");
     } catch (e) {
       setNotice(
@@ -1515,31 +1263,19 @@ export default function CustomerDashboard() {
           )}
 
           {tab === "messages" && (
-            <section className={styles.section}>
-              <div className={styles.sectionIntro}>
-                <span className={styles.eyebrow}>EHRAL NATIVE MESSAGING</span>
-                <h2>Your conversations</h2>
-                <p>
-                  Talk directly with businesses you are connected to without
-                  leaving Ehral.
-                </p>
-              </div>
-              <div className={styles.messageList}>
-                {messageLoading ? (
-                  <div className={styles.inlineLoading}>
-                    <span /> Loading conversations…
-                  </div>
-                ) : (
-                  <ConversationList
-                    conversations={messages}
-                    onOpen={(c) =>
-                      setActiveChat({ ...c, myIdentityId: user?.identityId })
-                    }
-                    large
-                  />
-                )}
-              </div>
-            </section>
+            <div
+              className={`${styles.messagesHost} ${messagesThreadOpen ? styles.messagesHostThread : ""}`}
+            >
+              <MessagingHub
+                mode="customer"
+                businesses={businesses}
+                onThreadOpenChange={setMessagesThreadOpen}
+                deepLink={messagesDeepLink}
+                onDeepLinkConsumed={() => setMessagesDeepLink(null)}
+                onActiveConversationChange={setActiveMessageConversationId}
+                onBadgeChange={inbox.refresh}
+              />
+            </div>
           )}
 
           {tab === "spending" && (
@@ -1807,16 +1543,14 @@ export default function CustomerDashboard() {
           onDownload={downloadReceipt}
         />
       )}
-      {activeChat && (
-        <div className={styles.chatOverlay}>
-          <MessagePanel
-            conversation={activeChat}
-            initialDraft={activeChat.initialDraft || ""}
-            onClose={() => setActiveChat(null)}
-            onSent={loadMessages}
-          />
-        </div>
-      )}
+      <NotificationToastStack
+        channel="CUSTOMER"
+        activeConversationId={tab === "messages" ? activeMessageConversationId : null}
+        onNavigate={(conversationId, messageId) => {
+          setMessagesDeepLink({ conversationId, messageId });
+          setTab("messages");
+        }}
+      />
     </div>
   );
 }

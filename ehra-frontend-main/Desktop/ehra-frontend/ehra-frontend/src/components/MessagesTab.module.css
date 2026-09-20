@@ -926,3 +926,51 @@
   .detailBody { padding: 10px; }
   .receiptsSection { margin: 0 10px 10px; }
 }
+
+/* ── Additions for the customer announcement manager
+   (components/messaging/CustomerAnnouncementsManager.jsx), which reuses
+   this stylesheet so both announcement tools look and behave alike. ── */
+
+.audienceChip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 0.5px solid var(--border-color);
+  background: var(--bg-soft-accent);
+  color: var(--accent);
+}
+
+.audienceChip > i {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.audienceChip span {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.audienceChip strong {
+  color: var(--text-primary);
+  font-size: 13.5px;
+}
+
+.audienceChip small {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.charCount {
+  align-self: flex-end;
+  margin-top: 4px;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.confirmIconAccent {
+  background: var(--bg-soft-accent);
+  color: var(--accent);
+}

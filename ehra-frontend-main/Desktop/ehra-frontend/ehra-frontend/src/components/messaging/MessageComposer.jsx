@@ -34,8 +34,9 @@ export default function MessageComposer({
   onCancelEdit,
   onSaveEdit,
   onComposerFocus,
+  initialDraft, // optional text to pre-fill (e.g. a reply started elsewhere)
 }) {
-  const [text, setText] = useState(editingMessage?.body || "");
+  const [text, setText] = useState(editingMessage?.body || initialDraft || "");
   const [showEmoji, setShowEmoji] = useState(false);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
   const [recording, setRecording] = useState(false);

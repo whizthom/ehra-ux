@@ -17,6 +17,7 @@ export default function ChatWindow({
   onBack,
   onConversationChanged,
   highlightMessageId,
+  initialDraft,
 }) {
   const {
     messages,
@@ -54,6 +55,20 @@ export default function ChatWindow({
   const isMultiParty = isGroup || isAnnouncement;
   const other = !isMultiParty ? conversation.participants?.[0] : null;
 
+  // A Business <-> Customer thread looks like a 1:1 chat from the header
+  // (one counterpart, presence, role badge) but is shared on the business
+  // side - the employer and every permitted employee answer in it - so
+  // bubbles must still say WHO on the business side replied. `viewerIsCustomer`
+  // = this thread's counterpart is "the business" (see
+  // MsgMessagingServiceImpl#summarizeCustomerThreads).
+  const isCustomerChannel = conversation.channel === "CUSTOMER";
+  const viewerIsCustomer = isCustomerChannel && other?.roleLabel === "Business";
+  const showSenderNames = isMultiParty || isCustomerChannel;
+  // The server locks a thread once the customer is unlinked or the business
+  // is inactive (the history stays readable) - mirror it so the composer
+  // doesn't invite a message that would be refused.
+  const threadLocked = isCustomerChannel && conversation.canSend === false;
+
   const groupMembers = isMultiParty ? conversation.participants : undefined;
 
   const myParticipant = conversation.participants?.find(
@@ -66,10 +81,11 @@ export default function ChatWindow({
   // enforcement - the server rejects the POST regardless of what this
   // computes, so getting it wrong here can only ever over-hide the
   // composer, never let someone post who isn't allowed to.
-  const canPostHere =
-    !isAnnouncement ||
-    myParticipant?.roleLabel === "Employer" ||
-    Boolean(myParticipant?.roleLabel?.startsWith("HOD"));
+  const canPostHere = isCustomerChannel
+    ? !threadLocked
+    : !isAnnouncement ||
+      myParticipant?.roleLabel === "Employer" ||
+      Boolean(myParticipant?.roleLabel?.startsWith("HOD"));
 
   // Auto-scroll to bottom on first load and on new messages, but only if
   // the person was already near the bottom - never yank them away from
@@ -218,11 +234,15 @@ export default function ChatWindow({
                 ? "typing…"
                 : isMultiParty
                   ? `${conversation.participants?.length || 0} members`
-                  : conversation.online
-                    ? "Online"
-                    : other?.lastSeenAt
-                      ? `Last seen ${new Date(other.lastSeenAt).toLocaleString()}`
-                      : "Offline"}
+                  : viewerIsCustomer
+                    ? conversation.online
+                      ? "Team online"
+                      : "Message the team - they'll reply here"
+                    : conversation.online
+                      ? "Online"
+                      : other?.lastSeenAt
+                        ? `Last seen ${new Date(other.lastSeenAt).toLocaleString()}`
+                        : "Offline"}
             </span>
           </div>
         </button>
@@ -248,7 +268,13 @@ export default function ChatWindow({
               <i className="ti ti-message-circle-2" />
             </div>
             <h3>Start the conversation</h3>
-            <p>Send a message to get started.</p>
+            <p>
+              {viewerIsCustomer
+                ? "Ask about products, orders, delivery or availability - the team will reply here."
+                : isCustomerChannel
+                  ? "Send a message to this customer to get started."
+                  : "Send a message to get started."}
+            </p>
           </div>
         ) : (
           grouped.map((item) =>
@@ -259,12 +285,13 @@ export default function ChatWindow({
                 <MessageBubble
                   message={item.message}
                   isOwn={item.message.senderIdentityId === myIdentityId}
-                  isGroup={isMultiParty}
+                  isGroup={showSenderNames}
                   canDeleteForEveryone={
                     item.message.senderIdentityId === myIdentityId ||
-                    conversation.participants?.find(
-                      (p) => p.identityId === myIdentityId,
-                    )?.roleLabel === "Employer"
+                    (!isCustomerChannel &&
+                      conversation.participants?.find(
+                        (p) => p.identityId === myIdentityId,
+                      )?.roleLabel === "Employer")
                   }
                   onReply={setReplyTo}
                   onEdit={setEditingMessage}
@@ -313,6 +340,7 @@ export default function ChatWindow({
           onStopTyping={stopTyping}
           onComposerFocus={handleComposerFocus}
           groupMembers={groupMembers}
+          initialDraft={initialDraft}
           editingMessage={editingMessage}
           onCancelEdit={() => setEditingMessage(null)}
           onSaveEdit={async (id, body) => {
@@ -323,7 +351,11 @@ export default function ChatWindow({
       ) : (
         <div className={styles.readOnlyBar}>
           <i className="ti ti-lock" />
-          Only Employers and HODs can post to Announcements
+          {isCustomerChannel
+            ? viewerIsCustomer
+              ? "You're no longer connected to this business, so you can't send messages here."
+              : "This customer is no longer linked to your business, so you can't send messages here."
+            : "Only Employers and HODs can post to Announcements"}
         </div>
       )}
 

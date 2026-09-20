@@ -12,16 +12,26 @@ import styles from "./MentionToastStack.module.css";
 // other instead of stacking - merging the two toast lists here (sorted
 // oldest-first, same as they'd naturally arrive) is what actually fixes
 // that, not just moving one of them to a different corner.
+//
+// `channel` picks which inbox this stack serves: "STAFF" (the original
+// workplace messaging - the default, so the generic employer/employee
+// dashboards are unchanged) or "CUSTOMER" (Business <-> Customer messaging,
+// used by business-type workspaces and the customer's own account).
+// @mentions only exist in workplace conversations, so a CUSTOMER stack
+// never shows them.
 export default function NotificationToastStack({
   onNavigate,
   activeConversationId,
+  channel = "STAFF",
 }) {
   const { toasts: mentionToasts, dismiss: dismissMention } = useMentionToasts();
   const { toasts: messageToasts, dismiss: dismissMessage } =
-    useNewMessageToasts(activeConversationId);
+    useNewMessageToasts(activeConversationId, channel);
 
   const combined = [
-    ...mentionToasts.map((t) => ({ ...t, kind: "mention" })),
+    ...(channel === "STAFF"
+      ? mentionToasts.map((t) => ({ ...t, kind: "mention" }))
+      : []),
     ...messageToasts.map((t) => ({ ...t, kind: "message" })),
   ].sort((a, b) => (a.id > b.id ? 1 : -1));
 

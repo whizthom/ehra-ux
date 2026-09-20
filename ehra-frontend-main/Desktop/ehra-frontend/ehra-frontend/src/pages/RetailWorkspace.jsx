@@ -53,6 +53,10 @@ import {
 import { getBusinessType, getMyBusinessProfile } from "../api/businessApi";
 import s from "./RetailWorkspace.module.css";
 import Logo from "../components/Logo";
+import MessagingHub from "../components/messaging/MessagingHub";
+import NotificationToastStack from "../components/notifications/NotificationToastStack";
+import useMessagingConnection from "../hooks/useMessagingConnection";
+import useCustomerInboxBadge from "../hooks/useCustomerInboxBadge";
 
 const today = () => new Date().toISOString().slice(0, 10);
 const NAV = [
@@ -62,6 +66,10 @@ const NAV = [
   ["Inventory", "□", "inventory"],
   ["Orders", "↗", "orders"],
   ["Customers", "♙", "customers"],
+  // Business <-> Customer messaging for this business type: the owner
+  // always, an employee only when the owner has ticked "Customer messages"
+  // for them in Settings -> Retail staff permissions.
+  ["Messages", "✉", "messages"],
   ["Sales / POS", "₦", "sales"],
   ["Expenses", "≡", "finance"],
   ["Suppliers", "⇄", "finance"],
@@ -75,10 +83,15 @@ const PERM = {
   customers: "canCustomers",
   sales: "canSales",
   finance: "canFinance",
+  messages: "canMessages",
 };
 
 export default function RetailWorkspace() {
   const nav = useNavigate();
+  // The live WebSocket connection (presence, real-time messages, badges) is
+  // opened once at the top of the page, exactly like the generic dashboards
+  // do - see useMessagingConnection's own doc.
+  useMessagingConnection();
   const [tab, setTab] = useState("Dashboard");
   const [inventoryHistory, setInventoryHistory] = useState(false);
   const [business, setBusiness] = useState(null),
@@ -102,6 +115,13 @@ export default function RetailWorkspace() {
     [editing, setEditing] = useState(null),
     [query, setQuery] = useState(""),
     [mobileMore, setMobileMore] = useState(false);
+  // Customer messaging: hub thread state (mobile full-screen), a deep link
+  // from a toast, and which conversation is open (to mute its toast).
+  const [messagesThreadOpen, setMessagesThreadOpen] = useState(false);
+  const [messagesDeepLink, setMessagesDeepLink] = useState(null);
+  const [activeMessageConversationId, setActiveMessageConversationId] = useState(null);
+  const canMessage = Boolean(context && (context.owner || context.canMessages));
+  const inbox = useCustomerInboxBadge({ enabled: canMessage });
   const money = (n) =>
     `${businessCurrency} ${Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const allowed = useMemo(() => {
@@ -272,6 +292,9 @@ export default function RetailWorkspace() {
             >
               <b>{i}</b>
               {n}
+              {n === "Messages" && inbox.total > 0 && (
+                <em className={s.navBadge}>{inbox.total > 99 ? "99+" : inbox.total}</em>
+              )}
             </button>
           ))}
         </nav>
@@ -297,7 +320,19 @@ export default function RetailWorkspace() {
             </div>
           </div>
         </header>
-        <div className={s.content}>
+        <div className={`${s.content} ${tab === "Messages" ? s.contentMessages : ""}`}>
+          {tab === "Messages" && canMessage && (
+            <div className={`${s.messagesHost} ${messagesThreadOpen ? s.messagesHostThread : ""}`}>
+              <MessagingHub
+                mode="business"
+                onThreadOpenChange={setMessagesThreadOpen}
+                deepLink={messagesDeepLink}
+                onDeepLinkConsumed={() => setMessagesDeepLink(null)}
+                onActiveConversationChange={setActiveMessageConversationId}
+                onBadgeChange={inbox.refresh}
+              />
+            </div>
+          )}
           {tab === "Dashboard" && (
             <Dashboard
               todaySales={todaySales}
@@ -541,6 +576,18 @@ export default function RetailWorkspace() {
           }}
         />
       )}
+      {canMessage && (
+        <NotificationToastStack
+          channel="CUSTOMER"
+          activeConversationId={tab === "Messages" ? activeMessageConversationId : null}
+          onNavigate={(conversationId, messageId) => {
+            setInventoryHistory(false);
+            setMobileMore(false);
+            setTab("Messages");
+            setMessagesDeepLink({ conversationId, messageId });
+          }}
+        />
+      )}
       <nav className={s.mobileNav} aria-label="Retail mobile navigation">
         <button
           type="button"
@@ -621,6 +668,7 @@ export default function RetailWorkspace() {
         >
           <span className={s.mobileNavIcon}>
             <i className="ti ti-dots" aria-hidden="true" />
+            {inbox.total > 0 && <span className={s.mobileNavDot} aria-label="Unread customer messages" />}
           </span>
           <span>More</span>
         </button>
@@ -674,6 +722,9 @@ export default function RetailWorkspace() {
                     <b>{icon}</b>
                   </span>
                   <strong>{name}</strong>
+                  {name === "Messages" && inbox.total > 0 && (
+                    <em className={s.navBadgeInline}>{inbox.total > 99 ? "99+" : inbox.total}</em>
+                  )}
                   <i className="ti ti-chevron-right" aria-hidden="true" />
                 </button>
               ))}

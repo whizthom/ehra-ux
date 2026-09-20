@@ -4,6 +4,11 @@ import SearchResultsPanel from "./SearchResultsPanel";
 import { formatDayLabel } from "../../utils/messagingFormat";
 import styles from "./ChatList.module.css";
 
+// `channel` ("STAFF" default | "CUSTOMER") and the copy props below let the
+// SAME list serve the Business <-> Customer inbox: it searches its own
+// channel, offers an "Unread" filter, and shows customer-specific empty
+// states (with an optional call to action) instead of the workplace ones.
+//
 // The tab bar itself (All / Group / Announcement / Archived) now lives one
 // level up, in MessagingHub - "Announcement" isn't a filter over
 // conversations at all, it swaps the whole pane for Ehral's existing
@@ -22,6 +27,14 @@ export default function ChatList({
   onTogglePin,
   onToggleMute,
   onToggleArchive,
+  channel = "STAFF",
+  searchPlaceholder = "Search conversations",
+  emptyTitle,
+  emptyText,
+  emptyActionLabel,
+  onEmptyAction,
+  onCompose,
+  composeLabel = "New message",
 }) {
   const [query, setQuery] = useState("");
   const [menuFor, setMenuFor] = useState(null);
@@ -39,6 +52,8 @@ export default function ChatList({
         return conversations.filter((c) => !c.archived && c.type === "GROUP");
       case "archived":
         return conversations.filter((c) => c.archived);
+      case "unread":
+        return conversations.filter((c) => !c.archived && Number(c.unreadCount) > 0);
       case "all":
       default:
         return conversations.filter((c) => !c.archived);
@@ -81,6 +96,8 @@ export default function ChatList({
         return "No groups yet - start one below.";
       case "archived":
         return "No archived chats.";
+      case "unread":
+        return "You're all caught up - no unread conversations.";
       default:
         return "No conversations yet.";
     }
@@ -134,7 +151,7 @@ export default function ChatList({
         <i className="ti ti-search" />
         <input
           className={styles.searchInput}
-          placeholder="Search conversations"
+          placeholder={searchPlaceholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -149,10 +166,20 @@ export default function ChatList({
         </button>
       )}
 
+      {onCompose && tab === "all" && !isSearching && (
+        <button className={styles.newGroupBtn} onClick={onCompose}>
+          <span className={styles.newGroupIcon}>
+            <i className="ti ti-message-plus" />
+          </span>
+          {composeLabel}
+        </button>
+      )}
+
       {isSearching ? (
         <SearchResultsPanel
           query={query.trim()}
           onSelectConversation={onSelect}
+          channel={channel}
         />
       ) : (
         <div className={styles.list}>
@@ -170,7 +197,22 @@ export default function ChatList({
           ) : loading ? (
             <div className={styles.loadingState}>Loading conversations…</div>
           ) : filtered.length === 0 ? (
-            <div className={styles.emptyState}>{emptyMessage()}</div>
+            tab === "all" && emptyTitle ? (
+              <div className={styles.richEmpty}>
+                <span className={styles.richEmptyIcon}>
+                  <i className="ti ti-message-circle-2" />
+                </span>
+                <strong>{emptyTitle}</strong>
+                {emptyText && <p>{emptyText}</p>}
+                {emptyActionLabel && onEmptyAction && (
+                  <button className={styles.richEmptyBtn} onClick={onEmptyAction}>
+                    <i className="ti ti-plus" /> {emptyActionLabel}
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className={styles.emptyState}>{emptyMessage()}</div>
+            )
           ) : (
             <>
               {pinnedList.length > 0 && (

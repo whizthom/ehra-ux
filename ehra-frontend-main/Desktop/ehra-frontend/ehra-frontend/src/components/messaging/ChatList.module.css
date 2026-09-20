@@ -281,3 +281,64 @@
         background: var(--bg-page);
     }
 }
+/* Rich empty state - used by the Business <-> Customer inbox, where an
+   empty list is an invitation to start a conversation rather than a dead end. */
+.richEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 44px 26px;
+  color: var(--text-secondary);
+}
+
+.richEmpty strong {
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.richEmpty p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  max-width: 250px;
+}
+
+.richEmptyIcon {
+  width: 58px;
+  height: 58px;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  background: var(--bg-soft-accent);
+  color: var(--accent);
+  font-size: 26px;
+  margin-bottom: 4px;
+}
+
+.richEmptyBtn {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.richEmptyBtn:hover {
+  background: var(--accent-hover);
+}
+
+.richEmptyBtn:active {
+  transform: scale(0.97);
+}

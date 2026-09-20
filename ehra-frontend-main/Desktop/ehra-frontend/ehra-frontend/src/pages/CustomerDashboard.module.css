@@ -3333,3 +3333,35 @@
     transition: none !important;
   }
 }
+/* ── Messages (MessagingHub, mode="customer") ─────────────────────────
+   The hub manages its own scrolling (chat list + open chat), so it gets a
+   fixed-height card instead of the page-scrolling content flow. */
+.messagesHost {
+  height: calc(100dvh - 86px - 30px - 28px);
+  min-height: 460px;
+  background: var(--bg-surface);
+  border: 0.5px solid var(--border-color);
+  border-radius: 18px;
+  box-shadow: 0 6px 24px var(--shadow-color);
+  overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  .messagesHost {
+    height: calc(100dvh - 70px - 16px - 84px);
+    min-height: 0;
+    border-radius: 16px;
+  }
+
+  /* An open chat takes the whole screen on a phone (over the top bar and the
+     bottom navigation) so the composer sits right above the keyboard. */
+  .messagesHostThread {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}

@@ -14,18 +14,22 @@ import { subscribeToUserQueue } from "../services/messagingSocket";
 // which also fires for pin/mute/archive changes and carried no sender
 // info to show in a toast. Keeping both would have meant two sounds for
 // the same message.
-export default function useMessagingBadgeSync(onPossibleChange) {
+//
+// `channel` ("STAFF" default, or "CUSTOMER") skips conversation events that
+// belong to the other inbox, so a workplace badge doesn't refetch for every
+// customer message and vice versa. (UNREAD_COUNT_UPDATED carries no
+// channel, so it always triggers a refetch - cheap, and always correct.)
+export default function useMessagingBadgeSync(onPossibleChange, channel = "STAFF") {
   useEffect(() => {
     const unsubscribe = subscribeToUserQueue((event) => {
       if (!event) return;
-      if (
-        event.type === "CONVERSATION_UPDATED" ||
-        event.type === "CONVERSATION_CREATED" ||
-        event.type === "UNREAD_COUNT_UPDATED"
-      ) {
+      if (event.type === "CONVERSATION_UPDATED" || event.type === "CONVERSATION_CREATED") {
+        if ((event.payload?.channel || "STAFF") !== channel) return;
+        onPossibleChange();
+      } else if (event.type === "UNREAD_COUNT_UPDATED") {
         onPossibleChange();
       }
     });
     return unsubscribe;
-  }, [onPossibleChange]);
+  }, [onPossibleChange, channel]);
 }

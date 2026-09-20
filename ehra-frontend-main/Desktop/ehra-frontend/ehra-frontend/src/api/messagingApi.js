@@ -5,7 +5,16 @@ import API from "./authApi";
 // (which still backs the old SSE-based chat) - nothing here touches that
 // file or its endpoints.
 
-export const listConversations = () => API.get("/messaging/conversations");
+// Two separate inboxes share this API, selected by `channel`:
+//   "STAFF"    (default) - the original workplace messaging.
+//   "CUSTOMER" - Business <-> Customer messaging (business-type workspaces
+//                and the customer's own Ehral account).
+// They never mix: the backend scopes every list, count and search by it.
+export const CHANNEL_STAFF = "STAFF";
+export const CHANNEL_CUSTOMER = "CUSTOMER";
+
+export const listConversations = (channel = CHANNEL_STAFF) =>
+  API.get("/messaging/conversations", { params: { channel } });
 
 export const createConversation = ({ memberIdentityIds, groupName, groupAvatarUrl }) =>
   API.post("/messaging/conversations", { memberIdentityIds, groupName, groupAvatarUrl });
@@ -47,9 +56,11 @@ export const leaveConversation = (conversationId) =>
 
 export const listContacts = () => API.get("/messaging/contacts");
 
-export const searchMessaging = (q) => API.get("/messaging/search", { params: { q } });
+export const searchMessaging = (q, channel = CHANNEL_STAFF) =>
+  API.get("/messaging/search", { params: { q, channel } });
 
-export const getMessagingUnreadCount = () => API.get("/messaging/unread-count");
+export const getMessagingUnreadCount = (channel = CHANNEL_STAFF) =>
+  API.get("/messaging/unread-count", { params: { channel } });
 
 export const uploadAttachment = (file, kind, onUploadProgress) => {
   const formData = new FormData();
@@ -62,3 +73,12 @@ export const uploadAttachment = (file, kind, onUploadProgress) => {
 };
 export const listCustomerConversations = () => API.get("/messaging/conversations/customer");
 export const createCustomerBusinessConversation = (businessId) => API.post(`/messaging/conversations/customer/business/${businessId}`);
+
+// Staff side (employer / an employee the employer allowed): customers
+// linked to the business, for the "new message" picker.
+export const listCustomerContacts = (q = "") =>
+  API.get("/messaging/customer-contacts", { params: { q } });
+
+// Staff side: open (or create) the shared thread with one customer.
+export const openCustomerConversation = (customerIdentityId) =>
+  API.post("/messaging/conversations/customer/open", { customerIdentityId });

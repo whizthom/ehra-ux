@@ -79,11 +79,15 @@ async function idbSet(storeName, key, value) {
 }
 
 // ── In-memory layer ──────────────────────────────────────────────────
-const memoryConversations = { value: null };
+// One cached list per channel - the workplace inbox and the customer inbox
+// must never overwrite each other. "STAFF" keeps the original IndexedDB key
+// ("list") so an existing user's cached workplace inbox stays valid.
+const memoryConversations = new Map(); // channel -> array
+const listKey = (channel) => (channel === "CUSTOMER" ? "list:CUSTOMER" : "list");
 const memoryMessages = new Map(); // conversationId -> array
 
-export function getCachedConversationsSync() {
-  return memoryConversations.value;
+export function getCachedConversationsSync(channel = "STAFF") {
+  return memoryConversations.get(channel) || null;
 }
 
 export function getCachedMessagesSync(conversationId) {
@@ -99,9 +103,9 @@ function scheduleWrite(key, fn) {
   pendingWrites.set(key, setTimeout(fn, 400));
 }
 
-export function setCachedConversations(list) {
-  memoryConversations.value = list;
-  scheduleWrite("conversations", () => idbSet(STORE_CONVERSATIONS, "list", list));
+export function setCachedConversations(list, channel = "STAFF") {
+  memoryConversations.set(channel, list);
+  scheduleWrite(`conversations:${channel}`, () => idbSet(STORE_CONVERSATIONS, listKey(channel), list));
 }
 
 export function setCachedMessages(conversationId, messages) {
@@ -117,10 +121,10 @@ export function setCachedMessages(conversationId, messages) {
 // layer doesn't have yet (i.e. right after a page reload). Cheap no-op on
 // every call after that, since the result gets folded into the memory
 // layer above.
-export async function hydrateConversationsFromDisk() {
-  if (memoryConversations.value) return memoryConversations.value;
-  const stored = await idbGet(STORE_CONVERSATIONS, "list");
-  if (stored) memoryConversations.value = stored;
+export async function hydrateConversationsFromDisk(channel = "STAFF") {
+  if (memoryConversations.get(channel)) return memoryConversations.get(channel);
+  const stored = await idbGet(STORE_CONVERSATIONS, listKey(channel));
+  if (stored) memoryConversations.set(channel, stored);
   return stored;
 }
 
@@ -135,7 +139,7 @@ export async function hydrateMessagesFromDisk(conversationId) {
 // IndexedDB (or memory) once their session ends - the next person to use
 // this browser/device must not see it.
 export async function clearMessagingCache() {
-  memoryConversations.value = null;
+  memoryConversations.clear();
   memoryMessages.clear();
   const db = await openDb();
   if (!db) return;

@@ -217,6 +217,19 @@ export default function MessageBubble({
             </button>
           )}
 
+          {/* A customer's reply to a business announcement carries a
+              reference to it (see CustomerAnnouncementServiceImpl#reply),
+              so both sides see what the message is answering. */}
+          {message.metadata?.announcement?.subject && (
+            <div className={styles.announcementRef}>
+              <i className="ti ti-speakerphone" />
+              <span className={styles.announcementRefText}>
+                <small>Replying to announcement</small>
+                <strong>{message.metadata.announcement.subject}</strong>
+              </span>
+            </div>
+          )}
+
           {renderContent()}
 
           <div className={styles.metaRow}>

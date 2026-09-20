@@ -10,7 +10,8 @@ const DEBOUNCE_MS = 300;
 // message content. This is what actually makes "search messages" work at
 // all; before this hook existed, the /api/messaging/search endpoint was
 // fully built on the backend but had no caller anywhere in the UI.
-export default function useMessageSearch(query) {
+// `channel` scopes the search to one inbox ("STAFF" default, or "CUSTOMER").
+export default function useMessageSearch(query, channel = "STAFF") {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const debounceRef = useRef(null);
@@ -29,7 +30,7 @@ export default function useMessageSearch(query) {
     const thisRequestId = ++requestIdRef.current;
     debounceRef.current = setTimeout(async () => {
       try {
-        const { data } = await searchMessaging(trimmed);
+        const { data } = await searchMessaging(trimmed, channel);
         // A slower earlier request finishing after a newer one would
         // otherwise clobber more current results with stale ones.
         if (thisRequestId === requestIdRef.current) setResults(data);
@@ -41,7 +42,7 @@ export default function useMessageSearch(query) {
     }, DEBOUNCE_MS);
 
     return () => clearTimeout(debounceRef.current);
-  }, [query]);
+  }, [query, channel]);
 
   return { results, loading };
 }

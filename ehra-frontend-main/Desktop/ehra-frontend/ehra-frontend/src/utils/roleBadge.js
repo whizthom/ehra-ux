@@ -16,6 +16,7 @@ const KNOWN_ROLE_COLORS = {
   HOD: "#845ef7", // violet
   Employee: "#2f9e44", // green - the baseline/most common role
   Customer: "#e8590c", // orange
+  Business: "#0b7285", // teal - what a customer sees on a business's thread
 };
 
 // Small, visually distinct palette for the hash fallback - chosen to

@@ -8,8 +8,9 @@ import styles from "./SearchResultsPanel.module.css";
 // message). See useMessageSearch's doc for why this needs its own
 // backend-driven results list rather than reusing ChatList's client-side
 // name filter.
-export default function SearchResultsPanel({ query, onSelectConversation }) {
-  const { results, loading } = useMessageSearch(query);
+// `channel` scopes the search to one inbox: "STAFF" (default) or "CUSTOMER".
+export default function SearchResultsPanel({ query, onSelectConversation, channel = "STAFF" }) {
+  const { results, loading } = useMessageSearch(query, channel);
 
   if (loading && results.length === 0) {
     return <div className={styles.state}>Searching…</div>;

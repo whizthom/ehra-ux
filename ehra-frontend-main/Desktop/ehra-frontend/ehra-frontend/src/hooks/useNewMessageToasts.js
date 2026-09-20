@@ -16,13 +16,19 @@ const AUTO_DISMISS_MS = 6000;
 // whichever conversation is CURRENTLY open and visibly on screen - no
 // point popping a notification for a message the person can already see
 // arrive live in the open chat window.
-export default function useNewMessageToasts(activeConversationId) {
+//
+// `channel` scopes which inbox's messages toast here: "STAFF" (the
+// original workplace inbox, the default) or "CUSTOMER" (Business <->
+// Customer). A workplace dashboard must not chime for a customer's message
+// it can't open, nor a customer/business-type workspace for a workplace one.
+export default function useNewMessageToasts(activeConversationId, channel = "STAFF") {
   const [toasts, setToasts] = useState([]);
 
   useEffect(() => {
     const unsubscribe = subscribeToUserQueue((event) => {
       if (!event || event.type !== "NEW_MESSAGE_NOTIFICATION") return;
       const payload = event.payload;
+      if ((payload.channel || "STAFF") !== channel) return;
       if (activeConversationId && payload.conversationId === activeConversationId) return;
 
       playMessageSound({ id: `message:${payload.messageId}`, conversationId: payload.conversationId });
@@ -34,7 +40,7 @@ export default function useNewMessageToasts(activeConversationId) {
       }, AUTO_DISMISS_MS);
     });
     return unsubscribe;
-  }, [activeConversationId]);
+  }, [activeConversationId, channel]);
 
   const dismiss = useCallback((id) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
