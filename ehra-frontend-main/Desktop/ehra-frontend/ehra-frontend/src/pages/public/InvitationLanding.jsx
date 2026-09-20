@@ -18,6 +18,11 @@ export default function InvitationLanding() {
   const [loading, setLoading] = useState(true);
   const [valid, setValid] = useState(false);
   const [businessName, setBusinessName] = useState("");
+  // "EMPLOYEE" (default) or "CUSTOMER" - see InvitationType on the
+  // backend. Drives which copy is shown and which registration route an
+  // anonymous invitee is sent to.
+  const [type, setType] = useState("EMPLOYEE");
+  const isCustomer = type === "CUSTOMER";
 
   // Separate from `valid`: this is true only when the backend actually
   // answered "no such invitation / expired / used / revoked" - as opposed
@@ -62,6 +67,7 @@ export default function InvitationLanding() {
         setBusinessName(
           typeof data?.businessName === "string" ? data.businessName : "",
         );
+        setType(data?.type === "CUSTOMER" ? "CUSTOMER" : "EMPLOYEE");
       })
       .catch((err) => {
         // A real answer from the backend ("no such invitation", expired,
@@ -213,21 +219,25 @@ export default function InvitationLanding() {
               <span className={styles.stateTitleAccent} aria-hidden="true" />
             </p>
             <p className={styles.stateSub}>
-              {businessName} still needs to approve your membership. Once
-              approved, this workspace will appear under My Accounts and you can
-              switch into it any time.
+              {isCustomer
+                ? `You're now connected to ${businessName} as a customer.`
+                : `${businessName} still needs to approve your membership. Once approved, this workspace will appear under My Accounts and you can switch into it any time.`}
             </p>
             <button
               className={styles.acceptBtn}
               onClick={() =>
                 navigate(
-                  user?.contextType === "EMPLOYEE"
-                    ? "/my-dashboard"
-                    : "/dashboard",
+                  isCustomer
+                    ? "/customer-dashboard"
+                    : user?.contextType === "EMPLOYEE"
+                      ? "/my-dashboard"
+                      : "/dashboard",
                 )
               }
             >
-              Go to my accounts →
+              {isCustomer
+                ? "Go to my customer dashboard →"
+                : "Go to my accounts →"}
             </button>
           </div>
         )}
@@ -242,16 +252,18 @@ export default function InvitationLanding() {
               <span className={styles.stateTitleAccent} aria-hidden="true" />
             </p>
             <p className={styles.stateSub}>
-              {businessName} has invited you to join as an employee. You're
-              already signed in to Ehra - accept below to add this workspace to
-              your account.
+              {isCustomer
+                ? `${businessName} has invited you to connect as a customer. You're already signed in to Ehral - accept below to link this business to your account.`
+                : `${businessName} has invited you to join as an employee. You're already signed in to Ehra - accept below to add this workspace to your account.`}
             </p>
 
             <div className={styles.orgCard}>
               <div className={styles.orgAvatar}>{initials}</div>
               <div>
                 <p className={styles.orgName}>{businessName}</p>
-                <p className={styles.orgLabel}>Invited organisation</p>
+                <p className={styles.orgLabel}>
+                  {isCustomer ? "Inviting business" : "Invited organisation"}
+                </p>
               </div>
             </div>
 
@@ -265,8 +277,9 @@ export default function InvitationLanding() {
             <div className={styles.notice}>
               <span>ℹ️</span>
               <p>
-                This adds a new workspace to your existing account - your other
-                businesses stay exactly as they are.
+                {isCustomer
+                  ? "This connects your existing account to this business as a customer - your other businesses and memberships stay exactly as they are."
+                  : "This adds a new workspace to your existing account - your other businesses stay exactly as they are."}
               </p>
             </div>
 
@@ -289,30 +302,39 @@ export default function InvitationLanding() {
               <span className={styles.stateTitleAccent} aria-hidden="true" />
             </p>
             <p className={styles.stateSub}>
-              An organisation has invited you to join their Ehra workspace as an
-              employee.
+              {isCustomer
+                ? `${businessName || "A business"} has invited you to connect with them as a customer on Ehral.`
+                : "An organisation has invited you to join their Ehra workspace as an employee."}
             </p>
 
             <div className={styles.orgCard}>
               <div className={styles.orgAvatar}>{initials}</div>
               <div>
                 <p className={styles.orgName}>{businessName}</p>
-                <p className={styles.orgLabel}>Invited organisation</p>
+                <p className={styles.orgLabel}>
+                  {isCustomer ? "Inviting business" : "Invited organisation"}
+                </p>
               </div>
             </div>
 
             <div className={styles.notice}>
               <span>ℹ️</span>
               <p>
-                Only accept if you recognise this organisation and were
-                expecting an invitation. You can decline if this was sent in
-                error.
+                Only accept if you recognise this{" "}
+                {isCustomer ? "business" : "organisation"} and were expecting an
+                invitation. You can decline if this was sent in error.
               </p>
             </div>
 
             <button
               className={styles.acceptBtn}
-              onClick={() => navigate(`/register/${token}`)}
+              onClick={() =>
+                navigate(
+                  isCustomer
+                    ? `/register-customer/${token}`
+                    : `/register/${token}`,
+                )
+              }
             >
               Accept & continue →
             </button>

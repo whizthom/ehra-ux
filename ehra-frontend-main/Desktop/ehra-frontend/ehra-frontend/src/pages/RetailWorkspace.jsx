@@ -19,6 +19,7 @@ import {
   CustomerModal,
   SupplierModal,
 } from "./retail/RetailSections";
+import InviteCustomerModal from "../components/InviteCustomerModal";
 import {
   getProducts,
   createProduct,
@@ -301,24 +302,24 @@ export default function RetailWorkspace() {
       </aside>
       <main className={s.main}>
         <header className={s.header}>
-          <div className={s.headerIdentity}>
-            <Logo size={28} variant="horizontal" tone="default" title="Ehral" />
-            <div>
-              <span className={s.kicker}>RETAIL BUSINESS WORKSPACE</span>
+          <div className={s.headerTop}>
+            <div className={s.headerIdentity}>
+              <Logo size={24} variant="horizontal" tone="default" title="Ehral" />
+              <span className={s.kicker}>Retail Workspace</span>
               <h1>{tab}</h1>
-              <p>
-                {business?.name} <span>•</span>{" "}
-                {context.owner
-                  ? "Business owner access."
-                  : `${context.role || "Employee"} access granted by your employer.`}
-              </p>
+            </div>
+            <div className={s.headerActions}>
+              <div className={s.avatar}>
+                {(business?.name || "B").slice(0, 1).toUpperCase()}
+              </div>
             </div>
           </div>
-          <div className={s.headerActions}>
-            <div className={s.avatar}>
-              {(business?.name || "B").slice(0, 1).toUpperCase()}
-            </div>
-          </div>
+          <p className={s.headerMeta}>
+            {business?.name} <span>•</span>{" "}
+            {context.owner
+              ? "Business owner access."
+              : `${context.role || "Employee"} access granted by your employer.`}
+          </p>
         </header>
         <div className={`${s.content} ${tab === "Messages" ? s.contentMessages : ""}`}>
           {tab === "Messages" && canMessage && (
@@ -408,11 +409,14 @@ export default function RetailWorkspace() {
           )}{" "}
           {tab === "Customers" && (
             <Customers
-              items={data.customers}
+              items={filtered(data.customers, ["firstName", "lastName", "phone", "email"])}
+              query={query}
+              setQuery={setQuery}
               onAdd={() => {
                 setEditing(null);
                 setModal("customer");
               }}
+              onInvite={() => setModal("inviteCustomer")}
               onEdit={(x) => {
                 setEditing(x);
                 setModal("customer");
@@ -574,6 +578,13 @@ export default function RetailWorkspace() {
             setModal(null);
             runLoad();
           }}
+        />
+      )}
+      {modal === "inviteCustomer" && (
+        <InviteCustomerModal
+          open
+          onClose={() => setModal(null)}
+          companyName={business?.name}
         />
       )}
       {canMessage && (

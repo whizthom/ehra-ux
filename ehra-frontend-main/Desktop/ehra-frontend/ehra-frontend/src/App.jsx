@@ -26,6 +26,7 @@ import VerifyEmail from "./pages/VerifyEmail";
 
 import InvitationLanding from "./pages/public/InvitationLanding";
 import EmployeeRegistration from "./pages/public/EmployeeRegistration";
+import CustomerInvitationRegistration from "./pages/public/CustomerInvitationRegistration";
 import RegistrationSubmitted from "./pages/public/RegistrationSubmitted";
 import QrDisplayPage from "./pages/public/QrDisplayPage";
 import Pricing from "./pages/public/Pricing";
@@ -131,11 +132,20 @@ function App() {
               }
             />
 
-            {/* EMPLOYEE INVITATION FLOW */}
+            {/* EMPLOYEE / CUSTOMER INVITATION FLOW - InvitationLanding
+                (/invite/:token) is shared by both invitation types and
+                routes an anonymous invitee to the matching registration
+                form below based on the invitation's type (see
+                InvitationLanding.jsx / InvitationType on the backend). */}
 
             <Route path="/invite/:token" element={<InvitationLanding />} />
 
             <Route path="/register/:token" element={<EmployeeRegistration />} />
+
+            <Route
+              path="/register-customer/:token"
+              element={<CustomerInvitationRegistration />}
+            />
 
             <Route
               path="/registration-submitted"

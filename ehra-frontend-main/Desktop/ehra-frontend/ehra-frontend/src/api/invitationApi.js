@@ -18,21 +18,24 @@ import API, { saveSession } from "./authApi";
 export const validateInvitation = (token) =>
   API.get(`/invitations/${token}`, { timeout: 45000 }).then((r) => r.data);
 
-// POST /api/invitations/generate - employer-only. multiUse=false (the
+// POST /api/invitations/generate - employer-only (EMPLOYEE type) or
+// Customers-permission-gated (CUSTOMER type). multiUse=false (the
 // default) generates today's single-use link; multiUse=true generates
 // the reusable "share with everyone" link instead - see the Invite
-// Employee modal's "Multi-use link" tab.
-export const generateInvitation = (multiUse = false) =>
-  API.post("/invitations/generate", { multiUse }).then((r) => r.data);
+// Employee/Invite Customer modal's "Multi-use link" tab. type is
+// "EMPLOYEE" (default) or "CUSTOMER".
+export const generateInvitation = (multiUse = false, type = "EMPLOYEE") =>
+  API.post("/invitations/generate", { multiUse, type }).then((r) => r.data);
 
-// POST /api/invitations/bulk - the Invite Employee modal's "Invite by
-// email" tab. `emails` is the raw text exactly as pasted
-// (comma/newline/semicolon-separated) - parsing happens server-side.
-// Creates one individually-bound single-use invite per valid address and
-// emails each recipient automatically; returns which addresses were sent
-// to versus skipped (and why), plus a batchId for #getInvitationBatch.
-export const sendBulkInvitations = (emails) =>
-  API.post("/invitations/bulk", { emails }).then((r) => r.data);
+// POST /api/invitations/bulk - the Invite Employee/Invite Customer
+// modal's "Invite by email" tab. `emails` is the raw text exactly as
+// pasted (comma/newline/semicolon-separated) - parsing happens
+// server-side. Creates one individually-bound single-use invite per
+// valid address and emails each recipient automatically; returns which
+// addresses were sent to versus skipped (and why), plus a batchId for
+// #getInvitationBatch. type is "EMPLOYEE" (default) or "CUSTOMER".
+export const sendBulkInvitations = (emails, type = "EMPLOYEE") =>
+  API.post("/invitations/bulk", { emails, type }).then((r) => r.data);
 
 // GET /api/invitations/batch/{batchId} - lets the employer come back
 // later and see who from a bulk email-invite has actually registered.
@@ -50,6 +53,17 @@ export const getInvitationBatch = (batchId) =>
 // login step, and no email is sent about any of this.
 export const registerInvitedEmployee = async (payload) => {
   const { data } = await API.post("/invitations/register", payload);
+  saveSession(data);
+  return data;
+};
+
+// POST /api/invitations/customer/register - the customer equivalent of
+// registerInvitedEmployee, for a CUSTOMER invitation. Much lighter form
+// (no date of birth, gender, address or emergency contact). Creates a
+// brand-new Identity + an immediately-active CustomerMembership at the
+// inviting business, and logs the person straight in.
+export const registerInvitedCustomer = async (payload) => {
+  const { data } = await API.post("/invitations/customer/register", payload);
   saveSession(data);
   return data;
 };
