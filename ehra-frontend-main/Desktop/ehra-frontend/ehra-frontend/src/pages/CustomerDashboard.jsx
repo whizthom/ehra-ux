@@ -347,9 +347,7 @@ function BusinessCard({ business, onVisit, onChat, detailed }) {
       <div className={styles.cardActions}>
         <button
           onClick={() => onVisit(business)}
-          disabled={
-            !business.businessSlug || business.storefrontActive === false
-          }
+          disabled={!business.businessId}
         >
           View business <i className="ti ti-arrow-up-right" />
         </button>
@@ -491,11 +489,13 @@ export default function CustomerDashboard() {
   // engine as everything else (MessagingHub, mode="customer"). This page only
   // keeps the light-weight pieces it needs itself: the conversation summaries
   // (for the home "needs attention" / activity cards) and the unread badge.
-  const { conversations: messages, refresh: loadMessages } = useConversations("CUSTOMER");
+  const { conversations: messages, refresh: loadMessages } =
+    useConversations("CUSTOMER");
   const inbox = useCustomerInboxBadge({ includeAnnouncements: true });
   const [messagesThreadOpen, setMessagesThreadOpen] = useState(false);
   const [messagesDeepLink, setMessagesDeepLink] = useState(null);
-  const [activeMessageConversationId, setActiveMessageConversationId] = useState(null);
+  const [activeMessageConversationId, setActiveMessageConversationId] =
+    useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [query, setQuery] = useState("");
@@ -601,9 +601,13 @@ export default function CustomerDashboard() {
   useEffect(() => {
     const conversationId = searchParams.get("chat");
     if (!conversationId) return;
-    const draft = sessionStorage.getItem(`ehral:pending-chat:${conversationId}`) || "";
+    const draft =
+      sessionStorage.getItem(`ehral:pending-chat:${conversationId}`) || "";
     sessionStorage.removeItem(`ehral:pending-chat:${conversationId}`);
-    setMessagesDeepLink({ conversationId: Number(conversationId), draft: draft || undefined });
+    setMessagesDeepLink({
+      conversationId: Number(conversationId),
+      draft: draft || undefined,
+    });
     setTab("messages");
     setSearchParams({}, { replace: true });
   }, [searchParams, setSearchParams]);
@@ -1545,7 +1549,9 @@ export default function CustomerDashboard() {
       )}
       <NotificationToastStack
         channel="CUSTOMER"
-        activeConversationId={tab === "messages" ? activeMessageConversationId : null}
+        activeConversationId={
+          tab === "messages" ? activeMessageConversationId : null
+        }
         onNavigate={(conversationId, messageId) => {
           setMessagesDeepLink({ conversationId, messageId });
           setTab("messages");

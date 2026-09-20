@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Logo from "../components/Logo";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
@@ -6,381 +6,640 @@ import {
   connectCustomerToBusinessId,
   getCustomerBusinessView,
 } from "../api/commerceApi";
+import { createCustomerBusinessConversation } from "../api/messagingApi";
+import { buildWhatsAppLink } from "../api/whatsappApi";
 import { useAuth } from "../context/AuthContext";
-import styles from "./CustomerDashboard.module.css";
+import {
+  DAYS,
+  dayIndex,
+  formatTime12,
+  initials,
+  mapsLink,
+  openStatus,
+  openStatusLabel,
+  parseHours,
+  standfirst,
+  todayProgress,
+} from "../utils/storeHelpers";
+import styles from "./CustomerBusinessView.module.css";
 
-const money = (currency, value) =>
-  `${currency || "NGN"} ${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-const initials = (name = "Ehral") =>
-  name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((x) => x[0])
-    .join("")
-    .toUpperCase();
+// The business PROFILE - who they are, where they are, when they're open,
+// how to reach them. Deliberately information-only and store-free: the
+// catalogue lives one tap away behind "Visit store" (pages/CustomerStore.jsx).
+//
+// Design intent: an editorial "spec sheet" on a plain background - big type,
+// hairline rules and generous whitespace instead of boxed panels - with the
+// Ehral brand carried by the accent colour, the type and the trust footer.
+// One theme-token-driven stylesheet, so it repaints correctly in light/dark
+// and reflows from a phone to a wide desktop without a separate layout.
+
+function Section({ index, title, children, id }) {
+  return (
+    <section className={styles.section} aria-labelledby={id}>
+      <div className={styles.sectionLabel}>
+        <span className={styles.sectionIndex} aria-hidden="true">
+          {index}
+        </span>
+        <h2 id={id}>{title}</h2>
+      </div>
+      <div className={styles.sectionBody}>{children}</div>
+    </section>
+  );
+}
 
 export default function CustomerBusinessView() {
   const { businessId } = useParams();
   const nav = useNavigate();
-  const { user, switchContext } = useAuth();
+  const { switchContext } = useAuth();
+
   const [view, setView] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
   const [working, setWorking] = useState(false);
   const [notice, setNotice] = useState("");
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const r = await getCustomerBusinessView(businessId);
-      setView(r.data);
-    } catch (e) {
-      setNotice(
-        e?.response?.data?.message || "This business could not be loaded.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [businessId]);
+  const [scrolled, setScrolled] = useState(false);
+  const [showDock, setShowDock] = useState(false);
+  const [clock, setClock] = useState(() => new Date());
+  const [nudgeConnect, setNudgeConnect] = useState(false);
+  const ctaRef = useRef(null);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    let dead = false;
+    (async () => {
+      try {
+        const r = await getCustomerBusinessView(businessId);
+        if (dead) return;
+        setView(r.data);
+        setError("");
+      } catch (e) {
+        if (!dead)
+          setError(
+            e?.response?.data?.message || "This business could not be loaded.",
+          );
+      } finally {
+        if (!dead) setLoading(false);
+      }
+    })();
+    return () => {
+      dead = true;
+    };
+  }, [businessId, reloadKey]);
+
+  // "Open now" must not go stale while the page sits open.
+  useEffect(() => {
+    const timer = setInterval(() => setClock(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 32);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // The floating action dock (phones) only appears once the hero's own
+  // buttons have scrolled out of view, so the primary action is always
+  // reachable but never duplicated on screen.
+  const hasView = Boolean(view);
+  useEffect(() => {
+    const el = ctaRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowDock(!entry.isIntersecting),
+      {
+        threshold: 0,
+      },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasView]);
+
+  const business = view?.business;
+  const storefront = view?.storefront;
+  const products = view?.products;
+
+  const details = useMemo(() => {
+    if (!business) return null;
+    const description = business.description || storefront?.description || "";
+    const categories = new Set(
+      (products || []).map((p) => p.category).filter(Boolean),
+    );
+    return {
+      description,
+      standfirst: standfirst(description),
+      address: business.address || storefront?.address || "",
+      phone: business.phone || storefront?.phone || "",
+      whatsapp: storefront?.whatsappNumber || "",
+      cover: storefront?.coverImage || "",
+      hoursJson: storefront?.openingHoursJson || "",
+      pickup: Boolean(storefront?.pickupEnabled),
+      delivery: Boolean(storefront?.deliveryEnabled),
+      productCount: products?.length || 0,
+      categoryCount: categories.size,
+    };
+  }, [business, storefront, products]);
+
+  const hours = useMemo(
+    () => parseHours(details?.hoursJson),
+    [details?.hoursJson],
+  );
+  const status = useMemo(
+    () => openStatus(details?.hoursJson, clock),
+    [details?.hoursJson, clock],
+  );
+  const progress = useMemo(
+    () => todayProgress(details?.hoursJson, clock),
+    [details?.hoursJson, clock],
+  );
+  const todayIdx = dayIndex(clock);
+
+  const goBack = () => {
+    if (window.history.length > 1) nav(-1);
+    else
+      nav(
+        business?.connected
+          ? "/customer-dashboard?tab=businesses"
+          : "/customer-dashboard?tab=discover",
+      );
+  };
 
   const connect = async () => {
-    if (!view?.business || working) return;
+    if (!business || working) return;
     setWorking(true);
     setNotice("");
     try {
-      const r = await connectCustomerToBusinessId(view.business.businessId);
+      const r = await connectCustomerToBusinessId(business.businessId);
       await switchContext("CUSTOMER", r.data.membershipId);
-      await load();
-      setNotice("You are now connected to this business on Ehral.");
+      setReloadKey((k) => k + 1);
+      setNotice(`You're now connected to ${business.businessName}.`);
     } catch (e) {
       setNotice(
         e?.response?.data?.message ||
-          "We could not connect you to this business.",
+          "We couldn't connect you to this business.",
       );
     } finally {
       setWorking(false);
     }
   };
 
-  const business = view?.business;
-  const storefront = view?.storefront;
-  const products = view?.products || [];
+  const message = async () => {
+    if (!business) return;
+    if (!business.connected) {
+      setNotice("Connect with this business first, then you can message them.");
+      setNudgeConnect(true);
+      setTimeout(() => setNudgeConnect(false), 1600);
+      return;
+    }
+    try {
+      const r = await createCustomerBusinessConversation(business.businessId);
+      nav(`/customer-dashboard?chat=${r.data.id}`);
+    } catch (e) {
+      setNotice(
+        e?.response?.data?.message ||
+          "Messaging isn't available for this business right now.",
+      );
+    }
+  };
+
+  const visitStore = () => nav(`/customer/business/${businessId}/store`);
+
+  // ── States ─────────────────────────────────────────────────────────
 
   if (loading && !view) {
     return (
-      <div className={styles.loadingScreen}>
-        <div className={styles.loadingBrand}>
-          <Logo size={126} variant="horizontal" tone="brand" title="Ehral" />
+      <div className={styles.page}>
+        <div className={styles.splash}>
+          <Logo size={132} variant="horizontal" tone="brand" title="Ehral" />
+          <span className={styles.splashBar} aria-hidden="true" />
+          <p>Opening business…</p>
         </div>
-        <span>Opening business…</span>
       </div>
     );
   }
 
   if (!business) {
     return (
-      <div className={styles.loadingScreen}>
-        <Logo size={126} variant="horizontal" tone="brand" title="Ehral" />
-        <strong>Business unavailable</strong>
-        <button
-          className={styles.heroPrimary}
-          onClick={() => nav("/customer-dashboard?tab=discover")}
-        >
-          Back to Discover
-        </button>
+      <div className={styles.page}>
+        <div className={styles.splash}>
+          <Logo size={132} variant="horizontal" tone="brand" title="Ehral" />
+          <h1 className={styles.splashTitle}>Business unavailable</h1>
+          <p>{error || "This business isn't available right now."}</p>
+          <button
+            className={styles.visit}
+            onClick={() => nav("/customer-dashboard?tab=discover")}
+          >
+            Back to Discover{" "}
+            <i className="ti ti-arrow-right" aria-hidden="true" />
+          </button>
+        </div>
       </div>
     );
   }
 
+  const storeOpen = Boolean(storefront);
+  const typeLine = [
+    business.businessTypeLabel || business.businessType,
+    business.businessCategory,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const fulfilment = [
+    details.pickup && "Store pickup",
+    details.delivery && "Delivery",
+  ].filter(Boolean);
+  const aboutFallback = `${business.businessName} is a${/^[aeiou]/i.test(business.businessTypeLabel || "") ? "n" : ""} ${(
+    business.businessTypeLabel || "Ehral"
+  ).toLowerCase()} business on Ehral. Connect to keep your orders, receipts and conversations with them in one place.`;
+  const hasReach = Boolean(
+    details.phone || details.whatsapp || details.address,
+  );
+
   return (
-    <div className={styles.shell}>
-      <aside className={styles.sidebar}>
-        <div className={styles.brand}>
-          <Logo size={116} variant="horizontal" tone="brand" title="Ehral" />
-          <span>Customer</span>
+    <div className={styles.page}>
+      <header className={`${styles.top} ${scrolled ? styles.topSolid : ""}`}>
+        <button
+          className={styles.topBack}
+          onClick={goBack}
+          aria-label="Go back"
+        >
+          <i className="ti ti-arrow-left" aria-hidden="true" />
+          <span>Back</span>
+        </button>
+        <div className={styles.topCenter}>
+          <span
+            className={`${styles.topBrand} ${scrolled ? styles.topBrandHidden : ""}`}
+          >
+            <Logo size={92} variant="horizontal" tone="brand" title="Ehral" />
+          </span>
+          <span
+            className={`${styles.topName} ${scrolled ? styles.topNameShown : ""}`}
+          >
+            {business.businessName}
+          </span>
         </div>
-        <div className={styles.profileMini}>
-          <div className={styles.profileAvatar}>{initials("My Ehral")}</div>
-          <div>
-            <strong>My Ehral</strong>
-            <small>Customer</small>
-          </div>
+        <div className={styles.topActions}>
+          <ThemeToggleMenu />
         </div>
-        <nav>
-          {[
-            ["/customer-dashboard", "Dashboard", "layout-dashboard"],
-            ["/customer-dashboard?tab=discover", "Discover", "compass"],
-            [
-              "/customer-dashboard?tab=businesses",
-              "My businesses",
-              "building-store",
-            ],
-            ["/customer-dashboard?tab=orders", "Orders", "shopping-bag"],
-            ["/customer-dashboard?tab=receipts", "Receipts", "receipt"],
-            ["/customer-dashboard?tab=messages", "Messages", "messages"],
-            ["/customer-dashboard?tab=spending", "Spending", "chart-donut"],
-            ["/customer-dashboard?tab=account", "Account", "user-circle"],
-          ].map(([path, label, icon]) => (
-            <button key={path} onClick={() => nav(path)}>
-              <i className={`ti ti-${icon}`} />
-              <span>{label}</span>
-            </button>
-          ))}
-        </nav>
-        <div className={styles.sidebarBottom}>
-          <button onClick={() => nav("/my-accounts")}>
-            <i className="ti ti-switch-horizontal" /> My Accounts
-          </button>
-          <button onClick={() => nav("/customer-dashboard?tab=account")}>
-            <i className="ti ti-settings" /> Account settings
+      </header>
+
+      {notice && (
+        <div className={styles.toast} role="status">
+          <i className="ti ti-sparkles" aria-hidden="true" />
+          <span>{notice}</span>
+          <button onClick={() => setNotice("")} aria-label="Dismiss">
+            <i className="ti ti-x" aria-hidden="true" />
           </button>
         </div>
-      </aside>
+      )}
 
       <main className={styles.main}>
-        <header className={styles.topbar}>
-          <button
-            className={styles.mobileBrand}
-            onClick={() => nav("/customer-dashboard")}
+        {/* ── Hero ───────────────────────────────────────────────── */}
+        <div className={styles.stage}>
+          <div
+            className={`${styles.cover} ${details.cover ? "" : styles.coverPattern}`}
+            aria-hidden="true"
           >
-            <Logo size={96} variant="horizontal" tone="brand" title="Ehral" />
-          </button>
-          <div className={styles.topTitle}>
-            <span>MY EHRAL</span>
-            <h1>{business.businessName}</h1>
+            {details.cover && <img src={details.cover} alt="" />}
           </div>
-          <div className={styles.topActions}>
-            <ThemeToggleMenu />
-            <button
-              className={styles.avatarButton}
-              onClick={() => nav("/my-accounts")}
-              aria-label="Open My Accounts"
-            >
-              <i className="ti ti-switch-horizontal" />
-            </button>
-          </div>
-        </header>
 
-        {notice && (
-          <div className={styles.toast} role="status">
-            <span className={styles.toastIcon}>
-              <i className="ti ti-sparkles" />
-            </span>
-            <span>{notice}</span>
-            <button
-              onClick={() => setNotice("")}
-              aria-label="Dismiss notification"
-            >
-              <i className="ti ti-x" />
-            </button>
-          </div>
-        )}
-
-        <div className={styles.content}>
-          <section className={styles.businessViewHero}>
-            <div className={styles.businessViewIdentity}>
-              <div className={styles.businessViewLogo}>
+          <section
+            className={`${styles.hero} ${details.cover ? "" : styles.heroNoCover}`}
+          >
+            <div className={styles.identity} style={{ "--i": 0 }}>
+              <div className={styles.logo}>
                 {business.businessLogo ? (
                   <img src={business.businessLogo} alt="" />
                 ) : (
-                  initials(business.businessName)
+                  <span>{initials(business.businessName)}</span>
                 )}
+                <i
+                  className={`ti ti-rosette-discount-check-filled ${styles.logoCheck}`}
+                  title="Registered on Ehral"
+                />
               </div>
-              <div>
-                <span className={styles.eyebrow}>
-                  {business.businessTypeLabel ||
-                    business.businessType ||
-                    "EHRAL BUSINESS"}
-                </span>
-                <h2>{business.businessName}</h2>
-                <p>{business.businessCategory || "Registered on Ehral"}</p>
-              </div>
+              {typeLine && <span className={styles.eyebrow}>{typeLine}</span>}
             </div>
-            <div className={styles.businessViewActions}>
-              {business.connected ? (
-                <span className={styles.connectedBadge}>
-                  <i className="ti ti-circle-check-filled" /> Connected customer
-                </span>
+
+            <h1 className={styles.name} style={{ "--i": 1 }}>
+              {business.businessName}
+            </h1>
+
+            {details.standfirst && (
+              <p className={styles.standfirst} style={{ "--i": 2 }}>
+                {details.standfirst}
+              </p>
+            )}
+
+            <ul className={styles.facts} style={{ "--i": 3 }}>
+              {status.known && (
+                <li
+                  className={
+                    status.isOpen ? styles.factOpen : styles.factClosed
+                  }
+                >
+                  <span className={styles.dot} aria-hidden="true" />
+                  {openStatusLabel(status)}
+                </li>
+              )}
+              {business.connected && (
+                <li className={styles.factConnected}>
+                  <i className="ti ti-circle-check-filled" aria-hidden="true" />{" "}
+                  You're connected
+                </li>
+              )}
+              {fulfilment.length > 0 && (
+                <li>
+                  <i className="ti ti-truck-delivery" aria-hidden="true" />{" "}
+                  {fulfilment.join(" · ")}
+                </li>
+              )}
+            </ul>
+
+            <div className={styles.actions} ref={ctaRef} style={{ "--i": 4 }}>
+              {storeOpen ? (
+                <button className={styles.visit} onClick={visitStore}>
+                  Visit store{" "}
+                  <i className="ti ti-arrow-right" aria-hidden="true" />
+                </button>
               ) : (
+                <div className={styles.soon}>
+                  <i className="ti ti-clock-hour-4" aria-hidden="true" />
+                  <span>
+                    <strong>Store opening soon</strong>
+                    <small>
+                      This business hasn't opened its online store yet.
+                    </small>
+                  </span>
+                </div>
+              )}
+              {!business.connected && (
                 <button
-                  className={styles.heroPrimary}
+                  className={`${styles.ghost} ${nudgeConnect ? styles.nudge : ""}`}
                   onClick={connect}
                   disabled={working}
                 >
-                  {working ? "Connecting…" : "Connect with this business"}{" "}
-                  <i className="ti ti-user-plus" />
+                  <i className="ti ti-user-plus" aria-hidden="true" />
+                  {working ? "Connecting…" : "Connect"}
                 </button>
               )}
-            </div>
-          </section>
-
-          <section className={styles.businessViewGrid}>
-            <div className={styles.section}>
-              <div className={styles.sectionIntro}>
-                <span className={styles.eyebrow}>BUSINESS</span>
-                <h2>About this business</h2>
-                <p>
-                  {business.description ||
-                    "This business has registered on Ehral and is available to discover through your customer account."}
-                </p>
-              </div>
-              <div className={styles.businessInfoGrid}>
-                {business.address && (
-                  <div>
-                    <i className="ti ti-map-pin" />
-                    <span>Location</span>
-                    <strong>{business.address}</strong>
-                  </div>
-                )}
-                {business.phone && (
-                  <div>
-                    <i className="ti ti-phone" />
-                    <span>Phone</span>
-                    <strong>{business.phone}</strong>
-                  </div>
-                )}
-                <div>
-                  <i className="ti ti-category" />
-                  <span>Category</span>
-                  <strong>
-                    {business.businessCategory ||
-                      business.businessTypeLabel ||
-                      "Ehral business"}
-                  </strong>
-                </div>
-                <div>
-                  <i className="ti ti-circle-check" />
-                  <span>Relationship</span>
-                  <strong>
-                    {business.connected
-                      ? "You are connected"
-                      : "Not connected yet"}
-                  </strong>
-                </div>
-              </div>
-            </div>
-
-            {storefront ? (
-              <div className={styles.section}>
-                <div className={styles.sectionHead}>
-                  <div>
-                    <span className={styles.eyebrow}>IN EHRAL</span>
-                    <h2>{storefront.name || "Store"}</h2>
-                  </div>
-                  <span className={styles.connectedBadge}>
-                    <i className="ti ti-building-store" /> Authenticated view
-                  </span>
-                </div>
-                {storefront.coverImage && (
-                  <div className={styles.businessViewCover}>
-                    <img src={storefront.coverImage} alt="" />
-                  </div>
-                )}
-                <p className={styles.businessViewNote}>
-                  You are viewing this business inside My Ehral. The public
-                  storefront remains separate from this authenticated
-                  experience.
-                </p>
-                {products.length ? (
-                  <div className={styles.productGrid}>
-                    {products.map((product) => (
-                      <article
-                        className={styles.discoveryProduct}
-                        key={product.id}
-                      >
-                        <div className={styles.discoveryProductImage}>
-                          {product.imageUrl ? (
-                            <img src={product.imageUrl} alt="" />
-                          ) : (
-                            <i className="ti ti-package" />
-                          )}
-                        </div>
-                        <div>
-                          <strong>{product.name}</strong>
-                          <small>
-                            {product.category || product.brand || "Product"}
-                          </small>
-                          <b>
-                            {money(
-                              product.currency || storefront.currency,
-                              product.price,
-                            )}
-                          </b>
-                        </div>
-                      </article>
-                    ))}
-                  </div>
-                ) : (
-                  <div className={styles.emptyState}>
-                    <i className="ti ti-package-off" />
-                    <h3>No products published yet</h3>
-                    <p>
-                      This business is registered on Ehral, but its catalog is
-                      not currently available.
-                    </p>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className={styles.section}>
-                <div className={styles.sectionIntro}>
-                  <span className={styles.eyebrow}>EHRAL BUSINESS</span>
-                  <h2>Business profile</h2>
-                  <p>
-                    This business does not currently publish a Retail
-                    storefront. You can still keep the business relationship
-                    inside Ehral.
-                  </p>
-                </div>
-              </div>
-            )}
-          </section>
-
-          <div className={styles.businessViewFooter}>
-            <button
-              className={styles.secondaryAction}
-              onClick={() => nav("/customer-dashboard?tab=discover")}
-            >
-              <i className="ti ti-arrow-left" /> Back to Discover
-            </button>
-            {business.connected && (
-              <button
-                className={styles.heroSecondary}
-                onClick={() => nav("/customer-dashboard?tab=messages")}
-              >
-                <i className="ti ti-message-circle" /> Message business
+              <button className={styles.ghost} onClick={message}>
+                <i className="ti ti-message-circle" aria-hidden="true" />{" "}
+                Message
               </button>
+              {details.phone && (
+                <a className={styles.ghost} href={`tel:${details.phone}`}>
+                  <i className="ti ti-phone" aria-hidden="true" /> Call
+                </a>
+              )}
+            </div>
+            {!business.connected && (
+              <p className={styles.connectHint}>
+                Connect to order, message the team and keep your receipts in
+                your Ehral account.
+              </p>
             )}
-          </div>
+          </section>
         </div>
+
+        {/* ── Editorial sections ─────────────────────────────────── */}
+        <div className={styles.sections}>
+          <Section index="01" title="About" id="bv-about">
+            <p className={styles.about}>
+              {details.description || aboutFallback}
+            </p>
+          </Section>
+
+          <Section index="02" title="The details" id="bv-details">
+            <dl className={styles.rows}>
+              {business.businessCategory && (
+                <div>
+                  <dt>Category</dt>
+                  <dd>{business.businessCategory}</dd>
+                </div>
+              )}
+              <div>
+                <dt>Business type</dt>
+                <dd>
+                  {business.businessTypeLabel ||
+                    business.businessType ||
+                    "Ehral business"}
+                </dd>
+              </div>
+              {details.address && (
+                <div>
+                  <dt>Location</dt>
+                  <dd>{details.address}</dd>
+                </div>
+              )}
+              {details.phone && (
+                <div>
+                  <dt>Phone</dt>
+                  <dd>{details.phone}</dd>
+                </div>
+              )}
+              {(details.pickup || details.delivery) && (
+                <div>
+                  <dt>Fulfilment</dt>
+                  <dd>{fulfilment.join(" · ")}</dd>
+                </div>
+              )}
+              {storeOpen && details.productCount > 0 && (
+                <div>
+                  <dt>Catalogue</dt>
+                  <dd>
+                    {details.productCount} product
+                    {details.productCount === 1 ? "" : "s"}
+                    {details.categoryCount > 0 &&
+                      ` across ${details.categoryCount} categor${details.categoryCount === 1 ? "y" : "ies"}`}
+                  </dd>
+                </div>
+              )}
+              <div>
+                <dt>Pays in</dt>
+                <dd>{business.currency || "NGN"}</dd>
+              </div>
+              <div>
+                <dt>With you</dt>
+                <dd>
+                  {business.connected
+                    ? "Connected customer"
+                    : "Not connected yet"}
+                </dd>
+              </div>
+            </dl>
+          </Section>
+
+          {status.known && (
+            <Section index="03" title="Opening hours" id="bv-hours">
+              <ul className={styles.hours}>
+                {DAYS.map(([key, label], i) => {
+                  const row = hours[key];
+                  const open = Boolean(row?.open && row?.close);
+                  const isToday = i === todayIdx;
+                  return (
+                    <li
+                      key={key}
+                      className={`${isToday ? styles.hoursToday : ""} ${open ? "" : styles.hoursClosed}`}
+                    >
+                      <span className={styles.hoursDay}>
+                        {label}
+                        {isToday && <em>Today</em>}
+                      </span>
+                      <span className={styles.leader} aria-hidden="true" />
+                      <span className={styles.hoursTime}>
+                        {open
+                          ? `${formatTime12(row.open)} – ${formatTime12(row.close)}`
+                          : "Closed"}
+                      </span>
+                      {isToday && open && progress !== null && (
+                        <span className={styles.hoursBar} aria-hidden="true">
+                          <i
+                            style={{ width: `${Math.round(progress * 100)}%` }}
+                          />
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+              <p className={styles.tzNote}>Times shown in your local time.</p>
+            </Section>
+          )}
+
+          {hasReach && (
+            <Section
+              index={status.known ? "04" : "03"}
+              title="Get in touch"
+              id="bv-reach"
+            >
+              <ul className={styles.reach}>
+                {details.phone && (
+                  <li>
+                    <a href={`tel:${details.phone}`}>
+                      <i className="ti ti-phone" aria-hidden="true" />
+                      <span>
+                        <small>Call</small>
+                        <strong>{details.phone}</strong>
+                      </span>
+                      <i
+                        className={`ti ti-arrow-up-right ${styles.reachArrow}`}
+                        aria-hidden="true"
+                      />
+                    </a>
+                  </li>
+                )}
+                {details.whatsapp && (
+                  <li>
+                    <a
+                      href={buildWhatsAppLink(
+                        details.whatsapp,
+                        `Hello ${business.businessName}, I found you on Ehral.`,
+                      )}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <i className="ti ti-brand-whatsapp" aria-hidden="true" />
+                      <span>
+                        <small>WhatsApp</small>
+                        <strong>Chat with the team</strong>
+                      </span>
+                      <i
+                        className={`ti ti-arrow-up-right ${styles.reachArrow}`}
+                        aria-hidden="true"
+                      />
+                    </a>
+                  </li>
+                )}
+                {details.address && (
+                  <li>
+                    <a
+                      href={mapsLink(details.address)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <i className="ti ti-map-pin" aria-hidden="true" />
+                      <span>
+                        <small>Find us</small>
+                        <strong>{details.address}</strong>
+                      </span>
+                      <i
+                        className={`ti ti-arrow-up-right ${styles.reachArrow}`}
+                        aria-hidden="true"
+                      />
+                    </a>
+                  </li>
+                )}
+              </ul>
+            </Section>
+          )}
+        </div>
+
+        {/* ── Closing call to action + trust ─────────────────────── */}
+        <footer className={styles.closing}>
+          {storeOpen && (
+            <div className={styles.closingCta}>
+              <h2>Ready to browse?</h2>
+              <p>
+                Step into {business.businessName}'s store without leaving Ehral.
+              </p>
+              <button className={styles.visit} onClick={visitStore}>
+                Visit store{" "}
+                <i className="ti ti-arrow-right" aria-hidden="true" />
+              </button>
+            </div>
+          )}
+          <div className={styles.trust}>
+            <Logo size={104} variant="horizontal" tone="brand" title="Ehral" />
+            <p>
+              <i className="ti ti-shield-check" aria-hidden="true" /> Your
+              orders, receipts and conversations with this business stay
+              protected in your Ehral account.
+            </p>
+            <button
+              className={styles.textLink}
+              onClick={() => nav("/customer-dashboard?tab=businesses")}
+            >
+              Back to My businesses
+            </button>
+          </div>
+        </footer>
       </main>
 
-      <nav className={styles.mobileNav} aria-label="Customer navigation">
-        {[
-          ["/customer-dashboard", "Dashboard", "layout-dashboard"],
-          ["/customer-dashboard?tab=discover", "Discover", "compass"],
-          [
-            "/customer-dashboard?tab=businesses",
-            "Businesses",
-            "building-store",
-          ],
-          ["/customer-dashboard?tab=orders", "Orders", "shopping-bag"],
-          ["/customer-dashboard?tab=messages", "Messages", "messages"],
-        ].map(([path, label, icon]) => (
-          <button key={path} onClick={() => nav(path)}>
-            <i className={`ti ti-${icon}`} />
-            <span>{label}</span>
+      {/* Phone action dock - appears after the hero buttons scroll away. */}
+      <div
+        className={`${styles.dock} ${showDock ? styles.dockShown : ""}`}
+        aria-hidden={!showDock}
+      >
+        {storeOpen ? (
+          <button
+            className={styles.dockPrimary}
+            onClick={visitStore}
+            tabIndex={showDock ? 0 : -1}
+          >
+            Visit store <i className="ti ti-arrow-right" aria-hidden="true" />
           </button>
-        ))}
-        <button onClick={() => nav("/my-accounts")}>
-          <i className="ti ti-switch-horizontal" />
-          <span>Accounts</span>
+        ) : !business.connected ? (
+          <button
+            className={styles.dockPrimary}
+            onClick={connect}
+            disabled={working}
+            tabIndex={showDock ? 0 : -1}
+          >
+            {working ? "Connecting…" : "Connect"}{" "}
+            <i className="ti ti-user-plus" aria-hidden="true" />
+          </button>
+        ) : null}
+        <button
+          className={styles.dockIcon}
+          onClick={message}
+          aria-label="Message business"
+          tabIndex={showDock ? 0 : -1}
+        >
+          <i className="ti ti-message-circle" aria-hidden="true" />
         </button>
-      </nav>
+      </div>
     </div>
   );
 }

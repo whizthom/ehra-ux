@@ -49,6 +49,7 @@ const EmployeeDashboard = lazy(() => import("./pages/EmployeeDashboard"));
 const EmployeeProfilePage = lazy(() => import("./pages/EmployeeProfilePage"));
 const MyAccountsPage = lazy(() => import("./pages/MyAccountsPage"));
 const CustomerBusinessView = lazy(() => import("./pages/CustomerBusinessView"));
+const CustomerStore = lazy(() => import("./pages/CustomerStore"));
 const Support = lazy(() => import("./pages/Support"));
 const BusinessSetup = lazy(() => import("./pages/BusinessSetup"));
 const RetailWorkspace = lazy(() => import("./pages/RetailWorkspace"));
@@ -206,6 +207,16 @@ function App() {
               element={
                 <ProtectedRoute roles={["ROLE_CUSTOMER"]}>
                   <CustomerBusinessView />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* The business's store, inside My Ehral (opened from the business profile's "Visit store"). */}
+            <Route
+              path="/customer/business/:businessId/store"
+              element={
+                <ProtectedRoute roles={["ROLE_CUSTOMER"]}>
+                  <CustomerStore />
                 </ProtectedRoute>
               }
             />
