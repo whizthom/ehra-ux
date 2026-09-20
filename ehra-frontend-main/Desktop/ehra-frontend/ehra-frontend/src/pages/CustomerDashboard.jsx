@@ -989,9 +989,6 @@ export default function CustomerDashboard() {
             <>
               <section className={styles.ghHero} aria-label="Your personal commerce hub">
                 <div className={styles.ghCopy}>
-                  <span className={styles.ghEyebrow}>
-                    <i className="ti ti-sparkles" aria-hidden="true" /> YOUR PERSONAL COMMERCE HUB
-                  </span>
                   <h2>
                     {greetingFor()}, <em>{data?.firstName || "there"}</em>.
                   </h2>

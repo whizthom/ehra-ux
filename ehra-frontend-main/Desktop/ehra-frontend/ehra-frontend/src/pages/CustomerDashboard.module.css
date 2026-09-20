@@ -3442,23 +3442,8 @@
   min-width: 0;
 }
 
-.ghEyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 10.5px;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  color: var(--accent);
-}
-
-.ghEyebrow i {
-  font-size: 14px;
-  color: #e0a11f;
-}
-
 .ghCopy h2 {
-  margin: 6px 0 4px;
+  margin: 0 0 4px;
   font-size: clamp(1.45rem, 3.2vw, 2.15rem);
   font-weight: 800;
   line-height: 1.1;
