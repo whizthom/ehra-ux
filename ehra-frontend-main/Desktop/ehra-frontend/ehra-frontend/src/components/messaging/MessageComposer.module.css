@@ -416,3 +416,12 @@
         font-size: 18px;
     }
 }
+
+/* ── Flat variant ─────────────────────────────────────────────────────── */
+:global([data-flat="true"]) .composerWrap {
+    background: color-mix(in srgb, var(--bg-page) 78%, transparent);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    backdrop-filter: blur(16px) saturate(1.4);
+    box-shadow: none;
+    border-top: 1px solid var(--border-color);
+}

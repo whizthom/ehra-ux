@@ -281,64 +281,142 @@
         background: var(--bg-page);
     }
 }
+
 /* Rich empty state - used by the Business <-> Customer inbox, where an
    empty list is an invitation to start a conversation rather than a dead end. */
 .richEmpty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 8px;
-  padding: 44px 26px;
-  color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    padding: 44px 26px;
+    color: var(--text-secondary);
 }
 
 .richEmpty strong {
-  color: var(--text-primary);
-  font-size: 15px;
-  font-weight: 700;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 700;
 }
 
 .richEmpty p {
-  margin: 0;
-  font-size: 12.5px;
-  line-height: 1.55;
-  max-width: 250px;
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.55;
+    max-width: 250px;
 }
 
 .richEmptyIcon {
-  width: 58px;
-  height: 58px;
-  border-radius: 20px;
-  display: grid;
-  place-items: center;
-  background: var(--bg-soft-accent);
-  color: var(--accent);
-  font-size: 26px;
-  margin-bottom: 4px;
+    width: 58px;
+    height: 58px;
+    border-radius: 20px;
+    display: grid;
+    place-items: center;
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+    font-size: 26px;
+    margin-bottom: 4px;
 }
 
 .richEmptyBtn {
-  margin-top: 8px;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--accent);
-  color: #fff;
-  font: inherit;
-  font-size: 12.5px;
-  font-weight: 700;
-  padding: 10px 18px;
-  cursor: pointer;
-  transition: background 0.15s ease, transform 0.15s ease;
+    margin-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
 }
 
 .richEmptyBtn:hover {
-  background: var(--accent-hover);
+    background: var(--accent-hover);
 }
 
 .richEmptyBtn:active {
-  transform: scale(0.97);
+    transform: scale(0.97);
+}
+
+/* ── Flat variant: the list sits on the page background ─────────────────
+   Applies inside a hub rendered with data-flat="true" (customer account). */
+:global([data-flat="true"]) .listPanel {
+    width: 372px;
+    background: transparent;
+    border-right: 1px solid var(--border-color);
+}
+
+:global([data-flat="true"]) .searchWrap {
+    margin: 16px 14px 8px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: transparent;
+    border: 1px solid color-mix(in srgb, var(--text-primary) 16%, transparent);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+:global([data-flat="true"]) .searchWrap:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+:global([data-flat="true"]) .list {
+    padding: 4px 8px 20px;
+}
+
+:global([data-flat="true"]) .row {
+    padding: 12px 12px;
+    border-radius: 16px;
+    transition: background 0.18s ease, transform 0.18s ease;
+}
+
+:global([data-flat="true"]) .row:hover {
+    background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
+:global([data-flat="true"]) .row.active {
+    background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 15%, transparent), transparent 92%);
+    box-shadow: inset 3px 0 0 var(--accent);
+}
+
+:global([data-flat="true"]) .dateGroupHeader {
+    background: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+:global([data-flat="true"]) .newGroupBtn:hover {
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+@media (min-width: 861px) and (max-width: 1100px) {
+    :global([data-flat="true"]) .listPanel {
+        width: 310px;
+    }
+}
+
+@media (max-width: 860px) {
+    :global([data-flat="true"]) .listPanel {
+        width: 100%;
+        border-right: none;
+        background: transparent;
+    }
+
+    :global([data-flat="true"]) .dateGroupHeader {
+        background: transparent;
+    }
+
+    :global([data-flat="true"]) .searchWrap {
+        margin: 14px 4px 8px;
+    }
+
+    :global([data-flat="true"]) .list {
+        padding: 2px 0 20px;
+    }
 }

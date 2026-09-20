@@ -317,3 +317,16 @@
     font-size: 13px;
     flex-shrink: 0;
 }
+
+/* ── Flat variant: header and composer float on the page background ── */
+:global([data-flat="true"]) .header {
+    background: color-mix(in srgb, var(--bg-page) 78%, transparent);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    backdrop-filter: blur(16px) saturate(1.4);
+    box-shadow: none;
+    border-bottom: 1px solid var(--border-color);
+}
+
+:global([data-flat="true"]) .readOnlyBar {
+    background: color-mix(in srgb, var(--bg-page) 78%, transparent);
+}

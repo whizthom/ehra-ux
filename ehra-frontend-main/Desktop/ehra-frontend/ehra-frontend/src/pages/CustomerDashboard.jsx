@@ -65,6 +65,12 @@ const money = (currency, value) =>
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
+// 1.2K / 3.4M style labels for the little numbers above the spending bars.
+const compactMoney = (value) =>
+  Number(value || 0).toLocaleString(undefined, {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  });
 const date = (v) =>
   v
     ? new Date(v).toLocaleDateString(undefined, {
@@ -85,6 +91,100 @@ const initials = (name = "Ehral") =>
     .map((x) => x[0])
     .join("")
     .toUpperCase();
+
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+const greetingFor = (d = new Date()) => {
+  const h = d.getHours();
+  if (h < 5) return "Up late";
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+};
+
+// Everything the Spending page shows, derived from the orders the overview
+// already returns - no extra request. Only fully PAID orders count, and the
+// month chart only sums orders in the account's main currency (adding naira
+// to dollars would be meaningless); anything in another currency is reported
+// in a footnote instead.
+function buildSpending(orders, businesses, data, now = new Date()) {
+  const currency = data?.currency;
+  const paid = orders.filter(
+    (o) => String(o.paymentStatus || "").toUpperCase() === "PAID",
+  );
+  const main = paid.filter(
+    (o) => !o.currency || !currency || o.currency === currency,
+  );
+  const amountOf = (o) => Number(o.amountPaid) || Number(o.total) || 0;
+
+  const months = [];
+  for (let i = 5; i >= 0; i -= 1) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({
+      key: `${d.getFullYear()}-${d.getMonth()}`,
+      label: MONTHS[d.getMonth()],
+      year: d.getFullYear(),
+      value: 0,
+      count: 0,
+      current: i === 0,
+    });
+  }
+  main.forEach((o) => {
+    const d = new Date(o.createdAt);
+    if (Number.isNaN(d.getTime())) return;
+    const bucket = months.find(
+      (m) => m.key === `${d.getFullYear()}-${d.getMonth()}`,
+    );
+    if (bucket) {
+      bucket.value += amountOf(o);
+      bucket.count += 1;
+    }
+  });
+  const max = Math.max(0, ...months.map((m) => m.value));
+  const cur = months[months.length - 1].value;
+  const prev = months[months.length - 2].value;
+
+  const total = Number(data?.totalSpent || 0);
+  const ranked = businesses
+    .filter((b) => Number(b.totalSpent || 0) > 0)
+    .map((b) => ({
+      ...b,
+      spent: Number(b.totalSpent || 0),
+      share: total > 0 ? (Number(b.totalSpent || 0) / total) * 100 : 0,
+    }))
+    .sort((a, b) => b.spent - a.spent);
+
+  return {
+    months,
+    max,
+    cur,
+    prev,
+    delta: prev > 0 ? ((cur - prev) / prev) * 100 : null,
+    largest: main.reduce((n, o) => Math.max(n, amountOf(o)), 0),
+    paidCount: paid.length,
+    foreignCount: paid.length - main.length,
+    recent: [...paid]
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 6),
+    ranked,
+    top: ranked.slice(0, 5),
+    restShare: ranked.slice(5).reduce((n, b) => n + b.share, 0),
+    restCount: Math.max(0, ranked.length - 5),
+  };
+}
 
 function Toast({ message, onClose }) {
   if (!message) return null;
@@ -612,8 +712,8 @@ export default function CustomerDashboard() {
     setSearchParams({}, { replace: true });
   }, [searchParams, setSearchParams]);
 
-  const businesses = data?.businesses || [];
-  const orders = data?.orders || [];
+  const businesses = useMemo(() => data?.businesses || [], [data]);
+  const orders = useMemo(() => data?.orders || [], [data]);
   const filteredOrders = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return orders;
@@ -637,6 +737,20 @@ export default function CustomerDashboard() {
     : 0;
   // Unread chats + unread business announcements, one badge for the Messages tab.
   const unread = inbox.total;
+  const spending = useMemo(
+    () => buildSpending(orders, businesses, data),
+    [orders, businesses, data],
+  );
+  const inProgressCount = orders.filter((o) =>
+    [
+      "PENDING",
+      "PROCESSING",
+      "CONFIRMED",
+      "READY",
+      "READY_FOR_PICKUP",
+      "OUT_FOR_DELIVERY",
+    ].includes(String(o.status || "").toUpperCase()),
+  ).length;
 
   const attentionItems = useMemo(() => {
     const items = [];
@@ -727,13 +841,21 @@ export default function CustomerDashboard() {
 
   const changeTab = (id) => {
     setTab(id);
-    setMobileMoreOpen(false);
+    // (There used to be a `setMobileMoreOpen(false)` here, but that state was
+    // never declared - it threw a ReferenceError on EVERY tab change, so the
+    // two refreshes below never ran. The mobile "More" sheet manages its own
+    // open state in MobileNavHub.)
     if (id === "messages") loadMessages();
     if (id === "discover") loadDiscovery();
   };
 
   const visitBusiness = (business) => {
-    if (business?.businessId) nav(`/customer/business/${business.businessId}`);
+    // Remember which tab this was opened from, so the profile's back arrow can
+    // return to exactly here.
+    if (business?.businessId)
+      nav(`/customer/business/${business.businessId}`, {
+        state: { fromTab: tab },
+      });
     else setNotice("This business could not be opened.");
   };
 
@@ -907,39 +1029,128 @@ export default function CustomerDashboard() {
 
         <Toast message={notice} onClose={() => setNotice("")} />
 
-        <div className={styles.content}>
+        <div
+          className={`${styles.content} ${tab === "messages" ? styles.contentMessages : ""}`}
+        >
           {tab === "home" && (
             <>
-              <section className={styles.hero}>
-                <div className={styles.heroCopy}>
-                  <span className={styles.eyebrow}>
-                    YOUR PERSONAL COMMERCE HUB
-                  </span>
-                  <h2>Good to see you, {data?.firstName || "there"}.</h2>
-                  <p>
-                    One Ehral account for your stores, orders, receipts,
-                    conversations and spending history.
-                  </p>
-                  <div className={styles.heroActions}>
+              <section
+                className={styles.ghHero}
+                aria-label="Your personal commerce hub"
+              >
+                {/* The scene behind the glass: deep Ehral green with slow,
+                    luminous colour blobs. The glass slab in front frosts
+                    whatever passes behind it. */}
+                <div className={styles.ghScene} aria-hidden="true">
+                  <span className={`${styles.ghBlob} ${styles.ghBlobMint}`} />
+                  <span className={`${styles.ghBlob} ${styles.ghBlobTeal}`} />
+                  <span className={`${styles.ghBlob} ${styles.ghBlobGold}`} />
+                  <span className={styles.ghRings} />
+                </div>
+
+                <div className={styles.ghSlab}>
+                  <span className={styles.ghSheen} aria-hidden="true" />
+
+                  <div className={styles.ghCopy}>
+                    <span className={styles.ghEyebrow}>
+                      <i className="ti ti-sparkles" aria-hidden="true" /> YOUR
+                      PERSONAL COMMERCE HUB
+                    </span>
+                    <h2>
+                      {greetingFor()},<br />
+                      <em>{data?.firstName || "there"}</em>.
+                    </h2>
+                    <p>
+                      One Ehral account for your stores, orders, receipts,
+                      conversations and spending history.
+                    </p>
+                    <div className={styles.ghActions}>
+                      <button
+                        onClick={() => changeTab("discover")}
+                        className={styles.ghPrimary}
+                      >
+                        Discover businesses{" "}
+                        <i
+                          className="ti ti-arrow-up-right"
+                          aria-hidden="true"
+                        />
+                      </button>
+                      <button
+                        onClick={() => changeTab("messages")}
+                        className={styles.ghGlassBtn}
+                      >
+                        <i
+                          className="ti ti-message-circle"
+                          aria-hidden="true"
+                        />{" "}
+                        Messages
+                        {unread > 0 && (
+                          <span className={styles.ghBadge}>{unread}</span>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={styles.ghStack}>
                     <button
-                      onClick={() => changeTab("discover")}
-                      className={styles.heroPrimary}
+                      className={`${styles.ghCard} ${styles.ghCardMain}`}
+                      onClick={() => changeTab("businesses")}
+                      aria-label={`${businesses.length} connected businesses`}
                     >
-                      Discover businesses <i className="ti ti-arrow-up-right" />
+                      <span className={styles.ghCardLabel}>
+                        Your Ehral network
+                      </span>
+                      <span className={styles.ghFaces}>
+                        {businesses.slice(0, 4).map((b) => (
+                          <span
+                            key={b.membershipId}
+                            className={styles.ghFace}
+                            title={b.businessName}
+                          >
+                            {b.businessLogo ? (
+                              <img src={b.businessLogo} alt="" />
+                            ) : (
+                              initials(b.businessName)
+                            )}
+                          </span>
+                        ))}
+                        {businesses.length > 4 && (
+                          <span
+                            className={`${styles.ghFace} ${styles.ghFaceMore}`}
+                          >
+                            +{businesses.length - 4}
+                          </span>
+                        )}
+                        {businesses.length === 0 && (
+                          <span
+                            className={`${styles.ghFace} ${styles.ghFaceMore}`}
+                          >
+                            <i className="ti ti-plus" aria-hidden="true" />
+                          </span>
+                        )}
+                      </span>
+                      <strong>
+                        {businesses.length} business
+                        {businesses.length === 1 ? "" : "es"}
+                      </strong>
                     </button>
                     <button
-                      onClick={() => changeTab("messages")}
-                      className={styles.heroSecondary}
+                      className={`${styles.ghCard} ${styles.ghCardMini}`}
+                      onClick={() => changeTab("orders")}
                     >
-                      <i className="ti ti-message-circle" /> Messages{" "}
-                      {unread > 0 && <span>{unread}</span>}
+                      <i className="ti ti-package" aria-hidden="true" />
+                      <b>{inProgressCount}</b>
+                      <span>in progress</span>
+                    </button>
+                    <button
+                      className={`${styles.ghCard} ${styles.ghCardMini}`}
+                      onClick={() => changeTab("messages")}
+                    >
+                      <i className="ti ti-message-2" aria-hidden="true" />
+                      <b>{unread}</b>
+                      <span>unread</span>
                     </button>
                   </div>
-                </div>
-                <div className={styles.heroOrb}>
-                  <span />
-                  <span />
-                  <i className="ti ti-sparkles" />
                 </div>
               </section>
 
@@ -1163,7 +1374,9 @@ export default function CustomerDashboard() {
                       key={b.businessId}
                       business={b}
                       onView={(business) =>
-                        nav(`/customer/business/${business.businessId}`)
+                        nav(`/customer/business/${business.businessId}`, {
+                          state: { fromTab: tab },
+                        })
                       }
                     />
                   ))}
@@ -1268,10 +1481,11 @@ export default function CustomerDashboard() {
 
           {tab === "messages" && (
             <div
-              className={`${styles.messagesHost} ${messagesThreadOpen ? styles.messagesHostThread : ""}`}
+              className={`${styles.msHost} ${messagesThreadOpen ? styles.msHostThread : ""}`}
             >
               <MessagingHub
                 mode="customer"
+                flat
                 businesses={businesses}
                 onThreadOpenChange={setMessagesThreadOpen}
                 deepLink={messagesDeepLink}
@@ -1283,121 +1497,333 @@ export default function CustomerDashboard() {
           )}
 
           {tab === "spending" && (
-            <section className={styles.section}>
-              <div className={styles.sectionIntro}>
+            <section className={styles.spWrap} aria-label="Spending">
+              <header className={styles.spHead}>
                 <span className={styles.eyebrow}>YOUR MONEY TRAIL</span>
                 <h2>Spending</h2>
                 <p>
-                  A clear view of payments completed across your Ehral
-                  businesses, net of recorded refunds.
+                  Payments completed across your Ehral businesses, net of
+                  recorded refunds.
                 </p>
-              </div>
-              <div className={styles.spendingHero}>
-                <div>
-                  <span>Total recorded spend</span>
-                  <strong>{money(data?.currency, data?.totalSpent)}</strong>
-                  <small>{completed.length} fully paid orders</small>
+              </header>
+
+              <div className={styles.spFigure}>
+                <span className={styles.spFigureLabel}>
+                  Total recorded spend
+                </span>
+                <strong className={styles.spBig}>
+                  {money(data?.currency, data?.totalSpent)}
+                </strong>
+                <div className={styles.spFigureMeta}>
+                  <span>
+                    {spending.paidCount} fully paid order
+                    {spending.paidCount === 1 ? "" : "s"}
+                  </span>
+                  {spending.delta !== null && (
+                    <span
+                      className={`${styles.spDelta} ${spending.delta >= 0 ? styles.spUp : styles.spDown}`}
+                    >
+                      <i
+                        className={`ti ${spending.delta >= 0 ? "ti-trending-up" : "ti-trending-down"}`}
+                        aria-hidden="true"
+                      />
+                      {Math.abs(spending.delta).toFixed(0)}% vs last month
+                    </span>
+                  )}
                 </div>
-                <div className={styles.spendingRing}>
-                  <i className="ti ti-chart-donut" />
-                </div>
               </div>
-              <div className={styles.spendingList}>
-                {businesses.map((b) => {
-                  const share = data?.totalSpent
-                    ? Math.min(
-                        100,
-                        (Number(b.totalSpent || 0) / Number(data.totalSpent)) *
-                          100,
-                      )
-                    : 0;
-                  return (
-                    <div className={styles.spendRow} key={b.membershipId}>
-                      <div className={styles.spendIdentity}>
-                        <div className={styles.avatar}>
-                          {b.businessLogo ? (
-                            <img src={b.businessLogo} alt="" />
-                          ) : (
-                            initials(b.businessName)
-                          )}
-                        </div>
-                        <div>
-                          <strong>{b.businessName}</strong>
-                          <small>
-                            {b.ordersCount} order
-                            {b.ordersCount === 1 ? "" : "s"}
-                          </small>
-                        </div>
-                      </div>
-                      <div className={styles.spendValue}>
-                        <strong>{money(b.currency, b.totalSpent)}</strong>
-                        <div>
-                          <span style={{ width: `${share}%` }} />
-                        </div>
-                        <small>{share.toFixed(1)}% of total spend</small>
-                      </div>
+
+              {spending.paidCount === 0 ? (
+                <div className={styles.spEmpty}>
+                  <i className="ti ti-chart-donut-3" aria-hidden="true" />
+                  <h3>Nothing to chart yet</h3>
+                  <p>
+                    Once you complete a payment with a business, your spending
+                    trail appears here.
+                  </p>
+                  <button
+                    className={styles.ghPrimary}
+                    onClick={() => changeTab("discover")}
+                  >
+                    Discover businesses{" "}
+                    <i className="ti ti-arrow-up-right" aria-hidden="true" />
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className={styles.spKpis}>
+                    <div>
+                      <span>This month</span>
+                      <strong>{money(data?.currency, spending.cur)}</strong>
                     </div>
-                  );
-                })}
-              </div>
+                    <div>
+                      <span>Average order</span>
+                      <strong>{money(data?.currency, average)}</strong>
+                    </div>
+                    <div>
+                      <span>Largest order</span>
+                      <strong>{money(data?.currency, spending.largest)}</strong>
+                    </div>
+                    <div>
+                      <span>Businesses paid</span>
+                      <strong>{spending.ranked.length}</strong>
+                    </div>
+                  </div>
+
+                  <section
+                    className={styles.spBlock}
+                    aria-label="Payments by month"
+                  >
+                    <div className={styles.spBlockHead}>
+                      <h3>Last 6 months</h3>
+                      <span>Payments by month</span>
+                    </div>
+                    <div
+                      className={styles.spChart}
+                      role="img"
+                      aria-label="Bar chart of payments over the last six months"
+                    >
+                      {spending.months.map((m) => {
+                        const pct =
+                          spending.max > 0
+                            ? Math.max(
+                                m.value > 0 ? 4 : 0,
+                                (m.value / spending.max) * 100,
+                              )
+                            : 0;
+                        const top = m.value > 0 && m.value === spending.max;
+                        return (
+                          <div
+                            key={m.key}
+                            className={`${styles.spCol} ${m.current ? styles.spColNow : ""} ${top ? styles.spColTop : ""}`}
+                            title={`${m.label} ${m.year}: ${money(data?.currency, m.value)} · ${m.count} order${m.count === 1 ? "" : "s"}`}
+                          >
+                            <span className={styles.spColValue}>
+                              {m.value > 0 ? compactMoney(m.value) : ""}
+                            </span>
+                            <span className={styles.spBarTrack}>
+                              <i style={{ height: `${pct}%` }} />
+                            </span>
+                            <span className={styles.spColLabel}>{m.label}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {spending.foreignCount > 0 && (
+                      <p className={styles.spNote}>
+                        {spending.foreignCount} payment
+                        {spending.foreignCount === 1 ? "" : "s"} in another
+                        currency
+                        {spending.foreignCount === 1 ? " is" : " are"} not
+                        included in the chart.
+                      </p>
+                    )}
+                  </section>
+
+                  <section
+                    className={styles.spBlock}
+                    aria-label="Spending by business"
+                  >
+                    <div className={styles.spBlockHead}>
+                      <h3>Where it went</h3>
+                      <span>Share of total spend</span>
+                    </div>
+                    <div
+                      className={styles.spSplit}
+                      role="img"
+                      aria-label="Spending split by business"
+                    >
+                      {spending.top.map((b, i) => (
+                        <span
+                          key={b.membershipId}
+                          style={{
+                            width: `${b.share}%`,
+                            background: `var(--sp-c${i})`,
+                          }}
+                        />
+                      ))}
+                      {spending.restShare > 0 && (
+                        <span
+                          style={{
+                            width: `${spending.restShare}%`,
+                            background: "var(--sp-c5)",
+                          }}
+                        />
+                      )}
+                    </div>
+                    <ul className={styles.spRows}>
+                      {spending.top.map((b, i) => (
+                        <li key={b.membershipId}>
+                          <span
+                            className={styles.spSwatch}
+                            style={{ background: `var(--sp-c${i})` }}
+                            aria-hidden="true"
+                          />
+                          <span className={styles.spAvatar}>
+                            {b.businessLogo ? (
+                              <img src={b.businessLogo} alt="" />
+                            ) : (
+                              initials(b.businessName)
+                            )}
+                          </span>
+                          <span className={styles.spWho}>
+                            <strong>{b.businessName}</strong>
+                            <small>
+                              {b.ordersCount} order
+                              {b.ordersCount === 1 ? "" : "s"}
+                            </small>
+                          </span>
+                          <span className={styles.spHow}>
+                            <strong>{money(b.currency, b.spent)}</strong>
+                            <small>{b.share.toFixed(1)}%</small>
+                          </span>
+                        </li>
+                      ))}
+                      {spending.restCount > 0 && (
+                        <li>
+                          <span
+                            className={styles.spSwatch}
+                            style={{ background: "var(--sp-c5)" }}
+                            aria-hidden="true"
+                          />
+                          <span className={styles.spAvatar}>
+                            <i className="ti ti-dots" aria-hidden="true" />
+                          </span>
+                          <span className={styles.spWho}>
+                            <strong>
+                              {spending.restCount} other business
+                              {spending.restCount === 1 ? "" : "es"}
+                            </strong>
+                          </span>
+                          <span className={styles.spHow}>
+                            <small>{spending.restShare.toFixed(1)}%</small>
+                          </span>
+                        </li>
+                      )}
+                    </ul>
+                  </section>
+
+                  <section
+                    className={styles.spBlock}
+                    aria-label="Recent payments"
+                  >
+                    <div className={styles.spBlockHead}>
+                      <h3>Recent payments</h3>
+                      <button
+                        className={styles.spLink}
+                        onClick={() => changeTab("orders")}
+                      >
+                        All orders{" "}
+                        <i className="ti ti-arrow-right" aria-hidden="true" />
+                      </button>
+                    </div>
+                    <ul className={styles.spRecent}>
+                      {spending.recent.map((o) => (
+                        <li key={o.id}>
+                          <button onClick={() => setSelectedOrder(o)}>
+                            <span className={styles.spRecentIcon}>
+                              <i
+                                className="ti ti-receipt-2"
+                                aria-hidden="true"
+                              />
+                            </span>
+                            <span className={styles.spWho}>
+                              <strong>{o.businessName}</strong>
+                              <small>
+                                #{o.orderNumber} · {date(o.createdAt)}
+                              </small>
+                            </span>
+                            <span className={styles.spHow}>
+                              <strong>
+                                {money(o.currency, o.amountPaid || o.total)}
+                              </strong>
+                            </span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                </>
+              )}
             </section>
           )}
 
           {tab === "account" && (
-            <section className={styles.section}>
-              <div className={styles.sectionIntro}>
-                <span className={styles.eyebrow}>ACCOUNT & SECURITY</span>
-                <h2>Your Ehral profile</h2>
-                <p>
-                  Your identity follows you across every Ehral business
-                  relationship.
-                </p>
-              </div>
-              <div className={styles.accountCard}>
-                <div className={styles.accountAvatar}>
-                  {initials(
-                    `${profileForm?.firstName || data?.firstName || ""} ${profileForm?.lastName || data?.lastName || ""}`,
-                  )}
+            <section className={styles.acWrap} aria-label="Account">
+              {/* Identity header - sits straight on the page background. */}
+              <header className={styles.acHero}>
+                <div className={styles.acAvatarWrap}>
+                  <span className={styles.acAvatarRing} aria-hidden="true" />
+                  <div className={styles.acAvatar}>
+                    {initials(
+                      `${profileForm?.firstName || data?.firstName || ""} ${profileForm?.lastName || data?.lastName || ""}`,
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <h3>
+                <div className={styles.acWho}>
+                  <span className={styles.eyebrow}>ACCOUNT &amp; SECURITY</span>
+                  <h2>
                     {profileForm?.firstName || data?.firstName}{" "}
                     {profileForm?.lastName || data?.lastName}
-                  </h3>
-                  <p>{profileForm?.email || data?.email || "No email added"}</p>
-                  <p>
-                    {profileForm?.phone || data?.phone}{" "}
-                    <span className={styles.verifiedPill}>
-                      <i className="ti ti-circle-check-filled" /> Verified
-                    </span>
-                  </p>
+                  </h2>
+                  <ul className={styles.acMeta}>
+                    <li>
+                      <i className="ti ti-mail" aria-hidden="true" />
+                      <span>
+                        {profileForm?.email || data?.email || "No email added"}
+                      </span>
+                    </li>
+                    <li>
+                      <i className="ti ti-phone" aria-hidden="true" />
+                      <span>{profileForm?.phone || data?.phone}</span>
+                      <em className={styles.acVerified}>
+                        <i
+                          className="ti ti-circle-check-filled"
+                          aria-hidden="true"
+                        />{" "}
+                        Verified
+                      </em>
+                    </li>
+                  </ul>
                 </div>
-                <div className={styles.accountActions}>
+                <div className={styles.acActions}>
                   <button
                     onClick={() => setEditingProfile((v) => !v)}
-                    className={styles.accountAction}
+                    className={styles.acPrimary}
                   >
-                    <i className="ti ti-user-edit" />{" "}
+                    <i
+                      className={editingProfile ? "ti ti-x" : "ti ti-user-edit"}
+                      aria-hidden="true"
+                    />
                     {editingProfile ? "Close editor" : "Edit profile"}
                   </button>
                   <button
                     onClick={() => nav("/forgot-password")}
-                    className={styles.accountAction}
+                    className={styles.acGhost}
                   >
-                    Change password <i className="ti ti-arrow-up-right" />
+                    <i className="ti ti-key" aria-hidden="true" /> Change
+                    password
                   </button>
                 </div>
-              </div>
+              </header>
+
               {editingProfile && profileForm && (
-                <div className={styles.profileEditor}>
-                  <div className={styles.profileEditorGrid}>
+                <div className={styles.acEditor}>
+                  <div className={styles.acEditorHead}>
+                    <h3>Edit your details</h3>
+                    <p>
+                      Changes apply to your Ehral identity and follow you across
+                      your relationships.
+                    </p>
+                  </div>
+                  <div className={styles.acFields}>
                     {[
                       ["firstName", "First name"],
                       ["middleName", "Middle name"],
                       ["lastName", "Last name"],
                       ["email", "Email"],
                     ].map(([key, label]) => (
-                      <label key={key}>
+                      <label key={key} className={styles.acField}>
                         <span>{label}</span>
                         <input
                           type={key === "email" ? "email" : "text"}
@@ -1411,15 +1837,15 @@ export default function CustomerDashboard() {
                         />
                       </label>
                     ))}
-                    <label>
+                    <label className={styles.acField}>
                       <span>Phone</span>
                       <input value={profileForm.phone || ""} readOnly />
                       <small>
-                        Your phone is your verified identity anchor and cannot
-                        be changed from this form.
+                        Your phone is your verified identity anchor and can't be
+                        changed here.
                       </small>
                     </label>
-                    <label>
+                    <label className={styles.acField}>
                       <span>Date of birth</span>
                       <input
                         type="date"
@@ -1432,7 +1858,7 @@ export default function CustomerDashboard() {
                         }
                       />
                     </label>
-                    <label>
+                    <label className={styles.acField}>
                       <span>Gender</span>
                       <input
                         value={profileForm.gender || ""}
@@ -1444,7 +1870,9 @@ export default function CustomerDashboard() {
                         }
                       />
                     </label>
-                    <label className={styles.profileEditorWide}>
+                    <label
+                      className={`${styles.acField} ${styles.acFieldWide}`}
+                    >
                       <span>Address</span>
                       <textarea
                         value={profileForm.address || ""}
@@ -1457,7 +1885,7 @@ export default function CustomerDashboard() {
                         rows={2}
                       />
                     </label>
-                    <label>
+                    <label className={styles.acField}>
                       <span>Emergency contact name</span>
                       <input
                         value={profileForm.emergencyContactName || ""}
@@ -1469,7 +1897,7 @@ export default function CustomerDashboard() {
                         }
                       />
                     </label>
-                    <label>
+                    <label className={styles.acField}>
                       <span>Emergency contact phone</span>
                       <input
                         value={profileForm.emergencyContactPhone || ""}
@@ -1482,13 +1910,15 @@ export default function CustomerDashboard() {
                       />
                     </label>
                   </div>
-                  <div className={styles.profileEditorFooter}>
-                    <span>
-                      Changes apply to your Ehral identity and follow you across
-                      your relationships.
-                    </span>
+                  <div className={styles.acEditorFoot}>
                     <button
-                      className={styles.heroPrimary}
+                      className={styles.acGhost}
+                      onClick={() => setEditingProfile(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className={styles.acPrimary}
                       onClick={saveProfile}
                       disabled={savingProfile}
                     >
@@ -1497,34 +1927,106 @@ export default function CustomerDashboard() {
                   </div>
                 </div>
               )}
-              <div className={styles.securityGrid}>
+
+              {/* At a glance - big numbers, no boxes */}
+              <div className={styles.acGlance}>
                 <div>
-                  <i className="ti ti-lock" />
-                  <strong>Password protected</strong>
-                  <span>Your account uses your Ehral password.</span>
+                  <strong>{businesses.length}</strong>
+                  <span>
+                    Connected business{businesses.length === 1 ? "" : "es"}
+                  </span>
                 </div>
                 <div>
-                  <i className="ti ti-device-mobile-check" />
-                  <strong>Phone verified</strong>
-                  <span>Your phone is your verified identity anchor.</span>
+                  <strong>{data?.totalOrders || 0}</strong>
+                  <span>
+                    Order{(data?.totalOrders || 0) === 1 ? "" : "s"} placed
+                  </span>
                 </div>
                 <div>
-                  <i className="ti ti-building-store" />
-                  <strong>{businesses.length} connected businesses</strong>
-                  <span>One identity, many relationships.</span>
+                  <strong>{money(data?.currency, data?.totalSpent)}</strong>
+                  <span>Recorded spend</span>
                 </div>
               </div>
-              <div className={styles.accountInfo}>
-                <span className={styles.eyebrow}>YOUR EHRAL IDENTITY</span>
-                <h3>One secure account across your commerce life.</h3>
-                <p>
-                  Your customer identity, orders, receipts and conversations
-                  stay connected while each business keeps control of its own
-                  products and operations.
-                </p>
-                <button onClick={signOut} className={styles.dangerAction}>
-                  <i className="ti ti-logout-2" /> Sign out of Ehral
-                </button>
+
+              <div className={styles.acColumns}>
+                <section
+                  className={styles.acSection}
+                  aria-labelledby="ac-security"
+                >
+                  <h3 id="ac-security">Security &amp; privacy</h3>
+                  <ul className={styles.acList}>
+                    <li>
+                      <span className={styles.acIcon}>
+                        <i className="ti ti-lock" aria-hidden="true" />
+                      </span>
+                      <span>
+                        <strong>Password protected</strong>
+                        <small>
+                          Your account is secured with your Ehral password.
+                        </small>
+                      </span>
+                      <i
+                        className={`ti ti-circle-check-filled ${styles.acTick}`}
+                        aria-hidden="true"
+                      />
+                    </li>
+                    <li>
+                      <span className={styles.acIcon}>
+                        <i
+                          className="ti ti-device-mobile-check"
+                          aria-hidden="true"
+                        />
+                      </span>
+                      <span>
+                        <strong>Phone verified</strong>
+                        <small>
+                          Your phone is your verified identity anchor.
+                        </small>
+                      </span>
+                      <i
+                        className={`ti ti-circle-check-filled ${styles.acTick}`}
+                        aria-hidden="true"
+                      />
+                    </li>
+                    <li>
+                      <span className={styles.acIcon}>
+                        <i
+                          className="ti ti-building-store"
+                          aria-hidden="true"
+                        />
+                      </span>
+                      <span>
+                        <strong>
+                          {businesses.length} connected business
+                          {businesses.length === 1 ? "" : "es"}
+                        </strong>
+                        <small>
+                          One identity, many relationships - each business only
+                          sees what you share.
+                        </small>
+                      </span>
+                    </li>
+                  </ul>
+                </section>
+
+                <section
+                  className={styles.acSection}
+                  aria-labelledby="ac-identity"
+                >
+                  <h3 id="ac-identity">Your Ehral identity</h3>
+                  <p className={styles.acStatement}>
+                    One secure account across your commerce life.
+                  </p>
+                  <p className={styles.acCopy}>
+                    Your customer identity, orders, receipts and conversations
+                    stay connected while each business keeps control of its own
+                    products and operations.
+                  </p>
+                  <button onClick={signOut} className={styles.acSignOut}>
+                    <i className="ti ti-logout-2" aria-hidden="true" /> Sign out
+                    of Ehral
+                  </button>
+                </section>
               </div>
             </section>
           )}

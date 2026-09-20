@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Logo from "../components/Logo";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
 import {
@@ -50,6 +50,7 @@ function Section({ index, title, children, id }) {
 export default function CustomerBusinessView() {
   const { businessId } = useParams();
   const nav = useNavigate();
+  const location = useLocation();
   const { switchContext } = useAuth();
 
   const [view, setView] = useState(null);
@@ -155,14 +156,15 @@ export default function CustomerBusinessView() {
   );
   const todayIdx = dayIndex(clock);
 
+  // The back arrow always lands on the customer dashboard - never "wherever
+  // the browser was before" (which could be the store, a chat, or another
+  // site). If the dashboard told us which tab it was opened from, return to
+  // exactly that; otherwise fall back to the tab that owns this business.
   const goBack = () => {
-    if (window.history.length > 1) nav(-1);
-    else
-      nav(
-        business?.connected
-          ? "/customer-dashboard?tab=businesses"
-          : "/customer-dashboard?tab=discover",
-      );
+    const tab =
+      location.state?.fromTab ||
+      (business?.connected ? "businesses" : "discover");
+    nav(`/customer-dashboard?tab=${tab}`, { replace: true });
   };
 
   const connect = async () => {

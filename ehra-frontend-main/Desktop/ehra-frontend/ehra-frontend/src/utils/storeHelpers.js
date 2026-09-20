@@ -210,7 +210,11 @@ export const mapsLink = (address) =>
 export function standfirst(description) {
   const text = String(description || "").trim();
   if (text.length < 150) return "";
-  const first = text.split(/(?<=[.!?])\s+/)[0] || "";
+  // No regex lookbehind here: a lookbehind is a parse-time SyntaxError on
+  // Safari < 16.4, which would stop this whole module (and both business
+  // pages that import it) from loading on older iPhones.
+  const match = text.match(/^[\s\S]*?[.!?](?=\s|$)/);
+  const first = match ? match[0].trim() : "";
   if (first.length < 24 || first.length > 160) return "";
   return first;
 }

@@ -104,6 +104,9 @@ export default function MessagingHub({
   businesses,
   // called whenever something the parent's unread badge depends on changed
   onBadgeChange,
+  // Renders on the page background - no card / panel chrome - for hosts (the
+  // customer's own account) that want the inbox to sit directly on the page.
+  flat = false,
 }) {
   const config = MODES[mode] || MODES.staff;
   const channel = config.channel;
@@ -252,7 +255,7 @@ export default function MessagingHub({
   };
 
   return (
-    <div className={styles.hubOuter}>
+    <div className={styles.hubOuter} data-flat={flat ? "true" : undefined}>
       <div className={`${styles.tabRow} ${detailOpen ? styles.tabRowHiddenMobile : ""}`}>
         {config.tabs.map((t) => {
           const badge = tabBadge(t.key);

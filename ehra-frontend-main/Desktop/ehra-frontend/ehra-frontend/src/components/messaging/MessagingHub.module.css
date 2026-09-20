@@ -165,3 +165,71 @@
     background: #fff;
     color: var(--accent);
 }
+
+/* ── Flat variant (data-flat="true") ─────────────────────────────────────
+   Used where the inbox sits straight on the page background instead of
+   inside a card - the customer's own account. Tabs become quiet text tabs
+   with an animated underline; every surface goes transparent and only
+   hairlines separate the regions. Child components (ChatList, ChatWindow,
+   MessageComposer) carry their own matching [data-flat] rules. */
+.hubOuter[data-flat="true"],
+.hubOuter[data-flat="true"] .hub,
+.hubOuter[data-flat="true"] .emptyPane {
+    background: transparent;
+}
+
+.hubOuter[data-flat="true"] .tabRow {
+    background: transparent;
+    padding: 0 4px;
+    gap: clamp(16px, 3.4vw, 34px);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.hubOuter[data-flat="true"] .tabBtn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    padding: 15px 2px 14px;
+    border-radius: 0;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.005em;
+    transition: color 0.2s ease;
+}
+
+.hubOuter[data-flat="true"] .tabBtn:hover {
+    color: var(--text-primary);
+}
+
+.hubOuter[data-flat="true"] .tabBtn::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    background: var(--accent);
+    transform: scaleX(0);
+    transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.hubOuter[data-flat="true"] .tabBtnActive {
+    background: transparent;
+    color: var(--text-primary);
+}
+
+.hubOuter[data-flat="true"] .tabBtnActive::after {
+    transform: scaleX(1);
+}
+
+.hubOuter[data-flat="true"] .tabBtnActive .tabCount {
+    background: var(--accent);
+    color: #fff;
+}
+
+.hubOuter[data-flat="true"] .emptyIcon {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
