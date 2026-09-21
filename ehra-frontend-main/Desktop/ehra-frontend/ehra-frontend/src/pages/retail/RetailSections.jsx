@@ -8,6 +8,7 @@ export {
   filteredRows,
   PaymentHistory,
   RETAIL_CATEGORIES,
+  DEFAULT_EXPENSE_CATEGORIES,
   today,
 } from "./sections/shared";
 export { Dashboard } from "./sections/dashboard";

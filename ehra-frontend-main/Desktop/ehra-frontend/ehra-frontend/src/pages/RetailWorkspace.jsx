@@ -214,6 +214,22 @@ export default function RetailWorkspace() {
     if (!allowed.has(tab)) setTab("Dashboard");
   }, [allowed, tab]);
   const active = data.products.filter((p) => p.status === "ACTIVE");
+  const productCategories = useMemo(
+    () => [
+      ...new Set(
+        data.products.map((p) => (p.category || "").trim()).filter(Boolean),
+      ),
+    ],
+    [data.products],
+  );
+  const expenseCategories = useMemo(
+    () => [
+      ...new Set(
+        data.expenses.map((x) => (x.category || "").trim()).filter(Boolean),
+      ),
+    ],
+    [data.expenses],
+  );
   const low = active.filter(
     (p) =>
       p.trackInventory &&
@@ -551,6 +567,7 @@ export default function RetailWorkspace() {
           item={editing}
           currency={businessCurrency}
           canFinance={context.owner || context.canFinance}
+          categories={productCategories}
           onClose={() => setModal(null)}
           onSave={async (d) => {
             editing
@@ -564,6 +581,7 @@ export default function RetailWorkspace() {
       {modal === "expense" && (
         <ExpenseModal
           item={editing}
+          categories={expenseCategories}
           onClose={() => setModal(null)}
           onSave={async (d) => {
             editing ? await updateExpense(editing.id, d) : await addExpense(d);
