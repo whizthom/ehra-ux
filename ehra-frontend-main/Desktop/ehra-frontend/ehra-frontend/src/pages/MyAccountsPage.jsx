@@ -873,7 +873,7 @@ export default function MyAccountsPage() {
               <button
                 type="button"
                 className={dash.sbLogoutBtn}
-                onClick={logout}
+                onClick={() => setShowLogoutConfirm(true)}
                 aria-label="Log out"
                 title="Log out"
               >
