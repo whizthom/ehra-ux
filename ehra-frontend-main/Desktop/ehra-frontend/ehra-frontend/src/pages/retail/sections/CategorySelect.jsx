@@ -78,12 +78,15 @@ function CategorySelect({
   useEffect(() => {
     if (!open) return;
     place();
-    const close = () => setOpen(false);
+    const reposition = () => place();
     const onKey = (e) => {
       if (e.key === "Escape") setOpen(false);
     };
-    window.addEventListener("resize", close);
-    window.addEventListener("scroll", close, true);
+    // Scrolling or resizing (e.g. a mobile keyboard opening when the search
+    // input focuses) should move the panel with its field, not dismiss it -
+    // only an explicit outside click or Escape should close it.
+    window.addEventListener("resize", reposition);
+    window.addEventListener("scroll", reposition, true);
     document.addEventListener("keydown", onKey);
     const onClick = (e) => {
       if (
@@ -94,10 +97,14 @@ function CategorySelect({
       setOpen(false);
     };
     document.addEventListener("mousedown", onClick);
-    setTimeout(() => inputRef.current?.focus(), 0);
+    const focusTimer = setTimeout(
+      () => inputRef.current?.focus({ preventScroll: true }),
+      0,
+    );
     return () => {
-      window.removeEventListener("resize", close);
-      window.removeEventListener("scroll", close, true);
+      clearTimeout(focusTimer);
+      window.removeEventListener("resize", reposition);
+      window.removeEventListener("scroll", reposition, true);
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("mousedown", onClick);
     };
