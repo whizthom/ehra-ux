@@ -20,6 +20,7 @@ import useConversations from "../hooks/useConversations";
 import useCustomerInboxBadge from "../hooks/useCustomerInboxBadge";
 import MessagingHub from "../components/messaging/MessagingHub";
 import NotificationToastStack from "../components/notifications/NotificationToastStack";
+import BusinessCard from "../components/BusinessCard";
 import styles from "./CustomerDashboard.module.css";
 
 // Matches Ehral\'s employer/employee mobile navigation behavior.
@@ -403,64 +404,56 @@ function ReceiptView({ order, onClose, onDownload }) {
   );
 }
 
-function BusinessCard({ business, onVisit, onChat, detailed }) {
+// A business the customer is already connected to (home strip + "Your
+// businesses"). Same card as Discover - only the content differs.
+function ConnectedBusinessCard({ business, onVisit, onChat, detailed }) {
+  const storeDown = business.storefrontActive === false;
+  const orders = Number(business.ordersCount || 0);
   return (
-    <article className={styles.businessCard}>
-      <div className={styles.businessIdentity}>
-        <div className={styles.businessLogo}>
-          {business.businessLogo ? (
-            <img src={business.businessLogo} alt="" />
-          ) : (
-            initials(business.businessName)
-          )}
-        </div>
-        <div className={styles.businessNameBlock}>
-          <strong>{business.businessName}</strong>
-          <small>
-            {business.ordersCount} order{business.ordersCount === 1 ? "" : "s"}{" "}
-            · {money(business.currency, business.totalSpent)} spent
-          </small>
-        </div>
-        <span
-          className={`${styles.connectedBadge} ${business.storefrontActive === false ? styles.connectedBadgeMuted : ""}`}
-        >
-          <i
-            className={
-              business.storefrontActive === false
-                ? "ti ti-info-circle"
-                : "ti ti-circle-check-filled"
-            }
-          />{" "}
-          {business.storefrontActive === false
-            ? "Connected · Store unavailable"
-            : "Connected"}
-        </span>
-      </div>
-      {detailed && (
-        <div className={styles.businessMeta}>
-          <span>
-            <i className="ti ti-user-check" /> Customer relationship
-          </span>
-          <span>
-            <i className="ti ti-shield-check" /> Protected by Ehral
-          </span>
-        </div>
-      )}
-      <div className={styles.cardActions}>
-        <button
-          onClick={() => onVisit(business)}
-          disabled={!business.businessId}
-        >
-          View business <i className="ti ti-arrow-up-right" />
-        </button>
-        <button
-          className={styles.secondaryAction}
-          onClick={() => onChat(business)}
-        >
-          Message <i className="ti ti-message-circle" />
-        </button>
-      </div>
-    </article>
+    <BusinessCard
+      linked
+      name={business.businessName}
+      logo={business.businessLogo}
+      subtitle={
+        business.businessTypeLabel || business.businessType || "Ehral business"
+      }
+      badge={{ label: "Connected", icon: "ti-circle-check-filled" }}
+      stats={[
+        { label: orders === 1 ? "Order" : "Orders", value: orders },
+        {
+          label: "Spent",
+          value: money(business.currency, business.totalSpent),
+        },
+      ]}
+      facts={
+        detailed
+          ? [
+              storeDown && {
+                icon: "ti-info-circle",
+                label: "Store unavailable",
+              },
+              { icon: "ti-shield-check", label: "Protected by Ehral" },
+            ].filter(Boolean)
+          : undefined
+      }
+      actions={[
+        {
+          key: "view",
+          label: "View business",
+          icon: "ti-arrow-up-right",
+          variant: "primary",
+          disabled: !business.businessId,
+          onClick: () => onVisit(business),
+        },
+        {
+          key: "chat",
+          label: "Message",
+          icon: "ti-message-circle",
+          variant: "soft",
+          onClick: () => onChat(business),
+        },
+      ]}
+    />
   );
 }
 
@@ -525,109 +518,64 @@ function OrderList({ orders, onReceipt }) {
   );
 }
 
-// Frosted-glass card for the Discover tab. The pointer position is written to
-// two CSS variables so a soft highlight follows the cursor across the glass;
-// touch screens simply don't get that highlight.
+// A business on the Discover tab. One tap on the first button flips the link:
+// Connect <-> Disconnect.
 function DiscoveryCard({ business, phase, onView, onToggle }) {
   const connected = Boolean(business.connected);
-  const busy = Boolean(phase);
   const name = business.businessName || "this business";
-  const typeLine = [
-    business.businessTypeLabel || business.businessType || "Ehral business",
-    business.businessCategory,
-  ]
-    .filter(Boolean)
-    .join(" · ");
-
-  const trackLight = (e) => {
-    if (e.pointerType === "touch") return;
-    const box = e.currentTarget.getBoundingClientRect();
-    e.currentTarget.style.setProperty("--mx", `${e.clientX - box.left}px`);
-    e.currentTarget.style.setProperty("--my", `${e.clientY - box.top}px`);
-  };
-
   return (
-    <article
-      className={`${styles.glassCard} ${connected ? styles.glassCardLinked : ""}`}
-      onPointerMove={trackLight}
-    >
-      <header className={styles.glassHead}>
-        <div className={styles.glassLogo}>
-          {business.businessLogo ? (
-            <img src={business.businessLogo} alt="" />
-          ) : (
-            initials(business.businessName)
-          )}
-        </div>
-        <div className={styles.glassTitle}>
-          <h3>{business.businessName}</h3>
-          <p>{typeLine}</p>
-        </div>
-        {connected && (
-          <span className={styles.glassStatus}>
-            <i className="ti ti-circle-check-filled" aria-hidden="true" />
-            Connected
-          </span>
-        )}
-      </header>
-
-      {business.description && (
-        <p className={styles.glassDescription}>{business.description}</p>
-      )}
-
-      {(business.address || business.storefrontActive) && (
-        <ul className={styles.glassFacts}>
-          {business.address && (
-            <li>
-              <i className="ti ti-map-pin" aria-hidden="true" />
-              <span>{business.address}</span>
-            </li>
-          )}
-          {business.storefrontActive && (
-            <li className={styles.glassFactStore}>
-              <i className="ti ti-building-store" aria-hidden="true" />
-              <span>Store available</span>
-            </li>
-          )}
-        </ul>
-      )}
-
-      <div className={styles.glassActions}>
-        <button
-          type="button"
-          className={connected ? styles.glassLeave : styles.glassJoin}
-          onClick={() => onToggle(business)}
-          disabled={busy}
-          aria-label={
-            connected ? `Disconnect from ${name}` : `Connect to ${name}`
-          }
-        >
-          {busy ? (
-            <span className={styles.glassSpinner} aria-hidden="true" />
-          ) : (
-            <i
-              className={connected ? "ti ti-user-minus" : "ti ti-user-plus"}
-              aria-hidden="true"
-            />
-          )}
-          {phase === "connecting"
-            ? "Connecting…"
-            : phase === "disconnecting"
-              ? "Disconnecting…"
-              : connected
-                ? "Disconnect"
-                : "Connect"}
-        </button>
-        <button
-          type="button"
-          className={styles.glassView}
-          onClick={() => onView(business)}
-        >
-          View business{" "}
-          <i className="ti ti-arrow-up-right" aria-hidden="true" />
-        </button>
-      </div>
-    </article>
+    <BusinessCard
+      linked={connected}
+      name={business.businessName}
+      logo={business.businessLogo}
+      subtitle={[
+        business.businessTypeLabel || business.businessType || "Ehral business",
+        business.businessCategory,
+      ]
+        .filter(Boolean)
+        .join(" · ")}
+      badge={
+        connected
+          ? { label: "Connected", icon: "ti-circle-check-filled" }
+          : undefined
+      }
+      description={business.description}
+      facts={[
+        business.address && { icon: "ti-map-pin", label: business.address },
+        business.storefrontActive && {
+          icon: "ti-building-store",
+          label: "Store available",
+          accent: true,
+        },
+      ].filter(Boolean)}
+      actions={[
+        {
+          key: "toggle",
+          variant: connected ? "outline" : "primary",
+          icon: connected ? "ti-user-minus" : "ti-user-plus",
+          busy: Boolean(phase),
+          ariaLabel: connected
+            ? `Disconnect from ${name}`
+            : `Connect to ${name}`,
+          label:
+            phase === "connecting"
+              ? "Connecting…"
+              : phase === "disconnecting"
+                ? "Disconnecting…"
+                : connected
+                  ? "Disconnect"
+                  : "Connect",
+          onClick: () => onToggle(business),
+        },
+        {
+          key: "view",
+          variant: "soft",
+          icon: "ti-arrow-up-right",
+          label: "View business",
+          onClick: () => onView(business),
+        },
+      ]}
+    />
   );
 }
 
@@ -1237,7 +1185,7 @@ export default function CustomerDashboard() {
               {businesses.length ? (
                 <div className={styles.businessGrid}>
                   {businesses.slice(0, 4).map((b) => (
-                    <BusinessCard
+                    <ConnectedBusinessCard
                       key={b.membershipId}
                       business={b}
                       onVisit={visitBusiness}
@@ -1385,22 +1333,20 @@ export default function CustomerDashboard() {
                 <span /> Finding businesses on Ehral…
               </div>
             ) : discovery.length ? (
-              <div className={styles.glassStage}>
-                <div className={`${styles.businessGrid} ${styles.glassGrid}`}>
-                  {discovery.map((b) => (
-                    <DiscoveryCard
-                      key={b.businessId}
-                      business={b}
-                      phase={phaseOf(b.businessId)}
-                      onToggle={toggleConnection}
-                      onView={(business) =>
-                        nav(`/customer/business/${business.businessId}`, {
-                          state: { fromTab: tab },
-                        })
-                      }
-                    />
-                  ))}
-                </div>
+              <div className={styles.businessGrid}>
+                {discovery.map((b) => (
+                  <DiscoveryCard
+                    key={b.businessId}
+                    business={b}
+                    phase={phaseOf(b.businessId)}
+                    onToggle={toggleConnection}
+                    onView={(business) =>
+                      nav(`/customer/business/${business.businessId}`, {
+                        state: { fromTab: tab },
+                      })
+                    }
+                  />
+                ))}
               </div>
             ) : (
               <div className={styles.emptyState}>
@@ -1424,7 +1370,7 @@ export default function CustomerDashboard() {
             </div>
             <div className={styles.businessGrid}>
               {businesses.map((b) => (
-                <BusinessCard
+                <ConnectedBusinessCard
                   key={b.membershipId}
                   business={b}
                   onVisit={visitBusiness}
