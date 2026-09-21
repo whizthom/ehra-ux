@@ -1063,7 +1063,7 @@ export default function CustomerStore() {
         </div>
 
         <footer className={styles.footer}>
-          <Logo size={100} variant="horizontal" tone="brand" title="Ehral" />
+          <Logo size={56} variant="horizontal" tone="brand" title="Ehral" />
           <p>
             <i className="ti ti-shield-check" aria-hidden="true" /> Secure
             ordering through your Ehral account. Your orders, receipts and

@@ -103,16 +103,9 @@
     max-width: 46vw;
 }
 
-.topBrand,
 .topName {
     grid-area: 1 / 1;
     transition: opacity 0.3s ease, transform 0.3s var(--bv-ease);
-}
-
-.topBrandHidden {
-    opacity: 0;
-    transform: translateY(-8px);
-    pointer-events: none;
 }
 
 .topName {
@@ -258,23 +251,24 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 18px;
+    gap: 14px;
 }
 
+/* Moderately small on every screen: 56px on phones up to 68px on desktop. */
 .logo {
     position: relative;
-    width: clamp(88px, 18vw, 132px);
+    width: clamp(56px, 8vw, 68px);
     aspect-ratio: 1;
-    border-radius: 30%;
+    border-radius: 28%;
     display: grid;
     place-items: center;
     background: var(--bv-accent-soft);
     border: 1px solid var(--bv-line);
     color: var(--bv-accent);
-    font-size: clamp(30px, 6vw, 44px);
+    font-size: clamp(20px, 3.4vw, 24px);
     font-weight: 800;
     letter-spacing: -0.02em;
-    box-shadow: 0 24px 50px -22px color-mix(in srgb, var(--bv-accent) 55%, transparent);
+    box-shadow: 0 14px 28px -16px color-mix(in srgb, var(--bv-accent) 55%, transparent);
 }
 
 .logo img {
@@ -286,16 +280,16 @@
 
 .logoCheck {
     position: absolute;
-    right: -8px;
-    bottom: -8px;
+    right: -6px;
+    bottom: -6px;
     display: grid;
     place-items: center;
-    width: 32px;
-    height: 32px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     background: var(--bv-bg);
     color: var(--bv-accent);
-    font-size: 30px;
+    font-size: 21px;
     line-height: 1;
 }
 

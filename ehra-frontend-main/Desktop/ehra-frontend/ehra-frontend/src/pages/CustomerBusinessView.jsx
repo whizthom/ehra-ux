@@ -279,11 +279,6 @@ export default function CustomerBusinessView() {
         </button>
         <div className={styles.topCenter}>
           <span
-            className={`${styles.topBrand} ${scrolled ? styles.topBrandHidden : ""}`}
-          >
-            <Logo size={92} variant="horizontal" tone="brand" title="Ehral" />
-          </span>
-          <span
             className={`${styles.topName} ${scrolled ? styles.topNameShown : ""}`}
           >
             {business.businessName}
@@ -609,7 +604,7 @@ export default function CustomerBusinessView() {
             </div>
           )}
           <div className={styles.trust}>
-            <Logo size={104} variant="horizontal" tone="brand" title="Ehral" />
+            <Logo size={56} variant="horizontal" tone="brand" title="Ehral" />
             <p>
               <i className="ti ti-shield-check" aria-hidden="true" /> Your
               orders, receipts and conversations with this business stay
