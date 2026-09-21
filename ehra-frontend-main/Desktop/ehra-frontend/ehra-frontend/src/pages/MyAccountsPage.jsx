@@ -945,7 +945,7 @@ export default function MyAccountsPage() {
 
       {/* ── Main ── */}
       <div className={dash.main}>
-        <div className={dash.topbar}>
+        <div className={`${dash.topbar} ${styles.clearTopbar}`}>
           <div>
             <h1 className={dash.topbarTitle}>
               <span className={dash.topbarTitleFull}>My Accounts</span>

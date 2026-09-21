@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "./Logo";
 import MobileNavHub from "./MobileNavHub";
@@ -52,6 +53,15 @@ export default function CustomerShell({
 }) {
   const nav = useNavigate();
   const initials = initialsOf(firstName, lastName);
+  const scrollerRef = useRef(null);
+
+  // Content scrolls inside the shell (below the top bar), not the document -
+  // the same app-locked layout the employer / employee dashboards use, which
+  // is what keeps the bottom navigation pinned on phones. So a new tab must
+  // reset THIS scroller (there is no window scroll to reset any more).
+  useEffect(() => {
+    scrollerRef.current?.scrollTo?.({ top: 0 });
+  }, [tab]);
 
   return (
     <div className={styles.shell}>
@@ -126,8 +136,10 @@ export default function CustomerShell({
 
         {banner}
 
-        <div className={`${styles.content} ${contentClassName}`}>
-          {children}
+        <div className={styles.scroller} ref={scrollerRef}>
+          <div className={`${styles.content} ${contentClassName}`}>
+            {children}
+          </div>
         </div>
       </main>
 

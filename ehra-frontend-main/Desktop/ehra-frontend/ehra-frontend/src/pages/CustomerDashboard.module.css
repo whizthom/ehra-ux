@@ -4664,3 +4664,57 @@
     background: var(--bg-page);
   }
 }
+
+/* ==========================================================================
+   APP-LOCKED SHELL  (same technique as the employer / employee dashboards)
+   --------------------------------------------------------------------------
+   The shell is exactly one viewport tall and never scrolls itself; only the
+   content area below the top bar scrolls. Two things follow:
+     - the fixed bottom navigation stays pinned on phones instead of sliding
+       as the browser's toolbar shows and hides;
+     - the top bar is a normal flex row ABOVE the scroller, so it can be fully
+       transparent - content never passes underneath it.
+   ========================================================================== */
+
+.shell {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.shell .main {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Transparent: it takes the background of whichever page it's on. */
+.shell .topbar {
+  position: relative;
+  flex-shrink: 0;
+  background: transparent;
+  border-bottom: 0;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.scroller {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* The bottom navigation floats over the bottom of the scroller (like the
+   employer bar), so the shell no longer reserves room for it - the content's
+   own bottom padding keeps the last items clear of it. */
+@media (max-width: 900px) {
+  .shell .main {
+    padding-bottom: 0;
+  }
+}

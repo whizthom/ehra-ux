@@ -19,6 +19,10 @@
     display: flex;
     flex-direction: column;
     gap: clamp(20px, 3vw, 30px);
+    /* width:100% matters inside the employer / employee shell, whose content
+     area is itself a flex column: without it, "margin: 0 auto" would shrink
+     this to its content width instead of filling up to max-width. */
+    width: 100%;
     max-width: 1080px;
     margin: 0 auto;
     min-width: 0;
@@ -27,7 +31,11 @@
 /* Soft brand glow behind the header - part of the page, not a panel. */
 .aura {
     position: absolute;
-    inset: -36px -24px auto -24px;
+    /* Stays exactly inside the page's own width. (It used to bleed 24px out on
+     each side, which on a phone made the whole page a few pixels wider than the
+     screen - so it could be panned sideways and the fixed bottom bar looked
+     like it was sliding with it.) */
+    inset: -36px 0 auto 0;
     height: 320px;
     z-index: -1;
     pointer-events: none;
@@ -126,9 +134,7 @@
     padding: 11px 16px;
     border: 1px solid var(--ma-line);
     border-radius: 18px;
-    background: color-mix(in srgb, var(--bg-surface) 72%, transparent);
-    -webkit-backdrop-filter: blur(14px) saturate(1.4);
-    backdrop-filter: blur(14px) saturate(1.4);
+    background: color-mix(in srgb, var(--bg-surface) 78%, transparent);
     box-shadow: 0 12px 28px -20px rgba(15, 110, 86, 0.5);
 }
 
@@ -1013,4 +1019,13 @@
     .tile {
         transition: none;
     }
+}
+
+/* The employer / employee shell's own top bar, made transparent on this page
+   so it wears the page background exactly like the customer version does. */
+.clearTopbar.clearTopbar {
+    background: transparent;
+    border-bottom-color: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
 }
