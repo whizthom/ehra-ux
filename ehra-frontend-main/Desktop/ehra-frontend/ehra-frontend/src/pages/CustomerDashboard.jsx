@@ -610,7 +610,6 @@ export default function CustomerDashboard() {
   const [profileForm, setProfileForm] = useState(null);
   const [editingProfile, setEditingProfile] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
-  const [showAccountLogoutConfirm, setShowAccountLogoutConfirm] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -915,8 +914,30 @@ export default function CustomerDashboard() {
 
   const handleProfileImageChange = (url) => {
     if (!url) return;
-    setData((current) => (current ? { ...current, profileImage: url } : current));
-    setProfileForm((current) => (current ? { ...current, profileImage: url, profilePictureUrl: url } : current));
+    setData((current) =>
+      current ? { ...current, profileImage: url } : current,
+    );
+    setProfileForm((current) =>
+      current
+        ? { ...current, profileImage: url, profilePictureUrl: url }
+        : current,
+    );
+  };
+
+  const [showAccountLogoutConfirm, setShowAccountLogoutConfirm] =
+    useState(false);
+  const [accountLogoutLoading, setAccountLogoutLoading] = useState(false);
+
+  const confirmAccountSignOut = async () => {
+    setAccountLogoutLoading(true);
+    try {
+      await contextLogout();
+      nav("/login", { replace: true });
+    } catch (e) {
+      setNotice("We could not sign you out cleanly. Please try again.");
+      setAccountLogoutLoading(false);
+      setShowAccountLogoutConfirm(false);
+    }
   };
 
   const signOut = async () => {
@@ -926,11 +947,6 @@ export default function CustomerDashboard() {
     } catch (e) {
       setNotice("We could not sign you out cleanly. Please try again.");
     }
-  };
-
-  const confirmAccountSignOut = async () => {
-    setShowAccountLogoutConfirm(false);
-    await signOut();
   };
 
   if (loading && !data) {
@@ -955,7 +971,11 @@ export default function CustomerDashboard() {
         onNavigate={changeTab}
         firstName={data?.firstName}
         lastName={data?.lastName}
-        profileImage={data?.profileImage || profileForm?.profileImage || profileForm?.profilePictureUrl}
+        profileImage={
+          data?.profileImage ||
+          profileForm?.profileImage ||
+          profileForm?.profilePictureUrl
+        }
         onProfileImageChange={handleProfileImageChange}
         unread={unread}
         onSignOut={signOut}
@@ -1666,19 +1686,33 @@ export default function CustomerDashboard() {
                 <button
                   type="button"
                   className={styles.acAvatar}
-                  onClick={() => document.getElementById("customer-account-photo-input")?.click()}
+                  onClick={() =>
+                    document
+                      .getElementById("customer-account-photo-input")
+                      ?.click()
+                  }
                   aria-label="Upload profile picture"
                   title="Upload profile picture"
                 >
-                  {profileForm?.profileImage || profileForm?.profilePictureUrl || data?.profileImage ? (
+                  {profileForm?.profileImage ||
+                  profileForm?.profilePictureUrl ||
+                  data?.profileImage ? (
                     <img
-                      src={profileForm?.profileImage || profileForm?.profilePictureUrl || data?.profileImage}
+                      src={
+                        profileForm?.profileImage ||
+                        profileForm?.profilePictureUrl ||
+                        data?.profileImage
+                      }
                       alt=""
                     />
                   ) : (
-                    initials(`${profileForm?.firstName || data?.firstName || ""} ${profileForm?.lastName || data?.lastName || ""}`)
+                    initials(
+                      `${profileForm?.firstName || data?.firstName || ""} ${profileForm?.lastName || data?.lastName || ""}`,
+                    )
                   )}
-                  <span className={styles.acAvatarCamera}><i className="ti ti-camera" /></span>
+                  <span className={styles.acAvatarCamera}>
+                    <i className="ti ti-camera" />
+                  </span>
                 </button>
                 <input
                   id="customer-account-photo-input"
@@ -1690,10 +1724,14 @@ export default function CustomerDashboard() {
                     e.target.value = "";
                     if (!file) return;
                     try {
-                      const { data: result } = await uploadCustomerProfilePicture(file);
+                      const { data: result } =
+                        await uploadCustomerProfilePicture(file);
                       handleProfileImageChange(result?.url);
                     } catch (err) {
-                      setNotice(err?.response?.data?.message || "We could not upload your profile picture.");
+                      setNotice(
+                        err?.response?.data?.message ||
+                          "We could not upload your profile picture.",
+                      );
                     }
                   }}
                 />
@@ -1739,7 +1777,8 @@ export default function CustomerDashboard() {
                   onClick={() => nav("/customer-dashboard?tab=spending")}
                   className={styles.acGhost}
                 >
-                  <i className="ti ti-chart-donut" aria-hidden="true" /> View spending
+                  <i className="ti ti-chart-donut" aria-hidden="true" /> View
+                  spending
                 </button>
               </div>
             </header>
@@ -1756,12 +1795,19 @@ export default function CustomerDashboard() {
                 <div className={styles.acPhotoField}>
                   <div>
                     <span className={styles.acFieldLabel}>Profile picture</span>
-                    <small>Use a clear photo. It will appear wherever your customer profile is shown.</small>
+                    <small>
+                      Use a clear photo. It will appear wherever your customer
+                      profile is shown.
+                    </small>
                   </div>
                   <button
                     type="button"
                     className={styles.acPhotoButton}
-                    onClick={() => document.getElementById("customer-account-photo-input")?.click()}
+                    onClick={() =>
+                      document
+                        .getElementById("customer-account-photo-input")
+                        ?.click()
+                    }
                   >
                     <i className="ti ti-camera" aria-hidden="true" />
                     Change picture
@@ -1944,7 +1990,11 @@ export default function CustomerDashboard() {
                   stay connected while each business keeps control of its own
                   products and operations.
                 </p>
-                <button onClick={() => setShowAccountLogoutConfirm(true)} className={styles.acSignOut}>
+                <button
+                  type="button"
+                  onClick={() => setShowAccountLogoutConfirm(true)}
+                  className={styles.acSignOut}
+                >
                   <i className="ti ti-logout-2" aria-hidden="true" /> Sign out
                   of Ehral
                 </button>
@@ -1961,6 +2011,15 @@ export default function CustomerDashboard() {
           onDownload={downloadReceipt}
         />
       )}
+      <LogoutConfirmModal
+        open={showAccountLogoutConfirm}
+        onCancel={() =>
+          !accountLogoutLoading && setShowAccountLogoutConfirm(false)
+        }
+        onConfirm={confirmAccountSignOut}
+        loading={accountLogoutLoading}
+      />
+
       <NotificationToastStack
         channel="CUSTOMER"
         activeConversationId={
@@ -1970,11 +2029,6 @@ export default function CustomerDashboard() {
           setMessagesDeepLink({ conversationId, messageId });
           setTab("messages");
         }}
-      />
-      <LogoutConfirmModal
-        open={showAccountLogoutConfirm}
-        onCancel={() => setShowAccountLogoutConfirm(false)}
-        onConfirm={confirmAccountSignOut}
       />
     </>
   );
