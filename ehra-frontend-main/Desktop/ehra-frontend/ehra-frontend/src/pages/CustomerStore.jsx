@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Logo from "../components/Logo";
+import BrandSplash from "../components/BrandSplash";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
 import {
   connectCustomerToBusinessId,
@@ -610,26 +611,13 @@ export default function CustomerStore() {
 
   // ── States ───────────────────────────────────────────────────────────
   if (loading && !view) {
-    return (
-      <div className={styles.app}>
-        <div className={styles.splash}>
-          <Logo size={126} variant="horizontal" tone="brand" title="Ehral" />
-          <div className={styles.skeletonRow} aria-hidden="true">
-            {[0, 1, 2, 3].map((n) => (
-              <span key={n} />
-            ))}
-          </div>
-          <p>Opening store…</p>
-        </div>
-      </div>
-    );
+    return <BrandSplash message="Opening store…" />;
   }
 
   if (!business || !storefront) {
     return (
       <div className={styles.app}>
-        <div className={styles.splash}>
-          <Logo size={126} variant="horizontal" tone="brand" title="Ehral" />
+        <BrandSplash busy={false}>
           <i
             className={`ti ti-building-store ${styles.splashIcon}`}
             aria-hidden="true"
@@ -648,7 +636,7 @@ export default function CustomerStore() {
           >
             {business ? "View business profile" : "Back to Discover"}
           </button>
-        </div>
+        </BrandSplash>
       </div>
     );
   }

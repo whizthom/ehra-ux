@@ -21,6 +21,7 @@ import useCustomerInboxBadge from "../hooks/useCustomerInboxBadge";
 import MessagingHub from "../components/messaging/MessagingHub";
 import NotificationToastStack from "../components/notifications/NotificationToastStack";
 import BusinessCard from "../components/BusinessCard";
+import BrandSplash from "../components/BrandSplash";
 import styles from "./CustomerDashboard.module.css";
 
 // Matches Ehral\'s employer/employee mobile navigation behavior.
@@ -965,14 +966,7 @@ export default function CustomerDashboard() {
   };
 
   if (loading && !data) {
-    return (
-      <div className={styles.loadingScreen}>
-        <div className={styles.loadingBrand}>
-          <Logo size={126} variant="horizontal" tone="brand" title="Ehral" />
-        </div>
-        <span>Preparing your customer hub…</span>
-      </div>
-    );
+    return <BrandSplash message="Preparing your customer hub…" />;
   }
 
   const navItems = CUSTOMER_NAV_ITEMS;

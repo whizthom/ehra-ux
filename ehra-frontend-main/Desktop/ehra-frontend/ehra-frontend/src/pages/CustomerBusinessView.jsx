@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Logo from "../components/Logo";
+import BrandSplash from "../components/BrandSplash";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
 import { getCustomerBusinessView } from "../api/commerceApi";
 import { createCustomerBusinessConversation } from "../api/messagingApi";
@@ -48,11 +49,8 @@ export default function CustomerBusinessView() {
   const { businessId } = useParams();
   const nav = useNavigate();
   const location = useLocation();
-  const {
-    connect: linkBusiness,
-    disconnect: unlinkBusiness,
-    phaseOf,
-  } = useBusinessConnection();
+  const { connect: linkBusiness, disconnect: unlinkBusiness, phaseOf } =
+    useBusinessConnection();
 
   const [view, setView] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -218,23 +216,14 @@ export default function CustomerBusinessView() {
   // ── States ─────────────────────────────────────────────────────────
 
   if (loading && !view) {
-    return (
-      <div className={styles.page}>
-        <div className={styles.splash}>
-          <Logo size={132} variant="horizontal" tone="brand" title="Ehral" />
-          <span className={styles.splashBar} aria-hidden="true" />
-          <p>Opening business…</p>
-        </div>
-      </div>
-    );
+    return <BrandSplash message="Opening business…" />;
   }
 
   if (!business) {
     return (
       <div className={styles.page}>
-        <div className={styles.splash}>
-          <Logo size={132} variant="horizontal" tone="brand" title="Ehral" />
-          <h1 className={styles.splashTitle}>Business unavailable</h1>
+        <BrandSplash busy={false}>
+          <h1>Business unavailable</h1>
           <p>{error || "This business isn't available right now."}</p>
           <button
             className={styles.visit}
@@ -243,7 +232,7 @@ export default function CustomerBusinessView() {
             Back to Discover{" "}
             <i className="ti ti-arrow-right" aria-hidden="true" />
           </button>
-        </div>
+        </BrandSplash>
       </div>
     );
   }
