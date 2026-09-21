@@ -7,6 +7,7 @@ import {
   InventoryHistory,
   Orders,
   Customers,
+  CustomerDetail,
   POS,
   Expenses,
   Suppliers,
@@ -95,6 +96,7 @@ export default function RetailWorkspace() {
   useMessagingConnection();
   const [tab, setTab] = useState("Dashboard");
   const [inventoryHistory, setInventoryHistory] = useState(false);
+  const [viewingCustomerId, setViewingCustomerId] = useState(null);
   const [business, setBusiness] = useState(null),
     [type, setType] = useState(null),
     [context, setContext] = useState(null),
@@ -120,7 +122,8 @@ export default function RetailWorkspace() {
   // from a toast, and which conversation is open (to mute its toast).
   const [messagesThreadOpen, setMessagesThreadOpen] = useState(false);
   const [messagesDeepLink, setMessagesDeepLink] = useState(null);
-  const [activeMessageConversationId, setActiveMessageConversationId] = useState(null);
+  const [activeMessageConversationId, setActiveMessageConversationId] =
+    useState(null);
   const canMessage = Boolean(context && (context.owner || context.canMessages));
   const inbox = useCustomerInboxBadge({ enabled: canMessage });
   const money = (n) =>
@@ -288,13 +291,16 @@ export default function RetailWorkspace() {
               className={tab === n ? s.navActive : ""}
               onClick={() => {
                 setInventoryHistory(false);
+                setViewingCustomerId(null);
                 setTab(n);
               }}
             >
               <b>{i}</b>
               {n}
               {n === "Messages" && inbox.total > 0 && (
-                <em className={s.navBadge}>{inbox.total > 99 ? "99+" : inbox.total}</em>
+                <em className={s.navBadge}>
+                  {inbox.total > 99 ? "99+" : inbox.total}
+                </em>
               )}
             </button>
           ))}
@@ -304,7 +310,12 @@ export default function RetailWorkspace() {
         <header className={s.header}>
           <div className={s.headerTop}>
             <div className={s.headerIdentity}>
-              <Logo size={24} variant="horizontal" tone="default" title="Ehral" />
+              <Logo
+                size={24}
+                variant="horizontal"
+                tone="default"
+                title="Ehral"
+              />
               <span className={s.kicker}>Retail Workspace</span>
               <h1>{tab}</h1>
             </div>
@@ -321,9 +332,13 @@ export default function RetailWorkspace() {
               : `${context.role || "Employee"} access granted by your employer.`}
           </p>
         </header>
-        <div className={`${s.content} ${tab === "Messages" ? s.contentMessages : ""}`}>
+        <div
+          className={`${s.content} ${tab === "Messages" ? s.contentMessages : ""}`}
+        >
           {tab === "Messages" && canMessage && (
-            <div className={`${s.messagesHost} ${messagesThreadOpen ? s.messagesHostThread : ""}`}>
+            <div
+              className={`${s.messagesHost} ${messagesThreadOpen ? s.messagesHostThread : ""}`}
+            >
               <MessagingHub
                 mode="business"
                 onThreadOpenChange={setMessagesThreadOpen}
@@ -407,26 +422,41 @@ export default function RetailWorkspace() {
               canFinance={context.owner || context.canFinance}
             />
           )}{" "}
-          {tab === "Customers" && (
-            <Customers
-              items={filtered(data.customers, ["firstName", "lastName", "phone", "email"])}
-              query={query}
-              setQuery={setQuery}
-              onAdd={() => {
-                setEditing(null);
-                setModal("customer");
-              }}
-              onInvite={() => setModal("inviteCustomer")}
-              onEdit={(x) => {
-                setEditing(x);
-                setModal("customer");
-              }}
-              onDelete={async (id) => {
-                await deleteCustomer(id);
-                runLoad();
-              }}
-            />
-          )}{" "}
+          {tab === "Customers" &&
+            (viewingCustomerId ? (
+              <CustomerDetail
+                membershipId={viewingCustomerId}
+                money={money}
+                businessCurrency={businessCurrency}
+                canFinance={context.owner || context.canFinance}
+                onBack={() => setViewingCustomerId(null)}
+              />
+            ) : (
+              <Customers
+                items={filtered(data.customers, [
+                  "firstName",
+                  "lastName",
+                  "phone",
+                  "email",
+                ])}
+                query={query}
+                setQuery={setQuery}
+                onAdd={() => {
+                  setEditing(null);
+                  setModal("customer");
+                }}
+                onInvite={() => setModal("inviteCustomer")}
+                onEdit={(x) => {
+                  setEditing(x);
+                  setModal("customer");
+                }}
+                onDelete={async (id) => {
+                  await deleteCustomer(id);
+                  runLoad();
+                }}
+                onView={(c) => setViewingCustomerId(c.membershipId)}
+              />
+            ))}{" "}
           {tab === "Sales / POS" && (
             <POS
               products={active}
@@ -590,7 +620,9 @@ export default function RetailWorkspace() {
       {canMessage && (
         <NotificationToastStack
           channel="CUSTOMER"
-          activeConversationId={tab === "Messages" ? activeMessageConversationId : null}
+          activeConversationId={
+            tab === "Messages" ? activeMessageConversationId : null
+          }
           onNavigate={(conversationId, messageId) => {
             setInventoryHistory(false);
             setMobileMore(false);
@@ -679,7 +711,12 @@ export default function RetailWorkspace() {
         >
           <span className={s.mobileNavIcon}>
             <i className="ti ti-dots" aria-hidden="true" />
-            {inbox.total > 0 && <span className={s.mobileNavDot} aria-label="Unread customer messages" />}
+            {inbox.total > 0 && (
+              <span
+                className={s.mobileNavDot}
+                aria-label="Unread customer messages"
+              />
+            )}
           </span>
           <span>More</span>
         </button>
@@ -725,6 +762,7 @@ export default function RetailWorkspace() {
                   }
                   onClick={() => {
                     setInventoryHistory(false);
+                    setViewingCustomerId(null);
                     setTab(name);
                     setMobileMore(false);
                   }}
@@ -734,7 +772,9 @@ export default function RetailWorkspace() {
                   </span>
                   <strong>{name}</strong>
                   {name === "Messages" && inbox.total > 0 && (
-                    <em className={s.navBadgeInline}>{inbox.total > 99 ? "99+" : inbox.total}</em>
+                    <em className={s.navBadgeInline}>
+                      {inbox.total > 99 ? "99+" : inbox.total}
+                    </em>
                   )}
                   <i className="ti ti-chevron-right" aria-hidden="true" />
                 </button>

@@ -1,0 +1,347 @@
+.wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.loadingState {
+    padding: 60px 0;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.topBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.topBarActions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ── Hero ─────────────────────────────────────────────────────────── */
+.hero {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    padding: 22px 24px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--bg-surface), var(--bg-soft-accent));
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 24px var(--shadow-color);
+}
+
+.heroAvatar {
+    width: 68px;
+    height: 68px;
+    border-radius: 20px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    font-size: 26px;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 60%, #102235));
+    overflow: hidden;
+}
+
+.heroAvatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.heroInfo {
+    flex: 1;
+    min-width: 200px;
+}
+
+.heroInfo h2 {
+    margin: 0 0 6px;
+    font-size: 21px;
+    color: var(--text-primary);
+}
+
+.heroMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.heroCoupons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-width: 260px;
+}
+
+.heroCouponPill {
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border-color));
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* ── Stat cards ───────────────────────────────────────────────────── */
+.statGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.statCard {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px 18px;
+    border-radius: 14px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 16px var(--shadow-color);
+}
+
+.statCard span {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+}
+
+.statCard strong {
+    font-size: 22px;
+    color: var(--text-primary);
+}
+
+.statDate {
+    font-size: 16px !important;
+}
+
+.statCard small {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.statAccent {
+    background: linear-gradient(135deg, var(--bg-soft-accent), var(--bg-surface));
+    border-color: color-mix(in srgb, var(--accent) 30%, var(--border-color));
+}
+
+.statAccent strong {
+    color: var(--accent);
+}
+
+/* ── Tabs ─────────────────────────────────────────────────────────── */
+.tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border-color);
+    overflow-x: auto;
+}
+
+.tab,
+.tabActive {
+    background: none;
+    border: none;
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    color: var(--text-secondary);
+    border-bottom: 2px solid transparent;
+}
+
+.tabActive {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+/* ── Overview ─────────────────────────────────────────────────────── */
+.overviewGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+@media (max-width: 860px) {
+    .overviewGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.barList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.barRow {
+    display: grid;
+    grid-template-columns: 84px 1fr 90px;
+    align-items: center;
+    gap: 10px;
+}
+
+.barLabel {
+    font-size: 11px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.barTrack {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--bg-surface-alt);
+    overflow: hidden;
+}
+
+.barFill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 60%, #fff));
+}
+
+.barFillAlt {
+    background: linear-gradient(90deg, var(--warning), color-mix(in srgb, var(--warning) 60%, #fff));
+}
+
+.barValue {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: right;
+}
+
+/* ── Coupons ──────────────────────────────────────────────────────── */
+.couponGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+}
+
+.couponCard {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-surface);
+}
+
+.couponHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.couponCode {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: .04em;
+    color: var(--text-primary);
+}
+
+.couponStatus {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .04em;
+    padding: 4px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+}
+
+.status_ACTIVE {
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+}
+
+.status_REDEEMED {
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+}
+
+.status_EXPIRED,
+.status_REVOKED {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.couponReward {
+    font-size: 16px;
+    color: var(--text-primary);
+}
+
+.couponNote {
+    margin: 2px 0;
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.couponMeta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 10px;
+    color: var(--text-secondary);
+}
+
+.couponActions {
+    display: flex;
+    gap: 10px;
+    margin-top: 6px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 8px;
+}
+
+/* ── Award form ───────────────────────────────────────────────────── */
+.awardForm {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* ── Print ────────────────────────────────────────────────────────── */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    .printRoot,
+    .printRoot * {
+        visibility: visible;
+    }
+
+    .printRoot {
+        position: absolute;
+        inset: 0;
+        padding: 12px;
+    }
+
+    .tabs {
+        display: none;
+    }
+
+    .overviewGrid,
+    .couponGrid {
+        grid-template-columns: 1fr;
+    }
+}

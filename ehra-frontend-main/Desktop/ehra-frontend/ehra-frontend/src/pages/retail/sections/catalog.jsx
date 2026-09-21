@@ -143,6 +143,7 @@ function Customers({
   onInvite,
   onEdit,
   onDelete,
+  onView,
 }) {
   return (
     <>
@@ -190,7 +191,17 @@ function Customers({
       >
         <div className={s.customerGrid}>
           {items.map((c) => (
-            <div className={s.customer} key={c.membershipId}>
+            <div
+              className={s.customer}
+              key={c.membershipId}
+              onClick={() => onView && onView(c)}
+              role={onView ? "button" : undefined}
+              tabIndex={onView ? 0 : undefined}
+              onKeyDown={(e) => {
+                if (onView && (e.key === "Enter" || e.key === " ")) onView(c);
+              }}
+              style={onView ? { cursor: "pointer" } : undefined}
+            >
               <div className={s.avatar}>{(c.firstName || "?").slice(0, 1)}</div>
               <div>
                 <b>
@@ -200,12 +211,21 @@ function Customers({
                 <small>{c.email || "No email"}</small>
               </div>
               <div>
-                <button className={s.textButton} onClick={() => onEdit(c)}>
+                <button
+                  className={s.textButton}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit(c);
+                  }}
+                >
                   Edit
                 </button>
                 <button
                   className={s.textDanger}
-                  onClick={() => onDelete(c.membershipId)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(c.membershipId);
+                  }}
                 >
                   Remove
                 </button>

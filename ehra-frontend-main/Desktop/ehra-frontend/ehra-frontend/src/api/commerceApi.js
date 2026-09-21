@@ -18,6 +18,32 @@ export const createPublicOrder = (slug,data) => API.post(`/public/storefronts/${
 export const uploadProductImage=file=>{const f=new FormData();f.append("file",file);return API.post("/products/images",f,{headers:{"Content-Type":"multipart/form-data"}})}; export const uploadStorefrontCover=file=>{const f=new FormData();f.append("file",file);return API.post("/business/storefront/cover-image",f,{headers:{"Content-Type":"multipart/form-data"}})}; export const createCustomer=d=>API.post("/customers",d); export const updateCustomer=(id,d)=>API.put(`/customers/${id}`,d); export const deleteCustomer=id=>API.delete(`/customers/${id}`);
 export const claimStorefrontCustomer=(slug,phoneVerificationToken)=>API.post(`/public/storefronts/${encodeURIComponent(slug)}/customer/claim`,null,{params:{phoneVerificationToken}});
 
+// ── Customer detail panel: full profile, spend/profit breakdown, orders,
+// loyalty coupons, and CSV/PDF export ──────────────────────────────────
+export const getCustomerDetail = (membershipId) => API.get(`/customers/${membershipId}/detail`);
+
+async function downloadCommerceBlob(url, filename) {
+  const { data } = await API.get(url, { responseType: "blob" });
+  const blobUrl = window.URL.createObjectURL(data);
+  const link = document.createElement("a");
+  link.href = blobUrl;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(blobUrl);
+}
+export const downloadCustomerCsv = (membershipId, customerName) =>
+  downloadCommerceBlob(`/customers/${membershipId}/export.csv`, `${(customerName || "customer").replace(/\s+/g, "-").toLowerCase()}-statement.csv`);
+export const downloadCustomerPdf = (membershipId, customerName) =>
+  downloadCommerceBlob(`/customers/${membershipId}/export.pdf`, `${(customerName || "customer").replace(/\s+/g, "-").toLowerCase()}-statement.pdf`);
+
+// ── Loyalty coupons ──────────────────────────────────────────────────────
+export const getCustomerCoupons = (membershipId) => API.get(`/customers/${membershipId}/coupons`);
+export const awardCustomerCoupon = (membershipId, data) => API.post(`/customers/${membershipId}/coupons`, data);
+export const revokeCustomerCoupon = (membershipId, couponId) => API.delete(`/customers/${membershipId}/coupons/${couponId}`);
+export const redeemCustomerCouponManually = (membershipId, couponId) => API.post(`/customers/${membershipId}/coupons/${couponId}/redeem`);
+
 export const getCustomerOrders = () => API.get("/customer/orders");
 
 export const getCustomerOverview = () => API.get("/customer/overview");
