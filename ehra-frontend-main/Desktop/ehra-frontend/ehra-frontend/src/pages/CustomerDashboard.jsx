@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Logo from "../components/Logo";
-import MobileNavHub from "../components/MobileNavHub";
-import ThemeToggleMenu from "../theme/ThemeToggleMenu";
+import CustomerShell from "../components/CustomerShell";
+import { CUSTOMER_NAV_ITEMS } from "../utils/customerNav";
 import {
   getCustomerOverview,
   getCustomerReceiptPdf,
@@ -67,7 +67,10 @@ const money = (currency, value) =>
   })}`;
 // 1.2K / 3.4M style labels for the little numbers above the spending bars.
 const compactMoney = (value) =>
-  Number(value || 0).toLocaleString(undefined, { notation: "compact", maximumFractionDigits: 1 });
+  Number(value || 0).toLocaleString(undefined, {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  });
 const date = (v) =>
   v
     ? new Date(v).toLocaleDateString(undefined, {
@@ -89,7 +92,20 @@ const initials = (name = "Ehral") =>
     .join("")
     .toUpperCase();
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
 const greetingFor = (d = new Date()) => {
   const h = d.getHours();
@@ -106,8 +122,12 @@ const greetingFor = (d = new Date()) => {
 // in a footnote instead.
 function buildSpending(orders, businesses, data, now = new Date()) {
   const currency = data?.currency;
-  const paid = orders.filter((o) => String(o.paymentStatus || "").toUpperCase() === "PAID");
-  const main = paid.filter((o) => !o.currency || !currency || o.currency === currency);
+  const paid = orders.filter(
+    (o) => String(o.paymentStatus || "").toUpperCase() === "PAID",
+  );
+  const main = paid.filter(
+    (o) => !o.currency || !currency || o.currency === currency,
+  );
   const amountOf = (o) => Number(o.amountPaid) || Number(o.total) || 0;
 
   const months = [];
@@ -125,7 +145,9 @@ function buildSpending(orders, businesses, data, now = new Date()) {
   main.forEach((o) => {
     const d = new Date(o.createdAt);
     if (Number.isNaN(d.getTime())) return;
-    const bucket = months.find((m) => m.key === `${d.getFullYear()}-${d.getMonth()}`);
+    const bucket = months.find(
+      (m) => m.key === `${d.getFullYear()}-${d.getMonth()}`,
+    );
     if (bucket) {
       bucket.value += amountOf(o);
       bucket.count += 1;
@@ -138,7 +160,11 @@ function buildSpending(orders, businesses, data, now = new Date()) {
   const total = Number(data?.totalSpent || 0);
   const ranked = businesses
     .filter((b) => Number(b.totalSpent || 0) > 0)
-    .map((b) => ({ ...b, spent: Number(b.totalSpent || 0), share: total > 0 ? (Number(b.totalSpent || 0) / total) * 100 : 0 }))
+    .map((b) => ({
+      ...b,
+      spent: Number(b.totalSpent || 0),
+      share: total > 0 ? (Number(b.totalSpent || 0) / total) * 100 : 0,
+    }))
     .sort((a, b) => b.spent - a.spent);
 
   return {
@@ -150,7 +176,9 @@ function buildSpending(orders, businesses, data, now = new Date()) {
     largest: main.reduce((n, o) => Math.max(n, amountOf(o)), 0),
     paidCount: paid.length,
     foreignCount: paid.length - main.length,
-    recent: [...paid].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6),
+    recent: [...paid]
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 6),
     ranked,
     top: ranked.slice(0, 5),
     restShare: ranked.slice(5).reduce((n, b) => n + b.share, 0),
@@ -417,7 +445,10 @@ function BusinessCard({ business, onVisit, onChat, detailed }) {
         </div>
       )}
       <div className={styles.cardActions}>
-        <button onClick={() => onVisit(business)} disabled={!business.businessId}>
+        <button
+          onClick={() => onVisit(business)}
+          disabled={!business.businessId}
+        >
           View business <i className="ti ti-arrow-up-right" />
         </button>
         <button
@@ -558,11 +589,13 @@ export default function CustomerDashboard() {
   // engine as everything else (MessagingHub, mode="customer"). This page only
   // keeps the light-weight pieces it needs itself: the conversation summaries
   // (for the home "needs attention" / activity cards) and the unread badge.
-  const { conversations: messages, refresh: loadMessages } = useConversations("CUSTOMER");
+  const { conversations: messages, refresh: loadMessages } =
+    useConversations("CUSTOMER");
   const inbox = useCustomerInboxBadge({ includeAnnouncements: true });
   const [messagesThreadOpen, setMessagesThreadOpen] = useState(false);
   const [messagesDeepLink, setMessagesDeepLink] = useState(null);
-  const [activeMessageConversationId, setActiveMessageConversationId] = useState(null);
+  const [activeMessageConversationId, setActiveMessageConversationId] =
+    useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [query, setQuery] = useState("");
@@ -668,9 +701,13 @@ export default function CustomerDashboard() {
   useEffect(() => {
     const conversationId = searchParams.get("chat");
     if (!conversationId) return;
-    const draft = sessionStorage.getItem(`ehral:pending-chat:${conversationId}`) || "";
+    const draft =
+      sessionStorage.getItem(`ehral:pending-chat:${conversationId}`) || "";
     sessionStorage.removeItem(`ehral:pending-chat:${conversationId}`);
-    setMessagesDeepLink({ conversationId: Number(conversationId), draft: draft || undefined });
+    setMessagesDeepLink({
+      conversationId: Number(conversationId),
+      draft: draft || undefined,
+    });
     setTab("messages");
     setSearchParams({}, { replace: true });
   }, [searchParams, setSearchParams]);
@@ -705,9 +742,14 @@ export default function CustomerDashboard() {
     [orders, businesses, data],
   );
   const inProgressCount = orders.filter((o) =>
-    ["PENDING", "PROCESSING", "CONFIRMED", "READY", "READY_FOR_PICKUP", "OUT_FOR_DELIVERY"].includes(
-      String(o.status || "").toUpperCase(),
-    ),
+    [
+      "PENDING",
+      "PROCESSING",
+      "CONFIRMED",
+      "READY",
+      "READY_FOR_PICKUP",
+      "OUT_FOR_DELIVERY",
+    ].includes(String(o.status || "").toUpperCase()),
   ).length;
 
   const attentionItems = useMemo(() => {
@@ -810,7 +852,10 @@ export default function CustomerDashboard() {
   const visitBusiness = (business) => {
     // Remember which tab this was opened from, so the profile's back arrow can
     // return to exactly here.
-    if (business?.businessId) nav(`/customer/business/${business.businessId}`, { state: { fromTab: tab } });
+    if (business?.businessId)
+      nav(`/customer/business/${business.businessId}`, {
+        state: { fromTab: tab },
+      });
     else setNotice("This business could not be opened.");
   };
 
@@ -885,867 +930,994 @@ export default function CustomerDashboard() {
     );
   }
 
-  const navItems = [
-    ["home", "Dashboard", "layout-dashboard"],
-    ["discover", "Discover", "compass"],
-    ["businesses", "My businesses", "building-store"],
-    ["orders", "Orders", "shopping-bag"],
-    ["receipts", "Receipts", "receipt"],
-    ["messages", "Messages", "messages"],
-    ["spending", "Spending", "chart-donut"],
-    ["account", "Account", "user-circle"],
-  ];
+  const navItems = CUSTOMER_NAV_ITEMS;
   const title = navItems.find((x) => x[0] === tab)?.[1] || "Dashboard";
 
   return (
-    <div className={styles.shell}>
-      <aside className={styles.sidebar}>
-        <div className={styles.brand}>
-          <Logo size={62} variant="horizontal" tone="sidebar" title="Ehral" />
-        </div>
-        <div className={styles.profileMini}>
-          <div className={styles.profileAvatar}>
-            {initials(`${data?.firstName || ""} ${data?.lastName || ""}`)}
-          </div>
-          <div>
-            <strong>{data?.firstName || "Customer"}</strong>
-            <small>Customer account</small>
-          </div>
-        </div>
-        <nav>
-          {navItems.map(([id, label, icon]) => (
-            <button
-              key={id}
-              className={tab === id ? styles.navActive : ""}
-              onClick={() => changeTab(id)}
-            >
-              <i className={`ti ti-${icon}`} />
-              <span>{label}</span>
-              {id === "messages" && unread > 0 && (
-                <em>{unread > 9 ? "9+" : unread}</em>
-              )}
-            </button>
-          ))}
-        </nav>
-        <div className={styles.sidebarBottom}>
-          <button onClick={() => changeTab("account")}>
-            <i className="ti ti-settings" /> Account settings
-          </button>
-          <button onClick={signOut}>
-            <i className="ti ti-logout-2" /> Sign out
-          </button>
-        </div>
-      </aside>
-
-      <main className={styles.main}>
-        <header className={styles.topbar}>
-          <button
-            className={styles.mobileBrand}
-            onClick={() => changeTab("home")}
-          >
-            <Logo size={48} variant="horizontal" tone="brand" title="Ehral" />
-          </button>
-          <div className={styles.topTitle}>
-            <span>MY EHRAL</span>
-            <h1>{title}</h1>
-          </div>
-          <div className={styles.topActions}>
-            <label className={styles.searchButton}>
-              <i className="ti ti-search" />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search orders…"
-                aria-label="Search orders"
-              />
-              {query && (
-                <button
-                  type="button"
-                  onClick={() => setQuery("")}
-                  aria-label="Clear search"
-                >
-                  <i className="ti ti-x" />
-                </button>
-              )}
-            </label>
-            {/* Light/dark switch — same self-contained component as the
-                employer dashboard (src/theme/ThemeToggleMenu.jsx), so
-                switching themes here behaves identically everywhere. */}
-            <ThemeToggleMenu />
-            <button
-              className={styles.avatarButton}
-              onClick={() => changeTab("account")}
-              aria-label="Open account"
-            >
-              {initials(`${data?.firstName || ""} ${data?.lastName || ""}`)}
-            </button>
-          </div>
-        </header>
-
-        <Toast message={notice} onClose={() => setNotice("")} />
-
-        <div className={`${styles.content} ${tab === "messages" ? styles.contentMessages : ""}`}>
-          {tab === "home" && (
-            <>
-              <section className={styles.ghHero} aria-label="Your personal commerce hub">
-                <div className={styles.ghCopy}>
-                  <h2>
-                    {greetingFor()}, <em>{data?.firstName || "there"}</em>.
-                  </h2>
-                  <p>
-                    One Ehral account for your stores, orders, receipts, conversations and spending history.
-                  </p>
-                  <div className={styles.ghActions}>
-                    <button onClick={() => changeTab("discover")} className={styles.ghPrimary}>
-                      Discover businesses <i className="ti ti-arrow-up-right" aria-hidden="true" />
-                    </button>
-                    <button onClick={() => changeTab("messages")} className={styles.ghGlassBtn}>
-                      <i className="ti ti-message-circle" aria-hidden="true" /> Messages
-                      {unread > 0 && <span className={styles.ghBadge}>{unread}</span>}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Live numbers - desktop/tablet only; on phones the stats row and
-                    "Needs your attention" just below already say the same. */}
-                <div className={styles.ghChips}>
-                  <button
-                    className={styles.ghChip}
-                    onClick={() => changeTab("businesses")}
-                    aria-label={`${businesses.length} connected businesses`}
-                  >
-                    <span className={styles.ghFaces}>
-                      {businesses.slice(0, 3).map((b) => (
-                        <span key={b.membershipId} className={styles.ghFace} title={b.businessName}>
-                          {b.businessLogo ? <img src={b.businessLogo} alt="" /> : initials(b.businessName)}
-                        </span>
-                      ))}
-                      {businesses.length === 0 && (
-                        <span className={styles.ghFace}>
-                          <i className="ti ti-plus" aria-hidden="true" />
-                        </span>
-                      )}
-                    </span>
-                    <strong>
-                      {businesses.length} business{businesses.length === 1 ? "" : "es"}
-                    </strong>
-                  </button>
-                  <button className={styles.ghChip} onClick={() => changeTab("orders")}>
-                    <i className="ti ti-package" aria-hidden="true" />
-                    <b>{inProgressCount}</b>
-                    <span>in progress</span>
-                  </button>
-                  <button className={styles.ghChip} onClick={() => changeTab("messages")}>
-                    <i className="ti ti-message-2" aria-hidden="true" />
-                    <b>{unread}</b>
-                    <span>unread</span>
-                  </button>
-                </div>
-              </section>
-
-              <section className={styles.stats}>
-                <div>
-                  <span>Total spent</span>
-                  <strong>{money(data?.currency, data?.totalSpent)}</strong>
-                  <small>Across connected businesses</small>
-                </div>
-                <div>
-                  <span>Orders</span>
-                  <strong>{data?.totalOrders || 0}</strong>
-                  <small>Purchase history</small>
-                </div>
-                <div>
-                  <span>Businesses</span>
-                  <strong>{businesses.length}</strong>
-                  <small>Your Ehral network</small>
-                </div>
-                <div>
-                  <span>Average order</span>
-                  <strong>{money(data?.currency, average)}</strong>
-                  <small>Based on recorded orders</small>
-                </div>
-              </section>
-
-              <section
-                className={styles.attentionSection}
-                aria-label="Needs your attention"
+    <>
+      <CustomerShell
+        tab={tab}
+        title={title}
+        onNavigate={changeTab}
+        firstName={data?.firstName}
+        lastName={data?.lastName}
+        unread={unread}
+        onSignOut={signOut}
+        banner={<Toast message={notice} onClose={() => setNotice("")} />}
+        contentClassName={tab === "messages" ? styles.contentMessages : ""}
+        topActionsBefore={
+          <label className={styles.searchButton}>
+            <i className="ti ti-search" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search orders…"
+              aria-label="Search orders"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="Clear search"
               >
-                <div className={styles.attentionHead}>
-                  <div>
-                    <span className={styles.eyebrow}>RIGHT NOW</span>
-                    <h2>Needs your attention</h2>
-                  </div>
-                  {attentionItems.length === 0 && (
-                    <span className={styles.allCaughtUp}>
-                      <i className="ti ti-circle-check-filled" /> All caught up
-                    </span>
-                  )}
-                </div>
-                {attentionItems.length ? (
-                  <div className={styles.attentionList}>
-                    {attentionItems.map((item) => (
-                      <button
-                        key={item.id}
-                        className={styles.attentionItem}
-                        onClick={item.action}
-                      >
-                        <span className={styles.attentionIcon}>
-                          <i className={`ti ti-${item.icon}`} />
-                        </span>
-                        <span className={styles.attentionCopy}>
-                          <strong>{item.title}</strong>
-                          <small>{item.text}</small>
-                        </span>
-                        <span className={styles.attentionAction}>
-                          {item.actionLabel}
-                          <i className="ti ti-arrow-right" />
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <p className={styles.attentionEmpty}>
-                    Your orders, messages and receipts do not need any action
-                    right now.
-                  </p>
-                )}
-              </section>
-
-              <section className={styles.section}>
-                <div className={styles.sectionHead}>
-                  <div>
-                    <span className={styles.eyebrow}>YOUR NETWORK</span>
-                    <h2>Businesses you use</h2>
-                  </div>
-                  <button onClick={() => changeTab("businesses")}>
-                    View all <i className="ti ti-arrow-right" />
-                  </button>
-                </div>
-                {businesses.length ? (
-                  <div className={styles.businessGrid}>
-                    {businesses.slice(0, 4).map((b) => (
-                      <BusinessCard
-                        key={b.membershipId}
-                        business={b}
-                        onVisit={visitBusiness}
-                        onChat={openBusinessChat}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className={styles.emptyState}>
-                    <i className="ti ti-building-store" />
-                    <h3>No connected businesses yet</h3>
-                    <p>
-                      Connect with businesses on Ehral and they will appear here
-                      as part of your customer network.
-                    </p>
-                  </div>
-                )}
-              </section>
-
-              <section className={styles.section}>
-                <div className={styles.sectionHead}>
-                  <div>
-                    <span className={styles.eyebrow}>LATEST</span>
-                    <h2>Recent orders</h2>
-                  </div>
-                  <button onClick={() => changeTab("orders")}>See all</button>
-                </div>
-                <OrderList
-                  orders={orders.slice(0, 5)}
-                  onReceipt={setSelectedOrder}
-                />
-              </section>
-
-              <section className={styles.section}>
-                <div className={styles.sectionHead}>
-                  <div>
-                    <span className={styles.eyebrow}>LIVE ACTIVITY</span>
-                    <h2>Recent activity</h2>
-                  </div>
-                </div>
-                <div className={styles.activityList}>
-                  {activity.length ? (
-                    activity.map((a) => (
-                      <button
-                        key={a.id}
-                        className={styles.activityRow}
-                        onClick={a.action}
-                      >
-                        <span className={styles.activityIcon}>
-                          <i className={`ti ti-${a.icon}`} />
-                        </span>
-                        <span className={styles.activityCopy}>
-                          <strong>{a.title}</strong>
-                          <small>{a.text}</small>
-                        </span>
-                        <span className={styles.activityDate}>
-                          {date(a.date)} {time(a.date)}
-                        </span>
-                        <i className="ti ti-chevron-right" />
-                      </button>
-                    ))
-                  ) : (
-                    <div className={styles.emptyState}>
-                      <i className="ti ti-sparkles" />
-                      <h3>Your activity will appear here</h3>
-                      <p>
-                        Orders and business conversations will build your Ehral
-                        timeline.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </section>
-            </>
-          )}
-
-          {tab === "discover" && (
-            <section className={styles.section}>
-              <div className={styles.sectionIntro}>
-                <span className={styles.eyebrow}>DISCOVER ON EHRAL</span>
-                <h2>Find businesses and services</h2>
+                <i className="ti ti-x" />
+              </button>
+            )}
+          </label>
+        }
+      >
+        {tab === "home" && (
+          <>
+            <section
+              className={styles.ghHero}
+              aria-label="Your personal commerce hub"
+            >
+              <div className={styles.ghCopy}>
+                <h2>
+                  {greetingFor()}, <em>{data?.firstName || "there"}</em>.
+                </h2>
                 <p>
-                  Search Ehral for businesses you need, explore their
-                  information, and connect with the ones you choose.
+                  One Ehral account for your stores, orders, receipts,
+                  conversations and spending history.
                 </p>
-              </div>
-              <div className={styles.discoveryToolbar}>
-                <label className={styles.discoverySearch}>
-                  <i className="ti ti-search" />
-                  <input
-                    value={discoveryQuery}
-                    onChange={(e) => setDiscoveryQuery(e.target.value)}
-                    placeholder="Search business, category, or location…"
-                    aria-label="Search businesses"
-                  />
-                  {discoveryQuery && (
-                    <button
-                      type="button"
-                      onClick={() => setDiscoveryQuery("")}
-                      aria-label="Clear search"
-                    >
-                      <i className="ti ti-x" />
-                    </button>
-                  )}
-                </label>
-                <div className={styles.discoveryTypes}>
+                <div className={styles.ghActions}>
                   <button
-                    className={!discoveryType ? styles.discoveryTypeActive : ""}
-                    onClick={() => setDiscoveryType("")}
+                    onClick={() => changeTab("discover")}
+                    className={styles.ghPrimary}
                   >
-                    All
+                    Discover businesses{" "}
+                    <i className="ti ti-arrow-up-right" aria-hidden="true" />
                   </button>
-                  {businessTypes.map((type) => (
+                  <button
+                    onClick={() => changeTab("messages")}
+                    className={styles.ghGlassBtn}
+                  >
+                    <i className="ti ti-message-circle" aria-hidden="true" />{" "}
+                    Messages
+                    {unread > 0 && (
+                      <span className={styles.ghBadge}>{unread}</span>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Live numbers - desktop/tablet only; on phones the stats row and
+                    "Needs your attention" just below already say the same. */}
+              <div className={styles.ghChips}>
+                <button
+                  className={styles.ghChip}
+                  onClick={() => changeTab("businesses")}
+                  aria-label={`${businesses.length} connected businesses`}
+                >
+                  <span className={styles.ghFaces}>
+                    {businesses.slice(0, 3).map((b) => (
+                      <span
+                        key={b.membershipId}
+                        className={styles.ghFace}
+                        title={b.businessName}
+                      >
+                        {b.businessLogo ? (
+                          <img src={b.businessLogo} alt="" />
+                        ) : (
+                          initials(b.businessName)
+                        )}
+                      </span>
+                    ))}
+                    {businesses.length === 0 && (
+                      <span className={styles.ghFace}>
+                        <i className="ti ti-plus" aria-hidden="true" />
+                      </span>
+                    )}
+                  </span>
+                  <strong>
+                    {businesses.length} business
+                    {businesses.length === 1 ? "" : "es"}
+                  </strong>
+                </button>
+                <button
+                  className={styles.ghChip}
+                  onClick={() => changeTab("orders")}
+                >
+                  <i className="ti ti-package" aria-hidden="true" />
+                  <b>{inProgressCount}</b>
+                  <span>in progress</span>
+                </button>
+                <button
+                  className={styles.ghChip}
+                  onClick={() => changeTab("messages")}
+                >
+                  <i className="ti ti-message-2" aria-hidden="true" />
+                  <b>{unread}</b>
+                  <span>unread</span>
+                </button>
+              </div>
+            </section>
+
+            <section className={styles.stats}>
+              <div>
+                <span>Total spent</span>
+                <strong>{money(data?.currency, data?.totalSpent)}</strong>
+                <small>Across connected businesses</small>
+              </div>
+              <div>
+                <span>Orders</span>
+                <strong>{data?.totalOrders || 0}</strong>
+                <small>Purchase history</small>
+              </div>
+              <div>
+                <span>Businesses</span>
+                <strong>{businesses.length}</strong>
+                <small>Your Ehral network</small>
+              </div>
+              <div>
+                <span>Average order</span>
+                <strong>{money(data?.currency, average)}</strong>
+                <small>Based on recorded orders</small>
+              </div>
+            </section>
+
+            <section
+              className={styles.attentionSection}
+              aria-label="Needs your attention"
+            >
+              <div className={styles.attentionHead}>
+                <div>
+                  <span className={styles.eyebrow}>RIGHT NOW</span>
+                  <h2>Needs your attention</h2>
+                </div>
+                {attentionItems.length === 0 && (
+                  <span className={styles.allCaughtUp}>
+                    <i className="ti ti-circle-check-filled" /> All caught up
+                  </span>
+                )}
+              </div>
+              {attentionItems.length ? (
+                <div className={styles.attentionList}>
+                  {attentionItems.map((item) => (
                     <button
-                      key={type}
-                      className={
-                        discoveryType === type ? styles.discoveryTypeActive : ""
-                      }
-                      onClick={() => setDiscoveryType(type)}
+                      key={item.id}
+                      className={styles.attentionItem}
+                      onClick={item.action}
                     >
-                      {type
-                        .replaceAll("_", " ")
-                        .replace(/\b\w/g, (m) => m.toUpperCase())}
+                      <span className={styles.attentionIcon}>
+                        <i className={`ti ti-${item.icon}`} />
+                      </span>
+                      <span className={styles.attentionCopy}>
+                        <strong>{item.title}</strong>
+                        <small>{item.text}</small>
+                      </span>
+                      <span className={styles.attentionAction}>
+                        {item.actionLabel}
+                        <i className="ti ti-arrow-right" />
+                      </span>
                     </button>
                   ))}
                 </div>
-              </div>
-              {discoveryLoading ? (
-                <div className={styles.inlineLoading}>
-                  <span /> Finding businesses on Ehral…
+              ) : (
+                <p className={styles.attentionEmpty}>
+                  Your orders, messages and receipts do not need any action
+                  right now.
+                </p>
+              )}
+            </section>
+
+            <section className={styles.section}>
+              <div className={styles.sectionHead}>
+                <div>
+                  <span className={styles.eyebrow}>YOUR NETWORK</span>
+                  <h2>Businesses you use</h2>
                 </div>
-              ) : discovery.length ? (
+                <button onClick={() => changeTab("businesses")}>
+                  View all <i className="ti ti-arrow-right" />
+                </button>
+              </div>
+              {businesses.length ? (
                 <div className={styles.businessGrid}>
-                  {discovery.map((b) => (
-                    <DiscoveryCard
-                      key={b.businessId}
+                  {businesses.slice(0, 4).map((b) => (
+                    <BusinessCard
+                      key={b.membershipId}
                       business={b}
-                      onView={(business) =>
-                        nav(`/customer/business/${business.businessId}`, { state: { fromTab: tab } })
-                      }
+                      onVisit={visitBusiness}
+                      onChat={openBusinessChat}
                     />
                   ))}
                 </div>
               ) : (
                 <div className={styles.emptyState}>
-                  <i className="ti ti-compass-off" />
-                  <h3>No matching businesses yet</h3>
-                  <p>Try another business name, category, or location.</p>
+                  <i className="ti ti-building-store" />
+                  <h3>No connected businesses yet</h3>
+                  <p>
+                    Connect with businesses on Ehral and they will appear here
+                    as part of your customer network.
+                  </p>
                 </div>
               )}
             </section>
-          )}
 
-          {tab === "businesses" && (
             <section className={styles.section}>
-              <div className={styles.sectionIntro}>
-                <span className={styles.eyebrow}>CONNECTED TO EHRAL</span>
-                <h2>Your businesses</h2>
-                <p>
-                  Every business where you have an active customer relationship.
-                  One account, many stores.
-                </p>
+              <div className={styles.sectionHead}>
+                <div>
+                  <span className={styles.eyebrow}>LATEST</span>
+                  <h2>Recent orders</h2>
+                </div>
+                <button onClick={() => changeTab("orders")}>See all</button>
               </div>
+              <OrderList
+                orders={orders.slice(0, 5)}
+                onReceipt={setSelectedOrder}
+              />
+            </section>
+
+            <section className={styles.section}>
+              <div className={styles.sectionHead}>
+                <div>
+                  <span className={styles.eyebrow}>LIVE ACTIVITY</span>
+                  <h2>Recent activity</h2>
+                </div>
+              </div>
+              <div className={styles.activityList}>
+                {activity.length ? (
+                  activity.map((a) => (
+                    <button
+                      key={a.id}
+                      className={styles.activityRow}
+                      onClick={a.action}
+                    >
+                      <span className={styles.activityIcon}>
+                        <i className={`ti ti-${a.icon}`} />
+                      </span>
+                      <span className={styles.activityCopy}>
+                        <strong>{a.title}</strong>
+                        <small>{a.text}</small>
+                      </span>
+                      <span className={styles.activityDate}>
+                        {date(a.date)} {time(a.date)}
+                      </span>
+                      <i className="ti ti-chevron-right" />
+                    </button>
+                  ))
+                ) : (
+                  <div className={styles.emptyState}>
+                    <i className="ti ti-sparkles" />
+                    <h3>Your activity will appear here</h3>
+                    <p>
+                      Orders and business conversations will build your Ehral
+                      timeline.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </section>
+          </>
+        )}
+
+        {tab === "discover" && (
+          <section className={styles.section}>
+            <div className={styles.sectionIntro}>
+              <span className={styles.eyebrow}>DISCOVER ON EHRAL</span>
+              <h2>Find businesses and services</h2>
+              <p>
+                Search Ehral for businesses you need, explore their information,
+                and connect with the ones you choose.
+              </p>
+            </div>
+            <div className={styles.discoveryToolbar}>
+              <label className={styles.discoverySearch}>
+                <i className="ti ti-search" />
+                <input
+                  value={discoveryQuery}
+                  onChange={(e) => setDiscoveryQuery(e.target.value)}
+                  placeholder="Search business, category, or location…"
+                  aria-label="Search businesses"
+                />
+                {discoveryQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setDiscoveryQuery("")}
+                    aria-label="Clear search"
+                  >
+                    <i className="ti ti-x" />
+                  </button>
+                )}
+              </label>
+              <div className={styles.discoveryTypes}>
+                <button
+                  className={!discoveryType ? styles.discoveryTypeActive : ""}
+                  onClick={() => setDiscoveryType("")}
+                >
+                  All
+                </button>
+                {businessTypes.map((type) => (
+                  <button
+                    key={type}
+                    className={
+                      discoveryType === type ? styles.discoveryTypeActive : ""
+                    }
+                    onClick={() => setDiscoveryType(type)}
+                  >
+                    {type
+                      .replaceAll("_", " ")
+                      .replace(/\b\w/g, (m) => m.toUpperCase())}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {discoveryLoading ? (
+              <div className={styles.inlineLoading}>
+                <span /> Finding businesses on Ehral…
+              </div>
+            ) : discovery.length ? (
               <div className={styles.businessGrid}>
-                {businesses.map((b) => (
-                  <BusinessCard
-                    key={b.membershipId}
+                {discovery.map((b) => (
+                  <DiscoveryCard
+                    key={b.businessId}
                     business={b}
-                    onVisit={visitBusiness}
-                    onChat={openBusinessChat}
-                    detailed
+                    onView={(business) =>
+                      nav(`/customer/business/${business.businessId}`, {
+                        state: { fromTab: tab },
+                      })
+                    }
                   />
                 ))}
               </div>
-            </section>
-          )}
-
-          {tab === "orders" && (
-            <section className={styles.section}>
-              <div className={styles.sectionIntro}>
-                <span className={styles.eyebrow}>PURCHASE HISTORY</span>
-                <h2>Your orders</h2>
-                <p>
-                  Everything you have bought through your Ehral customer
-                  account.
-                </p>
+            ) : (
+              <div className={styles.emptyState}>
+                <i className="ti ti-compass-off" />
+                <h3>No matching businesses yet</h3>
+                <p>Try another business name, category, or location.</p>
               </div>
-              <OrderList orders={filteredOrders} onReceipt={setSelectedOrder} />
-            </section>
-          )}
+            )}
+          </section>
+        )}
 
-          {tab === "receipts" && (
-            <section className={styles.section}>
-              <div className={styles.sectionIntro}>
-                <span className={styles.eyebrow}>YOUR PAPER TRAIL</span>
-                <h2>Receipts</h2>
-                <p>
-                  Receipts generated from your Ehral purchases remain available
-                  here, even after you leave a store.
-                </p>
-              </div>
-              <div className={styles.receiptGrid}>
-                {filteredOrders
-                  .filter((o) => o.receiptAvailable)
-                  .map((o) => (
-                    <button
-                      key={o.id}
-                      className={styles.receiptCard}
-                      onClick={() => setSelectedOrder(o)}
-                    >
-                      <div className={styles.receiptCardTop}>
-                        <div className={styles.avatar}>
-                          {o.businessLogo ? (
-                            <img src={o.businessLogo} alt="" />
-                          ) : (
-                            initials(o.businessName)
-                          )}
-                        </div>
-                        <span>{o.paymentStatus || "RECORDED"}</span>
-                      </div>
-                      <strong>{o.businessName}</strong>
-                      <small>
-                        #{o.orderNumber} · {date(o.createdAt)}
-                      </small>
-                      <b>{money(o.currency, o.total)}</b>
-                      <em>
-                        View receipt <i className="ti ti-arrow-up-right" />
-                      </em>
-                    </button>
-                  ))}
-              </div>
-              {!filteredOrders.some((o) => o.receiptAvailable) && (
-                <div className={styles.emptyState}>
-                  <i className="ti ti-receipt-off" />
-                  <h3>No receipts yet</h3>
-                  <p>Your completed Ehral purchases will appear here.</p>
-                </div>
-              )}
-            </section>
-          )}
-
-          {tab === "messages" && (
-            <div className={`${styles.msHost} ${messagesThreadOpen ? styles.msHostThread : ""}`}>
-              <MessagingHub
-                mode="customer"
-                flat
-                businesses={businesses}
-                onThreadOpenChange={setMessagesThreadOpen}
-                deepLink={messagesDeepLink}
-                onDeepLinkConsumed={() => setMessagesDeepLink(null)}
-                onActiveConversationChange={setActiveMessageConversationId}
-                onBadgeChange={inbox.refresh}
-              />
+        {tab === "businesses" && (
+          <section className={styles.section}>
+            <div className={styles.sectionIntro}>
+              <span className={styles.eyebrow}>CONNECTED TO EHRAL</span>
+              <h2>Your businesses</h2>
+              <p>
+                Every business where you have an active customer relationship.
+                One account, many stores.
+              </p>
             </div>
-          )}
+            <div className={styles.businessGrid}>
+              {businesses.map((b) => (
+                <BusinessCard
+                  key={b.membershipId}
+                  business={b}
+                  onVisit={visitBusiness}
+                  onChat={openBusinessChat}
+                  detailed
+                />
+              ))}
+            </div>
+          </section>
+        )}
 
-          {tab === "spending" && (
-            <section className={styles.spWrap} aria-label="Spending">
-              <header className={styles.spHead}>
-                <span className={styles.eyebrow}>YOUR MONEY TRAIL</span>
-                <h2>Spending</h2>
-                <p>Payments completed across your Ehral businesses, net of recorded refunds.</p>
-              </header>
+        {tab === "orders" && (
+          <section className={styles.section}>
+            <div className={styles.sectionIntro}>
+              <span className={styles.eyebrow}>PURCHASE HISTORY</span>
+              <h2>Your orders</h2>
+              <p>
+                Everything you have bought through your Ehral customer account.
+              </p>
+            </div>
+            <OrderList orders={filteredOrders} onReceipt={setSelectedOrder} />
+          </section>
+        )}
 
-              <div className={styles.spFigure}>
-                <span className={styles.spFigureLabel}>Total recorded spend</span>
-                <strong className={styles.spBig}>{money(data?.currency, data?.totalSpent)}</strong>
-                <div className={styles.spFigureMeta}>
-                  <span>
-                    {spending.paidCount} fully paid order{spending.paidCount === 1 ? "" : "s"}
-                  </span>
-                  {spending.delta !== null && (
-                    <span className={`${styles.spDelta} ${spending.delta >= 0 ? styles.spUp : styles.spDown}`}>
-                      <i className={`ti ${spending.delta >= 0 ? "ti-trending-up" : "ti-trending-down"}`} aria-hidden="true" />
-                      {Math.abs(spending.delta).toFixed(0)}% vs last month
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {spending.paidCount === 0 ? (
-                <div className={styles.spEmpty}>
-                  <i className="ti ti-chart-donut-3" aria-hidden="true" />
-                  <h3>Nothing to chart yet</h3>
-                  <p>Once you complete a payment with a business, your spending trail appears here.</p>
-                  <button className={styles.ghPrimary} onClick={() => changeTab("discover")}>
-                    Discover businesses <i className="ti ti-arrow-up-right" aria-hidden="true" />
+        {tab === "receipts" && (
+          <section className={styles.section}>
+            <div className={styles.sectionIntro}>
+              <span className={styles.eyebrow}>YOUR PAPER TRAIL</span>
+              <h2>Receipts</h2>
+              <p>
+                Receipts generated from your Ehral purchases remain available
+                here, even after you leave a store.
+              </p>
+            </div>
+            <div className={styles.receiptGrid}>
+              {filteredOrders
+                .filter((o) => o.receiptAvailable)
+                .map((o) => (
+                  <button
+                    key={o.id}
+                    className={styles.receiptCard}
+                    onClick={() => setSelectedOrder(o)}
+                  >
+                    <div className={styles.receiptCardTop}>
+                      <div className={styles.avatar}>
+                        {o.businessLogo ? (
+                          <img src={o.businessLogo} alt="" />
+                        ) : (
+                          initials(o.businessName)
+                        )}
+                      </div>
+                      <span>{o.paymentStatus || "RECORDED"}</span>
+                    </div>
+                    <strong>{o.businessName}</strong>
+                    <small>
+                      #{o.orderNumber} · {date(o.createdAt)}
+                    </small>
+                    <b>{money(o.currency, o.total)}</b>
+                    <em>
+                      View receipt <i className="ti ti-arrow-up-right" />
+                    </em>
                   </button>
-                </div>
-              ) : (
-                <>
-                  <div className={styles.spKpis}>
-                    <div>
-                      <span>This month</span>
-                      <strong>{money(data?.currency, spending.cur)}</strong>
-                    </div>
-                    <div>
-                      <span>Average order</span>
-                      <strong>{money(data?.currency, average)}</strong>
-                    </div>
-                    <div>
-                      <span>Largest order</span>
-                      <strong>{money(data?.currency, spending.largest)}</strong>
-                    </div>
-                    <div>
-                      <span>Businesses paid</span>
-                      <strong>{spending.ranked.length}</strong>
-                    </div>
+                ))}
+            </div>
+            {!filteredOrders.some((o) => o.receiptAvailable) && (
+              <div className={styles.emptyState}>
+                <i className="ti ti-receipt-off" />
+                <h3>No receipts yet</h3>
+                <p>Your completed Ehral purchases will appear here.</p>
+              </div>
+            )}
+          </section>
+        )}
+
+        {tab === "messages" && (
+          <div
+            className={`${styles.msHost} ${messagesThreadOpen ? styles.msHostThread : ""}`}
+          >
+            <MessagingHub
+              mode="customer"
+              flat
+              businesses={businesses}
+              onThreadOpenChange={setMessagesThreadOpen}
+              deepLink={messagesDeepLink}
+              onDeepLinkConsumed={() => setMessagesDeepLink(null)}
+              onActiveConversationChange={setActiveMessageConversationId}
+              onBadgeChange={inbox.refresh}
+            />
+          </div>
+        )}
+
+        {tab === "spending" && (
+          <section className={styles.spWrap} aria-label="Spending">
+            <header className={styles.spHead}>
+              <span className={styles.eyebrow}>YOUR MONEY TRAIL</span>
+              <h2>Spending</h2>
+              <p>
+                Payments completed across your Ehral businesses, net of recorded
+                refunds.
+              </p>
+            </header>
+
+            <div className={styles.spFigure}>
+              <span className={styles.spFigureLabel}>Total recorded spend</span>
+              <strong className={styles.spBig}>
+                {money(data?.currency, data?.totalSpent)}
+              </strong>
+              <div className={styles.spFigureMeta}>
+                <span>
+                  {spending.paidCount} fully paid order
+                  {spending.paidCount === 1 ? "" : "s"}
+                </span>
+                {spending.delta !== null && (
+                  <span
+                    className={`${styles.spDelta} ${spending.delta >= 0 ? styles.spUp : styles.spDown}`}
+                  >
+                    <i
+                      className={`ti ${spending.delta >= 0 ? "ti-trending-up" : "ti-trending-down"}`}
+                      aria-hidden="true"
+                    />
+                    {Math.abs(spending.delta).toFixed(0)}% vs last month
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {spending.paidCount === 0 ? (
+              <div className={styles.spEmpty}>
+                <i className="ti ti-chart-donut-3" aria-hidden="true" />
+                <h3>Nothing to chart yet</h3>
+                <p>
+                  Once you complete a payment with a business, your spending
+                  trail appears here.
+                </p>
+                <button
+                  className={styles.ghPrimary}
+                  onClick={() => changeTab("discover")}
+                >
+                  Discover businesses{" "}
+                  <i className="ti ti-arrow-up-right" aria-hidden="true" />
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className={styles.spKpis}>
+                  <div>
+                    <span>This month</span>
+                    <strong>{money(data?.currency, spending.cur)}</strong>
                   </div>
+                  <div>
+                    <span>Average order</span>
+                    <strong>{money(data?.currency, average)}</strong>
+                  </div>
+                  <div>
+                    <span>Largest order</span>
+                    <strong>{money(data?.currency, spending.largest)}</strong>
+                  </div>
+                  <div>
+                    <span>Businesses paid</span>
+                    <strong>{spending.ranked.length}</strong>
+                  </div>
+                </div>
 
-                  <section className={styles.spBlock} aria-label="Payments by month">
-                    <div className={styles.spBlockHead}>
-                      <h3>Last 6 months</h3>
-                      <span>Payments by month</span>
-                    </div>
-                    <div className={styles.spChart} role="img" aria-label="Bar chart of payments over the last six months">
-                      {spending.months.map((m) => {
-                        const pct = spending.max > 0 ? Math.max(m.value > 0 ? 4 : 0, (m.value / spending.max) * 100) : 0;
-                        const top = m.value > 0 && m.value === spending.max;
-                        return (
-                          <div
-                            key={m.key}
-                            className={`${styles.spCol} ${m.current ? styles.spColNow : ""} ${top ? styles.spColTop : ""}`}
-                            title={`${m.label} ${m.year}: ${money(data?.currency, m.value)} · ${m.count} order${m.count === 1 ? "" : "s"}`}
-                          >
-                            <span className={styles.spColValue}>{m.value > 0 ? compactMoney(m.value) : ""}</span>
-                            <span className={styles.spBarTrack}>
-                              <i style={{ height: `${pct}%` }} />
-                            </span>
-                            <span className={styles.spColLabel}>{m.label}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    {spending.foreignCount > 0 && (
-                      <p className={styles.spNote}>
-                        {spending.foreignCount} payment{spending.foreignCount === 1 ? "" : "s"} in another currency
-                        {spending.foreignCount === 1 ? " is" : " are"} not included in the chart.
-                      </p>
+                <section
+                  className={styles.spBlock}
+                  aria-label="Payments by month"
+                >
+                  <div className={styles.spBlockHead}>
+                    <h3>Last 6 months</h3>
+                    <span>Payments by month</span>
+                  </div>
+                  <div
+                    className={styles.spChart}
+                    role="img"
+                    aria-label="Bar chart of payments over the last six months"
+                  >
+                    {spending.months.map((m) => {
+                      const pct =
+                        spending.max > 0
+                          ? Math.max(
+                              m.value > 0 ? 4 : 0,
+                              (m.value / spending.max) * 100,
+                            )
+                          : 0;
+                      const top = m.value > 0 && m.value === spending.max;
+                      return (
+                        <div
+                          key={m.key}
+                          className={`${styles.spCol} ${m.current ? styles.spColNow : ""} ${top ? styles.spColTop : ""}`}
+                          title={`${m.label} ${m.year}: ${money(data?.currency, m.value)} · ${m.count} order${m.count === 1 ? "" : "s"}`}
+                        >
+                          <span className={styles.spColValue}>
+                            {m.value > 0 ? compactMoney(m.value) : ""}
+                          </span>
+                          <span className={styles.spBarTrack}>
+                            <i style={{ height: `${pct}%` }} />
+                          </span>
+                          <span className={styles.spColLabel}>{m.label}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {spending.foreignCount > 0 && (
+                    <p className={styles.spNote}>
+                      {spending.foreignCount} payment
+                      {spending.foreignCount === 1 ? "" : "s"} in another
+                      currency
+                      {spending.foreignCount === 1 ? " is" : " are"} not
+                      included in the chart.
+                    </p>
+                  )}
+                </section>
+
+                <section
+                  className={styles.spBlock}
+                  aria-label="Spending by business"
+                >
+                  <div className={styles.spBlockHead}>
+                    <h3>Where it went</h3>
+                    <span>Share of total spend</span>
+                  </div>
+                  <div
+                    className={styles.spSplit}
+                    role="img"
+                    aria-label="Spending split by business"
+                  >
+                    {spending.top.map((b, i) => (
+                      <span
+                        key={b.membershipId}
+                        style={{
+                          width: `${b.share}%`,
+                          background: `var(--sp-c${i})`,
+                        }}
+                      />
+                    ))}
+                    {spending.restShare > 0 && (
+                      <span
+                        style={{
+                          width: `${spending.restShare}%`,
+                          background: "var(--sp-c5)",
+                        }}
+                      />
                     )}
-                  </section>
+                  </div>
+                  <ul className={styles.spRows}>
+                    {spending.top.map((b, i) => (
+                      <li key={b.membershipId}>
+                        <span
+                          className={styles.spSwatch}
+                          style={{ background: `var(--sp-c${i})` }}
+                          aria-hidden="true"
+                        />
+                        <span className={styles.spAvatar}>
+                          {b.businessLogo ? (
+                            <img src={b.businessLogo} alt="" />
+                          ) : (
+                            initials(b.businessName)
+                          )}
+                        </span>
+                        <span className={styles.spWho}>
+                          <strong>{b.businessName}</strong>
+                          <small>
+                            {b.ordersCount} order
+                            {b.ordersCount === 1 ? "" : "s"}
+                          </small>
+                        </span>
+                        <span className={styles.spHow}>
+                          <strong>{money(b.currency, b.spent)}</strong>
+                          <small>{b.share.toFixed(1)}%</small>
+                        </span>
+                      </li>
+                    ))}
+                    {spending.restCount > 0 && (
+                      <li>
+                        <span
+                          className={styles.spSwatch}
+                          style={{ background: "var(--sp-c5)" }}
+                          aria-hidden="true"
+                        />
+                        <span className={styles.spAvatar}>
+                          <i className="ti ti-dots" aria-hidden="true" />
+                        </span>
+                        <span className={styles.spWho}>
+                          <strong>
+                            {spending.restCount} other business
+                            {spending.restCount === 1 ? "" : "es"}
+                          </strong>
+                        </span>
+                        <span className={styles.spHow}>
+                          <small>{spending.restShare.toFixed(1)}%</small>
+                        </span>
+                      </li>
+                    )}
+                  </ul>
+                </section>
 
-                  <section className={styles.spBlock} aria-label="Spending by business">
-                    <div className={styles.spBlockHead}>
-                      <h3>Where it went</h3>
-                      <span>Share of total spend</span>
-                    </div>
-                    <div className={styles.spSplit} role="img" aria-label="Spending split by business">
-                      {spending.top.map((b, i) => (
-                        <span key={b.membershipId} style={{ width: `${b.share}%`, background: `var(--sp-c${i})` }} />
-                      ))}
-                      {spending.restShare > 0 && <span style={{ width: `${spending.restShare}%`, background: "var(--sp-c5)" }} />}
-                    </div>
-                    <ul className={styles.spRows}>
-                      {spending.top.map((b, i) => (
-                        <li key={b.membershipId}>
-                          <span className={styles.spSwatch} style={{ background: `var(--sp-c${i})` }} aria-hidden="true" />
-                          <span className={styles.spAvatar}>
-                            {b.businessLogo ? <img src={b.businessLogo} alt="" /> : initials(b.businessName)}
+                <section
+                  className={styles.spBlock}
+                  aria-label="Recent payments"
+                >
+                  <div className={styles.spBlockHead}>
+                    <h3>Recent payments</h3>
+                    <button
+                      className={styles.spLink}
+                      onClick={() => changeTab("orders")}
+                    >
+                      All orders{" "}
+                      <i className="ti ti-arrow-right" aria-hidden="true" />
+                    </button>
+                  </div>
+                  <ul className={styles.spRecent}>
+                    {spending.recent.map((o) => (
+                      <li key={o.id}>
+                        <button onClick={() => setSelectedOrder(o)}>
+                          <span className={styles.spRecentIcon}>
+                            <i className="ti ti-receipt-2" aria-hidden="true" />
                           </span>
                           <span className={styles.spWho}>
-                            <strong>{b.businessName}</strong>
+                            <strong>{o.businessName}</strong>
                             <small>
-                              {b.ordersCount} order{b.ordersCount === 1 ? "" : "s"}
+                              #{o.orderNumber} · {date(o.createdAt)}
                             </small>
                           </span>
                           <span className={styles.spHow}>
-                            <strong>{money(b.currency, b.spent)}</strong>
-                            <small>{b.share.toFixed(1)}%</small>
-                          </span>
-                        </li>
-                      ))}
-                      {spending.restCount > 0 && (
-                        <li>
-                          <span className={styles.spSwatch} style={{ background: "var(--sp-c5)" }} aria-hidden="true" />
-                          <span className={styles.spAvatar}>
-                            <i className="ti ti-dots" aria-hidden="true" />
-                          </span>
-                          <span className={styles.spWho}>
                             <strong>
-                              {spending.restCount} other business{spending.restCount === 1 ? "" : "es"}
+                              {money(o.currency, o.amountPaid || o.total)}
                             </strong>
                           </span>
-                          <span className={styles.spHow}>
-                            <small>{spending.restShare.toFixed(1)}%</small>
-                          </span>
-                        </li>
-                      )}
-                    </ul>
-                  </section>
-
-                  <section className={styles.spBlock} aria-label="Recent payments">
-                    <div className={styles.spBlockHead}>
-                      <h3>Recent payments</h3>
-                      <button className={styles.spLink} onClick={() => changeTab("orders")}>
-                        All orders <i className="ti ti-arrow-right" aria-hidden="true" />
-                      </button>
-                    </div>
-                    <ul className={styles.spRecent}>
-                      {spending.recent.map((o) => (
-                        <li key={o.id}>
-                          <button onClick={() => setSelectedOrder(o)}>
-                            <span className={styles.spRecentIcon}>
-                              <i className="ti ti-receipt-2" aria-hidden="true" />
-                            </span>
-                            <span className={styles.spWho}>
-                              <strong>{o.businessName}</strong>
-                              <small>
-                                #{o.orderNumber} · {date(o.createdAt)}
-                              </small>
-                            </span>
-                            <span className={styles.spHow}>
-                              <strong>{money(o.currency, o.amountPaid || o.total)}</strong>
-                            </span>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-                </>
-              )}
-            </section>
-          )}
-
-          {tab === "account" && (
-            <section className={styles.acWrap} aria-label="Account">
-              {/* Identity header - sits straight on the page background. */}
-              <header className={styles.acHero}>
-                <div className={styles.acAvatarWrap}>
-                  <span className={styles.acAvatarRing} aria-hidden="true" />
-                  <div className={styles.acAvatar}>
-                    {initials(
-                      `${profileForm?.firstName || data?.firstName || ""} ${profileForm?.lastName || data?.lastName || ""}`,
-                    )}
-                  </div>
-                </div>
-                <div className={styles.acWho}>
-                  <span className={styles.eyebrow}>ACCOUNT &amp; SECURITY</span>
-                  <h2>
-                    {profileForm?.firstName || data?.firstName} {profileForm?.lastName || data?.lastName}
-                  </h2>
-                  <ul className={styles.acMeta}>
-                    <li>
-                      <i className="ti ti-mail" aria-hidden="true" />
-                      <span>{profileForm?.email || data?.email || "No email added"}</span>
-                    </li>
-                    <li>
-                      <i className="ti ti-phone" aria-hidden="true" />
-                      <span>{profileForm?.phone || data?.phone}</span>
-                      <em className={styles.acVerified}>
-                        <i className="ti ti-circle-check-filled" aria-hidden="true" /> Verified
-                      </em>
-                    </li>
-                  </ul>
-                </div>
-                <div className={styles.acActions}>
-                  <button onClick={() => setEditingProfile((v) => !v)} className={styles.acPrimary}>
-                    <i className={editingProfile ? "ti ti-x" : "ti ti-user-edit"} aria-hidden="true" />
-                    {editingProfile ? "Close editor" : "Edit profile"}
-                  </button>
-                  <button onClick={() => nav("/forgot-password")} className={styles.acGhost}>
-                    <i className="ti ti-key" aria-hidden="true" /> Change password
-                  </button>
-                </div>
-              </header>
-
-              {editingProfile && profileForm && (
-                <div className={styles.acEditor}>
-                  <div className={styles.acEditorHead}>
-                    <h3>Edit your details</h3>
-                    <p>Changes apply to your Ehral identity and follow you across your relationships.</p>
-                  </div>
-                  <div className={styles.acFields}>
-                    {[
-                      ["firstName", "First name"],
-                      ["middleName", "Middle name"],
-                      ["lastName", "Last name"],
-                      ["email", "Email"],
-                    ].map(([key, label]) => (
-                      <label key={key} className={styles.acField}>
-                        <span>{label}</span>
-                        <input
-                          type={key === "email" ? "email" : "text"}
-                          value={profileForm[key] || ""}
-                          onChange={(e) => setProfileForm((p) => ({ ...p, [key]: e.target.value }))}
-                        />
-                      </label>
+                        </button>
+                      </li>
                     ))}
-                    <label className={styles.acField}>
-                      <span>Phone</span>
-                      <input value={profileForm.phone || ""} readOnly />
-                      <small>Your phone is your verified identity anchor and can't be changed here.</small>
-                    </label>
-                    <label className={styles.acField}>
-                      <span>Date of birth</span>
-                      <input
-                        type="date"
-                        value={profileForm.dateOfBirth || ""}
-                        onChange={(e) => setProfileForm((p) => ({ ...p, dateOfBirth: e.target.value }))}
-                      />
-                    </label>
-                    <label className={styles.acField}>
-                      <span>Gender</span>
-                      <input
-                        value={profileForm.gender || ""}
-                        onChange={(e) => setProfileForm((p) => ({ ...p, gender: e.target.value }))}
-                      />
-                    </label>
-                    <label className={`${styles.acField} ${styles.acFieldWide}`}>
-                      <span>Address</span>
-                      <textarea
-                        value={profileForm.address || ""}
-                        onChange={(e) => setProfileForm((p) => ({ ...p, address: e.target.value }))}
-                        rows={2}
-                      />
-                    </label>
-                    <label className={styles.acField}>
-                      <span>Emergency contact name</span>
-                      <input
-                        value={profileForm.emergencyContactName || ""}
-                        onChange={(e) => setProfileForm((p) => ({ ...p, emergencyContactName: e.target.value }))}
-                      />
-                    </label>
-                    <label className={styles.acField}>
-                      <span>Emergency contact phone</span>
-                      <input
-                        value={profileForm.emergencyContactPhone || ""}
-                        onChange={(e) => setProfileForm((p) => ({ ...p, emergencyContactPhone: e.target.value }))}
-                      />
-                    </label>
-                  </div>
-                  <div className={styles.acEditorFoot}>
-                    <button className={styles.acGhost} onClick={() => setEditingProfile(false)}>
-                      Cancel
-                    </button>
-                    <button className={styles.acPrimary} onClick={saveProfile} disabled={savingProfile}>
-                      {savingProfile ? "Saving…" : "Save profile"}
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* At a glance - big numbers, no boxes */}
-              <div className={styles.acGlance}>
-                <div>
-                  <strong>{businesses.length}</strong>
-                  <span>Connected business{businesses.length === 1 ? "" : "es"}</span>
-                </div>
-                <div>
-                  <strong>{data?.totalOrders || 0}</strong>
-                  <span>Order{(data?.totalOrders || 0) === 1 ? "" : "s"} placed</span>
-                </div>
-                <div>
-                  <strong>{money(data?.currency, data?.totalSpent)}</strong>
-                  <span>Recorded spend</span>
-                </div>
-              </div>
-
-              <div className={styles.acColumns}>
-                <section className={styles.acSection} aria-labelledby="ac-security">
-                  <h3 id="ac-security">Security &amp; privacy</h3>
-                  <ul className={styles.acList}>
-                    <li>
-                      <span className={styles.acIcon}>
-                        <i className="ti ti-lock" aria-hidden="true" />
-                      </span>
-                      <span>
-                        <strong>Password protected</strong>
-                        <small>Your account is secured with your Ehral password.</small>
-                      </span>
-                      <i className={`ti ti-circle-check-filled ${styles.acTick}`} aria-hidden="true" />
-                    </li>
-                    <li>
-                      <span className={styles.acIcon}>
-                        <i className="ti ti-device-mobile-check" aria-hidden="true" />
-                      </span>
-                      <span>
-                        <strong>Phone verified</strong>
-                        <small>Your phone is your verified identity anchor.</small>
-                      </span>
-                      <i className={`ti ti-circle-check-filled ${styles.acTick}`} aria-hidden="true" />
-                    </li>
-                    <li>
-                      <span className={styles.acIcon}>
-                        <i className="ti ti-building-store" aria-hidden="true" />
-                      </span>
-                      <span>
-                        <strong>
-                          {businesses.length} connected business{businesses.length === 1 ? "" : "es"}
-                        </strong>
-                        <small>One identity, many relationships - each business only sees what you share.</small>
-                      </span>
-                    </li>
                   </ul>
                 </section>
+              </>
+            )}
+          </section>
+        )}
 
-                <section className={styles.acSection} aria-labelledby="ac-identity">
-                  <h3 id="ac-identity">Your Ehral identity</h3>
-                  <p className={styles.acStatement}>One secure account across your commerce life.</p>
-                  <p className={styles.acCopy}>
-                    Your customer identity, orders, receipts and conversations stay connected while each business
-                    keeps control of its own products and operations.
-                  </p>
-                  <button onClick={signOut} className={styles.acSignOut}>
-                    <i className="ti ti-logout-2" aria-hidden="true" /> Sign out of Ehral
-                  </button>
-                </section>
+        {tab === "account" && (
+          <section className={styles.acWrap} aria-label="Account">
+            {/* Identity header - sits straight on the page background. */}
+            <header className={styles.acHero}>
+              <div className={styles.acAvatarWrap}>
+                <span className={styles.acAvatarRing} aria-hidden="true" />
+                <div className={styles.acAvatar}>
+                  {initials(
+                    `${profileForm?.firstName || data?.firstName || ""} ${profileForm?.lastName || data?.lastName || ""}`,
+                  )}
+                </div>
               </div>
-            </section>
-          )}
-        </div>
-      </main>
+              <div className={styles.acWho}>
+                <span className={styles.eyebrow}>ACCOUNT &amp; SECURITY</span>
+                <h2>
+                  {profileForm?.firstName || data?.firstName}{" "}
+                  {profileForm?.lastName || data?.lastName}
+                </h2>
+                <ul className={styles.acMeta}>
+                  <li>
+                    <i className="ti ti-mail" aria-hidden="true" />
+                    <span>
+                      {profileForm?.email || data?.email || "No email added"}
+                    </span>
+                  </li>
+                  <li>
+                    <i className="ti ti-phone" aria-hidden="true" />
+                    <span>{profileForm?.phone || data?.phone}</span>
+                    <em className={styles.acVerified}>
+                      <i
+                        className="ti ti-circle-check-filled"
+                        aria-hidden="true"
+                      />{" "}
+                      Verified
+                    </em>
+                  </li>
+                </ul>
+              </div>
+              <div className={styles.acActions}>
+                <button
+                  onClick={() => setEditingProfile((v) => !v)}
+                  className={styles.acPrimary}
+                >
+                  <i
+                    className={editingProfile ? "ti ti-x" : "ti ti-user-edit"}
+                    aria-hidden="true"
+                  />
+                  {editingProfile ? "Close editor" : "Edit profile"}
+                </button>
+                <button
+                  onClick={() => nav("/forgot-password")}
+                  className={styles.acGhost}
+                >
+                  <i className="ti ti-key" aria-hidden="true" /> Change password
+                </button>
+              </div>
+            </header>
 
-      <MobileNavHub
-        role="customer"
-        activeNav={tab}
-        setActiveNav={changeTab}
-        navigate={nav}
-        badges={{ Messages: unread }}
-        onLogout={signOut}
-      />
+            {editingProfile && profileForm && (
+              <div className={styles.acEditor}>
+                <div className={styles.acEditorHead}>
+                  <h3>Edit your details</h3>
+                  <p>
+                    Changes apply to your Ehral identity and follow you across
+                    your relationships.
+                  </p>
+                </div>
+                <div className={styles.acFields}>
+                  {[
+                    ["firstName", "First name"],
+                    ["middleName", "Middle name"],
+                    ["lastName", "Last name"],
+                    ["email", "Email"],
+                  ].map(([key, label]) => (
+                    <label key={key} className={styles.acField}>
+                      <span>{label}</span>
+                      <input
+                        type={key === "email" ? "email" : "text"}
+                        value={profileForm[key] || ""}
+                        onChange={(e) =>
+                          setProfileForm((p) => ({
+                            ...p,
+                            [key]: e.target.value,
+                          }))
+                        }
+                      />
+                    </label>
+                  ))}
+                  <label className={styles.acField}>
+                    <span>Phone</span>
+                    <input value={profileForm.phone || ""} readOnly />
+                    <small>
+                      Your phone is your verified identity anchor and can't be
+                      changed here.
+                    </small>
+                  </label>
+                  <label className={styles.acField}>
+                    <span>Date of birth</span>
+                    <input
+                      type="date"
+                      value={profileForm.dateOfBirth || ""}
+                      onChange={(e) =>
+                        setProfileForm((p) => ({
+                          ...p,
+                          dateOfBirth: e.target.value,
+                        }))
+                      }
+                    />
+                  </label>
+                  <label className={styles.acField}>
+                    <span>Gender</span>
+                    <input
+                      value={profileForm.gender || ""}
+                      onChange={(e) =>
+                        setProfileForm((p) => ({
+                          ...p,
+                          gender: e.target.value,
+                        }))
+                      }
+                    />
+                  </label>
+                  <label className={`${styles.acField} ${styles.acFieldWide}`}>
+                    <span>Address</span>
+                    <textarea
+                      value={profileForm.address || ""}
+                      onChange={(e) =>
+                        setProfileForm((p) => ({
+                          ...p,
+                          address: e.target.value,
+                        }))
+                      }
+                      rows={2}
+                    />
+                  </label>
+                  <label className={styles.acField}>
+                    <span>Emergency contact name</span>
+                    <input
+                      value={profileForm.emergencyContactName || ""}
+                      onChange={(e) =>
+                        setProfileForm((p) => ({
+                          ...p,
+                          emergencyContactName: e.target.value,
+                        }))
+                      }
+                    />
+                  </label>
+                  <label className={styles.acField}>
+                    <span>Emergency contact phone</span>
+                    <input
+                      value={profileForm.emergencyContactPhone || ""}
+                      onChange={(e) =>
+                        setProfileForm((p) => ({
+                          ...p,
+                          emergencyContactPhone: e.target.value,
+                        }))
+                      }
+                    />
+                  </label>
+                </div>
+                <div className={styles.acEditorFoot}>
+                  <button
+                    className={styles.acGhost}
+                    onClick={() => setEditingProfile(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className={styles.acPrimary}
+                    onClick={saveProfile}
+                    disabled={savingProfile}
+                  >
+                    {savingProfile ? "Saving…" : "Save profile"}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* At a glance - big numbers, no boxes */}
+            <div className={styles.acGlance}>
+              <div>
+                <strong>{businesses.length}</strong>
+                <span>
+                  Connected business{businesses.length === 1 ? "" : "es"}
+                </span>
+              </div>
+              <div>
+                <strong>{data?.totalOrders || 0}</strong>
+                <span>
+                  Order{(data?.totalOrders || 0) === 1 ? "" : "s"} placed
+                </span>
+              </div>
+              <div>
+                <strong>{money(data?.currency, data?.totalSpent)}</strong>
+                <span>Recorded spend</span>
+              </div>
+            </div>
+
+            <div className={styles.acColumns}>
+              <section
+                className={styles.acSection}
+                aria-labelledby="ac-security"
+              >
+                <h3 id="ac-security">Security &amp; privacy</h3>
+                <ul className={styles.acList}>
+                  <li>
+                    <span className={styles.acIcon}>
+                      <i className="ti ti-lock" aria-hidden="true" />
+                    </span>
+                    <span>
+                      <strong>Password protected</strong>
+                      <small>
+                        Your account is secured with your Ehral password.
+                      </small>
+                    </span>
+                    <i
+                      className={`ti ti-circle-check-filled ${styles.acTick}`}
+                      aria-hidden="true"
+                    />
+                  </li>
+                  <li>
+                    <span className={styles.acIcon}>
+                      <i
+                        className="ti ti-device-mobile-check"
+                        aria-hidden="true"
+                      />
+                    </span>
+                    <span>
+                      <strong>Phone verified</strong>
+                      <small>
+                        Your phone is your verified identity anchor.
+                      </small>
+                    </span>
+                    <i
+                      className={`ti ti-circle-check-filled ${styles.acTick}`}
+                      aria-hidden="true"
+                    />
+                  </li>
+                  <li>
+                    <span className={styles.acIcon}>
+                      <i className="ti ti-building-store" aria-hidden="true" />
+                    </span>
+                    <span>
+                      <strong>
+                        {businesses.length} connected business
+                        {businesses.length === 1 ? "" : "es"}
+                      </strong>
+                      <small>
+                        One identity, many relationships - each business only
+                        sees what you share.
+                      </small>
+                    </span>
+                  </li>
+                </ul>
+              </section>
+
+              <section
+                className={styles.acSection}
+                aria-labelledby="ac-identity"
+              >
+                <h3 id="ac-identity">Your Ehral identity</h3>
+                <p className={styles.acStatement}>
+                  One secure account across your commerce life.
+                </p>
+                <p className={styles.acCopy}>
+                  Your customer identity, orders, receipts and conversations
+                  stay connected while each business keeps control of its own
+                  products and operations.
+                </p>
+                <button onClick={signOut} className={styles.acSignOut}>
+                  <i className="ti ti-logout-2" aria-hidden="true" /> Sign out
+                  of Ehral
+                </button>
+              </section>
+            </div>
+          </section>
+        )}
+      </CustomerShell>
 
       {selectedOrder && (
         <ReceiptView
@@ -1756,12 +1928,14 @@ export default function CustomerDashboard() {
       )}
       <NotificationToastStack
         channel="CUSTOMER"
-        activeConversationId={tab === "messages" ? activeMessageConversationId : null}
+        activeConversationId={
+          tab === "messages" ? activeMessageConversationId : null
+        }
         onNavigate={(conversationId, messageId) => {
           setMessagesDeepLink({ conversationId, messageId });
           setTab("messages");
         }}
       />
-    </div>
+    </>
   );
 }

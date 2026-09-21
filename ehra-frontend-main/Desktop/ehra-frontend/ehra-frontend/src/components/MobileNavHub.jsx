@@ -376,7 +376,7 @@ export default function MobileNavHub({
             role === "employer"
               ? "/dashboard"
               : role === "customer"
-                ? "/customer/dashboard"
+                ? "/customer-dashboard"
                 : "/my-dashboard",
           activeNav,
         },
@@ -497,7 +497,10 @@ export default function MobileNavHub({
                           key={item.key || item.route}
                           item={item}
                           badge={badgeFor(item.key)}
-                          active={activeNav === item.key}
+                          active={
+                            activeNav === item.key ||
+                            Boolean(item.route && activeNav === item.route)
+                          }
                           onClick={() => selectItem(item)}
                         />
                       ))}
