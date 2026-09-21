@@ -4847,3 +4847,284 @@
     padding-bottom: 0;
   }
 }
+
+/* ── Customer business discovery / My Businesses refresh ──────────── */
+.businessPage {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 6px 0 48px;
+}
+
+.businessPage .sectionIntro {
+  max-width: 760px;
+  margin-bottom: 28px;
+}
+
+.businessPage .sectionIntro h2 {
+  font-size: clamp(27px, 3vw, 38px);
+  letter-spacing: -0.045em;
+  margin-top: 7px;
+}
+
+.businessPage .sectionIntro p {
+  max-width: 650px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.discoveryToolbar {
+  margin: 0 0 30px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.discoverySearch {
+  position: relative;
+  flex: 1 1 360px;
+  min-width: 260px;
+  height: 48px;
+  padding: 0 8px 0 13px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--bg-surface);
+  box-shadow: 0 3px 14px var(--shadow-color);
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.discoverySearch:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent), 0 7px 20px var(--shadow-color);
+}
+
+.discoverySearch>i {
+  font-size: 22px;
+  color: var(--accent);
+  margin-right: 7px;
+}
+
+.discoverySearch input {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.discoverySearch input::placeholder {
+  font-weight: 500;
+}
+
+.discoverySearch>button {
+  width: 34px;
+  height: 34px;
+  margin-left: 4px;
+  border-radius: 9px;
+  font-size: 19px;
+  transition: background .15s ease, color .15s ease;
+}
+
+.discoverySearch>button:hover {
+  background: var(--bg-surface-alt);
+  color: var(--text-primary);
+}
+
+.discoveryTypes {
+  gap: 7px;
+  flex: 0 1 auto;
+}
+
+.discoveryTypes button {
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 10px;
+  transition: background .16s ease, border-color .16s ease, color .16s ease, transform .16s ease;
+}
+
+.discoveryTypes button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.discoveryTypes .discoveryTypeActive {
+  box-shadow: 0 7px 18px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.businessPage .businessGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.businessPage .businessCard {
+  position: relative;
+  min-height: 248px;
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  background: var(--bg-surface);
+  box-shadow: 0 7px 25px color-mix(in srgb, var(--shadow-color) 70%, transparent);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.businessPage .businessCard::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--cust-glow), transparent 82%);
+  opacity: .95;
+}
+
+.businessPage .businessCard::after {
+  content: "";
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  right: -85px;
+  top: -90px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  pointer-events: none;
+}
+
+.businessPage .businessCard:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border-color));
+  box-shadow: 0 18px 42px var(--shadow-color);
+}
+
+.businessPage .businessIdentity {
+  align-items: flex-start;
+  position: relative;
+  z-index: 1;
+}
+
+.businessPage .businessLogo {
+  width: 58px;
+  height: 58px;
+  border-radius: 17px;
+  font-size: 17px;
+  border: 1px solid color-mix(in srgb, var(--accent) 16%, var(--border-color));
+  box-shadow: inset 0 0 0 5px color-mix(in srgb, var(--bg-surface-alt) 65%, transparent);
+}
+
+.businessPage .businessNameBlock {
+  padding-top: 2px;
+  flex: 1;
+}
+
+.businessPage .businessNameBlock strong {
+  font-size: 14px;
+  letter-spacing: -.015em;
+}
+
+.businessPage .businessNameBlock small {
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.businessPage .connectedBadge {
+  margin-left: auto;
+  font-size: 8px;
+  padding: 6px 8px;
+  border-radius: 999px;
+  position: relative;
+  z-index: 1;
+}
+
+.businessPage .businessMeta {
+  margin: 20px 0 0;
+  gap: 7px;
+}
+
+.businessPage .businessMeta span {
+  background: transparent;
+  border-color: var(--border-color);
+  border-radius: 999px;
+  padding: 6px 9px;
+}
+
+.businessPage .discoveryDescription {
+  margin: 13px 0 0;
+  font-size: 11px;
+  line-height: 1.65;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.businessPage .cardActions {
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+.businessPage .cardActions button {
+  min-height: 38px;
+  padding: 0 13px;
+  border-radius: 10px;
+}
+
+.businessPage .emptyState {
+  min-height: 260px;
+  border: 1px dashed var(--border-color);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--bg-surface) 45%, transparent);
+}
+
+@media (max-width: 1050px) {
+  .businessPage .businessGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .businessPage {
+    padding-top: 0;
+  }
+
+  .businessPage .sectionIntro h2 {
+    font-size: 27px;
+  }
+
+  .discoveryToolbar {
+    align-items: stretch;
+  }
+
+  .discoverySearch {
+    flex-basis: 100%;
+  }
+
+  .discoveryTypes {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 3px;
+    scrollbar-width: none;
+  }
+
+  .discoveryTypes::-webkit-scrollbar {
+    display: none;
+  }
+
+  .discoveryTypes button {
+    flex: 0 0 auto;
+  }
+
+  .businessPage .businessGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .businessPage .businessCard {
+    min-height: 220px;
+  }
+}

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Logo from "../components/Logo";
 import CustomerShell from "../components/CustomerShell";
-import LogoutConfirmModal from "../components/LogoutConfirmModal";
 import { CUSTOMER_NAV_ITEMS } from "../utils/customerNav";
 import {
   getCustomerOverview,
@@ -924,22 +923,6 @@ export default function CustomerDashboard() {
     );
   };
 
-  const [showAccountLogoutConfirm, setShowAccountLogoutConfirm] =
-    useState(false);
-  const [accountLogoutLoading, setAccountLogoutLoading] = useState(false);
-
-  const confirmAccountSignOut = async () => {
-    setAccountLogoutLoading(true);
-    try {
-      await contextLogout();
-      nav("/login", { replace: true });
-    } catch (e) {
-      setNotice("We could not sign you out cleanly. Please try again.");
-      setAccountLogoutLoading(false);
-      setShowAccountLogoutConfirm(false);
-    }
-  };
-
   const signOut = async () => {
     try {
       await contextLogout();
@@ -1248,7 +1231,7 @@ export default function CustomerDashboard() {
         )}
 
         {tab === "discover" && (
-          <section className={styles.section}>
+          <section className={`${styles.section} ${styles.businessPage}`}>
             <div className={styles.sectionIntro}>
               <span className={styles.eyebrow}>DISCOVER ON EHRAL</span>
               <h2>Find businesses and services</h2>
@@ -1327,7 +1310,7 @@ export default function CustomerDashboard() {
         )}
 
         {tab === "businesses" && (
-          <section className={styles.section}>
+          <section className={`${styles.section} ${styles.businessPage}`}>
             <div className={styles.sectionIntro}>
               <span className={styles.eyebrow}>CONNECTED TO EHRAL</span>
               <h2>Your businesses</h2>
@@ -1990,11 +1973,7 @@ export default function CustomerDashboard() {
                   stay connected while each business keeps control of its own
                   products and operations.
                 </p>
-                <button
-                  type="button"
-                  onClick={() => setShowAccountLogoutConfirm(true)}
-                  className={styles.acSignOut}
-                >
+                <button onClick={signOut} className={styles.acSignOut}>
                   <i className="ti ti-logout-2" aria-hidden="true" /> Sign out
                   of Ehral
                 </button>
@@ -2011,15 +1990,6 @@ export default function CustomerDashboard() {
           onDownload={downloadReceipt}
         />
       )}
-      <LogoutConfirmModal
-        open={showAccountLogoutConfirm}
-        onCancel={() =>
-          !accountLogoutLoading && setShowAccountLogoutConfirm(false)
-        }
-        onConfirm={confirmAccountSignOut}
-        loading={accountLogoutLoading}
-      />
-
       <NotificationToastStack
         channel="CUSTOMER"
         activeConversationId={
