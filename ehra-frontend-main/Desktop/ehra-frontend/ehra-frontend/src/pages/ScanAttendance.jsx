@@ -11,6 +11,8 @@ import { getMyProfile } from "../api/employeeApi";
 import { useAuth } from "../context/AuthContext";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
 import LogoutConfirmModal from "../components/LogoutConfirmModal";
+import MobileNavHub from "../components/MobileNavHub";
+import useStaffNavBadges from "../hooks/useStaffNavBadges";
 import dash from "./Dashboard.module.css";
 import styles from "./ScanAttendance.module.css";
 import { readSession } from "../api/authApi";
@@ -115,40 +117,6 @@ function initials(first, last) {
   return result || "?";
 }
 
-// Tracks a horizontally-scrollable element and returns { left, width } as
-// percentages of its own track - same helper used on the dashboards, kept
-// local here since it isn't exported from anywhere shared.
-function useScrollThumb(ref) {
-  const [thumb, setThumb] = useState({ left: 0, width: 100 });
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return undefined;
-
-    const update = () => {
-      const { scrollWidth, clientWidth, scrollLeft } = el;
-      if (scrollWidth <= clientWidth + 1) {
-        setThumb({ left: 0, width: 100 });
-        return;
-      }
-      const width = Math.max((clientWidth / scrollWidth) * 100, 15);
-      const maxScroll = scrollWidth - clientWidth;
-      const left = maxScroll > 0 ? (scrollLeft / maxScroll) * (100 - width) : 0;
-      setThumb({ left, width });
-    };
-
-    update();
-    el.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    return () => {
-      el.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-    };
-  }, [ref]);
-
-  return thumb;
-}
-
 export default function ScanAttendance() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -157,7 +125,6 @@ export default function ScanAttendance() {
   const streamRef = useRef(null);
   const rafRef = useRef(null);
   const scanLockRef = useRef(false); // prevents double-submitting the same frame
-  const bottomNavScrollRef = useRef(null);
 
   const [cameraError, setCameraError] = useState("");
   // Camera is never started automatically - see startCamera() below.
@@ -192,7 +159,7 @@ export default function ScanAttendance() {
   const isAdmin = user?.role === "ROLE_ADMIN";
   const dashboardPath = isAdmin ? "/dashboard" : "/my-dashboard";
   const NAV = isAdmin ? ADMIN_NAV : EMPLOYEE_NAV;
-  const bottomNavThumb = useScrollThumb(bottomNavScrollRef);
+  const staffBadges = useStaffNavBadges(isAdmin ? "employer" : "employee");
 
   // Best-effort profile fetch, purely to dress the shared shell (business
   // logo/name, avatar, HOD-gated nav items) the same way the dashboards
@@ -340,7 +307,9 @@ export default function ScanAttendance() {
         captureOfflineAuthorization(data.offlineAuthorization);
         if (data.action) {
           setCachedTodayState(
-            data.action === "CLOCK_IN" ? { clockedIn: true } : { clockedOut: true },
+            data.action === "CLOCK_IN"
+              ? { clockedIn: true }
+              : { clockedOut: true },
           );
         }
         getLocalOfflineAvailability()
@@ -409,7 +378,9 @@ export default function ScanAttendance() {
     } catch (err) {
       setResult({
         ok: false,
-        message: err?.message || "Couldn't record offline attendance. Please try again.",
+        message:
+          err?.message ||
+          "Couldn't record offline attendance. Please try again.",
       });
     } finally {
       setOfflineSubmitting(false);
@@ -749,7 +720,9 @@ export default function ScanAttendance() {
                         />
                         <p>
                           You're offline, but this device is authorized. Your{" "}
-                          {offlineAction === "CLOCK_OUT" ? "clock-out" : "clock-in"}{" "}
+                          {offlineAction === "CLOCK_OUT"
+                            ? "clock-out"
+                            : "clock-in"}{" "}
                           will be recorded locally and verified once you're back
                           online.
                         </p>
@@ -783,7 +756,12 @@ export default function ScanAttendance() {
                         style={{ fontSize: 32 }}
                         aria-hidden="true"
                       />
-                      <p style={{ fontWeight: 500, color: "var(--text-primary)" }}>
+                      <p
+                        style={{
+                          fontWeight: 500,
+                          color: "var(--text-primary)",
+                        }}
+                      >
                         Device not recognized
                       </p>
                       <p>
@@ -812,7 +790,9 @@ export default function ScanAttendance() {
                   <p className={styles.resultMessage}>{result.message}</p>
                   {result.ok && (
                     <span className={styles.resultAction}>
-                      {result.action === "CLOCK_IN" ? "Clocked in" : "Clocked out"}
+                      {result.action === "CLOCK_IN"
+                        ? "Clocked in"
+                        : "Clocked out"}
                       {result.offlinePending ? " · Pending verification" : ""}
                     </span>
                   )}
@@ -846,8 +826,8 @@ export default function ScanAttendance() {
                     <li>A recognized device can clock in/out.</li>
                     <li>A new device can be verified online.</li>
                     <li>
-                      New or suspicious device activity may generate a
-                      security alert.
+                      New or suspicious device activity may generate a security
+                      alert.
                     </li>
                   </ul>
                 </div>
@@ -855,8 +835,8 @@ export default function ScanAttendance() {
                   <h5>Offline</h5>
                   <ul>
                     <li>
-                      Only a device already recognized and authorized by
-                      Ehral can clock offline.
+                      Only a device already recognized and authorized by Ehral
+                      can clock offline.
                     </li>
                     <li>New devices can't clock offline.</li>
                     <li>
@@ -864,8 +844,8 @@ export default function ScanAttendance() {
                       security credential.
                     </li>
                     <li>
-                      If that happens, reconnect to the internet to verify
-                      the device.
+                      If that happens, reconnect to the internet to verify the
+                      device.
                     </li>
                   </ul>
                 </div>
@@ -875,53 +855,22 @@ export default function ScanAttendance() {
         </div>
       </div>
 
-      {/* ── Mobile bottom navigation ── */}
-      <nav className={dash.bottomNav} aria-label="Primary">
-        <div className={dash.bottomNavScroll} ref={bottomNavScrollRef}>
-          {NAV.filter(
-            (n) =>
-              (!n.hodOnly || profile?.isHod) &&
-              n.label !== "Notifications" &&
-              n.label !== "Messages",
-          ).map((n) => (
-            <button
-              key={n.label}
-              type="button"
-              className={`${dash.bottomNavItem} ${n.label === ACTIVE_LABEL ? dash.bottomNavActive : ""}`}
-              onClick={() => handleNavClick(n)}
-            >
-              <div className={dash.bottomNavIconWrap}>
-                <i className={`ti ${n.icon}`} aria-hidden="true" />
-              </div>
-              <span>{n.label}</span>
-            </button>
-          ))}
-
-          {/* Logout has no sidebar/desktop equivalent in this strip - on
-              desktop it's the icon button in the sidebar footer instead.
-              This item only ever renders inside .bottomNav, which is
-              display:none above 900px, so it's mobile-only by construction. */}
-          <button
-            type="button"
-            className={dash.bottomNavItem}
-            onClick={() => setShowLogoutConfirm(true)}
-          >
-            <div className={dash.bottomNavIconWrap}>
-              <i className="ti ti-logout" aria-hidden="true" />
-            </div>
-            <span>Log out</span>
-          </button>
-        </div>
-        <div className={dash.bottomNavScrollTrack} aria-hidden="true">
-          <div
-            className={dash.bottomNavScrollThumb}
-            style={{
-              width: `${bottomNavThumb.width}%`,
-              left: `${bottomNavThumb.left}%`,
-            }}
-          />
-        </div>
-      </nav>
+      {/* ── Mobile bottom navigation ──
+          The SAME MobileNavHub the employer / employee dashboards use, with
+          Attendance as the current destination (the scanner is an attendance
+          action, so Operations is highlighted). Picking anything goes back to
+          the dashboard on that section. */}
+      <MobileNavHub
+        role={isAdmin ? "employer" : "employee"}
+        activeNav={ACTIVE_LABEL}
+        setActiveNav={(key) =>
+          navigate(dashboardPath, { state: { activeNav: key } })
+        }
+        navigate={navigate}
+        isHod={Boolean(profile?.isHod)}
+        badges={staffBadges}
+        onLogout={() => setShowLogoutConfirm(true)}
+      />
 
       <LogoutConfirmModal
         open={showLogoutConfirm}

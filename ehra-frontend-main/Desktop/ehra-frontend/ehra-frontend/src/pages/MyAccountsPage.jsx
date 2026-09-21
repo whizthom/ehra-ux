@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getMyAccounts } from "../api/authApi";
@@ -8,7 +8,9 @@ import { getMySubscription } from "../api/subscriptionApi";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
 import LogoutConfirmModal from "../components/LogoutConfirmModal";
 import CustomerShell from "../components/CustomerShell";
+import MobileNavHub from "../components/MobileNavHub";
 import useCustomerInboxBadge from "../hooks/useCustomerInboxBadge";
+import useStaffNavBadges from "../hooks/useStaffNavBadges";
 import dash from "./Dashboard.module.css";
 import styles from "./MyAccountsPage.module.css";
 
@@ -82,41 +84,6 @@ function personInitials(first, last) {
   const lastInitial = l.length > 0 ? l.charAt(0) : "";
   const result = `${firstInitial}${lastInitial}`.toUpperCase();
   return result || "?";
-}
-
-// Tracks a horizontally-scrollable element and returns { left, width } as
-// percentages of its own track - same helper used on the dashboards and
-// ScanAttendance.jsx, kept local here since it isn't exported from
-// anywhere shared.
-function useScrollThumb(ref) {
-  const [thumb, setThumb] = useState({ left: 0, width: 100 });
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return undefined;
-
-    const update = () => {
-      const { scrollWidth, clientWidth, scrollLeft } = el;
-      if (scrollWidth <= clientWidth + 1) {
-        setThumb({ left: 0, width: 100 });
-        return;
-      }
-      const width = Math.max((clientWidth / scrollWidth) * 100, 15);
-      const maxScroll = scrollWidth - clientWidth;
-      const left = maxScroll > 0 ? (scrollLeft / maxScroll) * (100 - width) : 0;
-      setThumb({ left, width });
-    };
-
-    update();
-    el.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    return () => {
-      el.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-    };
-  }, [ref]);
-
-  return thumb;
 }
 
 function initials(name) {
@@ -193,7 +160,6 @@ const TABS = [
 export default function MyAccountsPage() {
   const { user, logout, switchContext, addBusiness } = useAuth();
   const navigate = useNavigate();
-  const bottomNavScrollRef = useRef(null);
 
   const [profile, setProfile] = useState(null);
   const [customerProfile, setCustomerProfile] = useState(null);
@@ -209,37 +175,16 @@ export default function MyAccountsPage() {
       ? "/dashboard"
       : "/my-dashboard";
   const NAV = isAdmin ? ADMIN_NAV : EMPLOYEE_NAV;
-  const bottomNavThumb = useScrollThumb(bottomNavScrollRef);
   // Customers get the same Messages badge as on their dashboard.
   const inbox = useCustomerInboxBadge({
     enabled: isCustomer,
     includeAnnouncements: true,
   });
+  // Employer / employee phone-nav badges (Messages, Notifications, ...), same numbers as their dashboard.
+  const staffBadges = useStaffNavBadges(
+    isCustomer ? null : isAdmin ? "employer" : "employee",
+  );
   const [query, setQuery] = useState("");
-
-  // Matches the save/restore effect in Dashboard.jsx / EmployeeDashboard.jsx.
-  // This page has its own separate copy of the bottom nav strip (own DOM
-  // node, own ref), so without this it always mounts at scrollLeft 0 -
-  // which then gets read back by the dashboard's own restore effect,
-  // making the sync look reversed. Keyed by dashboard type so an
-  // employer's scroll position never leaks into an employee's strip (or
-  // vice versa) for identities holding both.
-  useEffect(() => {
-    const el = bottomNavScrollRef.current;
-    if (!el) return undefined;
-    const key = isCustomer
-      ? "customerBottomNavScrollLeft"
-      : isAdmin
-        ? "employerBottomNavScrollLeft"
-        : "employeeBottomNavScrollLeft";
-    const saved = sessionStorage.getItem(key);
-    if (saved !== null) el.scrollLeft = Number(saved) || 0;
-    const onScroll = () => {
-      sessionStorage.setItem(key, String(el.scrollLeft));
-    };
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, [isAdmin, isCustomer]);
 
   // Best-effort profile fetch, purely to dress the shared shell (business
   // logo/name, avatar, HOD-gated nav items) the same way the dashboards
@@ -964,53 +909,22 @@ export default function MyAccountsPage() {
         <div className={dash.content}>{content}</div>
       </div>
 
-      {/* ── Mobile bottom navigation ── */}
-      <nav className={dash.bottomNav} aria-label="Primary">
-        <div className={dash.bottomNavScroll} ref={bottomNavScrollRef}>
-          {NAV.filter(
-            (n) =>
-              (!n.hodOnly || profile?.isHod) &&
-              n.label !== "Notifications" &&
-              n.label !== "Messages",
-          ).map((n) => (
-            <button
-              key={n.label}
-              type="button"
-              className={`${dash.bottomNavItem} ${n.label === ACTIVE_LABEL ? dash.bottomNavActive : ""}`}
-              onClick={() => handleNavClick(n)}
-            >
-              <div className={dash.bottomNavIconWrap}>
-                <i className={`ti ${n.icon}`} aria-hidden="true" />
-              </div>
-              <span>{n.label}</span>
-            </button>
-          ))}
-
-          {/* Logout has no sidebar/desktop equivalent in this strip - on
-              desktop it's the icon button in the sidebar footer instead.
-              This item only ever renders inside .bottomNav, which is
-              display:none above 900px, so it's mobile-only by construction. */}
-          <button
-            type="button"
-            className={dash.bottomNavItem}
-            onClick={() => setShowLogoutConfirm(true)}
-          >
-            <div className={dash.bottomNavIconWrap}>
-              <i className="ti ti-logout" aria-hidden="true" />
-            </div>
-            <span>Log out</span>
-          </button>
-        </div>
-        <div className={dash.bottomNavScrollTrack} aria-hidden="true">
-          <div
-            className={dash.bottomNavScrollThumb}
-            style={{
-              width: `${bottomNavThumb.width}%`,
-              left: `${bottomNavThumb.left}%`,
-            }}
-          />
-        </div>
-      </nav>
+      {/* ── Mobile bottom navigation ──
+          The SAME MobileNavHub the employer / employee dashboards use (Home ·
+          People · Operations · Messages · More), so this page's phone nav is
+          identical to the one on the dashboard the person came from. Picking a
+          destination goes back to that dashboard on the chosen section. */}
+      <MobileNavHub
+        role={isAdmin ? "employer" : "employee"}
+        activeNav="/my-accounts"
+        setActiveNav={(key) =>
+          navigate(dashboardPath, { state: { activeNav: key } })
+        }
+        navigate={navigate}
+        isHod={Boolean(profile?.isHod)}
+        badges={staffBadges}
+        onLogout={() => setShowLogoutConfirm(true)}
+      />
 
       <LogoutConfirmModal
         open={showLogoutConfirm}
