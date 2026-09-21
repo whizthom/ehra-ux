@@ -10,6 +10,7 @@ import {
   getCustomerBusinessTypes,
   getCustomerProfile,
   updateCustomerProfile,
+  uploadCustomerProfilePicture,
 } from "../api/commerceApi";
 import { createCustomerBusinessConversation } from "../api/messagingApi";
 import { useAuth } from "../context/AuthContext";
@@ -910,6 +911,18 @@ export default function CustomerDashboard() {
     }
   };
 
+  const handleProfileImageChange = (url) => {
+    if (!url) return;
+    setData((current) =>
+      current ? { ...current, profileImage: url } : current,
+    );
+    setProfileForm((current) =>
+      current
+        ? { ...current, profileImage: url, profilePictureUrl: url }
+        : current,
+    );
+  };
+
   const signOut = async () => {
     try {
       await contextLogout();
@@ -941,6 +954,12 @@ export default function CustomerDashboard() {
         onNavigate={changeTab}
         firstName={data?.firstName}
         lastName={data?.lastName}
+        profileImage={
+          data?.profileImage ||
+          profileForm?.profileImage ||
+          profileForm?.profilePictureUrl
+        }
+        onProfileImageChange={handleProfileImageChange}
         unread={unread}
         onSignOut={signOut}
         banner={<Toast message={notice} onClose={() => setNotice("")} />}
@@ -1647,11 +1666,58 @@ export default function CustomerDashboard() {
             <header className={styles.acHero}>
               <div className={styles.acAvatarWrap}>
                 <span className={styles.acAvatarRing} aria-hidden="true" />
-                <div className={styles.acAvatar}>
-                  {initials(
-                    `${profileForm?.firstName || data?.firstName || ""} ${profileForm?.lastName || data?.lastName || ""}`,
+                <button
+                  type="button"
+                  className={styles.acAvatar}
+                  onClick={() =>
+                    document
+                      .getElementById("customer-account-photo-input")
+                      ?.click()
+                  }
+                  aria-label="Upload profile picture"
+                  title="Upload profile picture"
+                >
+                  {profileForm?.profileImage ||
+                  profileForm?.profilePictureUrl ||
+                  data?.profileImage ? (
+                    <img
+                      src={
+                        profileForm?.profileImage ||
+                        profileForm?.profilePictureUrl ||
+                        data?.profileImage
+                      }
+                      alt=""
+                    />
+                  ) : (
+                    initials(
+                      `${profileForm?.firstName || data?.firstName || ""} ${profileForm?.lastName || data?.lastName || ""}`,
+                    )
                   )}
-                </div>
+                  <span className={styles.acAvatarCamera}>
+                    <i className="ti ti-camera" />
+                  </span>
+                </button>
+                <input
+                  id="customer-account-photo-input"
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = "";
+                    if (!file) return;
+                    try {
+                      const { data: result } =
+                        await uploadCustomerProfilePicture(file);
+                      handleProfileImageChange(result?.url);
+                    } catch (err) {
+                      setNotice(
+                        err?.response?.data?.message ||
+                          "We could not upload your profile picture.",
+                      );
+                    }
+                  }}
+                />
               </div>
               <div className={styles.acWho}>
                 <span className={styles.eyebrow}>ACCOUNT &amp; SECURITY</span>
@@ -1691,10 +1757,11 @@ export default function CustomerDashboard() {
                   {editingProfile ? "Close editor" : "Edit profile"}
                 </button>
                 <button
-                  onClick={() => nav("/forgot-password")}
+                  onClick={() => nav("/customer-dashboard?tab=spending")}
                   className={styles.acGhost}
                 >
-                  <i className="ti ti-key" aria-hidden="true" /> Change password
+                  <i className="ti ti-chart-donut" aria-hidden="true" /> View
+                  spending
                 </button>
               </div>
             </header>
@@ -1707,6 +1774,27 @@ export default function CustomerDashboard() {
                     Changes apply to your Ehral identity and follow you across
                     your relationships.
                   </p>
+                </div>
+                <div className={styles.acPhotoField}>
+                  <div>
+                    <span className={styles.acFieldLabel}>Profile picture</span>
+                    <small>
+                      Use a clear photo. It will appear wherever your customer
+                      profile is shown.
+                    </small>
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.acPhotoButton}
+                    onClick={() =>
+                      document
+                        .getElementById("customer-account-photo-input")
+                        ?.click()
+                    }
+                  >
+                    <i className="ti ti-camera" aria-hidden="true" />
+                    Change picture
+                  </button>
                 </div>
                 <div className={styles.acFields}>
                   {[
@@ -1773,30 +1861,6 @@ export default function CustomerDashboard() {
                         }))
                       }
                       rows={2}
-                    />
-                  </label>
-                  <label className={styles.acField}>
-                    <span>Emergency contact name</span>
-                    <input
-                      value={profileForm.emergencyContactName || ""}
-                      onChange={(e) =>
-                        setProfileForm((p) => ({
-                          ...p,
-                          emergencyContactName: e.target.value,
-                        }))
-                      }
-                    />
-                  </label>
-                  <label className={styles.acField}>
-                    <span>Emergency contact phone</span>
-                    <input
-                      value={profileForm.emergencyContactPhone || ""}
-                      onChange={(e) =>
-                        setProfileForm((p) => ({
-                          ...p,
-                          emergencyContactPhone: e.target.value,
-                        }))
-                      }
                     />
                   </label>
                 </div>

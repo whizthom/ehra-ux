@@ -128,6 +128,51 @@
   flex-shrink: 0;
 }
 
+.profileAvatarButton {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 14px;
+  padding: 0;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(140deg, var(--cust-grad-2), var(--accent) 70%, var(--cust-glow));
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+  flex: 0 0 auto;
+  box-shadow: 0 12px 24px -16px color-mix(in srgb, var(--cust-glow) 80%, transparent);
+}
+
+.profileAvatarButton img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatarUploadHint {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--cust-grad-1) 82%, transparent);
+  color: var(--cust-glow);
+  font-size: 9px;
+  border: 1px solid color-mix(in srgb, var(--cust-glow) 55%, transparent);
+}
+
+.profileAvatarButton:disabled {
+  opacity: .65;
+  cursor: wait;
+}
+
 .profileAvatar {
   width: 40px;
   height: 40px;
@@ -283,6 +328,15 @@
   cursor: pointer;
   flex-shrink: 0;
 }
+
+.avatarButton img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: inherit;
+}
+
 
 .mobileBrand {
   display: none;
@@ -4199,7 +4253,35 @@
   font-size: clamp(1.7rem, 4vw, 2.6rem);
   font-weight: 800;
   letter-spacing: -0.03em;
+  border: 0;
+  padding: 0;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
   box-shadow: 0 24px 44px -22px color-mix(in srgb, var(--accent) 80%, transparent);
+}
+
+.acAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.acAvatarCamera {
+  position: absolute;
+  right: 7px;
+  bottom: 7px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--cust-grad-1) 76%, transparent);
+  color: var(--cust-glow);
+  border: 1px solid color-mix(in srgb, var(--cust-glow) 50%, transparent);
+  font-size: 13px;
+  backdrop-filter: blur(8px);
 }
 
 .acWho {
@@ -4335,6 +4417,53 @@
   margin: 0;
   font-size: 13.5px;
   color: var(--text-secondary);
+}
+
+.acPhotoField {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 15px 16px;
+  border-radius: 17px;
+  background: color-mix(in srgb, var(--cust-glow) 7%, var(--bg-surface));
+  border: 1px solid color-mix(in srgb, var(--cust-glow) 18%, var(--border-color));
+}
+
+.acPhotoField>div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.acFieldLabel {
+  font-size: 13px;
+  font-weight: 750;
+  color: var(--text-primary);
+}
+
+.acPhotoField small {
+  color: var(--text-secondary);
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+
+.acPhotoButton {
+  flex: none;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 11px;
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border-color));
+  background: color-mix(in srgb, var(--accent) 9%, var(--bg-surface));
+  color: var(--accent);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.acPhotoButton:hover {
+  background: color-mix(in srgb, var(--cust-glow) 14%, var(--bg-surface));
 }
 
 .acFields {

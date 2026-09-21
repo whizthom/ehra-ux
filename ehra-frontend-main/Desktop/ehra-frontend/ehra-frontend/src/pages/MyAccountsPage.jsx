@@ -793,17 +793,13 @@ export default function MyAccountsPage() {
           onNavigate={customerNavigate}
           firstName={customerProfile?.firstName}
           lastName={customerProfile?.lastName}
+          profileImage={profileImage}
+          onProfileImageChange={handleCustomerProfileImageChange}
           unread={inbox.total}
-          onSignOut={() => setShowLogoutConfirm(true)}
+          onSignOut={handleLogout}
         >
           {content}
         </CustomerShell>
-        <LogoutConfirmModal
-          open={showLogoutConfirm}
-          onCancel={() => setShowLogoutConfirm(false)}
-          onConfirm={handleLogout}
-          loading={loggingOut}
-        />
       </>
     );
   }

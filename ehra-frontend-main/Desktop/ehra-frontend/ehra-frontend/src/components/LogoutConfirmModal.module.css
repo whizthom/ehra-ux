@@ -1,108 +1,183 @@
-/* ── Confirmation modal - same visual pattern as
-   RemoveEmployeeModal.module.css so every confirm dialog in the app looks
-   and feels the same. ── */
-
 .modalOverlay {
     position: fixed;
     inset: 0;
-    background: rgba(15, 23, 42, 0.45);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 20px;
+    z-index: 2000;
+    display: grid;
+    place-items: center;
+    padding: 22px;
+    background:
+        radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--cust-glow, var(--accent)) 16%, transparent), transparent 38%),
+        color-mix(in srgb, var(--cust-grad-1, #0b1f1a) 58%, transparent);
+    backdrop-filter: blur(18px) saturate(125%);
+    -webkit-backdrop-filter: blur(18px) saturate(125%);
 }
 
 .modal {
-    background: var(--bg-surface);
-    border-radius: 16px;
-    padding: 28px;
-    max-width: 380px;
-    width: 100%;
+    position: relative;
+    width: min(440px, 100%);
+    overflow: hidden;
+    border-radius: 30px;
+    padding: 34px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
     text-align: center;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    gap: 16px;
+    color: var(--text-primary);
+    background:
+        linear-gradient(145deg,
+            color-mix(in srgb, #ffffff 82%, transparent),
+            color-mix(in srgb, var(--bg-surface) 76%, transparent) 58%,
+            color-mix(in srgb, var(--cust-glow, var(--accent)) 8%, transparent));
+    border: 1px solid color-mix(in srgb, #ffffff 74%, var(--cust-glow, var(--accent)) 26%);
+    box-shadow:
+        0 38px 100px color-mix(in srgb, var(--cust-grad-1, #0b1f1a) 42%, transparent),
+        inset 0 1px 0 color-mix(in srgb, #ffffff 88%, transparent),
+        inset 0 -1px 0 color-mix(in srgb, var(--cust-glow, var(--accent)) 18%, transparent);
+    backdrop-filter: blur(28px) saturate(145%);
+    -webkit-backdrop-filter: blur(28px) saturate(145%);
+}
+
+.modal::before,
+.modal::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(4px);
+}
+
+.modal::before {
+    width: 190px;
+    height: 190px;
+    top: -115px;
+    right: -75px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--cust-glow, var(--accent)) 30%, transparent), transparent 68%);
+}
+
+.modal::after {
+    width: 150px;
+    height: 150px;
+    bottom: -100px;
+    left: -55px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--accent) 24%, transparent), transparent 70%);
 }
 
 .modalIcon {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: var(--danger-bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: relative;
+    width: 70px;
+    height: 70px;
+    border-radius: 23px;
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--cust-glow, var(--accent)) 15%, #fff 85%);
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--cust-glow, var(--accent)) 38%, #fff 62%);
+    box-shadow:
+        0 16px 34px -20px color-mix(in srgb, var(--cust-glow, var(--accent)) 75%, transparent),
+        inset 0 1px 0 rgba(255, 255, 255, .8);
+}
+
+.modalIcon::after {
+    content: "";
+    position: absolute;
+    inset: -7px;
+    border-radius: 28px;
+    border: 1px solid color-mix(in srgb, var(--cust-glow, var(--accent)) 18%, transparent);
 }
 
 .modalTitle {
-    font-size: 16px;
-    font-weight: 500;
-    color: var(--text-primary);
-    margin: 0;
+    position: relative;
+    margin: 3px 0 0;
+    font-size: 23px;
+    line-height: 1.1;
+    letter-spacing: -.035em;
+    font-weight: 850;
 }
 
 .modalBody {
-    font-size: 13px;
-    color: var(--text-secondary);
-    line-height: 1.65;
+    position: relative;
+    max-width: 330px;
     margin: 0;
+    color: var(--text-secondary);
+    font-size: 13.5px;
+    line-height: 1.65;
 }
 
 .modalActions {
-    display: flex;
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
     width: 100%;
+    margin-top: 6px;
+}
+
+.cancelBtn,
+.confirmBtn {
+    height: 46px;
+    border-radius: 14px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 750;
+    cursor: pointer;
+    transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
 }
 
 .cancelBtn {
-    flex: 1;
-    height: 40px;
-    background: var(--bg-surface);
-    border: 0.5px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 13px;
-    cursor: pointer;
-    font-family: inherit;
-    color: var(--text-secondary);
-}
-
-.cancelBtn:hover {
-    background: var(--bg-surface-alt);
+    color: var(--text-primary);
+    background: color-mix(in srgb, #ffffff 62%, var(--bg-surface) 38%);
+    border: 1px solid color-mix(in srgb, var(--accent) 16%, var(--border-color));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8);
 }
 
 .confirmBtn {
-    flex: 1;
-    height: 40px;
-    background: var(--danger-text);
-    border: none;
-    border-radius: 8px;
     color: #fff;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: inherit;
-    transition: background 0.15s;
+    border: 1px solid color-mix(in srgb, var(--cust-glow, var(--accent)) 55%, var(--accent));
+    background: linear-gradient(135deg, var(--cust-grad-2, var(--accent)), var(--accent), var(--cust-glow, var(--accent)));
+    box-shadow: 0 16px 30px -18px color-mix(in srgb, var(--accent) 80%, transparent);
 }
 
-/* --danger-text in dark mode (#ffb4bd) is a light pink meant for TEXT
-   sitting on a translucent --danger-bg, not for use as a solid button
-   fill - using it here made this button render pale-pink-on-white
-   instead of a proper filled danger button, and looked like the modal
-   hadn't picked up dark mode at all. --danger is the actual solid-fill
-   danger color in both themes; only overriding it for dark mode keeps
-   light mode exactly as it already was. */
-[data-theme="dark"] .confirmBtn {
-    background: var(--danger);
+.cancelBtn:hover:not(:disabled),
+.confirmBtn:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.cancelBtn:hover:not(:disabled) {
+    background: color-mix(in srgb, #ffffff 78%, var(--cust-glow, var(--accent)) 22%);
 }
 
 .confirmBtn:hover:not(:disabled) {
-    background: var(--danger-hover);
+    box-shadow: 0 20px 34px -18px color-mix(in srgb, var(--cust-glow, var(--accent)) 88%, transparent);
 }
 
+.cancelBtn:disabled,
 .confirmBtn:disabled {
-    opacity: 0.6;
+    opacity: .55;
     cursor: not-allowed;
+}
+
+@media (max-width: 520px) {
+    .modal {
+        padding: 28px 22px 24px;
+        border-radius: 26px;
+    }
+
+    .modalActions {
+        grid-template-columns: 1fr;
+    }
+}
+
+[data-theme="dark"] .modal {
+    background:
+        linear-gradient(145deg,
+            color-mix(in srgb, var(--bg-surface) 82%, transparent),
+            color-mix(in srgb, var(--cust-grad-1, #0b1f1a) 72%, transparent) 62%,
+            color-mix(in srgb, var(--cust-glow, var(--accent)) 9%, transparent));
+    border-color: color-mix(in srgb, var(--cust-glow, var(--accent)) 24%, var(--border-color));
+}
+
+[data-theme="dark"] .cancelBtn {
+    background: color-mix(in srgb, var(--bg-surface) 76%, transparent);
+    border-color: color-mix(in srgb, var(--cust-glow, var(--accent)) 18%, var(--border-color));
 }

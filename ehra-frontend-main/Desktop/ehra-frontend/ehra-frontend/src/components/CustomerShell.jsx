@@ -1,8 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "./Logo";
 import MobileNavHub from "./MobileNavHub";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
+import LogoutConfirmModal from "./LogoutConfirmModal";
+import { uploadCustomerProfilePicture } from "../api/commerceApi";
 import { CUSTOMER_NAV_ITEMS } from "../utils/customerNav";
 import styles from "../pages/CustomerDashboard.module.css";
 
@@ -43,6 +45,8 @@ export default function CustomerShell({
   onNavigate,
   firstName,
   lastName,
+  profileImage,
+  onProfileImageChange,
   unread = 0,
   onSignOut,
   accountsActive = false,
@@ -53,6 +57,9 @@ export default function CustomerShell({
 }) {
   const nav = useNavigate();
   const initials = initialsOf(firstName, lastName);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const avatarInputRef = useRef(null);
   const scrollerRef = useRef(null);
 
   // Content scrolls inside the shell (below the top bar), not the document -
@@ -70,7 +77,39 @@ export default function CustomerShell({
           <Logo size={62} variant="horizontal" tone="sidebar" title="Ehral" />
         </div>
         <div className={styles.profileMini}>
-          <div className={styles.profileAvatar}>{initials}</div>
+          <button
+            type="button"
+            className={styles.profileAvatarButton}
+            onClick={() => avatarInputRef.current?.click()}
+            aria-label="Upload profile picture"
+            title="Upload profile picture"
+            disabled={uploadingPhoto}
+          >
+            {profileImage ? <img src={profileImage} alt="" /> : initials}
+            <span className={styles.avatarUploadHint}>
+              <i className="ti ti-camera" />
+            </span>
+          </button>
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              e.target.value = "";
+              if (!file) return;
+              setUploadingPhoto(true);
+              try {
+                const { data } = await uploadCustomerProfilePicture(file);
+                onProfileImageChange?.(data?.url);
+              } catch (err) {
+                console.error("Customer profile picture upload failed", err);
+              } finally {
+                setUploadingPhoto(false);
+              }
+            }}
+          />
           <div>
             <strong>{firstName || "Customer"}</strong>
             <small>Customer account</small>
@@ -101,7 +140,7 @@ export default function CustomerShell({
           >
             <i className="ti ti-switch-horizontal" /> Switch account
           </button>
-          <button onClick={onSignOut}>
+          <button onClick={() => setShowLogoutConfirm(true)}>
             <i className="ti ti-logout-2" /> Sign out
           </button>
         </div>
@@ -129,7 +168,7 @@ export default function CustomerShell({
               onClick={() => onNavigate("account")}
               aria-label="Open account"
             >
-              {initials}
+              {profileImage ? <img src={profileImage} alt="" /> : initials}
             </button>
           </div>
         </header>
@@ -149,7 +188,16 @@ export default function CustomerShell({
         setActiveNav={onNavigate}
         navigate={nav}
         badges={{ Messages: unread }}
-        onLogout={onSignOut}
+        onLogout={() => setShowLogoutConfirm(true)}
+      />
+
+      <LogoutConfirmModal
+        open={showLogoutConfirm}
+        onCancel={() => setShowLogoutConfirm(false)}
+        onConfirm={async () => {
+          await onSignOut?.();
+          setShowLogoutConfirm(false);
+        }}
       />
     </div>
   );
