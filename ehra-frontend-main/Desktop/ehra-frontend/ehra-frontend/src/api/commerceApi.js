@@ -251,6 +251,7 @@ export const uploadCustomerProfilePicture = (
     {
       headers: {
         "Content-Type": "multipart/form-data",
+        hel
       },
     }
   );
