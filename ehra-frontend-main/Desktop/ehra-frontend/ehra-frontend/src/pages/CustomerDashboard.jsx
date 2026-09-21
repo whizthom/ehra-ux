@@ -22,6 +22,7 @@ import MessagingHub from "../components/messaging/MessagingHub";
 import NotificationToastStack from "../components/notifications/NotificationToastStack";
 import BusinessCard from "../components/BusinessCard";
 import BrandSplash from "../components/BrandSplash";
+import LogoutConfirmModal from "../components/LogoutConfirmModal";
 import styles from "./CustomerDashboard.module.css";
 
 // Matches Ehral\'s employer/employee mobile navigation behavior.
@@ -603,6 +604,10 @@ export default function CustomerDashboard() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
+  // The "Sign out of Ehral" button on the Account page asks first, using the
+  // same confirmation dialog as the sidebar and mobile menu.
+  const [confirmSignOut, setConfirmSignOut] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const [discovery, setDiscovery] = useState([]);
   const [discoveryLoading, setDiscoveryLoading] = useState(false);
   const [discoveryQuery, setDiscoveryQuery] = useState("");
@@ -2016,7 +2021,10 @@ export default function CustomerDashboard() {
                   stay connected while each business keeps control of its own
                   products and operations.
                 </p>
-                <button onClick={signOut} className={styles.acSignOut}>
+                <button
+                  onClick={() => setConfirmSignOut(true)}
+                  className={styles.acSignOut}
+                >
                   <i className="ti ti-logout-2" aria-hidden="true" /> Sign out
                   of Ehral
                 </button>
@@ -2025,6 +2033,21 @@ export default function CustomerDashboard() {
           </section>
         )}
       </CustomerShell>
+
+      <LogoutConfirmModal
+        open={confirmSignOut}
+        loading={signingOut}
+        onCancel={() => setConfirmSignOut(false)}
+        onConfirm={async () => {
+          setSigningOut(true);
+          try {
+            await signOut();
+          } finally {
+            setSigningOut(false);
+            setConfirmSignOut(false);
+          }
+        }}
+      />
 
       {selectedOrder && (
         <ReceiptView
