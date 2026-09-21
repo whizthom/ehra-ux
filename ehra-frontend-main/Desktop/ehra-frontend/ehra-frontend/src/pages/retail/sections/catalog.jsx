@@ -256,18 +256,39 @@ function Customers({
     </>
   );
 }
-function Expenses({ items, onAdd, onEdit, onDelete, money }) {
+function Expenses({ items, query, setQuery, onAdd, onEdit, onDelete, money }) {
+  const visible = filteredRows(items, query, ["category", "description"]);
   return (
     <>
-      <Toolbar
-        title="Expenses"
-        sub="Record operating costs separately from owner withdrawals."
-        action={
+      <div className={s.productsToolbar}>
+        <div>
+          <h2>Expenses</h2>
+          <p>Record operating costs separately from owner withdrawals.</p>
+        </div>
+        <div className={s.productsToolbarControls}>
+          <div className={s.productsSearch}>
+            <span aria-hidden="true">⌕</span>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search expenses..."
+              aria-label="Search expenses"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="Clear search"
+              >
+                ×
+              </button>
+            )}
+          </div>
           <button className={s.primary} onClick={onAdd}>
             ＋ Add Expense
           </button>
-        }
-      />
+        </div>
+      </div>
       <Panel
         title="Expense ledger"
         sub="Rent, salaries, utilities, marketing, repairs and other operating costs."
@@ -285,7 +306,7 @@ function Expenses({ items, onAdd, onEdit, onDelete, money }) {
               </tr>
             </thead>
             <tbody>
-              {items.map((x) => (
+              {visible.map((x) => (
                 <tr key={x.id}>
                   <td>{x.expenseDate}</td>
                   <td>
@@ -315,14 +336,22 @@ function Expenses({ items, onAdd, onEdit, onDelete, money }) {
               ))}
             </tbody>
           </table>
-          {!items.length && (
+          {!visible.length && (
             <Empty
-              title="No expenses yet"
-              text="Record your first operating expense to start tracking business costs."
+              title={
+                query ? "No expenses match your search" : "No expenses yet"
+              }
+              text={
+                query
+                  ? "Try a different category or description."
+                  : "Record your first operating expense to start tracking business costs."
+              }
               action={
-                <button className={s.primary} onClick={onAdd}>
-                  Add expense
-                </button>
+                !query && (
+                  <button className={s.primary} onClick={onAdd}>
+                    Add expense
+                  </button>
+                )
               }
             />
           )}

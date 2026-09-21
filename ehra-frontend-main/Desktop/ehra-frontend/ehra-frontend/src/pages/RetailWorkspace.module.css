@@ -796,6 +796,169 @@ td small {
   color: var(--text-primary)
 }
 
+/* ── Retail staff permissions panel: a responsive card per employee so it
+   never relies on a horizontally-scrolling table, on any device size. ── */
+.staffGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+.staffCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  background: var(--bg-surface);
+  box-shadow: 0 3px 14px var(--shadow-color);
+  transition: opacity .15s ease;
+}
+
+.staffCardBusy {
+  opacity: .6;
+}
+
+.staffCardHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.staffCardName {
+  min-width: 0;
+}
+
+.staffCardName b {
+  display: block;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.staffCardName small {
+  display: block;
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.staffRoleField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.staffRoleField span {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.staffRoleField select {
+  width: 100%;
+  height: 42px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 0 12px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.staffPermLabel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border-color);
+  padding-top: 12px;
+}
+
+.staffPermGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+  margin-top: -6px;
+}
+
+.staffPermToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--bg-surface-alt);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.staffPermToggle input {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.staffPermToggle:has(input:checked) {
+  background: var(--bg-soft-accent);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border-color));
+  color: var(--accent);
+}
+
+.staffPermToggle:has(input:disabled) {
+  cursor: not-allowed;
+}
+
+.staffPermToggle span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media(max-width:900px) {
+  .staffGrid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+}
+
+@media(max-width:680px) {
+  .staffGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .staffCard {
+    padding: 15px;
+    border-radius: 16px;
+  }
+
+  .staffRoleField select {
+    height: 46px;
+  }
+
+  .staffPermGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .staffPermToggle {
+    padding: 11px 10px;
+  }
+}
+
+@media(max-width:380px) {
+  .staffPermGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .dateRange span {
   font-size: 11px;
   color: var(--text-secondary)

@@ -496,6 +496,8 @@ export default function RetailWorkspace() {
           {tab === "Expenses" && (
             <Expenses
               items={data.expenses}
+              query={query}
+              setQuery={setQuery}
               onAdd={() => {
                 setEditing(null);
                 setModal("expense");
