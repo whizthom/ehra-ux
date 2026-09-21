@@ -93,6 +93,29 @@ const initials = (name = "Ehral") =>
     .join("")
     .toUpperCase();
 
+const BUSINESS_CATEGORIES = [
+  "Food & Grocery",
+  "Restaurant & Dining",
+  "Fashion & Apparel",
+  "Beauty & Personal Care",
+  "Health & Wellness",
+  "Electronics & Technology",
+  "Home & Living",
+  "Automotive",
+  "Professional Services",
+  "Education & Training",
+  "Financial Services",
+  "Real Estate",
+  "Travel & Hospitality",
+  "Entertainment & Events",
+  "Sports & Fitness",
+  "Retail & Shopping",
+  "Construction & Home Services",
+  "Logistics & Delivery",
+  "Agriculture",
+  "Other Services",
+];
+
 const MONTHS = [
   "Jan",
   "Feb",
@@ -605,6 +628,7 @@ export default function CustomerDashboard() {
   const [discoveryLoading, setDiscoveryLoading] = useState(false);
   const [discoveryQuery, setDiscoveryQuery] = useState("");
   const [discoveryType, setDiscoveryType] = useState("");
+  const [discoveryCategory, setDiscoveryCategory] = useState("");
   const [businessTypes, setBusinessTypes] = useState([]);
   const [profileForm, setProfileForm] = useState(null);
   const [editingProfile, setEditingProfile] = useState(false);
@@ -1241,44 +1265,96 @@ export default function CustomerDashboard() {
               </p>
             </div>
             <div className={styles.discoveryToolbar}>
-              <label className={styles.discoverySearch}>
-                <i className="ti ti-search" />
-                <input
-                  value={discoveryQuery}
-                  onChange={(e) => setDiscoveryQuery(e.target.value)}
-                  placeholder="Search business, category, or location…"
-                  aria-label="Search businesses"
-                />
-                {discoveryQuery && (
+              <div className={styles.discoverySearchRow}>
+                <label className={styles.discoverySearch}>
+                  <i className="ti ti-search" />
+                  <input
+                    value={discoveryQuery}
+                    onChange={(e) => {
+                      setDiscoveryQuery(e.target.value);
+                      setDiscoveryCategory("");
+                    }}
+                    placeholder="Search business, category, or location…"
+                    aria-label="Search businesses"
+                  />
+                  {discoveryQuery && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDiscoveryQuery("");
+                        setDiscoveryCategory("");
+                      }}
+                      aria-label="Clear search"
+                    >
+                      <i className="ti ti-x" />
+                    </button>
+                  )}
+                </label>
+              </div>
+
+              <div className={styles.discoveryFilterSection}>
+                <div className={styles.discoveryFilterHeading}>
+                  <span>Business type</span>
+                  <small>Filter by the kind of business</small>
+                </div>
+                <div
+                  className={styles.discoveryTypes}
+                  role="group"
+                  aria-label="Business type filters"
+                >
                   <button
                     type="button"
-                    onClick={() => setDiscoveryQuery("")}
-                    aria-label="Clear search"
+                    className={!discoveryType ? styles.discoveryTypeActive : ""}
+                    onClick={() => setDiscoveryType("")}
                   >
-                    <i className="ti ti-x" />
+                    All
                   </button>
-                )}
-              </label>
-              <div className={styles.discoveryTypes}>
-                <button
-                  className={!discoveryType ? styles.discoveryTypeActive : ""}
-                  onClick={() => setDiscoveryType("")}
+                  {businessTypes.map((type) => (
+                    <button
+                      type="button"
+                      key={type}
+                      className={
+                        discoveryType === type ? styles.discoveryTypeActive : ""
+                      }
+                      onClick={() => setDiscoveryType(type)}
+                    >
+                      {type
+                        .replaceAll("_", " ")
+                        .replace(/\b\w/g, (m) => m.toUpperCase())}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className={styles.discoveryFilterSection}>
+                <div className={styles.discoveryFilterHeading}>
+                  <span>Explore by category</span>
+                  <small>Jump directly to what you need</small>
+                </div>
+                <div
+                  className={styles.discoveryCategories}
+                  role="group"
+                  aria-label="Business categories"
                 >
-                  All
-                </button>
-                {businessTypes.map((type) => (
-                  <button
-                    key={type}
-                    className={
-                      discoveryType === type ? styles.discoveryTypeActive : ""
-                    }
-                    onClick={() => setDiscoveryType(type)}
-                  >
-                    {type
-                      .replaceAll("_", " ")
-                      .replace(/\b\w/g, (m) => m.toUpperCase())}
-                  </button>
-                ))}
+                  {BUSINESS_CATEGORIES.map((category) => (
+                    <button
+                      type="button"
+                      key={category}
+                      className={
+                        discoveryCategory === category
+                          ? styles.discoveryCategoryActive
+                          : ""
+                      }
+                      onClick={() => {
+                        setDiscoveryCategory(category);
+                        setDiscoveryQuery(category);
+                      }}
+                    >
+                      <i className="ti ti-tag" aria-hidden="true" />
+                      {category}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
             {discoveryLoading ? (
