@@ -226,6 +226,17 @@ export const connectCustomerToBusinessId = (
     `/customer/businesses/${businessId}/connect`
   );
 
+// Leaves a business. The link is only soft-removed on the server (orders,
+// receipts and history stay in the customer's account), and calling
+// connectCustomerToBusinessId again restores it - so the two together
+// drive the Connect / Disconnect toggle.
+export const disconnectCustomerFromBusinessId = (
+  businessId
+) =>
+  API.delete(
+    `/customer/businesses/${businessId}/connect`
+  );
+
 export const getCustomerProfile = () =>
   API.get("/customer/profile");
 
@@ -251,7 +262,6 @@ export const uploadCustomerProfilePicture = (
     {
       headers: {
         "Content-Type": "multipart/form-data",
-        hel
       },
     }
   );

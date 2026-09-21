@@ -2,13 +2,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Logo from "../components/Logo";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
-import {
-  connectCustomerToBusinessId,
-  getCustomerBusinessView,
-} from "../api/commerceApi";
+import { getCustomerBusinessView } from "../api/commerceApi";
 import { createCustomerBusinessConversation } from "../api/messagingApi";
 import { buildWhatsAppLink } from "../api/whatsappApi";
-import { useAuth } from "../context/AuthContext";
+import useBusinessConnection from "../hooks/useBusinessConnection";
 import {
   DAYS,
   dayIndex,
@@ -51,13 +48,16 @@ export default function CustomerBusinessView() {
   const { businessId } = useParams();
   const nav = useNavigate();
   const location = useLocation();
-  const { switchContext } = useAuth();
+  const {
+    connect: linkBusiness,
+    disconnect: unlinkBusiness,
+    phaseOf,
+  } = useBusinessConnection();
 
   const [view, setView] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
-  const [working, setWorking] = useState(false);
   const [notice, setNotice] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const [showDock, setShowDock] = useState(false);
@@ -118,6 +118,8 @@ export default function CustomerBusinessView() {
   }, [hasView]);
 
   const business = view?.business;
+  const phase = business ? phaseOf(business.businessId) : null;
+  const working = Boolean(phase);
   const storefront = view?.storefront;
   const products = view?.products;
 
@@ -167,22 +169,28 @@ export default function CustomerBusinessView() {
     nav(`/customer-dashboard?tab=${tab}`, { replace: true });
   };
 
-  const connect = async () => {
+  // One handler for both directions, so the hero button, the phone dock and
+  // any future entry point behave identically: Connect <-> Disconnect.
+  const toggleConnection = async () => {
     if (!business || working) return;
-    setWorking(true);
+    const leaving = Boolean(business.connected);
     setNotice("");
     try {
-      const r = await connectCustomerToBusinessId(business.businessId);
-      await switchContext("CUSTOMER", r.data.membershipId);
+      if (leaving) await unlinkBusiness(business.businessId);
+      else await linkBusiness(business.businessId, { bind: true });
       setReloadKey((k) => k + 1);
-      setNotice(`You're now connected to ${business.businessName}.`);
+      setNotice(
+        leaving
+          ? `You've disconnected from ${business.businessName}.`
+          : `You're now connected to ${business.businessName}.`,
+      );
     } catch (e) {
       setNotice(
         e?.response?.data?.message ||
-          "We couldn't connect you to this business.",
+          (leaving
+            ? "We couldn't disconnect you from this business."
+            : "We couldn't connect you to this business."),
       );
-    } finally {
-      setWorking(false);
     }
   };
 
@@ -376,16 +384,25 @@ export default function CustomerBusinessView() {
                   </span>
                 </div>
               )}
-              {!business.connected && (
-                <button
-                  className={`${styles.ghost} ${nudgeConnect ? styles.nudge : ""}`}
-                  onClick={connect}
-                  disabled={working}
-                >
-                  <i className="ti ti-user-plus" aria-hidden="true" />
-                  {working ? "Connecting…" : "Connect"}
-                </button>
-              )}
+              <button
+                className={`${styles.ghost} ${business.connected ? styles.leave : ""} ${nudgeConnect ? styles.nudge : ""}`}
+                onClick={toggleConnection}
+                disabled={working}
+              >
+                <i
+                  className={
+                    business.connected ? "ti ti-user-minus" : "ti ti-user-plus"
+                  }
+                  aria-hidden="true"
+                />
+                {phase === "connecting"
+                  ? "Connecting…"
+                  : phase === "disconnecting"
+                    ? "Disconnecting…"
+                    : business.connected
+                      ? "Disconnect"
+                      : "Connect"}
+              </button>
               <button className={styles.ghost} onClick={message}>
                 <i className="ti ti-message-circle" aria-hidden="true" />{" "}
                 Message
@@ -396,12 +413,11 @@ export default function CustomerBusinessView() {
                 </a>
               )}
             </div>
-            {!business.connected && (
-              <p className={styles.connectHint}>
-                Connect to order, message the team and keep your receipts in
-                your Ehral account.
-              </p>
-            )}
+            <p className={styles.connectHint}>
+              {business.connected
+                ? "Disconnecting removes this business from My businesses. Your past orders and receipts stay in your Ehral account, and you can reconnect any time."
+                : "Connect to order, message the team and keep your receipts in your Ehral account."}
+            </p>
           </section>
         </div>
 
@@ -625,7 +641,7 @@ export default function CustomerBusinessView() {
         ) : !business.connected ? (
           <button
             className={styles.dockPrimary}
-            onClick={connect}
+            onClick={toggleConnection}
             disabled={working}
             tabIndex={showDock ? 0 : -1}
           >
@@ -633,6 +649,26 @@ export default function CustomerBusinessView() {
             <i className="ti ti-user-plus" aria-hidden="true" />
           </button>
         ) : null}
+        {(storeOpen || business.connected) && (
+          <button
+            className={`${styles.dockIcon} ${business.connected ? styles.dockLeave : ""}`}
+            onClick={toggleConnection}
+            disabled={working}
+            aria-label={
+              business.connected
+                ? `Disconnect from ${business.businessName}`
+                : `Connect to ${business.businessName}`
+            }
+            tabIndex={showDock ? 0 : -1}
+          >
+            <i
+              className={
+                business.connected ? "ti ti-user-minus" : "ti ti-user-plus"
+              }
+              aria-hidden="true"
+            />
+          </button>
+        )}
         <button
           className={styles.dockIcon}
           onClick={message}
