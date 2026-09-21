@@ -385,7 +385,7 @@ export default function CustomerBusinessView() {
                 </div>
               )}
               <button
-                className={`${styles.ghost} ${business.connected ? styles.leave : ""} ${nudgeConnect ? styles.nudge : ""}`}
+                className={`${styles.ghost} ${nudgeConnect ? styles.nudge : ""}`}
                 onClick={toggleConnection}
                 disabled={working}
               >
@@ -651,7 +651,7 @@ export default function CustomerBusinessView() {
         ) : null}
         {(storeOpen || business.connected) && (
           <button
-            className={`${styles.dockIcon} ${business.connected ? styles.dockLeave : ""}`}
+            className={styles.dockIcon}
             onClick={toggleConnection}
             disabled={working}
             aria-label={

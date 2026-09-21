@@ -480,26 +480,6 @@
     cursor: progress;
 }
 
-/* Disconnect: same shape as Connect, but coloured as a "leave" action. */
-.leave {
-    --bv-leave: #c2334d;
-    border-color: color-mix(in srgb, var(--bv-leave) 45%, transparent);
-    color: var(--bv-leave);
-}
-
-.leave i {
-    color: var(--bv-leave);
-}
-
-.leave:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--bv-leave) 10%, transparent);
-    border-color: var(--bv-leave);
-}
-
-[data-theme="dark"] .leave {
-    --bv-leave: #ff8a9b;
-}
-
 .nudge {
     border-color: var(--bv-accent);
     background: var(--bv-accent-soft);
@@ -908,15 +888,6 @@
     color: var(--bv-accent);
     font-size: 22px;
     cursor: pointer;
-}
-
-.dockLeave {
-    color: #c2334d;
-    border-color: color-mix(in srgb, #c2334d 45%, transparent);
-}
-
-[data-theme="dark"] .dockLeave {
-    color: #ff8a9b;
 }
 
 .dockIcon:disabled {

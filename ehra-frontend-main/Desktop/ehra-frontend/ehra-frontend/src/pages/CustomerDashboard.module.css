@@ -5452,11 +5452,14 @@
 }
 
 /* ── Discover: frosted-glass business cards ────────────────────────────
-   Dim, smoked, translucent glass. Each card is tinted by --hue (set inline
-   per business) and always uses light, glowing type, so it stays readable
-   in both the light and the dark theme. Frosted glass needs something to
-   blur, so .glassStage paints a soft field of colour behind the grid.
-   Only Discover uses these classes - "Your businesses" cards are untouched. */
+   Whitish, semi-transparent frosted glass. The glass itself is never
+   coloured: it is white (light theme) or a faint white veil (dark theme),
+   and the only colour anywhere on the card is Ehral's own greens, taken
+   from the app's theme tokens (--accent, --accent-hover, --cust-glow,
+   --cust-grad-1) so it repaints with the theme. Frosted glass needs
+   something to blur, so .glassStage paints soft Ehral-green light behind
+   the grid. Only Discover uses these classes - "Your businesses" cards
+   are untouched. */
 
 .glassStage {
   position: relative;
@@ -5471,19 +5474,18 @@
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 36% 260px at 6% 10%, rgba(52, 211, 153, 0.6), transparent 72%),
-    radial-gradient(ellipse 32% 240px at 50% 4%, rgba(56, 189, 248, 0.5), transparent 72%),
-    radial-gradient(ellipse 34% 280px at 94% 16%, rgba(167, 139, 250, 0.55), transparent 72%),
-    radial-gradient(ellipse 38% 300px at 28% 56%, rgba(251, 191, 36, 0.42), transparent 72%),
-    radial-gradient(ellipse 36% 280px at 80% 64%, rgba(244, 114, 182, 0.46), transparent 72%),
-    radial-gradient(ellipse 32% 240px at 8% 92%, rgba(56, 189, 248, 0.44), transparent 72%);
+    radial-gradient(ellipse 34% 250px at 8% 10%, color-mix(in srgb, var(--cust-glow) 62%, transparent), transparent 72%),
+    radial-gradient(ellipse 30% 230px at 52% 4%, color-mix(in srgb, var(--accent) 34%, transparent), transparent 72%),
+    radial-gradient(ellipse 34% 270px at 94% 18%, color-mix(in srgb, var(--cust-glow) 50%, transparent), transparent 72%),
+    radial-gradient(ellipse 38% 290px at 30% 58%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 72%),
+    radial-gradient(ellipse 34% 270px at 82% 66%, color-mix(in srgb, var(--cust-glow) 46%, transparent), transparent 72%),
+    radial-gradient(ellipse 30% 230px at 8% 92%, color-mix(in srgb, var(--accent) 32%, transparent), transparent 72%);
   background-size: 100% 1100px;
   background-repeat: repeat-y;
-  opacity: 0.85;
 }
 
 [data-theme="dark"] .glassStage::before {
-  opacity: 0.55;
+  opacity: 0.6;
 }
 
 .glassGrid {
@@ -5492,10 +5494,22 @@
 }
 
 .glassCard {
-  --h: var(--hue, 162);
-  --glass-ink: hsl(var(--h) 100% 97%);
-  --glass-pop: hsl(var(--h) 100% 84%);
-  --glass-pop-2: hsl(calc(var(--h) + 140) 100% 86%);
+  /* Light theme: white glass, deep-green ink. */
+  --g-ink: var(--cust-grad-1);
+  --g-body: color-mix(in srgb, var(--cust-grad-1) 82%, transparent);
+  --g-pop: var(--accent-hover);
+  --g-line: rgba(255, 255, 255, 0.75);
+  --g-fill-a: rgba(255, 255, 255, 0.62);
+  --g-fill-b: rgba(255, 255, 255, 0.34);
+  --g-chip: color-mix(in srgb, var(--accent) 10%, rgba(255, 255, 255, 0.35));
+  --g-chip-line: color-mix(in srgb, var(--accent) 28%, transparent);
+  --g-btn-fill: rgba(255, 255, 255, 0.5);
+  --g-btn-line: color-mix(in srgb, var(--cust-grad-1) 16%, transparent);
+  --g-join-bg: var(--accent);
+  --g-join-ink: #fff;
+  --g-shadow: color-mix(in srgb, var(--cust-grad-1) 22%, transparent);
+  --g-etch: 0 1px 0 rgba(255, 255, 255, 0.85);
+  --g-spot: rgba(255, 255, 255, 0.7);
   position: relative;
   isolation: isolate;
   display: flex;
@@ -5504,24 +5518,39 @@
   padding: 22px;
   border-radius: 24px;
   overflow: hidden;
-  color: rgba(255, 255, 255, 0.9);
-  background: linear-gradient(155deg,
-      hsl(var(--h) 52% 32% / 0.72) 0%,
-      hsl(calc(var(--h) + 30) 48% 16% / 0.8) 60%,
-      hsl(calc(var(--h) + 60) 52% 11% / 0.88) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  -webkit-backdrop-filter: blur(22px) saturate(1.6);
-  backdrop-filter: blur(22px) saturate(1.6);
+  color: var(--g-body);
+  background: linear-gradient(150deg, var(--g-fill-a), var(--g-fill-b));
+  border: 1px solid var(--g-line);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  backdrop-filter: blur(20px) saturate(1.5);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.38),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.3),
-    inset 0 0 44px hsl(var(--h) 90% 70% / 0.08),
-    0 22px 46px -20px hsl(var(--h) 80% 18% / 0.7),
-    0 2px 6px rgba(0, 0, 0, 0.18);
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 color-mix(in srgb, var(--cust-grad-1) 8%, transparent),
+    0 20px 44px -22px var(--g-shadow),
+    0 2px 8px color-mix(in srgb, var(--cust-grad-1) 8%, transparent);
   transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Frost: a diagonal reflection, a bloom of the card's hue, and fine grain. */
+/* Dark theme: a faint white veil, light ink, brighter Ehral green. */
+[data-theme="dark"] .glassCard {
+  --g-ink: #f2f7f5;
+  --g-body: rgba(233, 237, 239, 0.88);
+  --g-pop: var(--cust-glow);
+  --g-line: rgba(255, 255, 255, 0.2);
+  --g-fill-a: rgba(255, 255, 255, 0.15);
+  --g-fill-b: rgba(255, 255, 255, 0.05);
+  --g-chip: color-mix(in srgb, var(--cust-glow) 12%, rgba(255, 255, 255, 0.04));
+  --g-chip-line: color-mix(in srgb, var(--cust-glow) 34%, transparent);
+  --g-btn-fill: rgba(255, 255, 255, 0.07);
+  --g-btn-line: rgba(255, 255, 255, 0.24);
+  --g-join-bg: var(--cust-glow);
+  --g-join-ink: var(--cust-grad-1);
+  --g-shadow: rgba(0, 0, 0, 0.6);
+  --g-etch: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --g-spot: rgba(255, 255, 255, 0.18);
+}
+
+/* Frost: a soft diagonal reflection and fine grain, both white. */
 .glassCard::before {
   content: "";
   position: absolute;
@@ -5529,9 +5558,14 @@
   z-index: 0;
   pointer-events: none;
   background:
-    linear-gradient(115deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.06) 28%, transparent 46%),
-    radial-gradient(ellipse 120% 80% at 100% 0%, hsl(var(--h) 95% 70% / 0.22), transparent 58%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.16'/%3E%3C/svg%3E");
+    linear-gradient(115deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.12) 30%, transparent 48%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.14'/%3E%3C/svg%3E");
+}
+
+[data-theme="dark"] .glassCard::before {
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 30%, transparent 48%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E");
 }
 
 /* Light that follows the pointer across the glass. */
@@ -5541,14 +5575,14 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: radial-gradient(240px circle at var(--mx, 88%) var(--my, 0%), hsl(var(--h) 100% 88% / 0.22), transparent 66%);
-  opacity: 0.6;
+  background: radial-gradient(240px circle at var(--mx, 88%) var(--my, 0%), var(--g-spot), transparent 66%);
+  opacity: 0.55;
   transition: opacity 0.3s ease;
 }
 
 .glassCard:hover {
   transform: translateY(-3px);
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--g-line));
 }
 
 .glassCard:hover::after {
@@ -5561,13 +5595,12 @@
 }
 
 .glassCardLinked {
-  border-color: rgba(110, 231, 183, 0.5);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--g-line));
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.3),
-    inset 0 0 52px rgba(52, 211, 153, 0.14),
-    0 22px 46px -20px hsl(var(--h) 80% 18% / 0.7),
-    0 2px 6px rgba(0, 0, 0, 0.18);
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 0 44px color-mix(in srgb, var(--cust-glow) 20%, transparent),
+    0 20px 44px -22px var(--g-shadow),
+    0 2px 8px color-mix(in srgb, var(--cust-grad-1) 8%, transparent);
 }
 
 .glassHead {
@@ -5584,13 +5617,12 @@
   place-items: center;
   overflow: hidden;
   border-radius: 16px;
-  background: hsl(var(--h) 60% 42% / 0.38);
-  border: 1px solid rgba(255, 255, 255, 0.32);
-  box-shadow: inset 0 0 16px hsl(var(--h) 100% 80% / 0.25), 0 6px 14px -6px rgba(0, 0, 0, 0.5);
-  color: var(--glass-ink);
+  background: var(--g-chip);
+  border: 1px solid var(--g-chip-line);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 6px 14px -8px var(--g-shadow);
+  color: var(--g-pop);
   font-size: 17px;
   font-weight: 800;
-  text-shadow: 0 0 14px hsl(var(--h) 100% 70% / 0.8);
 }
 
 .glassLogo img {
@@ -5611,8 +5643,8 @@
   font-weight: 800;
   line-height: 1.25;
   letter-spacing: -0.02em;
-  color: var(--glass-ink);
-  text-shadow: 0 0 22px hsl(var(--h) 100% 65% / 0.55), 0 1px 2px rgba(0, 0, 0, 0.5);
+  color: var(--g-ink);
+  text-shadow: var(--g-etch);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -5625,8 +5657,8 @@
   font-size: 11.5px;
   font-weight: 700;
   line-height: 1.45;
-  color: var(--glass-pop);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  color: var(--g-pop);
+  text-shadow: var(--g-etch);
 }
 
 .glassStatus {
@@ -5636,21 +5668,20 @@
   gap: 5px;
   padding: 5px 10px;
   border-radius: 999px;
-  border: 1px solid rgba(110, 231, 183, 0.45);
-  background: rgba(52, 211, 153, 0.18);
-  color: #a7f8d8;
+  border: 1px solid var(--g-chip-line);
+  background: var(--g-chip);
+  color: var(--g-pop);
   font-size: 10.5px;
   font-weight: 800;
   white-space: nowrap;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 .glassDescription {
   margin: 16px 0 0;
   font-size: 12.5px;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.88);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  color: var(--g-body);
+  text-shadow: var(--g-etch);
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -5673,9 +5704,9 @@
   max-width: 100%;
   padding: 6px 11px;
   border-radius: 999px;
-  border: 1px solid hsl(var(--h) 90% 82% / 0.34);
-  background: hsl(var(--h) 70% 70% / 0.14);
-  color: hsl(var(--h) 100% 90%);
+  border: 1px solid var(--g-chip-line);
+  background: var(--g-chip);
+  color: var(--g-pop);
   font-size: 11px;
   font-weight: 700;
   line-height: 1.3;
@@ -5684,22 +5715,11 @@
 .glassFacts li i {
   flex: 0 0 auto;
   font-size: 14px;
-  color: var(--glass-pop);
 }
 
 .glassFacts li span {
   min-width: 0;
   overflow-wrap: anywhere;
-}
-
-.glassFacts .glassFactStore {
-  border-color: hsl(calc(var(--h) + 140) 90% 82% / 0.36);
-  background: hsl(calc(var(--h) + 140) 70% 70% / 0.14);
-  color: var(--glass-pop-2);
-}
-
-.glassFacts .glassFactStore i {
-  color: var(--glass-pop-2);
 }
 
 .glassActions {
@@ -5724,7 +5744,7 @@
   font-weight: 800;
   white-space: nowrap;
   cursor: pointer;
-  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .glassActions button i {
@@ -5740,44 +5760,44 @@
   opacity: 0.75;
 }
 
-/* Not connected: a lit, opaque button so the main action is unmistakable. */
+/* Not connected: solid Ehral green, so the main action is unmistakable. */
 .glassActions .glassJoin {
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  background: linear-gradient(135deg, hsl(var(--h) 95% 76%), hsl(calc(var(--h) + 40) 95% 70%));
-  color: hsl(var(--h) 80% 10%);
-  box-shadow: 0 10px 22px -10px hsl(var(--h) 100% 65% / 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  border: 1px solid color-mix(in srgb, var(--g-join-bg) 70%, #fff);
+  background: var(--g-join-bg);
+  color: var(--g-join-ink);
+  box-shadow: 0 10px 22px -10px color-mix(in srgb, var(--g-join-bg) 80%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .glassActions .glassJoin:hover:not(:disabled) {
-  box-shadow: 0 14px 26px -10px hsl(var(--h) 100% 65%), inset 0 1px 0 rgba(255, 255, 255, 0.7);
   transform: translateY(-1px);
+  box-shadow: 0 14px 26px -10px color-mix(in srgb, var(--g-join-bg) 90%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
-/* Connected: the same slot flips to a coral outline for Disconnect. */
+/* Connected: the same slot flips to a green outline on glass for Disconnect. */
 .glassActions .glassLeave {
-  border: 1px solid rgba(255, 150, 162, 0.6);
-  background: rgba(255, 110, 130, 0.14);
-  color: #ffc9cf;
+  border: 1px solid color-mix(in srgb, var(--g-pop) 60%, transparent);
+  background: color-mix(in srgb, var(--g-pop) 8%, var(--g-btn-fill));
+  color: var(--g-pop);
 }
 
 .glassActions .glassLeave:hover:not(:disabled) {
-  background: rgba(255, 110, 130, 0.26);
-  border-color: rgba(255, 175, 185, 0.85);
+  background: color-mix(in srgb, var(--g-pop) 16%, var(--g-btn-fill));
+  border-color: var(--g-pop);
 }
 
 .glassActions .glassView {
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  border: 1px solid var(--g-btn-line);
+  background: var(--g-btn-fill);
+  color: var(--g-ink);
 }
 
 .glassActions .glassView:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: var(--g-pop);
+  color: var(--g-pop);
 }
 
 .glassActions button:focus-visible {
-  outline: 2px solid var(--glass-pop);
+  outline: 2px solid var(--g-pop);
   outline-offset: 2px;
 }
 
@@ -5799,7 +5819,7 @@
 /* Browsers without backdrop-filter get a more solid pane so text still reads. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glassCard {
-    background: linear-gradient(155deg, hsl(var(--h) 45% 24%), hsl(calc(var(--h) + 40) 45% 12%));
+    background: var(--bg-surface);
   }
 }
 

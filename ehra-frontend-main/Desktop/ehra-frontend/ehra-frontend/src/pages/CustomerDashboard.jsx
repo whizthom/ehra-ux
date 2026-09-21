@@ -525,16 +525,6 @@ function OrderList({ orders, onReceipt }) {
   );
 }
 
-// Every business gets its own tint, picked from a small palette that sits well
-// with the Ehral greens, so a grid of cards reads as a set rather than a rainbow.
-const GLASS_HUES = [162, 188, 212, 258, 296, 334, 14, 38];
-const glassHue = (business) => {
-  const key = `${business.businessName || ""}${business.businessId || ""}`;
-  let h = 0;
-  for (let i = 0; i < key.length; i += 1) h = (h * 31 + key.charCodeAt(i)) >>> 0;
-  return GLASS_HUES[h % GLASS_HUES.length];
-};
-
 // Frosted-glass card for the Discover tab. The pointer position is written to
 // two CSS variables so a soft highlight follows the cursor across the glass;
 // touch screens simply don't get that highlight.
@@ -559,7 +549,6 @@ function DiscoveryCard({ business, phase, onView, onToggle }) {
   return (
     <article
       className={`${styles.glassCard} ${connected ? styles.glassCardLinked : ""}`}
-      style={{ "--hue": glassHue(business) }}
       onPointerMove={trackLight}
     >
       <header className={styles.glassHead}>
@@ -634,7 +623,8 @@ function DiscoveryCard({ business, phase, onView, onToggle }) {
           className={styles.glassView}
           onClick={() => onView(business)}
         >
-          View business <i className="ti ti-arrow-up-right" aria-hidden="true" />
+          View business{" "}
+          <i className="ti ti-arrow-up-right" aria-hidden="true" />
         </button>
       </div>
     </article>
