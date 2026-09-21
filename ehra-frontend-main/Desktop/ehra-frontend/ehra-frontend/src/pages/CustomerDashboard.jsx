@@ -1410,7 +1410,7 @@ export default function CustomerDashboard() {
         )}
 
         {tab === "orders" && (
-          <section className={styles.section}>
+          <section className={`${styles.section} ${styles.orderPage}`}>
             <div className={styles.sectionIntro}>
               <span className={styles.eyebrow}>PURCHASE HISTORY</span>
               <h2>Your orders</h2>
@@ -1423,7 +1423,7 @@ export default function CustomerDashboard() {
         )}
 
         {tab === "receipts" && (
-          <section className={styles.section}>
+          <section className={`${styles.section} ${styles.receiptPage}`}>
             <div className={styles.sectionIntro}>
               <span className={styles.eyebrow}>YOUR PAPER TRAIL</span>
               <h2>Receipts</h2>
