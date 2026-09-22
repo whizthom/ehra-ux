@@ -150,17 +150,13 @@
     overflow: hidden;
 }
 
-/* Two-up numbers strip (orders / spent). Spent gets the wider 80% share
-   and Orders the remaining 20% - it's a currency amount and can run a lot
-   longer than a plain order count, so an even split, and even a
-   moderately uneven one, was still the column that regularly felt
-   cramped. Order is fixed by the caller (Orders first, Spent second -
-   see ConnectedBusinessCard), so this asymmetry always lands on the
-   right column. */
+/* Two-up numbers strip (orders / spent). Orders gets 30% and Spent gets
+   70%, giving the currency value substantially more room while making the
+   order count visibly more prominent than a narrow 20% column. */
 .stats {
     margin: 16px 0 0;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 4fr);
+    grid-template-columns: minmax(0, 3fr) minmax(0, 7fr);
     border: 1px solid var(--bc-line);
     border-radius: 14px;
     background: color-mix(in srgb, var(--accent) 5%, var(--bg-surface));
@@ -335,5 +331,156 @@
 
     .spinner {
         animation-duration: 1.6s;
+    }
+}
+
+/* ========================================================================
+   Responsive hardening
+   ======================================================================== */
+
+.card,
+.body,
+.actions,
+.stats,
+.stats>div {
+    box-sizing: border-box;
+}
+
+.card {
+    width: 100%;
+    min-height: 0;
+}
+
+.cover,
+.body,
+.actions {
+    min-width: 0;
+}
+
+.name,
+.subtitle,
+.about,
+.stats dt,
+.stats dd,
+.facts li,
+.actions button {
+    min-width: 0;
+}
+
+.actions button {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 640px) {
+    .card {
+        border-radius: 18px;
+    }
+
+    .cover {
+        height: 70px;
+        padding: 10px;
+    }
+
+    .body {
+        padding: 0 16px;
+    }
+
+    .logo {
+        width: 54px;
+        height: 54px;
+        margin-top: -27px;
+        border-radius: 16px;
+        box-shadow:
+            0 0 0 3px var(--bg-surface),
+            0 8px 18px -10px var(--shadow-color);
+    }
+
+    .name {
+        margin-top: 12px;
+        font-size: 15.5px;
+    }
+
+    .subtitle {
+        font-size: 11px;
+    }
+
+    .about {
+        margin-top: 10px;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .stats {
+        margin-top: 13px;
+        grid-template-columns: minmax(0, 30%) minmax(0, 70%);
+        border-radius: 12px;
+    }
+
+    .stats>div {
+        padding: 9px 10px;
+    }
+
+    .stats dt {
+        font-size: 9.5px;
+    }
+
+    .stats dd {
+        font-size: 13px;
+    }
+
+    .facts {
+        margin-top: 11px;
+        gap: 6px;
+    }
+
+    .facts li {
+        max-width: 100%;
+        padding: 5px 8px;
+        font-size: 10.5px;
+    }
+
+    .actions {
+        gap: 7px;
+        padding: 14px 16px 16px;
+    }
+
+    .actions button {
+        flex: 1 1 100px;
+        min-height: 40px;
+        padding: 0 11px;
+        font-size: 11.5px;
+    }
+}
+
+@media (max-width: 400px) {
+    .body {
+        padding: 0 14px;
+    }
+
+    .stats>div {
+        padding: 8px;
+    }
+
+    .stats dd {
+        font-size: 12.5px;
+    }
+
+    .actions {
+        padding: 12px 14px 14px;
+    }
+
+    .actions button {
+        flex-basis: 100%;
+    }
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .card:hover {
+        transform: none;
+    }
+
+    .actions button:hover:not(:disabled) {
+        transform: none;
     }
 }

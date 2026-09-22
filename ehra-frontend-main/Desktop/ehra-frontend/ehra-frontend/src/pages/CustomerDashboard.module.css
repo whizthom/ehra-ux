@@ -652,7 +652,57 @@
    auto-fill lets it add columns as room allows and still collapse to one
    column on narrow screens without a separate media-query override. */
 .flatSection .businessGrid {
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  display: flex;
+  grid-template-columns: none;
+  gap: 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 2px 8px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--accent) 55%, var(--border-color)) transparent;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+.flatSection .businessGrid::-webkit-scrollbar {
+  height: 5px;
+}
+
+.flatSection .businessGrid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.flatSection .businessGrid::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--accent) 55%, var(--border-color));
+  border-radius: 999px;
+}
+
+.flatSection .businessGrid>* {
+  flex: 0 0 clamp(250px, 31vw, 340px);
+  scroll-snap-align: start;
+}
+
+.homeBusinessScroller {
+  position: relative;
+}
+
+.horizontalScrollHint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 7px 2px 0;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: var(--bg-soft-accent);
+  color: var(--accent);
+  font-size: 9px;
+  font-weight: 800;
+  pointer-events: none;
+}
+
+.horizontalScrollHint i {
+  font-size: 13px;
 }
 
 .businessCard {
@@ -832,6 +882,21 @@
 
 .orderRow:first-child {
   border-top: 0;
+}
+
+/* Compact business thumbnail used by recent-order rows. */
+.orderRow .businessLogo {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+.orderRow .orderStore {
+  min-width: 0;
+}
+
+.orderRow .orderStore>div:last-child {
+  min-width: 0;
 }
 
 .orderItems {
@@ -1191,7 +1256,9 @@
   border: 0;
   outline: 0;
   background: transparent;
-  font: 600 13px inherit;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
   color: var(--text-primary);
 }
 
@@ -1214,7 +1281,9 @@
   border: 0.5px solid var(--border-color);
   border-radius: 10px;
   background: var(--bg-surface);
-  font: 800 11px inherit;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 800;
   color: var(--text-primary);
   cursor: pointer;
   white-space: nowrap;
@@ -1373,12 +1442,15 @@
 }
 
 .spendIdentity {
-  min-width: 220px;
+  min-width: 0;
+  flex: 0 0 30%;
 }
 
 .spendValue {
   text-align: right;
-  width: 50%;
+  flex: 1 1 70%;
+  width: auto;
+  min-width: 0;
 }
 
 .spendValue strong {
@@ -1633,18 +1705,31 @@
   display: grid;
   place-items: center;
   padding: 20px;
+  overflow: hidden;
 }
 
 .receiptModal {
   width: min(760px, calc(100vw - 28px));
   max-height: min(88dvh, 780px);
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   background: var(--bg-page);
   border: 0.5px solid var(--border-color);
   border-radius: 28px;
   box-shadow: 0 40px 120px var(--shadow-color);
   padding: 0;
   position: relative;
+}
+
+.receiptModal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.receiptModal::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--accent) 45%, var(--border-color));
+  border-radius: 999px;
 }
 
 .modalClose,
@@ -2466,6 +2551,71 @@
    1024/900px "sidebar collapses" pattern used across the app, tuned
    down slightly for this page's own content width). */
 @media (max-width: 900px) {
+  .flatSection .businessGrid>* {
+    flex-basis: clamp(245px, 58vw, 320px);
+  }
+
+  .overlay {
+    place-items: start center;
+    padding: 12px 10px calc(84px + 20vh + env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
+  }
+
+  .receiptModal {
+    width: min(760px, calc(100vw - 20px));
+    max-height: calc(80dvh - 84px - env(safe-area-inset-bottom, 0px));
+    min-height: 0;
+    margin: 4px 0 0;
+    border-radius: 20px;
+  }
+
+  .receiptTop {
+    padding: 20px 18px 16px;
+  }
+
+  .receiptTitleBlock {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 17px;
+  }
+
+  .receiptTitleBlock h2 {
+    font-size: 20px;
+    padding-right: 30px;
+  }
+
+  .receiptNumberBlock {
+    text-align: left;
+  }
+
+  .receiptBody {
+    padding: 0 12px 4px;
+  }
+
+  .receiptBusiness,
+  .receiptInfoGrid,
+  .receiptLines,
+  .receiptTotals,
+  .receiptNote,
+  .receiptFooter,
+  .receiptActions {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .receiptInfoGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .receiptLine {
+    align-items: flex-start;
+  }
+
+  .receiptLine>div {
+    min-width: 0;
+  }
+
   .sidebar {
     display: none;
   }
@@ -2637,7 +2787,7 @@
   .receiptModal {
     padding: 0;
     border-radius: 19px;
-    max-height: calc(100dvh - 28px);
+    max-height: calc(80dvh - 84px - env(safe-area-inset-bottom, 0px));
   }
 
   .receiptTop {
@@ -2773,6 +2923,25 @@
 
 /* Phone */
 @media (max-width: 620px) {
+  .flatSection .businessGrid {
+    gap: 10px;
+    padding-right: 24px;
+  }
+
+  .flatSection .businessGrid>* {
+    flex-basis: min(82vw, 300px);
+  }
+
+  .horizontalScrollHint {
+    font-size: 8px;
+  }
+
+  .orderRow .businessLogo {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+  }
+
   .heroActions {
     display: grid;
     grid-template-columns: 1fr;
@@ -5788,6 +5957,59 @@
   }
 
   .approvalDeclineActions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .flatSection .businessGrid {
+    gap: 12px;
+    padding-left: 1px;
+    padding-right: 8px;
+  }
+
+  .flatSection .businessGrid>* {
+    flex-basis: min(82vw, 300px);
+  }
+
+  .horizontalScrollHint {
+    margin-top: 5px;
+  }
+
+  .receiptModal {
+    width: calc(100vw - 16px);
+    max-height: calc(100dvh - 96px - env(safe-area-inset-bottom, 0px));
+    border-radius: 18px;
+    margin-bottom: 20vh;
+  }
+
+  .receiptBrandRow {
+    padding-right: 28px;
+  }
+
+  .receiptSecure {
+    font-size: 9px;
+  }
+
+  .receiptInfoGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+  }
+
+  .receiptInfoGrid>div {
+    padding: 11px;
+  }
+
+  .receiptSectionLabel {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+
+  .receiptActions {
+    flex-direction: column;
+  }
+
+  .receiptActions button {
     width: 100%;
   }
 }

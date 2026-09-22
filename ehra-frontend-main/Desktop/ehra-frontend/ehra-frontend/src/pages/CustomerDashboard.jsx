@@ -1294,15 +1294,31 @@ export default function CustomerDashboard() {
                 </button>
               </div>
               {businesses.length ? (
-                <div className={styles.businessGrid}>
-                  {businesses.slice(0, 4).map((b) => (
-                    <ConnectedBusinessCard
-                      key={b.membershipId}
-                      business={b}
-                      onVisit={visitBusiness}
-                      onChat={openBusinessChat}
-                    />
-                  ))}
+                <div className={styles.homeBusinessScroller}>
+                  <div
+                    className={styles.businessGrid}
+                    role="region"
+                    aria-label="Businesses you use. Horizontally scroll to view more businesses."
+                    tabIndex={0}
+                  >
+                    {businesses.slice(0, 4).map((b) => (
+                      <ConnectedBusinessCard
+                        key={b.membershipId}
+                        business={b}
+                        onVisit={visitBusiness}
+                        onChat={openBusinessChat}
+                      />
+                    ))}
+                  </div>
+                  {businesses.length > 1 && (
+                    <div
+                      className={styles.horizontalScrollHint}
+                      aria-hidden="true"
+                    >
+                      <i className="ti ti-arrows-horizontal" />
+                      <span>Swipe or scroll to see more</span>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className={styles.emptyState}>
