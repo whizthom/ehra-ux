@@ -121,6 +121,7 @@ function GlassSelect({
   options = [],
   placeholder = "Select…",
   required = false,
+  disabled = false,
 }) {
   const [open, setOpen] = useState(false);
   const [highlight, setHighlight] = useState(0);
@@ -217,9 +218,10 @@ function GlassSelect({
       <button
         type="button"
         ref={triggerRef}
-        className={`${c.trigger} ${open ? c.triggerOpen : ""}`}
-        onClick={() => (open ? setOpen(false) : openPanel())}
-        onKeyDown={onKeyDown}
+        className={`${c.trigger} ${open ? c.triggerOpen : ""} ${disabled ? c.triggerDisabled : ""}`}
+        disabled={disabled}
+        onClick={() => (disabled ? null : open ? setOpen(false) : openPanel())}
+        onKeyDown={disabled ? undefined : onKeyDown}
         aria-haspopup="listbox"
         aria-expanded={open}
       >
@@ -306,4 +308,25 @@ function GlassSelect({
   );
 }
 
-export { GlassSelect };
+// Builds { value: "HH:MM", label: "9:00 AM" } pairs at a fixed interval,
+// in 24-hour value form (matching the native <input type="time"> format
+// this replaces) with a friendly 12-hour label. Used for "clock" fields
+// like store opening/closing hours so picking a time never triggers the
+// device's own native time-picker sheet.
+function buildTimeOptions(stepMinutes = 15) {
+  const out = [];
+  for (let mins = 0; mins < 24 * 60; mins += stepMinutes) {
+    const h24 = Math.floor(mins / 60);
+    const m = mins % 60;
+    const value = `${String(h24).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+    const period = h24 < 12 ? "AM" : "PM";
+    const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+    out.push({
+      value,
+      label: `${h12}:${String(m).padStart(2, "0")} ${period}`,
+    });
+  }
+  return out;
+}
+
+export { GlassSelect, buildTimeOptions };

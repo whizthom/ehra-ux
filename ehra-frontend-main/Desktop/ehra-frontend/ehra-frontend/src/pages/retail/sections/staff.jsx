@@ -17,6 +17,7 @@ import {
   RETAIL_CATEGORIES,
   today,
 } from "./shared";
+import { GlassSelect } from "./GlassSelect";
 
 const ROLES = [
   "EMPLOYEE",
@@ -27,6 +28,12 @@ const ROLES = [
   "INVENTORY_MANAGER",
   "DELIVERY_STAFF",
 ];
+const ROLE_OPTIONS = ROLES.map((r) => ({
+  value: r,
+  label: r
+    .replace(/_/g, " ")
+    .replace(/\w\S*/g, (w) => w[0] + w.slice(1).toLowerCase()),
+}));
 const PERMISSIONS = [
   [
     "retailWorkspace",
@@ -123,20 +130,13 @@ function RetailEmployees() {
                   <small>{x.phone || "No phone on file"}</small>
                 </div>
               </div>
-              <label className={s.staffRoleField}>
-                <span>Role</span>
-                <select
-                  value={x.role || "EMPLOYEE"}
-                  disabled={busy}
-                  onChange={(e) => change(x.membershipId, e.target.value)}
-                >
-                  {ROLES.map((r) => (
-                    <option key={r} value={r}>
-                      {r.replace(/_/g, " ")}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <GlassSelect
+                label="Role"
+                value={x.role || "EMPLOYEE"}
+                disabled={busy}
+                onChange={(v) => change(x.membershipId, v)}
+                options={ROLE_OPTIONS}
+              />
               <div className={s.staffPermLabel}>Business function access</div>
               <div className={s.staffPermGrid}>
                 {PERMISSIONS.map(([key, label, hint]) => (
