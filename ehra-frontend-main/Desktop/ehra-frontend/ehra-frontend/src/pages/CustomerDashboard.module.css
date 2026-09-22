@@ -1784,6 +1784,135 @@
   border-radius: 999px;
 }
 
+/* Premium receipt presentation. The receipt is intentionally a contained,
+   scrollable surface so the mobile navigation remains unobstructed. */
+.receiptModal {
+  scrollbar-gutter: stable;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--bg-surface) 97%, var(--accent) 3%), var(--bg-page));
+}
+
+.receiptModal::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, var(--cust-grad-2), var(--cust-glow), var(--accent));
+  pointer-events: none;
+  z-index: 2;
+}
+
+.receiptModal .modalClose {
+  width: 36px;
+  height: 36px;
+  right: 16px;
+  top: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  background: rgba(5, 15, 12, 0.26);
+  color: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  transition: transform .18s ease, background .18s ease, border-color .18s ease;
+}
+
+.receiptModal .modalClose:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.receiptModal .modalClose:active {
+  transform: scale(.96);
+}
+
+.receiptModal .modalClose i {
+  font-size: 17px;
+}
+
+.receiptBrandRow {
+  min-height: 34px;
+}
+
+.receiptBrandRow .ehralReceiptLogo {
+  width: 104px;
+  height: 32px;
+  max-width: 104px;
+  object-fit: contain;
+  display: block;
+}
+
+.receiptBusiness .avatar {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 10px;
+  font-size: 11px;
+  box-shadow: 0 6px 16px -10px var(--shadow-color);
+}
+
+.receiptBusiness .avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.receiptActions {
+  align-items: stretch;
+}
+
+.receiptActions .receiptCloseButton,
+.receiptActions .receiptDownloadButton {
+  min-height: 44px;
+  border-radius: 13px;
+  padding: 0 16px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 850;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: transform .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.receiptActions .receiptCloseButton {
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: 0 8px 20px -16px var(--shadow-color);
+}
+
+.receiptActions .receiptCloseButton:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border-color));
+  background: var(--bg-soft-accent);
+  transform: translateY(-1px);
+}
+
+.receiptActions .receiptDownloadButton {
+  border: 0;
+  background: linear-gradient(135deg, var(--cust-grad-2), var(--accent));
+  color: #fff;
+  box-shadow: 0 12px 25px -14px color-mix(in srgb, var(--accent) 85%, transparent);
+}
+
+.receiptActions .receiptDownloadButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 30px -14px color-mix(in srgb, var(--accent) 90%, transparent);
+}
+
+.receiptActions .receiptCloseButton:active,
+.receiptActions .receiptDownloadButton:active {
+  transform: scale(.98);
+}
+
+.receiptActions .receiptCloseButton:focus-visible,
+.receiptActions .receiptDownloadButton:focus-visible {
+  outline: 2px solid var(--cust-glow);
+  outline-offset: 2px;
+}
+
 .modalClose,
 .iconButton {
   border: 0;
@@ -6076,5 +6205,128 @@
 
   .receiptActions button {
     width: 100%;
+  }
+}
+
+
+/* Final receipt overrides: these intentionally come last so older dashboard
+   breakpoints cannot enlarge the logos or undo the mobile receipt layout. */
+@media (max-width: 900px) {
+  .overlay {
+    align-items: flex-start;
+    justify-items: center;
+    padding: 12px 10px calc(84px + 20vh + env(safe-area-inset-bottom, 0px));
+  }
+
+  .receiptModal {
+    width: min(760px, calc(100vw - 20px));
+    max-height: calc(100dvh - 84px - 20vh - env(safe-area-inset-bottom, 0px));
+    margin: 4px 0 0;
+    border-radius: 20px;
+  }
+
+  .receiptBrandRow .ehralReceiptLogo {
+    width: 92px;
+    max-width: 92px;
+  }
+
+  .receiptBusiness .avatar {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: 9px;
+  }
+}
+
+@media (max-width: 520px) {
+  .receiptModal {
+    width: calc(100vw - 16px);
+    max-height: calc(100dvh - 92px - 20vh - env(safe-area-inset-bottom, 0px));
+    border-radius: 18px;
+  }
+
+  .receiptTop {
+    padding: 18px 16px 15px;
+  }
+
+  .receiptBrandRow {
+    padding-right: 40px;
+  }
+
+  .receiptBrandRow .ehralReceiptLogo {
+    width: 82px;
+    max-width: 82px;
+  }
+
+  .receiptSecure {
+    font-size: 8px;
+  }
+
+  .receiptBusiness {
+    margin-top: 14px;
+    padding: 13px;
+    border-radius: 15px;
+  }
+
+  .receiptBusiness .avatar {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    border-radius: 8px;
+    font-size: 10px;
+  }
+
+  .receiptBusiness strong {
+    font-size: 11px;
+  }
+
+  .receiptBusiness small {
+    font-size: 8px;
+  }
+
+  .receiptStatus small {
+    font-size: 8px;
+  }
+
+  .receiptActions {
+    gap: 8px;
+  }
+
+  .receiptActions .receiptCloseButton,
+  .receiptActions .receiptDownloadButton {
+    min-height: 42px;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 380px) {
+  .receiptModal {
+    width: calc(100vw - 12px);
+    max-height: calc(100dvh - 88px - 20vh - env(safe-area-inset-bottom, 0px));
+  }
+
+  .receiptTop {
+    padding-left: 13px;
+    padding-right: 13px;
+  }
+
+  .receiptBrandRow .ehralReceiptLogo {
+    width: 74px;
+    max-width: 74px;
+  }
+
+  .receiptBusiness .avatar {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .receiptModal .modalClose,
+  .receiptActions .receiptCloseButton,
+  .receiptActions .receiptDownloadButton {
+    transition: none;
   }
 }
