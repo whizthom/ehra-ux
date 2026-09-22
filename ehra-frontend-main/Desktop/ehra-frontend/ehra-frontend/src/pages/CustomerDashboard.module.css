@@ -5232,6 +5232,20 @@
   padding: 6px 0 48px;
 }
 
+/* Discover search should align with the page content edges rather than
+   being constrained by the inner padding of the section card. */
+.businessPage .discoveryToolbar {
+  width: calc(100% + 48px);
+  margin-left: -24px;
+}
+
+.businessPage .discoverySearchRow,
+.businessPage .discoverySearch {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
 .businessPage .sectionIntro {
   max-width: 760px;
   margin-bottom: 28px;
