@@ -150,11 +150,16 @@
     overflow: hidden;
 }
 
-/* Two-up numbers strip (orders / spent). */
+/* Two-up numbers strip (orders / spent). Spent gets more room than
+   Orders - it's a currency amount and can run a lot longer than a plain
+   order count, so an even 50/50 split was the one column that regularly
+   felt cramped. Order is fixed by the caller (Orders first, Spent
+   second - see ConnectedBusinessCard), so this asymmetry always lands on
+   the right column. */
 .stats {
     margin: 16px 0 0;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
     border: 1px solid var(--bc-line);
     border-radius: 14px;
     background: color-mix(in srgb, var(--accent) 5%, var(--bg-surface));

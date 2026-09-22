@@ -574,6 +574,18 @@
   margin-top: 18px;
 }
 
+/* Modifier for a section that should sit directly on the page background
+   instead of inside a bordered/shadowed panel - e.g. the home "Businesses
+   you use" strip, which already has its own cards and doesn't need a
+   second layer of framing around them. */
+.flatSection {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+}
+
 .sectionHead {
   display: flex;
   align-items: center;
@@ -5151,7 +5163,10 @@
     align-items: stretch;
   }
 
+  .discoverySearchRow,
   .discoverySearch {
+    width: 100%;
+    flex: 1 1 100%;
     flex-basis: 100%;
   }
 
@@ -5448,5 +5463,322 @@
 
   .receiptPage .receiptCard {
     min-height: 190px;
+  }
+}
+
+/* ── Customer approvals: plain page treatment (no panel), premium slip
+   cards, fully responsive down to small phones ─────────────────────── */
+.approvalsPage {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 6px 0 34px;
+}
+
+.approvalsPage .sectionIntro {
+  max-width: 700px;
+  margin-bottom: 26px;
+}
+
+.approvalsPage .sectionIntro h2 {
+  font-size: clamp(25px, 3vw, 34px);
+  letter-spacing: -0.04em;
+  margin-top: 7px;
+}
+
+.approvalsPage .sectionIntro p {
+  max-width: 640px;
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+.approvalList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.approvalCard {
+  background: linear-gradient(180deg, #0b1f1a, #0f3a2c);
+  color: #eafff4;
+  border-radius: 18px;
+  padding: 18px 20px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.18);
+}
+
+.approvalHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.approvalWho {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+
+/* Keeps the business logo a small, tidy square regardless of the source
+   image's real dimensions - previously unconstrained here, so a large
+   uploaded logo rendered at its full native size. */
+.approvalAvatar {
+  width: 42px;
+  height: 42px;
+  font-size: 14px;
+  flex: 0 0 auto;
+}
+
+.approvalMeta {
+  min-width: 0;
+}
+
+.approvalMeta strong {
+  display: block;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.approvalMeta small {
+  display: block;
+  color: rgba(234, 255, 244, 0.55);
+  font-size: 11px;
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.approvalStatus {
+  flex: 0 0 auto;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 5px 9px;
+  border-radius: 99px;
+  white-space: nowrap;
+}
+
+.approvalStatusPending {
+  background: rgba(255, 196, 0, 0.16);
+  color: #ffd666;
+}
+
+.approvalStatusWaiting {
+  background: rgba(85, 224, 174, 0.16);
+  color: #7cf2c4;
+}
+
+.approvalStatusDeclined {
+  background: rgba(255, 99, 86, 0.16);
+  color: #ff9d92;
+}
+
+.approvalStatusDefault {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(234, 255, 244, 0.6);
+}
+
+.approvalItems {
+  margin-top: 14px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.16);
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.approvalItemRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.approvalItemRow span:first-child {
+  color: rgba(234, 255, 244, 0.8);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.approvalTotals {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  color: rgba(234, 255, 244, 0.6);
+}
+
+.approvalTotalRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.approvalGrandTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 12px;
+  gap: 10px;
+}
+
+.approvalGrandTotal span {
+  font-size: 11px;
+  color: rgba(234, 255, 244, 0.55);
+}
+
+.approvalGrandTotal strong {
+  font-size: 19px;
+}
+
+.approvalActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.approvalActions button {
+  height: 40px;
+  border-radius: 10px;
+  border: 0;
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.approvalBtnCash {
+  flex: 1 1 auto;
+  background: rgba(255, 255, 255, 0.1);
+  color: #eafff4;
+}
+
+.approvalBtnPay {
+  flex: 1 1 auto;
+  background: linear-gradient(90deg, #0f6e56, #06cf9c);
+  color: #04140f;
+}
+
+.approvalBtnDecline {
+  flex: 0 0 auto;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  font-weight: 700 !important;
+  background: transparent;
+  color: rgba(234, 255, 244, 0.75);
+}
+
+.approvalDeclineBox {
+  margin-top: 14px;
+}
+
+.approvalDeclineTextarea {
+  width: 100%;
+  min-height: 60px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  color: #eafff4;
+  padding: 10px;
+  font-size: 12px;
+  font: inherit;
+  resize: vertical;
+}
+
+.approvalDeclineActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.approvalDeclineActions button {
+  height: 38px;
+  border-radius: 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.approvalBtnConfirmDecline {
+  flex: 1 1 140px;
+  border: 0;
+  font-weight: 800;
+  background: #e2504a;
+  color: #fff;
+}
+
+.approvalBtnBack {
+  flex: 0 0 auto;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  color: rgba(234, 255, 244, 0.75);
+}
+
+.approvalNote {
+  margin: 14px 0 0;
+  font-size: 11px;
+  color: rgba(234, 255, 244, 0.55);
+}
+
+@media (max-width: 700px) {
+  .approvalsPage {
+    padding-top: 0;
+  }
+
+  .approvalsPage .sectionIntro h2 {
+    font-size: 25px;
+  }
+
+  .approvalCard {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .approvalHead {
+    flex-wrap: wrap;
+  }
+
+  .approvalStatus {
+    order: -1;
+  }
+}
+
+@media (max-width: 460px) {
+  .approvalAvatar {
+    width: 36px;
+    height: 36px;
+    font-size: 12px;
+  }
+
+  .approvalMeta strong {
+    font-size: 13px;
+  }
+
+  .approvalActions {
+    flex-direction: column;
+  }
+
+  .approvalActions button {
+    width: 100%;
+  }
+
+  .approvalBtnDecline {
+    order: 3;
+  }
+
+  .approvalDeclineActions {
+    flex-direction: column;
+  }
+
+  .approvalDeclineActions button {
+    width: 100%;
   }
 }
