@@ -6503,3 +6503,116 @@
     padding: 16px;
   }
 }
+
+
+/* ========================================================================
+   Final receipt viewport treatment
+   ------------------------------------------------------------------------
+   The purchase receipt should use the full available mobile viewport up to
+   the bottom navigation, while its content remains independently scrollable.
+   Extra top space keeps the official receipt heading and Ehral lockup clear
+   of the floating close control.
+   ======================================================================== */
+@media (max-width: 900px) {
+  .overlay {
+    place-items: start center;
+    padding: 0 8px calc(84px + env(safe-area-inset-bottom, 0px));
+    overflow-y: hidden;
+  }
+
+  .receiptModal {
+    width: min(760px, calc(100vw - 16px));
+    height: calc(100dvh - 84px - env(safe-area-inset-bottom, 0px));
+    max-height: calc(100dvh - 84px - env(safe-area-inset-bottom, 0px));
+    min-height: calc(100dvh - 84px - env(safe-area-inset-bottom, 0px));
+    margin: 0;
+    border-radius: 0 0 22px 22px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .receiptTop {
+    padding: 58px 18px 22px;
+  }
+
+  .receiptBrandRow {
+    min-height: 34px;
+    padding-right: 42px;
+  }
+
+  .receiptBrandRow .ehralReceiptLogo {
+    width: 96px;
+    height: 30px;
+    max-width: 96px;
+  }
+
+  .receiptTitleBlock {
+    margin-top: 22px;
+  }
+
+  .receiptBusiness .avatar {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    flex: 0 0 34px;
+    border-radius: 9px;
+  }
+}
+
+@media (max-width: 480px) {
+  .overlay {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .receiptModal {
+    width: 100vw;
+    border-radius: 0;
+  }
+
+  .receiptTop {
+    padding: 62px 16px 22px;
+  }
+
+  .receiptBrandRow {
+    gap: 10px;
+    padding-right: 46px;
+  }
+
+  .receiptBrandRow .ehralReceiptLogo {
+    width: 90px;
+    height: 28px;
+    max-width: 90px;
+  }
+
+  .receiptSecure {
+    font-size: 9px;
+  }
+
+  .receiptTitleBlock {
+    margin-top: 24px;
+  }
+
+  .receiptTitleBlock h2 {
+    font-size: 21px;
+    line-height: 1.15;
+  }
+}
+
+@media (max-width: 360px) {
+  .receiptTop {
+    padding: 66px 14px 20px;
+  }
+
+  .receiptBrandRow {
+    padding-right: 42px;
+  }
+
+  .receiptBrandRow .ehralReceiptLogo {
+    width: 84px;
+    height: 27px;
+    max-width: 84px;
+  }
+}
