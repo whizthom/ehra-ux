@@ -1379,15 +1379,46 @@
 .galleryMain {
     position: relative;
     aspect-ratio: 1;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
     border-radius: 24px;
     background: var(--st-accent-soft);
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+    scrollbar-width: none;
+    isolation: isolate;
 }
 
-.galleryMain img {
+.galleryMain::-webkit-scrollbar {
+    display: none;
+}
+
+.galleryTrack {
+    display: flex;
     width: 100%;
     height: 100%;
+}
+
+.gallerySlide {
+    position: relative;
+    flex: 0 0 100%;
+    width: 100%;
+    height: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+}
+
+.gallerySlide img {
+    width: 100%;
+    height: 100%;
+    display: block;
     object-fit: cover;
+    user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: none;
 }
 
 .galleryMain .badgeSale {

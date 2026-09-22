@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Logo from "../components/Logo";
 import BrandSplash from "../components/BrandSplash";
@@ -222,6 +222,7 @@ export default function CustomerStore() {
   const [selected, setSelected] = useState(null);
   const [selQty, setSelQty] = useState(1);
   const [selImage, setSelImage] = useState(0);
+  const galleryRef = useRef(null);
   const [bagOpen, setBagOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [connectOpen, setConnectOpen] = useState(false);
@@ -1233,12 +1234,31 @@ export default function CustomerStore() {
               <i className="ti ti-x" aria-hidden="true" />
             </button>
             <div className={styles.gallery}>
-              <div className={styles.galleryMain}>
+              <div
+                className={styles.galleryMain}
+                ref={galleryRef}
+                onScroll={(e) => {
+                  if (!selGallery.length) return;
+                  const width = e.currentTarget.clientWidth || 1;
+                  const next = Math.round(e.currentTarget.scrollLeft / width);
+                  setSelImage(
+                    Math.max(0, Math.min(next, selGallery.length - 1)),
+                  );
+                }}
+                aria-label={`${selected.name} images`}
+              >
                 {selGallery.length ? (
-                  <img
-                    src={selGallery[Math.min(selImage, selGallery.length - 1)]}
-                    alt={selected.name}
-                  />
+                  <div className={styles.galleryTrack}>
+                    {selGallery.map((src, i) => (
+                      <div className={styles.gallerySlide} key={src + i}>
+                        <img
+                          src={src}
+                          alt={`${selected.name} image ${i + 1}`}
+                          draggable="false"
+                        />
+                      </div>
+                    ))}
+                  </div>
                 ) : (
                   <span className={styles.noImage}>
                     <i className="ti ti-package" aria-hidden="true" />
@@ -1254,7 +1274,13 @@ export default function CustomerStore() {
                     <button
                       key={src + i}
                       className={i === selImage ? styles.thumbOn : ""}
-                      onClick={() => setSelImage(i)}
+                      onClick={() => {
+                        setSelImage(i);
+                        galleryRef.current?.scrollTo({
+                          left: i * (galleryRef.current?.clientWidth || 0),
+                          behavior: "smooth",
+                        });
+                      }}
                       aria-label={`Image ${i + 1}`}
                     >
                       <img src={src} alt="" />
