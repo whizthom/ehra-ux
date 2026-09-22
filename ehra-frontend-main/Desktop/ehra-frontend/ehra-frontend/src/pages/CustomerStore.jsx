@@ -68,6 +68,130 @@ export function Stepper({ value, max, onMinus, onPlus, size = "md" }) {
   );
 }
 
+// A hand-built listbox standing in for a native <select> - so the sort menu
+// looks and animates like the rest of the store instead of dropping into
+// whatever the OS/browser renders for form controls. Full keyboard support
+// (arrows, Home/End, Enter, typeahead, Escape) and click-outside-to-close,
+// so it behaves like a native select even though nothing about it is.
+function SortMenu({ value, onChange, options }) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef(null);
+  const listRef = useRef(null);
+  const typeaheadRef = useRef({ text: "", timer: null });
+  const selectedIndex = Math.max(
+    0,
+    options.findIndex(([v]) => v === value),
+  );
+  const [activeIndex, setActiveIndex] = useState(selectedIndex);
+
+  const current = options[selectedIndex] || options[0];
+
+  const commit = useCallback(
+    (v) => {
+      onChange(v);
+      setOpen(false);
+    },
+    [onChange],
+  );
+
+  useEffect(() => {
+    if (open) setActiveIndex(selectedIndex);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onDocPointer = (e) => {
+      if (rootRef.current && !rootRef.current.contains(e.target))
+        setOpen(false);
+    };
+    document.addEventListener("mousedown", onDocPointer);
+    return () => document.removeEventListener("mousedown", onDocPointer);
+  }, [open]);
+
+  useEffect(() => {
+    if (open) listRef.current?.focus();
+  }, [open]);
+
+  const onListKeyDown = (e) => {
+    const last = options.length - 1;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((i) => Math.min(last, i + 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((i) => Math.max(0, i - 1));
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      setActiveIndex(0);
+    } else if (e.key === "End") {
+      e.preventDefault();
+      setActiveIndex(last);
+    } else if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      commit(options[activeIndex][0]);
+    } else if (e.key === "Escape" || e.key === "Tab") {
+      setOpen(false);
+    } else if (e.key.length === 1) {
+      const state = typeaheadRef.current;
+      clearTimeout(state.timer);
+      state.text += e.key.toLowerCase();
+      const match = options.findIndex(([, label]) =>
+        label.toLowerCase().startsWith(state.text),
+      );
+      if (match >= 0) setActiveIndex(match);
+      state.timer = setTimeout(() => {
+        state.text = "";
+      }, 600);
+    }
+  };
+
+  return (
+    <div className={styles.sortMenu} ref={rootRef}>
+      <button
+        type="button"
+        className={`${styles.sortTrigger} ${open ? styles.sortTriggerOpen : ""}`}
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={`Sort: ${current[1]}`}
+      >
+        <i className="ti ti-arrows-sort" aria-hidden="true" />
+        <span>{current[1]}</span>
+        <span className={styles.sortChevron} aria-hidden="true">
+          <i className="ti ti-chevron-down" aria-hidden="true" />
+        </span>
+      </button>
+      {open && (
+        <ul
+          className={styles.sortPanel}
+          role="listbox"
+          tabIndex={-1}
+          aria-label="Sort products"
+          aria-activedescendant={`sort-opt-${options[activeIndex][0]}`}
+          ref={listRef}
+          onKeyDown={onListKeyDown}
+        >
+          {options.map(([v, l], i) => (
+            <li
+              key={v}
+              id={`sort-opt-${v}`}
+              role="option"
+              aria-selected={v === value}
+              className={`${styles.sortOption} ${v === value ? styles.sortOptionOn : ""} ${i === activeIndex ? styles.sortOptionActive : ""}`}
+              onMouseEnter={() => setActiveIndex(i)}
+              onClick={() => commit(v)}
+            >
+              <span>{l}</span>
+              {v === value && <i className="ti ti-check" aria-hidden="true" />}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 export function ProductCard({
   product,
   qty,
@@ -896,21 +1020,7 @@ export default function CustomerStore() {
                 <i className="ti ti-discount-2" aria-hidden="true" /> Offers
               </button>
             )}
-            <label className={styles.sort}>
-              <i className="ti ti-arrows-sort" aria-hidden="true" />
-              <span>Sort</span>
-              <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value)}
-                aria-label="Sort products"
-              >
-                {SORTS.map(([v, l]) => (
-                  <option key={v} value={v}>
-                    {l}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <SortMenu value={sort} onChange={setSort} options={SORTS} />
           </div>
         </div>
 

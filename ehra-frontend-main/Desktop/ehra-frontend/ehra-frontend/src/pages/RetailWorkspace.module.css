@@ -2335,15 +2335,6 @@ td small {
 }
 
 .descriptionField textarea {
-  width: 100%;
-  box-sizing: border-box;
-  border: 1px solid var(--border-color);
-  background: var(--bg-surface);
-  color: var(--text-primary);
-  border-radius: 8px;
-  font: inherit;
-  font-size: 12px;
-  outline: none;
   min-height: 132px;
   line-height: 1.55;
   padding: 12px;
@@ -2440,6 +2431,95 @@ td small {
 
 .hiddenFileInput {
   display: none
+}
+
+/* Business-side "view your store" entry point in the Public channel panel -
+   a glassy, gently glowing card so it reads as the one action here that
+   takes you somewhere (out to the live, customer-facing page), not just
+   another setting. */
+.viewStoreBtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 14px;
+  padding: 13px 15px;
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--border-color));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--bg-surface) 55%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.5);
+  backdrop-filter: blur(14px) saturate(1.5);
+  color: var(--text-primary);
+  text-decoration: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  animation: rwGlowPulse 2.6s ease-in-out infinite;
+  transition: transform .18s, border-color .18s, background .18s
+}
+
+.viewStoreBtn:hover {
+  transform: translateY(-1px);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--bg-surface) 40%, transparent)
+}
+
+.viewStoreBtn:active {
+  transform: translateY(0)
+}
+
+.viewStoreIcon {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--bg-soft-accent);
+  color: var(--accent);
+  font-size: 18px
+}
+
+.viewStoreText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px
+}
+
+.viewStoreText strong {
+  font-size: 12.5px;
+  font-weight: 800
+}
+
+.viewStoreText small {
+  font-size: 10px;
+  color: var(--text-secondary)
+}
+
+.viewStoreBtn>.ti-external-link {
+  flex-shrink: 0;
+  font-size: 15px;
+  color: var(--accent)
+}
+
+@keyframes rwGlowPulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 35%, transparent), 0 8px 22px -14px color-mix(in srgb, var(--accent) 55%, transparent)
+  }
+
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 0%, transparent), 0 8px 22px -14px color-mix(in srgb, var(--accent) 55%, transparent)
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viewStoreBtn {
+    animation: none
+  }
 }
 
 .storeUrlCard {

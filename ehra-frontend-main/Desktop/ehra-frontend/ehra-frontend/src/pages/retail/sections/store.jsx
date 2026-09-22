@@ -7,21 +7,6 @@ import {
 } from "../../../api/commerceApi";
 import { updateBusinessProfile } from "../../../api/businessApi";
 import { Panel, Field, RETAIL_CATEGORIES } from "./shared";
-import { GlassSelect, buildTimeOptions } from "./GlassSelect";
-
-const TIME_OPTIONS = buildTimeOptions(15);
-
-const CURRENCY_OPTIONS = [
-  { value: "NGN", label: "NGN — Nigerian Naira" },
-  { value: "USD", label: "USD — US Dollar" },
-  { value: "GBP", label: "GBP — British Pound" },
-  { value: "EUR", label: "EUR — Euro" },
-  { value: "CAD", label: "CAD — Canadian Dollar" },
-  { value: "AUD", label: "AUD — Australian Dollar" },
-  { value: "GHS", label: "GHS — Ghanaian Cedi" },
-  { value: "KES", label: "KES — Kenyan Shilling" },
-  { value: "ZAR", label: "ZAR — South African Rand" },
-];
 
 const DAYS = [
   ["monday", "Monday"],
@@ -104,20 +89,24 @@ function OpeningHours({ value, onChange }) {
                 <strong>{label}</strong>
                 <span>{isOpen ? `${row.open} – ${row.close}` : "Closed"}</span>
               </div>
-              <GlassSelect
-                label="Opens"
-                value={row.open || ""}
-                onChange={(v) => updateDay(day, "open", v)}
-                options={TIME_OPTIONS}
-                placeholder="Opens"
-              />
-              <GlassSelect
-                label="Closes"
-                value={row.close || ""}
-                onChange={(v) => updateDay(day, "close", v)}
-                options={TIME_OPTIONS}
-                placeholder="Closes"
-              />
+              <label className={s.timeField}>
+                <span>Opens</span>
+                <input
+                  aria-label={`${label} opening time`}
+                  type="time"
+                  value={row.open || ""}
+                  onChange={(e) => updateDay(day, "open", e.target.value)}
+                />
+              </label>
+              <label className={s.timeField}>
+                <span>Closes</span>
+                <input
+                  aria-label={`${label} closing time`}
+                  type="time"
+                  value={row.close || ""}
+                  onChange={(e) => updateDay(day, "close", e.target.value)}
+                />
+              </label>
               <button
                 type="button"
                 className={s.hoursStatus}
@@ -357,20 +346,36 @@ function Store({ store, setStore, business, owner, onCurrencyChange }) {
               value={form.name}
               onChange={(e) => setField("name", e.target.value)}
             />
-            <GlassSelect
-              label="Business currency"
-              value={currency}
-              onChange={setCurrency}
-              options={CURRENCY_OPTIONS}
-              disabled={!owner}
-            />
-            <GlassSelect
-              label="Business category"
-              value={form.businessCategory || ""}
-              onChange={(v) => setField("businessCategory", v)}
-              options={RETAIL_CATEGORIES}
-              placeholder="Select category"
-            />
+            <label className={s.field}>
+              <span>Business currency</span>
+              <select
+                disabled={!owner}
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value)}
+              >
+                <option value="NGN">NGN</option>
+                <option value="USD">USD</option>
+                <option value="GBP">GBP</option>
+                <option value="EUR">EUR</option>
+                <option value="CAD">CAD</option>
+                <option value="AUD">AUD</option>
+                <option value="GHS">GHS</option>
+                <option value="KES">KES</option>
+                <option value="ZAR">ZAR</option>
+              </select>
+            </label>
+            <label className={s.field}>
+              <span>Business category</span>
+              <select
+                value={form.businessCategory || ""}
+                onChange={(e) => setField("businessCategory", e.target.value)}
+              >
+                <option value="">Select category</option>
+                {RETAIL_CATEGORIES.map((x) => (
+                  <option key={x}>{x}</option>
+                ))}
+              </select>
+            </label>
 
             <div className={`${s.field} ${s.slugField}`}>
               <span>Store URL slug</span>
@@ -513,6 +518,23 @@ function Store({ store, setStore, business, owner, onCurrencyChange }) {
           title="Public channel"
           sub="Your storefront is a shareable customer-facing page on Ehral."
         >
+          {publicUrl && (
+            <a
+              className={s.viewStoreBtn}
+              href={publicUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span className={s.viewStoreIcon}>
+                <i className="ti ti-building-store" aria-hidden="true" />
+              </span>
+              <span className={s.viewStoreText}>
+                <strong>View your store</strong>
+                <small>Opens exactly what your customers see</small>
+              </span>
+              <i className="ti ti-external-link" aria-hidden="true" />
+            </a>
+          )}
           <StoreUrl
             slug={
               store?.slug ||
