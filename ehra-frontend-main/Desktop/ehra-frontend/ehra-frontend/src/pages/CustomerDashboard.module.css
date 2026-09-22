@@ -6330,3 +6330,176 @@
     transition: none;
   }
 }
+
+/* ========================================================================
+   Final receipt spacing pass
+   ------------------------------------------------------------------------
+   The receipt should feel like a full-height premium mobile sheet rather
+   than a compressed card. The Ehral horizontal lockup stays on one line,
+   while the receipt retains clear breathing room and usable scrolling.
+   ======================================================================== */
+.receiptBrandRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  min-width: 0;
+  gap: 16px;
+}
+
+.receiptBrandRow .ehralReceiptLogo {
+  width: 128px;
+  max-width: 128px;
+  height: 30px;
+  flex: 0 0 auto;
+  display: block;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.receiptBrandRow .receiptSecure {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+.receiptModal {
+  max-height: min(92dvh, 860px);
+}
+
+.receiptTop {
+  padding-top: 30px;
+  padding-bottom: 24px;
+}
+
+.receiptTitleBlock {
+  margin-top: 28px;
+}
+
+.receiptBody {
+  padding-bottom: 12px;
+}
+
+.receiptBusiness {
+  margin-top: 22px;
+  padding: 20px;
+}
+
+.receiptInfoGrid {
+  margin-top: 16px;
+}
+
+.receiptActions {
+  padding-top: 18px;
+  padding-bottom: 22px;
+}
+
+@media (max-width: 900px) {
+  .overlay {
+    align-items: flex-start;
+    padding: 12px 10px calc(84px + 20vh + env(safe-area-inset-bottom, 0px));
+  }
+
+  .receiptModal {
+    width: min(760px, calc(100vw - 20px));
+    max-height: 80dvh;
+    margin: 4px 0 0;
+  }
+
+  .receiptBrandRow {
+    gap: 12px;
+    padding-right: 44px;
+  }
+
+  .receiptBrandRow .ehralReceiptLogo {
+    width: 124px;
+    max-width: 124px;
+    height: 29px;
+  }
+
+  .receiptTitleBlock {
+    margin-top: 26px;
+  }
+}
+
+@media (max-width: 520px) {
+  .overlay {
+    padding: 10px 8px calc(84px + 20vh + env(safe-area-inset-bottom, 0px));
+  }
+
+  .receiptModal {
+    width: calc(100vw - 16px);
+    max-height: 80dvh;
+    border-radius: 20px;
+  }
+
+  .receiptTop {
+    padding: 24px 16px 22px;
+  }
+
+  .receiptBrandRow {
+    gap: 9px;
+    padding-right: 38px;
+  }
+
+  .receiptBrandRow .ehralReceiptLogo {
+    width: 116px;
+    max-width: 116px;
+    height: 27px;
+  }
+
+  .receiptSecure {
+    font-size: 8.5px;
+  }
+
+  .receiptTitleBlock {
+    margin-top: 24px;
+  }
+
+  .receiptBusiness {
+    margin-top: 20px;
+    padding: 18px;
+  }
+
+  .receiptInfoGrid {
+    margin-top: 14px;
+  }
+
+  .receiptActions {
+    padding: 18px 16px 24px;
+  }
+}
+
+@media (max-width: 380px) {
+  .receiptModal {
+    width: calc(100vw - 12px);
+    max-height: 80dvh;
+  }
+
+  .receiptTop {
+    padding: 22px 13px 20px;
+  }
+
+  .receiptBrandRow {
+    gap: 7px;
+    padding-right: 34px;
+  }
+
+  .receiptBrandRow .ehralReceiptLogo {
+    width: 108px;
+    max-width: 108px;
+    height: 25px;
+  }
+
+  .receiptSecure {
+    font-size: 8px;
+  }
+
+  .receiptTitleBlock {
+    margin-top: 22px;
+  }
+
+  .receiptBusiness {
+    padding: 16px;
+  }
+}
