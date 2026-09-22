@@ -1274,9 +1274,10 @@
 
 .discoveryToolbar {
   display: flex;
+  flex-direction: column;
   gap: 12px;
-  align-items: center;
-  justify-content: space-between;
+  align-items: stretch;
+  justify-content: flex-start;
   margin: 22px 0 24px;
   padding: 14px;
   border: 0.5px solid var(--border-color);
@@ -1289,7 +1290,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  flex: 1;
+  width: 100%;
+  flex: 0 0 auto;
   min-width: 0;
   height: 46px;
   padding: 0 14px;
