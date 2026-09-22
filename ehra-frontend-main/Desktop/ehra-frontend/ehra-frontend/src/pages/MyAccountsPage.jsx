@@ -143,7 +143,11 @@ const TABS = [
     key: "CUSTOMER",
     label: "Customer",
     icon: "ti-shopping-bag",
-    blurb: "Businesses you're a customer of.",
+    // Deliberately NOT "accounts" - there is exactly one Customer context
+    // per Identity. This tab is a directory of the businesses that
+    // context is connected to, not a set of separate accounts to switch
+    // between - see the CUSTOMER branch of `pick()` below.
+    blurb: "One customer account, connected to every business below.",
   },
 ];
 
@@ -299,11 +303,21 @@ export default function MyAccountsPage() {
     setSwitchingId(acc.membershipId);
     setError("");
     try {
+      // For EMPLOYER/EMPLOYEE this really is switching to a different
+      // account (a different membership, a different login-level
+      // identity relationship). For CUSTOMER it isn't - the person never
+      // leaves the Customer context, this just points that one context at
+      // a different connected business (see switchContext's CUSTOMER
+      // case and its comment). Same API call either way; only the label
+      // shown to the person differs (see cardAction below).
       const data = await switchContext(acc.type, acc.membershipId);
       navigate(destinationFor(data.contextType));
     } catch (err) {
       const msg =
-        err?.response?.data?.message || "Couldn't switch to that workspace.";
+        acc.type === "CUSTOMER"
+          ? "Couldn't open that business."
+          : err?.response?.data?.message ||
+            "Couldn't switch to that workspace.";
       setError(typeof msg === "string" ? msg : "Something went wrong.");
     } finally {
       setSwitchingId(null);
@@ -566,13 +580,18 @@ export default function MyAccountsPage() {
                     {acc.active ? (
                       <span className={styles.here}>
                         <span className={styles.liveDot} aria-hidden="true" />{" "}
-                        Current
+                        {acc.type === "CUSTOMER" ? "Viewing" : "Current"}
                       </span>
                     ) : switchingId === acc.membershipId ? (
-                      <span className={styles.spinner} aria-label="Switching" />
+                      <span
+                        className={styles.spinner}
+                        aria-label={
+                          acc.type === "CUSTOMER" ? "Opening" : "Switching"
+                        }
+                      />
                     ) : (
                       <span className={styles.go}>
-                        Switch{" "}
+                        {acc.type === "CUSTOMER" ? "Open" : "Switch"}{" "}
                         <i className="ti ti-arrow-right" aria-hidden="true" />
                       </span>
                     )}
@@ -682,8 +701,9 @@ export default function MyAccountsPage() {
 
           <p className={styles.note}>
             <i className="ti ti-shield-check" aria-hidden="true" />
-            Switching keeps you signed in - each role opens its own dashboard,
-            and you can come back here any time.
+            {activeTab === "CUSTOMER"
+              ? "You have one customer account - opening a business just brings up your orders and conversation with them."
+              : "Switching keeps you signed in - each role opens its own dashboard, and you can come back here any time."}
           </p>
         </section>
       )}

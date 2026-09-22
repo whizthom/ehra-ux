@@ -66,7 +66,10 @@ export default function MyAccountsPanel({ open, onClose }) {
     setLoading(true);
     setError("");
     Promise.all([getMyAccounts(), getMySubscription().catch(() => null)])
-      .then(([accountRows, subscriptionData]) => { setAccounts(accountRows); setSubscription(subscriptionData); })
+      .then(([accountRows, subscriptionData]) => {
+        setAccounts(accountRows);
+        setSubscription(subscriptionData);
+      })
       .catch(() => setError("Couldn't load your accounts. Please try again."))
       .finally(() => setLoading(false));
   }, [open]);
@@ -95,7 +98,8 @@ export default function MyAccountsPanel({ open, onClose }) {
 
   const employerCount = accounts.filter((a) => a.type === "EMPLOYER").length;
   const maxBusinesses = Number(subscription?.maxBusinesses || 0);
-  const canCreateBusiness = maxBusinesses > 0 ? employerCount < maxBusinesses : true;
+  const canCreateBusiness =
+    maxBusinesses > 0 ? employerCount < maxBusinesses : true;
 
   const handleCreate = async () => {
     setCreateError("");
@@ -195,7 +199,9 @@ export default function MyAccountsPanel({ open, onClose }) {
                         </span>
                       </div>
                       {acc.active ? (
-                        <span className={styles.activeBadge}>Current</span>
+                        <span className={styles.activeBadge}>
+                          {acc.type === "CUSTOMER" ? "Viewing" : "Current"}
+                        </span>
                       ) : switchingId === acc.membershipId ? (
                         <span className={styles.spinner} />
                       ) : (
@@ -207,7 +213,9 @@ export default function MyAccountsPanel({ open, onClose }) {
                   ))}
 
                   {accounts.length === 0 && (
-                    <p className={styles.empty}>No business memberships found yet.</p>
+                    <p className={styles.empty}>
+                      No business memberships found yet.
+                    </p>
                   )}
 
                   {!accounts.some((a) => a.type === "CUSTOMER") && (
@@ -221,36 +229,72 @@ export default function MyAccountsPanel({ open, onClose }) {
                         try {
                           const data = await switchContext("CUSTOMER", null);
                           onClose();
-                          navigate(`${destinationFor(data.contextType)}?tab=discover`);
+                          navigate(
+                            `${destinationFor(data.contextType)}?tab=discover`,
+                          );
                         } catch (err) {
-                          const msg = err?.response?.data?.message || "Couldn't open the Customer experience.";
-                          setError(typeof msg === "string" ? msg : "Something went wrong.");
+                          const msg =
+                            err?.response?.data?.message ||
+                            "Couldn't open the Customer experience.";
+                          setError(
+                            typeof msg === "string"
+                              ? msg
+                              : "Something went wrong.",
+                          );
                         } finally {
                           setSwitchingId(null);
                         }
                       }}
                     >
-                      <div className={styles.avatar}><i className="ti ti-compass" /></div>
+                      <div className={styles.avatar}>
+                        <i className="ti ti-compass" />
+                      </div>
                       <div className={styles.itemBody}>
                         <span className={styles.itemName}>Customer</span>
-                        <span className={styles.itemMeta}>Discover businesses and services on Ehral</span>
+                        <span className={styles.itemMeta}>
+                          Discover businesses and services on Ehral
+                        </span>
                       </div>
-                      {switchingId === "CUSTOMER" ? <span className={styles.spinner} /> : <i className={`ti ti-chevron-right ${styles.itemChevron}`} />}
+                      {switchingId === "CUSTOMER" ? (
+                        <span className={styles.spinner} />
+                      ) : (
+                        <i
+                          className={`ti ti-chevron-right ${styles.itemChevron}`}
+                        />
+                      )}
                     </button>
                   )}
                 </div>
               )}
 
               {canCreateBusiness ? (
-                <button type="button" className={styles.createTrigger} onClick={() => setShowCreate(true)}>
+                <button
+                  type="button"
+                  className={styles.createTrigger}
+                  onClick={() => setShowCreate(true)}
+                >
                   <i className="ti ti-plus" />
                   Create a business under this account
                 </button>
               ) : (
                 <div className={styles.planLimitNotice}>
                   <i className="ti ti-lock" />
-                  <span><strong>Business limit reached</strong><small>Your current plan allows {maxBusinesses} {maxBusinesses === 1 ? "business" : "businesses"}.</small></span>
-                  <button type="button" onClick={() => { onClose(); navigate("/pricing"); }}>View plans</button>
+                  <span>
+                    <strong>Business limit reached</strong>
+                    <small>
+                      Your current plan allows {maxBusinesses}{" "}
+                      {maxBusinesses === 1 ? "business" : "businesses"}.
+                    </small>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      navigate("/pricing");
+                    }}
+                  >
+                    View plans
+                  </button>
                 </div>
               )}
             </>
