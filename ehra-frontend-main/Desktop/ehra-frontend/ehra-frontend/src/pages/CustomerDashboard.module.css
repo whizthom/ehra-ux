@@ -646,6 +646,15 @@
   gap: 14px;
 }
 
+/* The home "Businesses you use" strip lost its panel wrapper (see
+   .flatSection) specifically so it could use the page's full width - a
+   fixed 2-column grid wasted that space on anything wider than a phone.
+   auto-fill lets it add columns as room allows and still collapse to one
+   column on narrow screens without a separate media-query override. */
+.flatSection .businessGrid {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
 .businessCard {
   border: 0.5px solid var(--border-color);
   border-radius: 17px;

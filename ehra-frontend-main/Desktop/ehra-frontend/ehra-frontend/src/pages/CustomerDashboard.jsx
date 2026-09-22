@@ -215,7 +215,14 @@ function Toast({ message, onClose }) {
 function ReceiptView({ order, onClose, onDownload }) {
   if (!order) return null;
   const receiptReady = Boolean(order.receiptAvailable);
-  const paid = Number(order.amountPaid || 0);
+  // Same reasoning as OrderList: a negative id means this was approved and
+  // paid at the counter, so treat it as settled even though its premium
+  // PDF isn't downloadable through this modal's "Download PDF" action
+  // (that's what the Receipts tab is for).
+  const isPosSale = Number(order.id) < 0;
+  const isRefunded = String(order.status || "").toUpperCase() === "REFUNDED";
+  const settled = receiptReady || (isPosSale && !isRefunded);
+  const paidAmount = Number(order.amountPaid || 0);
   const paymentStatus = String(order.paymentStatus || "UNPAID").toUpperCase();
   return (
     <div
@@ -242,9 +249,7 @@ function ReceiptView({ order, onClose, onDownload }) {
           <div className={styles.receiptTitleBlock}>
             <div>
               <span className={styles.receiptKicker}>
-                {receiptReady
-                  ? "OFFICIAL PURCHASE RECEIPT"
-                  : "ORDER CONFIRMATION"}
+                {settled ? "OFFICIAL PURCHASE RECEIPT" : "ORDER CONFIRMATION"}
               </span>
               <h2>{order.businessName}</h2>
             </div>
@@ -278,8 +283,10 @@ function ReceiptView({ order, onClose, onDownload }) {
                 {paymentStatus.replaceAll("_", " ")}
               </span>
               <small>
-                {receiptReady
-                  ? `Issued ${date(order.receiptIssuedAt || order.createdAt)}`
+                {settled
+                  ? receiptReady
+                    ? `Issued ${date(order.receiptIssuedAt || order.createdAt)}`
+                    : "Paid at the counter"
                   : "Awaiting full payment"}
               </small>
             </div>
@@ -310,9 +317,9 @@ function ReceiptView({ order, onClose, onDownload }) {
               <span>Payment</span>
               <strong>{order.paymentMethod || "Recorded payment"}</strong>
               <small>
-                {receiptReady
-                  ? `${money(order.currency, paid)} paid`
-                  : `${money(order.currency, paid)} received`}
+                {settled
+                  ? `${money(order.currency, paidAmount)} paid`
+                  : `${money(order.currency, paidAmount)} received`}
               </small>
             </div>
             <div>
@@ -364,8 +371,8 @@ function ReceiptView({ order, onClose, onDownload }) {
               <b>{money(order.currency, order.total)}</b>
             </div>
             <div className={styles.receiptPaid}>
-              <span>{receiptReady ? "Amount paid" : "Amount received"}</span>
-              <b>{money(order.currency, paid)}</b>
+              <span>{settled ? "Amount paid" : "Amount received"}</span>
+              <b>{money(order.currency, paidAmount)}</b>
             </div>
           </div>
 
@@ -385,7 +392,9 @@ function ReceiptView({ order, onClose, onDownload }) {
             <span>
               {receiptReady
                 ? "Receipt stored in My Ehral"
-                : "Receipt issued after full payment"}
+                : settled
+                  ? "Full receipt available in your Receipts tab"
+                  : "Receipt issued after full payment"}
             </span>
           </div>
           <div className={styles.receiptActions}>
@@ -399,6 +408,11 @@ function ReceiptView({ order, onClose, onDownload }) {
               >
                 <i className="ti ti-file-download" /> Download premium PDF
               </button>
+            ) : settled ? (
+              <span className={styles.receiptPending}>
+                <i className="ti ti-circle-check" /> Paid — full receipt in your
+                Receipts tab
+              </span>
             ) : (
               <span className={styles.receiptPending}>
                 <i className="ti ti-clock" /> Receipt available after full
@@ -480,51 +494,66 @@ function OrderList({ orders, onReceipt }) {
   }
   return (
     <div className={styles.orderList}>
-      {orders.map((o) => (
-        <article className={styles.orderRow} key={o.id}>
-          <div className={styles.orderStore}>
-            <div className={styles.avatar}>
-              {o.businessLogo ? (
-                <img src={o.businessLogo} alt="" />
-              ) : (
-                initials(o.businessName)
+      {orders.map((o) => {
+        // Sales approved and paid at the counter carry a negative id (see
+        // saleToOrderDto's doc comment on the backend) and are only ever
+        // recorded here once the business has confirmed payment. Their
+        // premium PDF lives behind the Receipts tab's own endpoint, not
+        // this row's "download" mechanism - receiptAvailable is false for
+        // them for that reason alone, not because payment is outstanding.
+        const isPosSale = Number(o.id) < 0;
+        const isRefunded = String(o.status || "").toUpperCase() === "REFUNDED";
+        const settled = o.receiptAvailable || (isPosSale && !isRefunded);
+        return (
+          <article className={styles.orderRow} key={o.id}>
+            <div className={styles.orderStore}>
+              <div className={styles.avatar}>
+                {o.businessLogo ? (
+                  <img src={o.businessLogo} alt="" />
+                ) : (
+                  initials(o.businessName)
+                )}
+              </div>
+              <div>
+                <strong>{o.businessName}</strong>
+                <small>
+                  #{o.orderNumber} · {date(o.createdAt)}
+                </small>
+              </div>
+            </div>
+            <div className={styles.orderItems}>
+              {(o.items || []).slice(0, 2).map((i) => (
+                <span key={i.id || i.productId}>
+                  {i.productName} × {i.quantity}
+                </span>
+              ))}
+              {(o.items || []).length > 2 && (
+                <span>+{o.items.length - 2} more</span>
               )}
             </div>
-            <div>
-              <strong>{o.businessName}</strong>
-              <small>
-                #{o.orderNumber} · {date(o.createdAt)}
-              </small>
-            </div>
-          </div>
-          <div className={styles.orderItems}>
-            {(o.items || []).slice(0, 2).map((i) => (
-              <span key={i.id || i.productId}>
-                {i.productName} × {i.quantity}
+            <div className={styles.orderStatus}>
+              <span
+                className={`${styles.statusPill} ${styles[`status_${String(o.status || "").toLowerCase()}`] || ""}`}
+              >
+                {String(o.status || "RECORDED").replaceAll("_", " ")}
               </span>
-            ))}
-            {(o.items || []).length > 2 && (
-              <span>+{o.items.length - 2} more</span>
-            )}
-          </div>
-          <div className={styles.orderStatus}>
-            <span
-              className={`${styles.statusPill} ${styles[`status_${String(o.status || "").toLowerCase()}`] || ""}`}
+              <strong>{money(o.currency, o.total)}</strong>
+            </div>
+            <button
+              className={styles.receiptButton}
+              onClick={() => onReceipt(o)}
+              disabled={!settled}
             >
-              {String(o.status || "RECORDED").replaceAll("_", " ")}
-            </span>
-            <strong>{money(o.currency, o.total)}</strong>
-          </div>
-          <button
-            className={styles.receiptButton}
-            onClick={() => onReceipt(o)}
-            disabled={!o.receiptAvailable}
-          >
-            <i className="ti ti-receipt" />{" "}
-            {o.receiptAvailable ? "Receipt" : "Payment pending"}
-          </button>
-        </article>
-      ))}
+              <i className="ti ti-receipt" />{" "}
+              {o.receiptAvailable
+                ? "Receipt"
+                : settled
+                  ? "Paid"
+                  : "Payment pending"}
+            </button>
+          </article>
+        );
+      })}
     </div>
   );
 }
