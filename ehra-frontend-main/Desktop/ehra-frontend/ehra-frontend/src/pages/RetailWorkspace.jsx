@@ -477,12 +477,15 @@ export default function RetailWorkspace() {
             <POS
               products={active}
               sales={data.sales}
+              customers={data.customers}
+              business={business}
               onDone={async (d) => {
                 const r = await createSale(d);
                 setModal(null);
                 runLoad();
                 return r;
               }}
+              onApprovalsChanged={runLoad}
               canFinance={context.owner || context.canFinance}
               onRefund={async (id) => {
                 if (confirm("Refund this sale and restore its inventory?")) {

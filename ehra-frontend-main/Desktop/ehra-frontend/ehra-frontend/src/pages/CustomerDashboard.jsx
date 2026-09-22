@@ -11,6 +11,10 @@ import {
   getCustomerProfile,
   updateCustomerProfile,
   uploadCustomerProfilePicture,
+  getMySalesApprovals,
+  approveSaleApproval,
+  declineSaleApproval,
+  getMyPosReceipts,
 } from "../api/commerceApi";
 import { createCustomerBusinessConversation } from "../api/messagingApi";
 import { useAuth } from "../context/AuthContext";
@@ -23,6 +27,7 @@ import NotificationToastStack from "../components/notifications/NotificationToas
 import BusinessCard from "../components/BusinessCard";
 import BrandSplash from "../components/BrandSplash";
 import LogoutConfirmModal from "../components/LogoutConfirmModal";
+import PremiumReceipt from "../components/PremiumReceipt";
 import styles from "./CustomerDashboard.module.css";
 
 // Matches Ehral\'s employer/employee mobile navigation behavior.
@@ -616,6 +621,51 @@ export default function CustomerDashboard() {
   const [profileForm, setProfileForm] = useState(null);
   const [editingProfile, setEditingProfile] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [approvals, setApprovals] = useState([]);
+  const [approvalsLoading, setApprovalsLoading] = useState(false);
+  const [decisionBusy, setDecisionBusy] = useState(null);
+  const [decisionError, setDecisionError] = useState("");
+  const [decliningApproval, setDecliningApproval] = useState(null);
+  const [posReceipts, setPosReceipts] = useState([]);
+  const [selectedPosReceipt, setSelectedPosReceipt] = useState(null);
+
+  const loadApprovals = useCallback(async () => {
+    setApprovalsLoading(true);
+    try {
+      const r = await getMySalesApprovals();
+      setApprovals(r.data || []);
+    } catch (e) {
+      setNotice(e?.response?.data?.message || "We could not load your approval slips.");
+    } finally {
+      setApprovalsLoading(false);
+    }
+  }, []);
+
+  const loadPosReceipts = useCallback(async () => {
+    try {
+      const r = await getMyPosReceipts();
+      setPosReceipts(r.data || []);
+    } catch {
+      // non-fatal — receipts tab already shows order receipts
+    }
+  }, []);
+
+  const decideApproval = async (id, approve, paymentMethod, reason) => {
+    setDecisionBusy(id);
+    setDecisionError("");
+    try {
+      if (approve) await approveSaleApproval(id, paymentMethod);
+      else await declineSaleApproval(id, reason);
+      await loadApprovals();
+      setDecliningApproval(null);
+    } catch (e) {
+      setDecisionError(e?.response?.data?.message || "We could not record your decision. Please try again.");
+    } finally {
+      setDecisionBusy(null);
+    }
+  };
+
+  const pendingApprovalsCount = approvals.filter((a) => a.status === "PENDING_CUSTOMER_APPROVAL").length;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -654,10 +704,11 @@ export default function CustomerDashboard() {
 
   useEffect(() => {
     load();
+    loadApprovals();
     getCustomerBusinessTypes()
       .then(({ data: types }) => setBusinessTypes(types || []))
       .catch(() => {});
-  }, [load]);
+  }, [load, loadApprovals]);
 
   useEffect(() => {
     const requestedTab = searchParams.get("tab");
@@ -855,6 +906,8 @@ export default function CustomerDashboard() {
     // open state in MobileNavHub.)
     if (id === "messages") loadMessages();
     if (id === "discover") loadDiscovery();
+    if (id === "approvals") loadApprovals();
+    if (id === "receipts") loadPosReceipts();
   };
 
   const visitBusiness = (business) => {
@@ -992,6 +1045,7 @@ export default function CustomerDashboard() {
         }
         onProfileImageChange={handleProfileImageChange}
         unread={unread}
+        approvalsCount={pendingApprovalsCount}
         onSignOut={signOut}
         banner={<Toast message={notice} onClose={() => setNotice("")} />}
         contentClassName={tab === "messages" ? styles.contentMessages : ""}
@@ -1381,6 +1435,168 @@ export default function CustomerDashboard() {
           </section>
         )}
 
+        {tab === "approvals" && (
+          <section className={styles.section}>
+            <div className={styles.sectionIntro}>
+              <span className={styles.eyebrow}>REVIEW BEFORE YOU PAY</span>
+              <h2>Approval slips</h2>
+              <p>
+                When a business builds your cart at the counter, it lands
+                here first — nothing is charged until you approve it and pick
+                how you'll pay.
+              </p>
+            </div>
+            {decisionError && (
+              <div className={styles.emptyState} style={{ borderColor: "#e2a199", color: "#a33b32", marginBottom: 16 }}>
+                <p style={{ margin: 0 }}>{decisionError}</p>
+              </div>
+            )}
+            {approvalsLoading && !approvals.length ? (
+              <div className={styles.emptyState}>
+                <i className="ti ti-loader-2" />
+                <p>Loading your approval slips…</p>
+              </div>
+            ) : !approvals.length ? (
+              <div className={styles.emptyState}>
+                <i className="ti ti-clipboard-check" />
+                <h3>Nothing waiting on you</h3>
+                <p>Carts a business sends you from the counter will show up here for your approval.</p>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                {approvals.map((a) => {
+                  const pending = a.status === "PENDING_CUSTOMER_APPROVAL";
+                  const declining = decliningApproval === a.id;
+                  return (
+                    <div
+                      key={a.id}
+                      style={{
+                        background: "linear-gradient(180deg, #0b1f1a, #0f3a2c)",
+                        color: "#eafff4",
+                        borderRadius: 18,
+                        padding: "18px 20px",
+                        boxShadow: "0 20px 45px rgba(0,0,0,.18)",
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
+                        <div style={{ display: "flex", gap: 10, alignItems: "center", minWidth: 0 }}>
+                          <div className={styles.avatar}>
+                            {a.businessLogo ? <img src={a.businessLogo} alt="" /> : initials(a.businessName)}
+                          </div>
+                          <div style={{ minWidth: 0 }}>
+                            <strong style={{ display: "block", fontSize: 14 }}>{a.businessName}</strong>
+                            <small style={{ color: "rgba(234,255,244,.55)", fontSize: 11 }}>
+                              {a.slipNumber} · {date(a.createdAt)} · {a.itemCount} item(s)
+                            </small>
+                          </div>
+                        </div>
+                        <span
+                          style={{
+                            fontSize: 9,
+                            fontWeight: 800,
+                            letterSpacing: ".05em",
+                            textTransform: "uppercase",
+                            padding: "5px 9px",
+                            borderRadius: 99,
+                            background: pending ? "rgba(255,196,0,.16)" : a.status === "AWAITING_BUSINESS_CONFIRMATION" ? "rgba(85,224,174,.16)" : a.status === "CUSTOMER_DECLINED" ? "rgba(255,99,86,.16)" : "rgba(255,255,255,.1)",
+                            color: pending ? "#ffd666" : a.status === "AWAITING_BUSINESS_CONFIRMATION" ? "#7cf2c4" : a.status === "CUSTOMER_DECLINED" ? "#ff9d92" : "rgba(234,255,244,.6)",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {{
+                            PENDING_CUSTOMER_APPROVAL: "Needs your review",
+                            AWAITING_BUSINESS_CONFIRMATION: "Waiting on business",
+                            CUSTOMER_DECLINED: "Declined",
+                            CANCELLED: "Withdrawn",
+                            COMPLETED: "Completed",
+                          }[a.status] || a.status}
+                        </span>
+                      </div>
+
+                      <div style={{ marginTop: 14, borderTop: "1px dashed rgba(255,255,255,.16)", paddingTop: 12, display: "flex", flexDirection: "column", gap: 5 }}>
+                        {(a.items || []).map((it, idx) => (
+                          <div key={idx} style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
+                            <span style={{ color: "rgba(234,255,244,.8)" }}>{it.productName} × {it.quantity}</span>
+                            <span>{money(a.currency, it.lineTotal)}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 4, fontSize: 11, color: "rgba(234,255,244,.6)" }}>
+                        {Number(a.discount) > 0 && <div style={{ display: "flex", justifyContent: "space-between" }}><span>Discount</span><span>−{money(a.currency, a.discount)}</span></div>}
+                        {Number(a.couponDiscount) > 0 && <div style={{ display: "flex", justifyContent: "space-between" }}><span>Coupon {a.couponCode ? `· ${a.couponCode}` : ""}</span><span>−{money(a.currency, a.couponDiscount)}</span></div>}
+                        {Number(a.tax) > 0 && <div style={{ display: "flex", justifyContent: "space-between" }}><span>Tax</span><span>{money(a.currency, a.tax)}</span></div>}
+                      </div>
+
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: 12 }}>
+                        <span style={{ fontSize: 11, color: "rgba(234,255,244,.55)" }}>Total</span>
+                        <strong style={{ fontSize: 19 }}>{money(a.currency, a.total)}</strong>
+                      </div>
+
+                      {pending && !declining && (
+                        <div style={{ display: "flex", gap: 8, marginTop: 14, flexWrap: "wrap" }}>
+                          <button
+                            disabled={decisionBusy === a.id}
+                            onClick={() => decideApproval(a.id, true, "CASH")}
+                            style={{ flex: "1 1 auto", height: 40, borderRadius: 10, border: 0, fontWeight: 800, fontSize: 12, cursor: "pointer", background: "rgba(255,255,255,.1)", color: "#eafff4" }}
+                          >
+                            Approve · Pay cash
+                          </button>
+                          <button
+                            disabled={decisionBusy === a.id}
+                            onClick={() => decideApproval(a.id, true, "EHRAL_PAY")}
+                            style={{ flex: "1 1 auto", height: 40, borderRadius: 10, border: 0, fontWeight: 800, fontSize: 12, cursor: "pointer", background: "linear-gradient(90deg,#0f6e56,#06cf9c)", color: "#04140f" }}
+                          >
+                            Approve · Ehral Pay
+                          </button>
+                          <button
+                            disabled={decisionBusy === a.id}
+                            onClick={() => setDecliningApproval(a.id)}
+                            style={{ height: 40, padding: "0 14px", borderRadius: 10, border: "1px solid rgba(255,255,255,.2)", fontWeight: 700, fontSize: 12, cursor: "pointer", background: "transparent", color: "rgba(234,255,244,.75)" }}
+                          >
+                            Decline
+                          </button>
+                        </div>
+                      )}
+
+                      {pending && declining && (
+                        <div style={{ marginTop: 14 }}>
+                          <textarea
+                            id={`decline-reason-${a.id}`}
+                            placeholder="Optional — let the business know why"
+                            style={{ width: "100%", minHeight: 60, borderRadius: 10, border: "1px solid rgba(255,255,255,.2)", background: "rgba(255,255,255,.06)", color: "#eafff4", padding: 10, fontSize: 12, resize: "vertical" }}
+                          />
+                          <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                            <button
+                              disabled={decisionBusy === a.id}
+                              onClick={() => decideApproval(a.id, false, null, document.getElementById(`decline-reason-${a.id}`)?.value || "")}
+                              style={{ flex: 1, height: 38, borderRadius: 10, border: 0, fontWeight: 800, fontSize: 12, cursor: "pointer", background: "#e2504a", color: "#fff" }}
+                            >
+                              Confirm decline
+                            </button>
+                            <button onClick={() => setDecliningApproval(null)} style={{ height: 38, padding: "0 14px", borderRadius: 10, border: "1px solid rgba(255,255,255,.2)", background: "transparent", color: "rgba(234,255,244,.75)", fontSize: 12, cursor: "pointer" }}>
+                              Back
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {a.status === "AWAITING_BUSINESS_CONFIRMATION" && (
+                        <p style={{ marginTop: 14, marginBottom: 0, fontSize: 11, color: "rgba(234,255,244,.55)" }}>
+                          You chose to pay with {a.paymentMethodChosen === "EHRAL_PAY" ? "Ehral Pay" : "cash"}. Your premium receipt will land on your dashboard the moment {a.businessName} confirms they've received it.
+                        </p>
+                      )}
+                      {a.status === "CUSTOMER_DECLINED" && a.declineReason && (
+                        <p style={{ marginTop: 14, marginBottom: 0, fontSize: 11, color: "rgba(234,255,244,.55)" }}>Your note: “{a.declineReason}”</p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        )}
+
         {tab === "orders" && (
           <section className={`${styles.section} ${styles.orderPage}`}>
             <div className={styles.sectionIntro}>
@@ -1409,7 +1625,7 @@ export default function CustomerDashboard() {
                 .filter((o) => o.receiptAvailable)
                 .map((o) => (
                   <button
-                    key={o.id}
+                    key={`order-${o.id}`}
                     className={styles.receiptCard}
                     onClick={() => setSelectedOrder(o)}
                   >
@@ -1433,8 +1649,34 @@ export default function CustomerDashboard() {
                     </em>
                   </button>
                 ))}
+              {posReceipts.map((r) => (
+                <button
+                  key={`pos-${r.saleId}`}
+                  className={styles.receiptCard}
+                  onClick={() => setSelectedPosReceipt(r)}
+                >
+                  <div className={styles.receiptCardTop}>
+                    <div className={styles.avatar}>
+                      {r.businessLogo ? (
+                        <img src={r.businessLogo} alt="" />
+                      ) : (
+                        initials(r.businessName)
+                      )}
+                    </div>
+                    <span>IN-STORE</span>
+                  </div>
+                  <strong>{r.businessName}</strong>
+                  <small>
+                    #{r.saleNumber} · {date(r.createdAt)}
+                  </small>
+                  <b>{money(r.currency, r.total)}</b>
+                  <em>
+                    View receipt <i className="ti ti-arrow-up-right" />
+                  </em>
+                </button>
+              ))}
             </div>
-            {!filteredOrders.some((o) => o.receiptAvailable) && (
+            {!filteredOrders.some((o) => o.receiptAvailable) && !posReceipts.length && (
               <div className={styles.emptyState}>
                 <i className="ti ti-receipt-off" />
                 <h3>No receipts yet</h3>
@@ -1443,6 +1685,7 @@ export default function CustomerDashboard() {
             )}
           </section>
         )}
+
 
         {tab === "messages" && (
           <div
@@ -2054,6 +2297,32 @@ export default function CustomerDashboard() {
           order={selectedOrder}
           onClose={() => setSelectedOrder(null)}
           onDownload={downloadReceipt}
+        />
+      )}
+      {selectedPosReceipt && (
+        <PremiumReceipt
+          receipt={{
+            businessName: selectedPosReceipt.businessName,
+            businessLogo: selectedPosReceipt.businessLogo,
+            businessAddress: selectedPosReceipt.businessAddress,
+            businessPhone: selectedPosReceipt.businessPhone,
+            saleNumber: selectedPosReceipt.saleNumber,
+            slipNumber: selectedPosReceipt.slipNumber,
+            currency: selectedPosReceipt.currency,
+            customerName: selectedPosReceipt.customerName,
+            items: selectedPosReceipt.items,
+            subtotal: selectedPosReceipt.subtotal,
+            discount: selectedPosReceipt.discount,
+            tax: selectedPosReceipt.tax,
+            couponCode: selectedPosReceipt.couponCode,
+            couponDiscount: selectedPosReceipt.couponDiscount,
+            total: selectedPosReceipt.total,
+            amountPaid: selectedPosReceipt.amountPaid,
+            paymentMethod: selectedPosReceipt.paymentMethod,
+            paymentStatus: selectedPosReceipt.paymentStatus,
+            createdAt: selectedPosReceipt.createdAt,
+          }}
+          onClose={() => setSelectedPosReceipt(null)}
         />
       )}
       <NotificationToastStack

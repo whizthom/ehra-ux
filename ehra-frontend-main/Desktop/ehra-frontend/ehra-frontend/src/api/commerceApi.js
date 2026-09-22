@@ -243,6 +243,15 @@ export const getCustomerProfile = () =>
 export const updateCustomerProfile = (data) =>
   API.put("/customer/profile", data);
 
+// POS approval slips: carts a business sends from the counter for the
+// customer to review, approve (choosing how they'll pay) or decline — and
+// the premium branded receipts issued once the business confirms payment.
+export const getMySalesApprovals = () => API.get("/customer/sales-approvals");
+export const approveSaleApproval = (id, paymentMethod) => API.post(`/customer/sales-approvals/${id}/approve`, { paymentMethod });
+export const declineSaleApproval = (id, reason) => API.post(`/customer/sales-approvals/${id}/decline`, { reason });
+export const getMyPosReceipts = () => API.get("/customer/sales-approvals/receipts");
+export const getMyPosReceipt = (saleId) => API.get(`/customer/sales-approvals/receipts/${saleId}`);
+
 /**
  * Upload the customer's profile picture.
  *

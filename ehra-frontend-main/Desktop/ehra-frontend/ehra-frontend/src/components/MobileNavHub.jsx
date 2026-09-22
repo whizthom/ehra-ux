@@ -237,6 +237,12 @@ const customerPeople = [
 
 const customerOperations = [
   {
+    key: "approvals",
+    label: "Approvals",
+    icon: "ti-clipboard-check",
+    description: "Review and approve carts sent from the counter.",
+  },
+  {
     key: "orders",
     label: "Orders",
     icon: "ti-shopping-bag",

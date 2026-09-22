@@ -13,3 +13,10 @@ export const updatePaymentStatus=(id,status,reason)=>API.put(`/retail/payments/$
 
 export const getRetailContext=()=>API.get("/retail/context");
 export const getMovementHistory=(params={})=>API.get('/retail/inventory/movements/history',{params});
+
+// POS "approval slip" flow: send a cart to an Ehral-account customer for
+// their approval + choice of payment method before the sale is finalized.
+export const createSaleApproval=d=>API.post('/retail/sales/approvals',d);
+export const getSaleApprovals=(status)=>API.get('/retail/sales/approvals',{params:status?{status}:{}});
+export const confirmSaleApprovalPayment=id=>API.post(`/retail/sales/approvals/${id}/confirm-payment`);
+export const cancelSaleApproval=id=>API.post(`/retail/sales/approvals/${id}/cancel`);

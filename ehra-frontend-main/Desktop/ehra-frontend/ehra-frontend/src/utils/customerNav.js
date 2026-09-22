@@ -5,6 +5,7 @@ export const CUSTOMER_NAV_ITEMS = [
   ["home", "Dashboard", "layout-dashboard"],
   ["discover", "Discover", "compass"],
   ["businesses", "My businesses", "building-store"],
+  ["approvals", "Approvals", "clipboard-check"],
   ["orders", "Orders", "shopping-bag"],
   ["receipts", "Receipts", "receipt"],
   ["messages", "Messages", "messages"],

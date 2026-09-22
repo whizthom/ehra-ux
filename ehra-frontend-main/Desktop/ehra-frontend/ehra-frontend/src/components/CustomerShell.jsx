@@ -48,6 +48,7 @@ export default function CustomerShell({
   profileImage,
   onProfileImageChange,
   unread = 0,
+  approvalsCount = 0,
   onSignOut,
   accountsActive = false,
   topActionsBefore = null,
@@ -126,6 +127,9 @@ export default function CustomerShell({
               <span>{label}</span>
               {id === "messages" && unread > 0 && (
                 <em>{unread > 9 ? "9+" : unread}</em>
+              )}
+              {id === "approvals" && approvalsCount > 0 && (
+                <em>{approvalsCount > 9 ? "9+" : approvalsCount}</em>
               )}
             </button>
           ))}
