@@ -2335,6 +2335,15 @@ td small {
 }
 
 .descriptionField textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 12px;
+  outline: none;
   min-height: 132px;
   line-height: 1.55;
   padding: 12px;
