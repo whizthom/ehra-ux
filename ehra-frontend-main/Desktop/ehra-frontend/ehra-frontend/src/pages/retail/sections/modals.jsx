@@ -15,6 +15,19 @@ import {
   today,
 } from "./shared";
 import { CategorySelect } from "./CategorySelect";
+import { GlassSelect } from "./GlassSelect";
+
+const PAYMENT_METHOD_OPTIONS = [
+  { value: "CASH", label: "Cash", icon: "cash" },
+  { value: "POS", label: "POS / Card", icon: "card" },
+  { value: "BANK_TRANSFER", label: "Bank Transfer", icon: "bank" },
+  { value: "OTHER", label: "Other", icon: "dot" },
+];
+const PAYMENT_STATUS_OPTIONS = [
+  { value: "COMPLETED", label: "Completed", icon: "check" },
+  { value: "PENDING", label: "Pending", icon: "clock" },
+  { value: "FAILED", label: "Failed", icon: "cross" },
+];
 function ProductModal({
   item,
   onClose,
@@ -699,18 +712,12 @@ function PaymentModal({ title, max, onClose, onSave }) {
           value={d.amount}
           onChange={(e) => setD({ ...d, amount: e.target.value })}
         />
-        <label className={s.field}>
-          <span>Payment method</span>
-          <select
-            value={d.method}
-            onChange={(e) => setD({ ...d, method: e.target.value })}
-          >
-            <option>CASH</option>
-            <option>POS</option>
-            <option>BANK_TRANSFER</option>
-            <option>OTHER</option>
-          </select>
-        </label>
+        <GlassSelect
+          label="Payment method"
+          value={d.method}
+          onChange={(v) => setD({ ...d, method: v })}
+          options={PAYMENT_METHOD_OPTIONS}
+        />
         <Field
           label="Reference"
           value={d.reference}
@@ -733,17 +740,12 @@ function PaymentModal({ title, max, onClose, onSave }) {
           value={d.note}
           onChange={(e) => setD({ ...d, note: e.target.value })}
         />
-        <label className={s.field}>
-          <span>Status</span>
-          <select
-            value={d.status}
-            onChange={(e) => setD({ ...d, status: e.target.value })}
-          >
-            <option>COMPLETED</option>
-            <option>PENDING</option>
-            <option>FAILED</option>
-          </select>
-        </label>
+        <GlassSelect
+          label="Status"
+          value={d.status}
+          onChange={(v) => setD({ ...d, status: v })}
+          options={PAYMENT_STATUS_OPTIONS}
+        />
       </div>
       <div className={s.modalFoot}>
         <button className={s.outline} onClick={onClose}>

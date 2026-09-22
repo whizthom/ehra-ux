@@ -1,0 +1,247 @@
+/* =========================================================================
+   GlassSelect — "laminated architectural glass" control.
+   -------------------------------------------------------------------------
+   Replaces the native <select> popup. Deliberately NOT the common
+   glassmorphism look (a blurred, floating, drop-shadowed card sitting on
+   top of the page). Instead the trigger and its panel read as one
+   continuous slab of frosted material: near-white on near-white, with
+   depth built from paper-thin tonal shifts, inset highlights/shadows and
+   a soft diagonal diffusion sheen rather than an outer drop shadow.
+   Typography and the selected row look pressed into the surface (etched/
+   debossed) instead of printed on top of it. All colors derive from the
+   existing theme tokens via color-mix() so it adapts to dark mode as a
+   dark laminate using the same technique.
+========================================================================= */
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+
+    --glass-top: color-mix(in srgb, var(--bg-surface) 100%, white 7%);
+    --glass-bottom: color-mix(in srgb, var(--bg-surface) 90%, var(--bg-page) 10%);
+    --glass-border: color-mix(in srgb, var(--text-primary) 9%, transparent);
+    --glass-hi: color-mix(in srgb, white 75%, transparent);
+    --glass-lo: color-mix(in srgb, black 9%, transparent);
+    --glass-sheen: color-mix(in srgb, white 40%, transparent);
+    --etch-hi: color-mix(in srgb, white 70%, transparent);
+    --etch-lo: color-mix(in srgb, black 16%, transparent);
+}
+
+.label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: .01em;
+}
+
+.label em {
+    color: var(--danger, #d94848);
+    font-style: normal;
+}
+
+/* ── Trigger (replaces the native <select>) ─────────────────────────── */
+.trigger {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    padding: 11px 13px;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    background:
+        linear-gradient(125deg, transparent 40%, var(--glass-sheen) 48%, transparent 60%),
+        linear-gradient(180deg, var(--glass-top), var(--glass-bottom));
+    background-blend-mode: normal;
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    backdrop-filter: blur(18px) saturate(150%);
+    box-shadow:
+        inset 0 1px 0 var(--glass-hi),
+        inset 0 -1px 1px var(--glass-lo),
+        inset 0 0 0 1px color-mix(in srgb, white 22%, transparent),
+        0 1px 1px color-mix(in srgb, black 4%, transparent);
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    text-align: left;
+    transition: box-shadow .18s ease, border-radius .12s ease;
+}
+
+.trigger:hover {
+    box-shadow:
+        inset 0 1px 0 var(--glass-hi),
+        inset 0 -1px 1px var(--glass-lo),
+        inset 0 0 0 1px color-mix(in srgb, white 30%, transparent),
+        0 0 0 3px color-mix(in srgb, var(--accent) 7%, transparent),
+        0 1px 1px color-mix(in srgb, black 4%, transparent);
+}
+
+.triggerOpen {
+    border-radius: 10px 10px 0 0;
+    box-shadow:
+        inset 0 1px 0 var(--glass-hi),
+        inset 0 -1px 2px var(--glass-lo),
+        inset 0 0 0 1px color-mix(in srgb, var(--accent) 16%, transparent),
+        0 0 0 3px color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.triggerLeft {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.triggerValue,
+.optionLeft span {
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-shadow: 0 1px 0 var(--etch-hi), 0 -1px 0 var(--etch-lo);
+}
+
+.triggerPlaceholder {
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chevron {
+    flex-shrink: 0;
+    color: var(--text-secondary);
+    filter: drop-shadow(0 1px 0 var(--etch-hi));
+    transition: transform .15s ease, color .15s ease;
+}
+
+.triggerOpen .chevron {
+    transform: rotate(180deg);
+    color: var(--accent);
+}
+
+.optionIcon {
+    display: inline-grid;
+    place-items: center;
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+    color: var(--text-secondary);
+    filter: drop-shadow(0 1px 0 var(--etch-hi));
+}
+
+.optionIcon svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* ── Panel: laminated INSIDE the slab, not a floating card ───────────── */
+.panel {
+    position: fixed;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px;
+    overflow-y: auto;
+    border-radius: 0 0 12px 12px;
+    border: 1px solid var(--glass-border);
+    border-top: none;
+    background:
+        linear-gradient(180deg,
+            color-mix(in srgb, var(--bg-surface) 99%, var(--bg-page) 1%) 0%,
+            color-mix(in srgb, var(--bg-surface) 92%, var(--bg-page) 8%) 100%);
+    -webkit-backdrop-filter: blur(22px) saturate(150%);
+    backdrop-filter: blur(22px) saturate(150%);
+    box-shadow:
+        inset 0 6px 10px -9px color-mix(in srgb, black 30%, transparent),
+        inset 0 1px 0 var(--glass-hi),
+        inset 0 0 0 1px color-mix(in srgb, white 18%, transparent),
+        0 14px 26px -18px color-mix(in srgb, black 30%, transparent);
+    animation: glassPanelIn .14s ease;
+}
+
+@keyframes glassPanelIn {
+    from {
+        opacity: 0;
+        transform: translateY(-2px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.option {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 10px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    box-shadow: none;
+    font-size: 12.5px;
+    text-align: left;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: box-shadow .12s ease, background .12s ease;
+}
+
+.optionLeft {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.optionHighlight {
+    background: color-mix(in srgb, var(--bg-page) 55%, transparent);
+    box-shadow:
+        inset 0 1px 2px color-mix(in srgb, black 6%, transparent),
+        inset 0 -1px 0 var(--glass-hi);
+}
+
+.optionSelected {
+    box-shadow:
+        inset 0 1px 2px color-mix(in srgb, black 7%, transparent),
+        inset 0 -1px 0 var(--glass-hi),
+        inset 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.optionSelected .optionLeft span {
+    font-weight: 700;
+    color: var(--accent);
+    text-shadow: 0 1px 0 var(--etch-hi), 0 -1px 0 color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.optionSelected .optionIcon {
+    color: var(--accent);
+}
+
+.optionTick {
+    flex-shrink: 0;
+    display: inline-grid;
+    place-items: center;
+    color: var(--accent);
+    filter: drop-shadow(0 1px 0 var(--etch-hi));
+}
+
+@media (max-width: 520px) {
+    .panel {
+        border-radius: 0 0 14px 14px;
+    }
+
+    .option {
+        padding: 11px 10px;
+        font-size: 13px;
+    }
+}
