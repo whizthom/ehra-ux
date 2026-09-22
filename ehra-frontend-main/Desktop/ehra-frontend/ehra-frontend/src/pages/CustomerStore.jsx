@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import Logo from "../components/Logo";
 import BrandSplash from "../components/BrandSplash";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
@@ -47,7 +47,7 @@ const SORTS = [
   ["name", "Name A–Z"],
 ];
 
-function Stepper({ value, max, onMinus, onPlus, size = "md" }) {
+export function Stepper({ value, max, onMinus, onPlus, size = "md" }) {
   return (
     <div
       className={`${styles.stepper} ${size === "sm" ? styles.stepperSm : ""}`}
@@ -68,7 +68,7 @@ function Stepper({ value, max, onMinus, onPlus, size = "md" }) {
   );
 }
 
-function ProductCard({
+export function ProductCard({
   product,
   qty,
   wished,
@@ -201,6 +201,7 @@ const normalizeAccounts = (response) =>
 export default function CustomerStore() {
   const { businessId } = useParams();
   const nav = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { switchContext } = useAuth();
 
   const [view, setView] = useState(null);
@@ -322,6 +323,28 @@ export default function CustomerStore() {
     () => ["All", ...Array.from(new Set(products.map(getCategory)))],
     [products],
   );
+
+  // Deep links from the product page (`?bag=1`, `?category=…`) act on the
+  // store once and then tidy the URL, so refreshing or sharing the link
+  // afterwards doesn't keep re-triggering them.
+  useEffect(() => {
+    if (!products.length) return;
+    let changed = false;
+    const next = new URLSearchParams(searchParams);
+    if (next.get("bag") === "1") {
+      setBagOpen(true);
+      next.delete("bag");
+      changed = true;
+    }
+    const wantedCategory = next.get("category");
+    if (wantedCategory) {
+      if (categories.includes(wantedCategory)) setCategory(wantedCategory);
+      next.delete("category");
+      changed = true;
+    }
+    if (changed) setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products.length]);
   const available = useMemo(() => products.filter(isInStock), [products]);
   const deals = useMemo(
     () =>
@@ -1267,6 +1290,20 @@ export default function CustomerStore() {
                 {selPercent > 0 && (
                   <span className={styles.badgeSale}>−{selPercent}%</span>
                 )}
+                {selGallery.length > 0 && (
+                  <button
+                    type="button"
+                    className={styles.galleryExpand}
+                    onClick={() =>
+                      nav(
+                        `/customer/business/${businessId}/store/product/${selected.id}`,
+                      )
+                    }
+                    aria-label="View full product page"
+                  >
+                    <i className="ti ti-arrows-maximize" aria-hidden="true" />
+                  </button>
+                )}
               </div>
               {selGallery.length > 1 && (
                 <div className={styles.thumbs}>
@@ -1290,6 +1327,19 @@ export default function CustomerStore() {
               )}
             </div>
             <div className={styles.productInfo}>
+              <button
+                type="button"
+                className={styles.fullPageBtn}
+                onClick={() =>
+                  nav(
+                    `/customer/business/${businessId}/store/product/${selected.id}`,
+                  )
+                }
+              >
+                <i className="ti ti-arrows-maximize" aria-hidden="true" />
+                View full page
+                <i className="ti ti-arrow-right" aria-hidden="true" />
+              </button>
               <span className={styles.kicker}>{getCategory(selected)}</span>
               <h2>{selected.name}</h2>
               {selected.brand && (

@@ -1434,6 +1434,35 @@
     left: 14px;
 }
 
+/* Small icon-only shortcut sitting on the image itself, for anyone who
+   reaches for the picture first. The prominent, labelled way in is the
+   glowing .fullPageBtn below the fold in .productInfo. */
+.galleryExpand {
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+    z-index: 2;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--st-surface) 82%, transparent);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    color: var(--st-ink);
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.2s var(--st-ease), background 0.2s ease;
+}
+
+.galleryExpand:hover {
+    background: var(--st-accent);
+    color: #fff;
+    transform: scale(1.06);
+}
+
 .thumbs {
     display: flex;
     width: 100%;
@@ -1475,6 +1504,62 @@
 
 .productInfo {
     padding: 20px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Glowing entry point into the dedicated product page. A soft pulsing ring
+   (not just color) is what makes it read as "there's more here" rather
+   than another plain link among the rest of .productInfo. */
+.fullPageBtn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 9px 16px;
+    border: 1px solid color-mix(in srgb, var(--st-accent) 45%, transparent);
+    border-radius: 999px;
+    background: var(--st-accent-soft);
+    color: var(--st-accent);
+    font-size: 12.5px;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    animation: stGlowPulse 2.6s ease-in-out infinite;
+    transition: transform 0.2s var(--st-ease), background 0.2s ease;
+}
+
+.fullPageBtn i {
+    font-size: 15px;
+}
+
+.fullPageBtn i:last-child {
+    font-size: 13px;
+    transition: transform 0.2s var(--st-ease);
+}
+
+.fullPageBtn:hover {
+    background: color-mix(in srgb, var(--st-accent-soft) 55%, var(--st-accent) 14%);
+    transform: translateY(-1px);
+}
+
+.fullPageBtn:hover i:last-child {
+    transform: translateX(2px);
+}
+
+.fullPageBtn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+@keyframes stGlowPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 color-mix(in srgb, var(--st-accent) 45%, transparent);
+    }
+
+    50% {
+        box-shadow: 0 0 0 8px color-mix(in srgb, var(--st-accent) 0%, transparent);
+    }
 }
 
 .productInfo h2 {
@@ -2155,7 +2240,8 @@
     .toast,
     .bagBar,
     .successMark,
-    .mobileSearch {
+    .mobileSearch,
+    .fullPageBtn {
         animation: none;
     }
 

@@ -51,6 +51,7 @@ const EmployeeProfilePage = lazy(() => import("./pages/EmployeeProfilePage"));
 const MyAccountsPage = lazy(() => import("./pages/MyAccountsPage"));
 const CustomerBusinessView = lazy(() => import("./pages/CustomerBusinessView"));
 const CustomerStore = lazy(() => import("./pages/CustomerStore"));
+const CustomerStoreProduct = lazy(() => import("./pages/CustomerStoreProduct"));
 const Support = lazy(() => import("./pages/Support"));
 const BusinessSetup = lazy(() => import("./pages/BusinessSetup"));
 const RetailWorkspace = lazy(() => import("./pages/RetailWorkspace"));
@@ -227,6 +228,17 @@ function App() {
               element={
                 <ProtectedRoute roles={["ROLE_CUSTOMER"]}>
                   <CustomerStore />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* A single product's dedicated full page, reached from the "View
+                full page" button in the store's product sheet. */}
+            <Route
+              path="/customer/business/:businessId/store/product/:productId"
+              element={
+                <ProtectedRoute roles={["ROLE_CUSTOMER"]}>
+                  <CustomerStoreProduct />
                 </ProtectedRoute>
               }
             />
