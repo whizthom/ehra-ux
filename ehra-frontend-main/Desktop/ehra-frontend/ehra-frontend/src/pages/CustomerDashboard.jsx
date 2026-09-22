@@ -19,6 +19,7 @@ import {
 import { createCustomerBusinessConversation } from "../api/messagingApi";
 import { useAuth } from "../context/AuthContext";
 import useMessagingConnection from "../hooks/useMessagingConnection";
+import { subscribeToUserQueue } from "../services/messagingSocket";
 import useBusinessConnection from "../hooks/useBusinessConnection";
 import useConversations from "../hooks/useConversations";
 import useCustomerInboxBadge from "../hooks/useCustomerInboxBadge";
@@ -709,6 +710,24 @@ export default function CustomerDashboard() {
       .then(({ data: types }) => setBusinessTypes(types || []))
       .catch(() => {});
   }, [load, loadApprovals]);
+
+  // Live updates over the same WebSocket connection chat messages use
+  // (kept alive by useMessagingConnection() above): a new approval slip
+  // lands the instant a business sends it, and the finished receipt +
+  // updated spending/order history land the instant the business confirms
+  // payment - no manual refresh needed on either end.
+  useEffect(() => {
+    return subscribeToUserQueue((event) => {
+      if (!event?.type) return;
+      if (event.type === "SALE_APPROVAL_CREATED") {
+        loadApprovals();
+      } else if (event.type === "SALE_COMPLETED") {
+        loadApprovals();
+        loadPosReceipts();
+        load();
+      }
+    });
+  }, [loadApprovals, loadPosReceipts, load]);
 
   useEffect(() => {
     const requestedTab = searchParams.get("tab");

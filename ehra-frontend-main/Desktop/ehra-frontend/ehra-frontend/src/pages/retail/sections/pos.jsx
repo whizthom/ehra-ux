@@ -4,6 +4,7 @@ import {addSalePayment,getSalePayments,createSaleApproval,getSaleApprovals,confi
 import {Modal,Field,Empty,Metric,Panel,Toolbar,filteredRows,PaymentHistory,RETAIL_CATEGORIES,today} from "./shared";
 import {PaymentModal} from "./modals";
 import PremiumReceipt from "../../../components/PremiumReceipt";
+import {subscribeToUserQueue} from "../../../services/messagingSocket";
 
 const STATUS_LABEL={PENDING_CUSTOMER_APPROVAL:"Awaiting customer",CUSTOMER_APPROVED:"Customer approved",AWAITING_BUSINESS_CONFIRMATION:"Awaiting your confirmation",CUSTOMER_DECLINED:"Declined",CANCELLED:"Cancelled",COMPLETED:"Completed"};
 const STATUS_TONE={PENDING_CUSTOMER_APPROVAL:"pending",CUSTOMER_APPROVED:"pending",AWAITING_BUSINESS_CONFIRMATION:"action",CUSTOMER_DECLINED:"danger",CANCELLED:"muted",COMPLETED:"success"};
@@ -48,6 +49,18 @@ function POS({products,sales,customers,business,onDone,onRefund,onApprovalsChang
   const [approvals,setApprovals]=useState([]);const [approvalsBusy,setApprovalsBusy]=useState(null);
   const loadApprovals=()=>getSaleApprovals('OPEN').then(r=>setApprovals(r.data||[])).catch(()=>{});
   useEffect(()=>{loadApprovals()},[]);
+  // Live updates: the moment a customer approves/declines a slip, or a
+  // confirm-payment we (or a teammate on another screen) triggered finishes,
+  // this fires over the same WebSocket connection chat messages use — no
+  // manual refresh needed on either side. RetailWorkspace already keeps the
+  // socket connected via useMessagingConnection().
+  useEffect(()=>{
+    return subscribeToUserQueue((event)=>{
+      if(!event?.type)return;
+      if(event.type==='SALE_APPROVAL_DECIDED'){loadApprovals();}
+      else if(event.type==='SALE_COMPLETED'){loadApprovals();onApprovalsChanged&&onApprovalsChanged();}
+    });
+  },[]);
   const add=p=>setCart(c=>{const x=c.find(i=>i.productId===p.id);const max=p.trackInventory?Number(p.stockQuantity||0):Infinity;if(max<=0)return c;if(x)return c.map(i=>i.productId===p.id?{...i,quantity:Math.min(i.quantity+1,max)}:i);return [...c,{productId:p.id,name:p.name,price:Math.max(0,Number(p.price||0)-Number(p.discount||0)),quantity:1,maxStock:max}]});
   const subtotal=cart.reduce((n,i)=>n+Number(i.price)*i.quantity,0);const total=Math.max(0,subtotal-Number(discount||0)+Number(tax||0));
   const clearCheckout=()=>{setCart([]);setName('');setPhone('');setDiscount('');setTax('');setAmountPaid('');setPaymentReference('');setPaymentProvider('');setCouponCode('');setPickedCustomer(null)};
