@@ -298,7 +298,7 @@ function getPrimary(activeNav, role) {
   if (activeNav === "home") return "Home";
   if (role === "customer") {
     if (["discover", "businesses"].includes(activeNav)) return "Businesses";
-    if (["orders", "receipts", "spending"].includes(activeNav)) return "Orders";
+    if (["approvals", "orders", "receipts", "spending"].includes(activeNav)) return "Orders";
   } else if (role === "employer") {
     if (
       ["Workforce", "Departments", "Branches", "Profile Edits"].includes(

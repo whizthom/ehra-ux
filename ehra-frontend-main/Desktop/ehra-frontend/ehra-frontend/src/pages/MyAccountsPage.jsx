@@ -232,6 +232,17 @@ export default function MyAccountsPage() {
     }
   };
 
+  // Mirrors CustomerDashboard.jsx's handleProfileImageChange: after
+  // CustomerShell uploads a new photo, reflect the returned URL straight
+  // into local state so the sidebar/topbar avatar updates immediately
+  // instead of waiting on a full getCustomerOverview() refetch.
+  const handleCustomerProfileImageChange = (url) => {
+    if (!url) return;
+    setCustomerProfile((current) =>
+      current ? { ...current, profileImage: url } : current,
+    );
+  };
+
   const handleNavClick = (n) => {
     if (n.isFullPage) {
       // Already here - nothing to navigate to.
