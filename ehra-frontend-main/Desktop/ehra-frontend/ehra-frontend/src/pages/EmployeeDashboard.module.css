@@ -1675,7 +1675,7 @@
 
     .qaScrollWrap {
         position: relative;
-        margin: 0 -16px;
+        margin: 0;
         min-width: 0;
     }
 
@@ -1702,20 +1702,30 @@
         display: none;
     }
 
+    /* Quick actions live directly on the dashboard canvas on phones.
+       Remove all card/panel chrome from each action so the row feels like
+       native dashboard controls rather than a collection of mini-panels.
+       The icon treatment still provides the visual grouping and tap target. */
     .qaBtn {
         min-width: 0;
-        width: 100%;
-        height: 52px;
-        padding: 0 10px;
-        border-radius: 15px;
+        width: auto;
+        flex: 0 0 auto;
+        height: 44px;
+        padding: 0 8px;
+        border-radius: 10px;
         white-space: nowrap;
         box-shadow: none;
         justify-content: flex-start;
-        border: 1px solid var(--border-color);
-        background: var(--bg-surface);
+        border: none;
+        background: transparent;
         color: var(--text-primary);
         font-size: 10px;
         font-weight: 600;
+    }
+
+    .qaBtn:hover {
+        background: transparent;
+        border-color: transparent;
     }
 
     .qaBtn:active {
