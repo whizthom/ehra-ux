@@ -352,6 +352,10 @@
 }
 
 /* ── Toast / notice ───────────────────────────────────────────────── */
+/* Premium glass treatment carrying the same Ehral customer-hub branding
+   as the hero and the confirmation dialogs: the cust-grad emerald
+   gradient, a soft glow accent and backdrop blur, rather than a flat
+   dark rectangle. No icon - the copy and the brand gradient carry it. */
 
 .toast {
   position: fixed;
@@ -360,41 +364,62 @@
   z-index: 150;
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 14px;
   max-width: min(430px, calc(100vw - 32px));
-  padding: 12px 13px;
-  border-radius: 15px;
-  background: var(--cust-grad-1);
+  padding: 15px 14px 15px 20px;
+  border-radius: 16px;
+  overflow: hidden;
   color: #fff;
-  box-shadow: 0 20px 50px var(--shadow-color);
-  border: 1px solid color-mix(in srgb, var(--cust-glow) 24%, transparent);
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 13.5px;
+  font-weight: 650;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  background:
+    radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--cust-glow) 30%, transparent), transparent 60%),
+    linear-gradient(135deg, var(--cust-grad-1) 0%, var(--cust-grad-3) 65%, var(--cust-grad-2) 100%);
+  border: 1px solid color-mix(in srgb, var(--cust-glow) 38%, transparent);
+  box-shadow:
+    0 26px 60px -16px color-mix(in srgb, var(--cust-grad-1) 70%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #ffffff 14%, transparent);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  animation: toastIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.toastIcon {
-  width: 30px;
-  height: 30px;
-  border-radius: 10px;
-  background: var(--cust-glow);
-  color: var(--cust-grad-1);
-  display: grid;
-  place-items: center;
-  flex: none;
+.toast>span:first-of-type {
+  position: relative;
+  flex: 1;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .toast>button {
+  position: relative;
+  flex: none;
   border: 0;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.65);
-  width: 28px;
-  height: 28px;
+  background: color-mix(in srgb, #ffffff 12%, transparent);
+  color: rgba(255, 255, 255, 0.75);
+  width: 26px;
+  height: 26px;
+  border-radius: 9px;
   display: grid;
   place-items: center;
   cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease;
 }
 
 .toast>button:hover {
+  background: color-mix(in srgb, #ffffff 20%, transparent);
   color: #fff;
 }
 

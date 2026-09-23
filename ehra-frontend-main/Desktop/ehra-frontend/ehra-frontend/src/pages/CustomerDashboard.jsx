@@ -202,9 +202,6 @@ function Toast({ message, onClose }) {
   if (!message) return null;
   return (
     <div className={styles.toast} role="status">
-      <span className={styles.toastIcon}>
-        <i className="ti ti-sparkles" />
-      </span>
       <span>{message}</span>
       <button onClick={onClose} aria-label="Dismiss notification">
         <i className="ti ti-x" />
