@@ -8,6 +8,7 @@ import { verifyOtp, checkPhone, checkPhoneBeforeOtp, sendCustomerRegistrationOtp
 import { getMyAccounts, switchContext, login as apiLogin, clearTokens } from "../../api/authApi";
 import { connectCustomerToBusiness } from "../../api/commerceApi";
 import { createCustomerBusinessConversation } from "../../api/messagingApi";
+import { payForOrderOnline } from "../../api/orderPaymentApi";
 import { useAuth } from "../../context/AuthContext";
 import Logo from "../../components/Logo";
 import styles from "./Storefront.module.css";
@@ -245,6 +246,9 @@ export default function Storefront() {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [placed, setPlaced] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [payingOnline, setPayingOnline] = useState(false);
+  const [onlinePaymentResult, setOnlinePaymentResult] = useState(null);
+  const [onlinePaymentError, setOnlinePaymentError] = useState("");
   const [form, setForm] = useState({ customerName: "", customerPhone: "", customerEmail: "", deliveryAddress: "", customerNote: "", fulfillmentMethod: "" });
   const [customerGate, setCustomerGate] = useState({ open: false, step: "phone", pending: null, firstName: "", lastName: "", phone: "", email: "", password: "", confirmPassword: "", pinId: "", otp: "", message: "" });
 
@@ -388,6 +392,21 @@ export default function Storefront() {
       setActionError(e2?.response?.data?.message || "Could not place your order.");
     } finally { setSubmitting(false); }
   };
+  // Pays the just-placed order via Paystack (spec §7, §12): the customer
+  // is only ever asked to pay the order's own displayed total - no Ehral
+  // or Paystack fee is added here. Never marks anything paid itself; the
+  // returned status is whatever the backend's own Paystack verification
+  // concluded (see api/orderPaymentApi.js#payForOrderOnline).
+  const payNow = async () => {
+    if (!placed) return;
+    setPayingOnline(true); setOnlinePaymentError(""); setOnlinePaymentResult(null);
+    try {
+      const result = await payForOrderOnline(placed.id);
+      setOnlinePaymentResult(result);
+    } catch (e3) {
+      setOnlinePaymentError(e3?.response?.data?.message || e3?.message || "Payment could not be completed.");
+    } finally { setPayingOnline(false); }
+  };
 
   if (loading) return <div className={styles.center}><div className={styles.loader}><span /><span /><span /><p>Loading store</p></div></div>;
   if (error && !store) return <div className={styles.center}><div className={styles.notFound}><i className="ti ti-store-off" /><h2>Store unavailable</h2><p>{error}</p></div></div>;
@@ -457,7 +476,21 @@ export default function Storefront() {
 
       {checkout && <div className={styles.overlay}><div className={styles.checkoutModal}><button className={styles.close} onClick={() => setCheckout(false)} aria-label="Close">×</button><div className={styles.checkoutHead}><span className={styles.sectionKicker}>CHECKOUT</span><h2>Complete your order</h2><p>Review your items and tell the store how to fulfil your order.</p></div><div className={styles.checkoutSummary}>{cartItems.map((i) => <div key={i.id}><span>{i.name} × {i.quantity}</span><b>{money(i.currency, i.lineTotal)}</b></div>)}<div className={styles.summaryTotal}><span>Total</span><b>{money(currency, total)}</b></div></div><form onSubmit={submit} className={styles.checkoutForm}><div className={styles.verifiedCheckoutIdentity}><div><span>Customer</span><strong>{form.customerName || "Verified Ehral customer"}</strong></div><div><span>Verified phone</span><strong>{form.customerPhone}</strong></div><div><span>Email</span><strong>{form.customerEmail || "Not added"}</strong></div><i className="ti ti-shield-check" /></div>{(store.pickupEnabled || store.deliveryEnabled) ? <div><label>Fulfilment method</label><select required value={form.fulfillmentMethod} onChange={(e) => setForm({ ...form, fulfillmentMethod: e.target.value })}><option value="">Choose fulfilment</option>{store.pickupEnabled && <option value="PICKUP">Pickup</option>}{store.deliveryEnabled && <option value="DELIVERY">Delivery</option>}</select></div> : <div className={styles.fulfilmentNotice}><i className="ti ti-info-circle" /> The store will contact you to arrange fulfilment.</div>}{form.fulfillmentMethod === "DELIVERY" && <textarea required placeholder="Delivery address" value={form.deliveryAddress} onChange={(e) => setForm({ ...form, deliveryAddress: e.target.value })} />}<textarea placeholder="Order note (optional)" value={form.customerNote} onChange={(e) => setForm({ ...form, customerNote: e.target.value })} />{actionError && <div className={styles.error}>{actionError}</div>}<button className={styles.checkoutCta} disabled={submitting || !cartItems.length}>{submitting ? "Placing order…" : "Place order"}<i className="ti ti-arrow-right" /></button></form></div></div>}
 
-      {placed && <div className={styles.overlay}><div className={styles.successModal}><div className={styles.successIcon}><i className="ti ti-check" /></div><span className={styles.sectionKicker}>ORDER CONFIRMED</span><h2>Thank you for your order.</h2><p>Your order <b>#{placed.orderNumber}</b> has been created successfully. Your receipt will become available in My Ehral after the order has been fully paid, and it will be sent to your email when available.</p><div className={styles.orderTotal}><span>Total</span><strong>{money(placed.currency, placed.total)}</strong></div><button className={styles.checkoutCta} onClick={() => navigate("/customer-dashboard?chat=" + "")}>Open My Ehral <i className="ti ti-layout-dashboard" /></button>{store.whatsappNumber && <button className={styles.textCta} onClick={() => window.location.href = buildWhatsAppLink(store.whatsappNumber, `Hello, I just placed order #${placed.orderNumber} through Ehral and would like to follow up.`)}>Continue on WhatsApp <i className="ti ti-brand-whatsapp" /></button>}<button className={styles.textCta} onClick={() => setPlaced(null)}>Continue shopping</button></div></div>}
+      {placed && <div className={styles.overlay}><div className={styles.successModal}><div className={styles.successIcon}><i className="ti ti-check" /></div><span className={styles.sectionKicker}>ORDER CONFIRMED</span><h2>Thank you for your order.</h2><p>Your order <b>#{placed.orderNumber}</b> has been created successfully. Your receipt will become available in My Ehral after the order has been fully paid, and it will be sent to your email when available.</p><div className={styles.orderTotal}><span>Total</span><strong>{money(placed.currency, placed.total)}</strong></div>
+{store.onlinePaymentsEnabled && !onlinePaymentResult && (
+  <button className={styles.checkoutCta} disabled={payingOnline} onClick={payNow}>
+    {payingOnline ? "Opening secure payment…" : "Pay online now"} <i className="ti ti-credit-card" />
+  </button>
+)}
+{onlinePaymentError && <div className={styles.error}>{onlinePaymentError}</div>}
+{onlinePaymentResult && (
+  <div className={onlinePaymentResult.status === "SUCCESS" ? styles.paymentSuccess : styles.error}>
+    {onlinePaymentResult.status === "SUCCESS"
+      ? <><i className="ti ti-check" /> Payment received - your order is now paid.</>
+      : "We could not confirm this payment yet. You can try again or pay on delivery/pickup."}
+  </div>
+)}
+<button className={styles.checkoutCta} onClick={() => navigate("/customer-dashboard?chat=" + "")}>Open My Ehral <i className="ti ti-layout-dashboard" /></button>{store.whatsappNumber && <button className={styles.textCta} onClick={() => window.location.href = buildWhatsAppLink(store.whatsappNumber, `Hello, I just placed order #${placed.orderNumber} through Ehral and would like to follow up.`)}>Continue on WhatsApp <i className="ti ti-brand-whatsapp" /></button>}<button className={styles.textCta} onClick={() => { setPlaced(null); setOnlinePaymentResult(null); setOnlinePaymentError(""); }}>Continue shopping</button></div></div>}
     </div>
   );
 }

@@ -20,6 +20,7 @@ export { POS } from "./sections/pos";
 export { Suppliers } from "./sections/suppliers";
 export { Reports } from "./sections/reports";
 export { OpeningHours, Store } from "./sections/store";
+export { OnlinePayments } from "./sections/onlinePayments";
 export { RetailEmployees } from "./sections/staff";
 export { Settings } from "./sections/settings";
 export {

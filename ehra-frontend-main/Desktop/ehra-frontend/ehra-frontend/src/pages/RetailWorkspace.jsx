@@ -13,6 +13,7 @@ import {
   Suppliers,
   Reports,
   Store,
+  OnlinePayments,
   Settings,
   ProductModal,
   ExpenseModal,
@@ -76,6 +77,7 @@ const NAV = [
   ["Expenses", "≡", "finance"],
   ["Suppliers", "⇄", "finance"],
   ["Reports", "▥", "finance"],
+  ["Payments", "$", "finance"],
   ["Settings", "⚙", "settings"],
 ];
 const PERM = {
@@ -556,6 +558,9 @@ export default function RetailWorkspace() {
           )}{" "}
           {tab === "Reports" && (
             <Reports report={report} setReport={setReport} money={money} />
+          )}{" "}
+          {tab === "Payments" && (
+            <OnlinePayments owner={context.owner} money={money} />
           )}{" "}
           {tab === "Settings" && (
             <Settings

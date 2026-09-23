@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import s from "../../RetailWorkspace.module.css";
 import { getOrderPayments, addOrderPayment } from "../../../api/retailApi";
 import { updateOrderStatus } from "../../../api/commerceApi";
+import { getOrderPaymentBreakdown, refundOrderPayment } from "../../../api/orderPaymentApi";
 import {
   Modal,
   Field,
@@ -15,6 +16,79 @@ import {
   today,
 } from "./shared";
 import { PaymentModal } from "./modals";
+
+// Transparent per-order breakdown for a Paystack-paid order (spec §9,
+// §10): Paystack fee and Ehral fee are always shown as two distinct
+// lines, never combined into a single "fees" figure. Silently renders
+// nothing for orders that were never paid online (e.g. cash/manual
+// orders) - this is an addition to the order detail view, not a
+// replacement for the existing manual PaymentHistory ledger below it.
+function OnlinePaymentBreakdown({ orderId, money, canFinance }) {
+  const [breakdown, setBreakdown] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [refunding, setRefunding] = useState(false);
+  const [refundError, setRefundError] = useState("");
+
+  const load = () => {
+    setLoading(true);
+    getOrderPaymentBreakdown(orderId)
+      .then(setBreakdown)
+      .catch(() => setBreakdown(null))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { load(); }, [orderId]);
+
+  if (loading || !breakdown) return null;
+
+  const remaining = Number(breakdown.grossAmount || 0) - Number(breakdown.totalRefunded || 0);
+
+  const requestRefund = async () => {
+    const reason = window.prompt("Reason for this refund?");
+    if (!reason) return;
+    setRefunding(true);
+    setRefundError("");
+    try {
+      await refundOrderPayment(orderId, { reason });
+      load();
+    } catch (e) {
+      setRefundError(e?.response?.data?.message || "Could not process this refund.");
+    } finally {
+      setRefunding(false);
+    }
+  };
+
+  return (
+    <>
+      <h3>Online payment breakdown</h3>
+      <div className={s.tableWrap}>
+        <table>
+          <tbody>
+            <tr><td>Order value</td><td style={{ textAlign: "right" }}>{money(breakdown.grossAmount)}</td></tr>
+            <tr><td>Paystack processing fee</td><td style={{ textAlign: "right" }}>-{money(breakdown.paystackFee)}</td></tr>
+            <tr><td>Ehral platform fee</td><td style={{ textAlign: "right" }}>-{money(breakdown.ehralFee)}</td></tr>
+            <tr><td><strong>Business settlement</strong></td><td style={{ textAlign: "right" }}><strong>{money(breakdown.netBusinessSettlement)}</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div className={s.detailGrid}>
+        <div><span>Payment status</span><b>{breakdown.status}</b></div>
+        <div><span>Reference</span><b>{breakdown.reference}</b></div>
+        <div><span>Paid on</span><b>{breakdown.paidAt ? new Date(breakdown.paidAt).toLocaleString() : "—"}</b></div>
+        {Number(breakdown.totalRefunded || 0) > 0 && (
+          <div><span>Refunded</span><b>{money(breakdown.totalRefunded)}</b></div>
+        )}
+      </div>
+      {refundError && <div className={s.error}>{refundError}</div>}
+      {canFinance && breakdown.status === "SUCCESS" && remaining > 0 && (
+        <button className={s.outline} disabled={refunding} onClick={requestRefund}>
+          {refunding ? "Processing…" : "Refund this payment"}
+        </button>
+      )}
+    </>
+  );
+}
+
 function Orders({ items, query, setQuery, money, canFinance = false }) {
   const [list, setList] = useState(items);
   const [paymentOrder, setPaymentOrder] = useState(null);
@@ -210,6 +284,7 @@ function Orders({ items, query, setQuery, money, canFinance = false }) {
                 <p>{selected.customerNote}</p>
               </>
             )}
+            <OnlinePaymentBreakdown orderId={selected.id} money={money} canFinance={canFinance} />
             {selected.status !== "REFUNDED" &&
               selected.status !== "CANCELLED" && (
                 <button
