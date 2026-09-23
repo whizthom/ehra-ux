@@ -77,7 +77,8 @@ const MODES = {
     emptyText:
       "Message a business you've ordered from or follow on Ehral - ask about products, orders, delivery or availability.",
     emptyPaneTitle: "Your messages",
-    emptyPaneText: "Talk directly with the businesses you're connected to, without leaving Ehral.",
+    emptyPaneText:
+      "Talk directly with the businesses you're connected to, without leaving Ehral.",
   },
 };
 
@@ -107,6 +108,7 @@ export default function MessagingHub({
   // Renders on the page background - no card / panel chrome - for hosts (the
   // customer's own account) that want the inbox to sit directly on the page.
   flat = false,
+  employeePremium = false,
 }) {
   const config = MODES[mode] || MODES.staff;
   const channel = config.channel;
@@ -121,7 +123,8 @@ export default function MessagingHub({
   // side, in the wrong color. Coercing once here, at the single place this
   // value enters the messaging feature, is what fixes that for every
   // consumer below.
-  const myIdentityId = user?.identityId != null ? Number(user.identityId) : null;
+  const myIdentityId =
+    user?.identityId != null ? Number(user.identityId) : null;
   const isEmployer = user?.contextType === "EMPLOYER";
   // The actual WebSocket connection is opened once, at the top of the
   // page (Dashboard / EmployeeDashboard / RetailWorkspace / CustomerDashboard),
@@ -153,7 +156,9 @@ export default function MessagingHub({
   const active = conversations.find((c) => c.id === activeId) || null;
   const showingAnnouncements = tab === "announcement";
   const unreadChats = useMemo(
-    () => conversations.filter((c) => !c.archived && Number(c.unreadCount) > 0).length,
+    () =>
+      conversations.filter((c) => !c.archived && Number(c.unreadCount) > 0)
+        .length,
     [conversations],
   );
 
@@ -239,24 +244,35 @@ export default function MessagingHub({
 
   // Customer mode: open (or create) the thread with a business.
   const handlePickBusiness = async (business) => {
-    const { data } = await createCustomerBusinessConversation(business.businessId);
+    const { data } = await createCustomerBusinessConversation(
+      business.businessId,
+    );
     setShowNewChat(false);
     await openThread(data.id);
   };
 
-  const togglePin = (c) => updateConversationState(c.id, { pinned: !c.pinned }).then(refresh);
-  const toggleMute = (c) => updateConversationState(c.id, { muted: !c.muted }).then(refresh);
-  const toggleArchive = (c) => updateConversationState(c.id, { archived: !c.archived }).then(refresh);
+  const togglePin = (c) =>
+    updateConversationState(c.id, { pinned: !c.pinned }).then(refresh);
+  const toggleMute = (c) =>
+    updateConversationState(c.id, { muted: !c.muted }).then(refresh);
+  const toggleArchive = (c) =>
+    updateConversationState(c.id, { archived: !c.archived }).then(refresh);
 
   const tabBadge = (key) => {
     if (key === "unread") return unreadChats;
-    if (key === "announcement" && mode === "customer") return announcementUnread;
+    if (key === "announcement" && mode === "customer")
+      return announcementUnread;
     return 0;
   };
 
   return (
-    <div className={styles.hubOuter} data-flat={flat ? "true" : undefined}>
-      <div className={`${styles.tabRow} ${detailOpen ? styles.tabRowHiddenMobile : ""}`}>
+    <div
+      className={`${styles.hubOuter} ${employeePremium ? styles.employeePremium : ""}`}
+      data-flat={flat ? "true" : undefined}
+    >
+      <div
+        className={`${styles.tabRow} ${detailOpen ? styles.tabRowHiddenMobile : ""}`}
+      >
         {config.tabs.map((t) => {
           const badge = tabBadge(t.key);
           return (
@@ -266,7 +282,11 @@ export default function MessagingHub({
               onClick={() => switchTab(t.key)}
             >
               {t.label}
-              {badge > 0 && <span className={styles.tabCount}>{badge > 99 ? "99+" : badge}</span>}
+              {badge > 0 && (
+                <span className={styles.tabCount}>
+                  {badge > 99 ? "99+" : badge}
+                </span>
+              )}
             </button>
           );
         })}
@@ -275,7 +295,9 @@ export default function MessagingHub({
       {showingAnnouncements ? (
         <div className={styles.announcementsPane}>
           {mode === "business" ? (
-            <CustomerAnnouncementsManager onDetailOpenChange={reportDetailOpen} />
+            <CustomerAnnouncementsManager
+              onDetailOpenChange={reportDetailOpen}
+            />
           ) : mode === "customer" ? (
             <CustomerAnnouncementsInbox
               onDetailOpenChange={reportDetailOpen}
@@ -288,12 +310,17 @@ export default function MessagingHub({
           ) : isEmployer ? (
             <MessagesTab onDetailOpenChange={reportDetailOpen} />
           ) : (
-            <EmployeeInbox onUnreadCountChange={() => {}} onDetailOpenChange={reportDetailOpen} />
+            <EmployeeInbox
+              onUnreadCountChange={() => {}}
+              onDetailOpenChange={reportDetailOpen}
+            />
           )}
         </div>
       ) : (
         <div className={styles.hub}>
-          <div className={`${styles.listCol} ${!mobileShowList ? styles.listColHiddenMobile : ""}`}>
+          <div
+            className={`${styles.listCol} ${!mobileShowList ? styles.listColHiddenMobile : ""}`}
+          >
             <ChatList
               tab={tab}
               conversations={conversations}
@@ -311,13 +338,17 @@ export default function MessagingHub({
               emptyTitle={config.emptyTitle}
               emptyText={config.emptyText}
               emptyActionLabel={config.composeLabel}
-              onEmptyAction={isStaffMode ? undefined : () => setShowNewChat(true)}
+              onEmptyAction={
+                isStaffMode ? undefined : () => setShowNewChat(true)
+              }
               onCompose={isStaffMode ? undefined : () => setShowNewChat(true)}
               composeLabel={config.composeLabel}
             />
           </div>
 
-          <div className={`${styles.windowCol} ${mobileShowList ? styles.windowColHiddenMobile : ""}`}>
+          <div
+            className={`${styles.windowCol} ${mobileShowList ? styles.windowColHiddenMobile : ""}`}
+          >
             {active ? (
               <ChatWindow
                 key={active.id}
@@ -326,7 +357,9 @@ export default function MessagingHub({
                 onBack={handleBack}
                 onConversationChanged={refresh}
                 highlightMessageId={highlightMessageId}
-                initialDraft={draft.conversationId === active.id ? draft.text : undefined}
+                initialDraft={
+                  draft.conversationId === active.id ? draft.text : undefined
+                }
               />
             ) : (
               <div className={styles.emptyPane}>
@@ -345,10 +378,16 @@ export default function MessagingHub({
       )}
 
       {showNewChat && isStaffMode && (
-        <NewChatModal onClose={() => setShowNewChat(false)} onCreate={handleCreateGroup} />
+        <NewChatModal
+          onClose={() => setShowNewChat(false)}
+          onCreate={handleCreateGroup}
+        />
       )}
       {showNewChat && mode === "business" && (
-        <NewCustomerChatModal onClose={() => setShowNewChat(false)} onPick={handlePickCustomer} />
+        <NewCustomerChatModal
+          onClose={() => setShowNewChat(false)}
+          onPick={handlePickCustomer}
+        />
       )}
       {showNewChat && mode === "customer" && (
         <NewBusinessChatModal

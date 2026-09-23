@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { getMyAttendance } from "../api/attendanceApi";
 import { getMyPenaltySummary } from "../api/penaltyApi";
 import useMessageStream from "../hooks/useMessageStream";
-import styles from "./Dashboard.module.css";
+import styles from "./EmployeeDashboard.module.css";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
 import {
   getAllProfileEdits,
@@ -63,7 +63,12 @@ const NAV = [
   { icon: "ti-mail", label: "Messages", section: "main" },
   { icon: "ti-cash-banknote", label: "Penalty", section: "tools" },
   { icon: "ti-bell", label: "Notifications", section: "tools" },
-  { icon: "ti-building-store", label: "Retail Workspace", section: "main", retailOnly: true },
+  {
+    icon: "ti-building-store",
+    label: "Retail Workspace",
+    section: "main",
+    retailOnly: true,
+  },
   { icon: "ti-user-circle", label: "My Profile", section: "account" },
   {
     icon: "ti-switch-horizontal",
@@ -482,7 +487,11 @@ export default function Dashboard() {
     }
   }, []);
 
-  useEffect(() => { getRetailContext().then(({data}) => setRetailContext(data)).catch(() => setRetailContext(null)); }, []);
+  useEffect(() => {
+    getRetailContext()
+      .then(({ data }) => setRetailContext(data))
+      .catch(() => setRetailContext(null));
+  }, []);
 
   // Quick actions row: a brief, one-time "nudge" scroll on mount so the
   // row visibly demonstrates it's scrollable at a glance, rather than
@@ -831,13 +840,18 @@ export default function Dashboard() {
               <div className={styles.sbSection}>{section}</div>
               {NAV.filter(
                 (n) =>
-                  n.section === section && (!n.hodOnly || myProfile?.isHod) && (!n.retailOnly || retailContext?.canWorkspace),
+                  n.section === section &&
+                  (!n.hodOnly || myProfile?.isHod) &&
+                  (!n.retailOnly || retailContext?.canWorkspace),
               ).map((n) => (
                 <div
                   key={n.label}
                   className={`${styles.sbItem} ${activeNav === n.label && !n.isFullPage ? styles.active : ""}`}
                   onClick={() => {
-                    if (n.label === "Retail Workspace") { navigate("/retail"); return; }
+                    if (n.label === "Retail Workspace") {
+                      navigate("/retail");
+                      return;
+                    }
                     if (n.isFullPage) {
                       navigate(n.route ?? "/my-accounts", {
                         state: { returnPath: "/my-dashboard", activeNav },
@@ -1179,6 +1193,7 @@ export default function Dashboard() {
             <HodWorkforceTab />
           ) : activeNav === "Messages" ? (
             <MessagingHub
+              employeePremium
               onThreadOpenChange={setChatThreadOpen}
               deepLink={messagingDeepLink}
               onDeepLinkConsumed={() => setMessagingDeepLink(null)}
@@ -1193,7 +1208,11 @@ export default function Dashboard() {
           ) : activeNav === "Penalty" ? (
             <EmployeePenaltyTab />
           ) : activeNav === "My Profile" ? (
-            <MyProfileTab profile={myProfile} isHod={myProfile?.isHod} />
+            <MyProfileTab
+              employeePremium
+              profile={myProfile}
+              isHod={myProfile?.isHod}
+            />
           ) : (
             <>
               {summaryError && (
@@ -1620,6 +1639,7 @@ export default function Dashboard() {
       </div>
 
       <MobileNavHub
+        employeePremium
         role="employee"
         activeNav={activeNav}
         setActiveNav={setActiveNav}

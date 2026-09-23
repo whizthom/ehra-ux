@@ -298,7 +298,8 @@ function getPrimary(activeNav, role) {
   if (activeNav === "home") return "Home";
   if (role === "customer") {
     if (["discover", "businesses"].includes(activeNav)) return "Businesses";
-    if (["approvals", "orders", "receipts", "spending"].includes(activeNav)) return "Orders";
+    if (["approvals", "orders", "receipts", "spending"].includes(activeNav))
+      return "Orders";
   } else if (role === "employer") {
     if (
       ["Workforce", "Departments", "Branches", "Profile Edits"].includes(
@@ -340,6 +341,7 @@ export default function MobileNavHub({
   badges = {},
   isHod = false,
   onLogout,
+  employeePremium = false,
 }) {
   const [hub, setHub] = useState(null);
 
@@ -418,7 +420,7 @@ export default function MobileNavHub({
       />
 
       <div
-        className={`${styles.sheet} ${hub ? styles.sheetOpen : ""}`}
+        className={`${styles.sheet} ${hub ? styles.sheetOpen : ""} ${employeePremium ? styles.employeePremium : ""}`}
         role={hub ? "dialog" : undefined}
         aria-modal={hub ? "true" : undefined}
         aria-label={hub ? `${hub} menu` : undefined}
@@ -537,7 +539,7 @@ export default function MobileNavHub({
       </div>
 
       <nav
-        className={`${styles.bottomNav} ${hidden ? styles.hidden : ""}`}
+        className={`${styles.bottomNav} ${hidden ? styles.hidden : ""} ${employeePremium ? styles.employeePremium : ""}`}
         aria-label="Primary mobile navigation"
       >
         <div className={styles.bottomNavInner}>

@@ -17,7 +17,11 @@ const TABS = [
 // under a tab now. "Security" is new: the same SecuritySettingsSection
 // component the employer uses for their own account (2FA / password),
 // reused as-is so employees get the exact same self-service 2FA setup.
-export default function MyProfileTab({ profile, isHod }) {
+export default function MyProfileTab({
+  profile,
+  isHod,
+  employeePremium = false,
+}) {
   const [tab, setTab] = useState("profile");
   const editSectionRef = useRef(null);
 
@@ -34,7 +38,9 @@ export default function MyProfileTab({ profile, isHod }) {
   };
 
   return (
-    <div className={styles.layout}>
+    <div
+      className={`${styles.layout} ${employeePremium ? styles.employeePremium : ""}`}
+    >
       <div className={styles.tabBar}>
         {TABS.map((t) => (
           <button

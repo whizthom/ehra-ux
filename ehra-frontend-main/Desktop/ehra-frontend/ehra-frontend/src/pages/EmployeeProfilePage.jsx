@@ -14,6 +14,7 @@ import LogoutConfirmModal from "../components/LogoutConfirmModal";
 // profile looks and behaves identically to the dashboard it was opened
 // from, instead of this page inventing its own nav from scratch.
 import shellStyles from "./Dashboard.module.css";
+import employeeShellStyles from "./EmployeeDashboard.module.css";
 import styles from "./EmployeeProfilePage.module.css";
 
 // ── Nav destinations ─────────────────────────────────────────────────────
@@ -134,6 +135,7 @@ export default function EmployeeProfilePage() {
   const hodView = location.state?.hodView === true;
 
   const isAdmin = user?.role === "ROLE_ADMIN";
+  const shell = isAdmin ? shellStyles : employeeShellStyles;
   const isHod = user?.membershipRole === "HOD";
   const dashboardPath = isAdmin ? "/dashboard" : "/my-dashboard";
   const visibleNav = (isAdmin ? ADMIN_NAV : EMPLOYEE_NAV).filter(
@@ -267,24 +269,24 @@ export default function EmployeeProfilePage() {
   const statusStyle = STATUS_COLOR[profile.status] || STATUS_COLOR.ACTIVE;
 
   return (
-    <div className={shellStyles.dash}>
+    <div className={shell.dash}>
       {/* ── Sidebar (desktop/tablet) ── */}
-      <aside className={shellStyles.sidebar}>
-        <div className={shellStyles.sbLogo}>
-          <div className={shellStyles.sbLogoIcon}>💼</div>
-          <span className={shellStyles.sbLogoText}>Ehra</span>
+      <aside className={shell.sidebar}>
+        <div className={shell.sbLogo}>
+          <div className={shell.sbLogoIcon}>💼</div>
+          <span className={shell.sbLogoText}>Ehra</span>
         </div>
 
-        <nav className={shellStyles.sbNav}>
+        <nav className={shell.sbNav}>
           {["main", "tools", "account"].map((section) => (
             <div key={section}>
-              <div className={shellStyles.sbSection}>{section}</div>
+              <div className={shell.sbSection}>{section}</div>
               {visibleNav
                 .filter((n) => n.section === section)
                 .map((n) => (
                   <div
                     key={n.label}
-                    className={shellStyles.sbItem}
+                    className={shell.sbItem}
                     onClick={() => goToNav(n)}
                   >
                     <i className={`ti ${n.icon}`} aria-hidden="true" />
@@ -295,7 +297,7 @@ export default function EmployeeProfilePage() {
           ))}
         </nav>
 
-        <div className={shellStyles.sbFooter}>
+        <div className={shell.sbFooter}>
           <button
             type="button"
             className={styles.sidebarLogoutBtn}
@@ -308,8 +310,8 @@ export default function EmployeeProfilePage() {
       </aside>
 
       {/* ── Main ── */}
-      <div className={shellStyles.main}>
-        <div className={shellStyles.topbar}>
+      <div className={shell.main}>
+        <div className={shell.topbar}>
           <button
             type="button"
             className={styles.backBtn}
@@ -321,12 +323,12 @@ export default function EmployeeProfilePage() {
             <span className={styles.backBtnFull}>Back to {backNavLabel}</span>
             <span className={styles.backBtnShort}>Back</span>
           </button>
-          <div className={shellStyles.topbarRight}>
+          <div className={shell.topbarRight}>
             {/* ── Message shortcut - same jump-to-Messages affordance the
                 dashboards' topbar has, just via a route instead of local
                 tab state since this page lives outside either dashboard. ── */}
             <div
-              className={shellStyles.notifBtn}
+              className={shell.notifBtn}
               onClick={() => goToNav({ label: "Messages" })}
               aria-label="Messages"
               title="Messages"
@@ -337,7 +339,7 @@ export default function EmployeeProfilePage() {
                 aria-hidden="true"
               />
               {unreadMessagesCount > 0 && (
-                <span className={shellStyles.notifCount}>
+                <span className={shell.notifCount}>
                   {unreadMessagesCount > 9 ? "9+" : unreadMessagesCount}
                 </span>
               )}
@@ -346,7 +348,7 @@ export default function EmployeeProfilePage() {
             {/* ── Notification bell - real unread count, jumps to the
                 Notifications tab on the dashboard this profile belongs to. ── */}
             <div
-              className={shellStyles.notifBtn}
+              className={shell.notifBtn}
               onClick={() => goToNav({ label: "Notifications" })}
               aria-label="Notifications"
               title="Notifications"
@@ -357,7 +359,7 @@ export default function EmployeeProfilePage() {
                 aria-hidden="true"
               />
               {unreadNotifCount > 0 && (
-                <span className={shellStyles.notifCount}>
+                <span className={shell.notifCount}>
                   {unreadNotifCount > 9 ? "9+" : unreadNotifCount}
                 </span>
               )}
@@ -368,7 +370,7 @@ export default function EmployeeProfilePage() {
         </div>
 
         <div
-          className={shellStyles.contentFull}
+          className={shell.contentFull}
           style={{ overflowX: "hidden", minWidth: 0 }}
         >
           {/* ── Hero section ── */}
@@ -854,16 +856,16 @@ export default function EmployeeProfilePage() {
       </div>
 
       {/* ── Mobile bottom navigation ── */}
-      <nav className={shellStyles.bottomNav} aria-label="Primary">
-        <div className={shellStyles.bottomNavScroll} ref={bottomNavScrollRef}>
+      <nav className={shell.bottomNav} aria-label="Primary">
+        <div className={shell.bottomNavScroll} ref={bottomNavScrollRef}>
           {visibleNav.map((n) => (
             <button
               key={n.label}
               type="button"
-              className={shellStyles.bottomNavItem}
+              className={shell.bottomNavItem}
               onClick={() => goToNav(n)}
             >
-              <div className={shellStyles.bottomNavIconWrap}>
+              <div className={shell.bottomNavIconWrap}>
                 <i className={`ti ${n.icon}`} aria-hidden="true" />
               </div>
               <span>{n.label}</span>
@@ -872,18 +874,18 @@ export default function EmployeeProfilePage() {
 
           <button
             type="button"
-            className={shellStyles.bottomNavItem}
+            className={shell.bottomNavItem}
             onClick={() => setShowLogoutConfirm(true)}
           >
-            <div className={shellStyles.bottomNavIconWrap}>
+            <div className={shell.bottomNavIconWrap}>
               <i className="ti ti-logout" aria-hidden="true" />
             </div>
             <span>Log out</span>
           </button>
         </div>
-        <div className={shellStyles.bottomNavScrollTrack} aria-hidden="true">
+        <div className={shell.bottomNavScrollTrack} aria-hidden="true">
           <div
-            className={shellStyles.bottomNavScrollThumb}
+            className={shell.bottomNavScrollThumb}
             style={{
               width: `${bottomNavThumb.width}%`,
               left: `${bottomNavThumb.left}%`,

@@ -2,17 +2,16 @@
 .dash {
     display: flex;
     height: 100vh;
-    /* dvh matches the browser's actual visible viewport on mobile - see
-       Dashboard.module.css's .dash for the full reasoning (this file was
-       previously missing both the dvh fallback and the keyboard-aware
-       var below, which is very likely why the chat header on this
-       (Employee) dashboard could still get covered/dragged off-screen
-       even after ChatWindow's own scroll-lock changes). */
+    /* dvh matches the browser's actual visible viewport on mobile, where
+       100vh can be taller than what's on-screen while the address bar is
+       showing — that mismatch is what let the whole app shell (topbar
+       included) scroll away. Browsers without dvh support just keep the
+       100vh value above. */
     height: 100dvh;
-    /* --app-vh (see useVisualViewportHeight.js) additionally tracks the
-       on-screen keyboard, which dvh alone doesn't reliably do on every
-       device - falls straight back to the 100dvh above on any browser
-       that doesn't support visualViewport. */
+    /* --app-vh (see useVisualViewportHeight.js) tracks the on-screen
+       keyboard too, which dvh alone doesn't reliably do on every device —
+       falls straight back to the 100dvh above on any browser that
+       doesn't support visualViewport. */
     height: var(--app-vh, 100dvh);
     width: 100vw;
     overflow: hidden;
@@ -67,24 +66,33 @@
 
 .sbNav {
     flex: 1;
-    padding: 14px 0;
+    padding: 10px 0;
     overflow-y: auto;
+}
+
+.sbSection {
+    padding: 10px 20px 4px;
+    font-size: 10px;
+    color: var(--sidebar-muted);
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+    font-weight: 500;
 }
 
 .sbItem {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 20px;
-    color: rgba(255, 255, 255, 0.75);
-    font-size: 13px;
+    padding: 9px 20px;
     cursor: pointer;
-    position: relative;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 13px;
+    transition: background 0.15s, color 0.15s;
 }
 
 .sbItem i {
     font-size: 16px;
-    width: 18px;
+    flex-shrink: 0;
 }
 
 .sbItem:hover {
@@ -93,52 +101,108 @@
 }
 
 .sbItem.active {
-    background: rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.15);
     color: var(--sidebar-text);
     font-weight: 500;
 }
 
-.active {
-    background: rgba(255, 255, 255, 0.14);
-    color: var(--sidebar-text);
-    font-weight: 500;
+/* Light mode's sidebar is the saturated brand green, where white text at
+   60% opacity still reads clearly. Dark mode's sidebar is near-black
+   (--bg-sidebar: #111b21), so that same 60% white reads as a dim,
+   low-contrast grey — bump it up so nav labels are actually legible. */
+[data-theme="dark"] .sbItem {
+    color: rgba(233, 237, 239, 0.75);
 }
 
 .sbBadge {
     margin-left: auto;
-    background: var(--warning);
-    color: var(--warning-text);
-    font-size: 10px;
-    font-weight: 700;
-    border-radius: 999px;
-    padding: 1px 7px;
-    min-width: 18px;
-    text-align: center;
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--bg-soft-accent);
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 10px;
+}
+
+/* --bg-soft-accent is a background-tint token (a near-transparent 14%
+   teal wash in dark mode — see theme.css), not built for use as text.
+   Using it as the badge's number color left the count almost unreadable
+   against the translucent white pill in dark mode. --accent-hover in
+   dark mode is a bright, saturated light green designed to read clearly
+   against dark surfaces — same fix approach as .sbItem above. */
+[data-theme="dark"] .sbBadge {
+    color: var(--accent-hover);
 }
 
 .sbFooter {
-    padding: 14px 20px 18px;
+    padding: 14px 20px;
     border-top: 0.5px solid rgba(255, 255, 255, 0.1);
 }
 
-.logoutBtn {
-    width: 100%;
+.sbUser {
     display: flex;
     align-items: center;
-    gap: 8px;
-    height: 36px;
-    padding: 0 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    border-radius: 8px;
-    color: var(--sidebar-text);
-    font-size: 12px;
-    cursor: pointer;
-    font-family: inherit;
+    gap: 10px;
 }
 
-.logoutBtn:hover {
-    background: rgba(255, 255, 255, 0.18);
+.sbAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--sidebar-text);
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.sbAvatarImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.sbUserName {
+    font-size: 13px;
+    color: var(--sidebar-text);
+    font-weight: 500;
+}
+
+.sbUserRole {
+    font-size: 11px;
+    color: var(--sidebar-muted);
+}
+
+.sbUserRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.sbLogoutBtn {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--sidebar-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s;
+}
+
+.sbLogoutBtn:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: var(--sidebar-text);
 }
 
 /* ── Main ── */
@@ -146,132 +210,447 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
+    overflow: hidden;
+    min-height: 0;
+    min-width: 0;
 }
 
 .topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 22px 28px;
-    /* Pushes title/icons below the iOS status bar (viewport-fit=cover in
-       index.html means content draws all the way to the physical top of
-       the screen) - independent of background color, so this still
-       matters even with the transparent mobile override below. */
-    padding-top: calc(22px + env(safe-area-inset-top, 0px));
+    gap: 16px;
+    padding: 8px 24px;
+    min-height: 56px;
     background: var(--bg-surface);
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 0.5px solid var(--border-color);
     flex-shrink: 0;
+    /* Belt-and-braces: keeps the header pinned even if something makes
+       .main taller than the viewport and the page itself ends up
+       scrolling, instead of only relying on .content being the sole
+       scroll container. */
+    position: sticky;
+    top: 0;
+    z-index: 30;
 }
 
-/* Matches Dashboard.module.css's mobile treatment (the admin dashboard) -
-   a borderless header that blends into the page background instead of
-   sitting in its own bordered panel. .dash's background: var(--bg-page)
-   (plus the html/body backstop in theme.css) is what actually shows
-   through here once the topbar stops painting its own color. */
-@media (max-width: 640px) {
+
+/* Temporarily hidden on the employer home dashboard for mobile. The data
+   and approval logic remain intact so desktop behavior is unchanged. */
+.mobileHiddenHomePanel {
+    display: block;
+}
+
+@media (max-width: 900px) {
+    .mobileHiddenHomePanel {
+        display: none !important;
+    }
+
     .topbar {
         background: transparent;
         border-bottom: none;
     }
 }
 
-.pageTitle {
-    font-size: 19px;
-    font-weight: 600;
+.topbarTitle {
+    font-size: 15px;
+    font-weight: 500;
     color: var(--text-primary);
-    margin: 0;
 }
 
-.pageSub {
+.topbarTitleShort {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    .topbarTitleFull {
+        display: none;
+    }
+
+    .topbarTitleShort {
+        display: inline;
+    }
+}
+
+/* Mobile-only business logo + name, standing in for the plain company-name
+   text on phones — the date/time underneath stays exactly where it's
+   always been (.topbarSub), just like the desktop title. */
+.topbarMobileBrand {
+    display: none;
+}
+
+@media (max-width: 640px) {
+    .topbarTitleShort {
+        display: none;
+    }
+
+    .topbarMobileBrand {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .topbarMobileLogo {
+        width: 26px;
+        height: 26px;
+        border-radius: 7px;
+        flex-shrink: 0;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-soft-accent);
+        border: 0.5px solid var(--border-color);
+    }
+
+    .topbarMobileLogoImg {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .topbarMobileLogo i {
+        font-size: 13px;
+        color: var(--accent);
+    }
+
+    .topbarMobileLogoText {
+        font-size: 19px;
+        font-weight: 700;
+        color: var(--text-primary);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 60vw;
+    }
+}
+
+.topbarSub {
     font-size: 12px;
     color: var(--text-secondary);
-    margin: 2px 0 0;
+    margin-top: 1px;
 }
 
-.topbarRight {
+.topbarGreeting {
+    /* superseded by .empGreeting below — kept only so nothing else in
+       this stylesheet that might still reference it breaks. */
+    display: none;
+}
+
+/* ── Employee/HOD dashboard topbar heading ───────────────────────────────
+   A single cohesive block, not three breakpoint-specific markups stitched
+   together: the greeting is always the hero text, the workspace name is
+   always a small secondary tag next to the date. Scales down by font-size
+   alone, so there's nothing to swap in/out at each breakpoint. */
+.empTopbarHeading {
     display: flex;
-    align-items: center;
-    gap: 14px;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
 }
 
-.scanBtn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    height: 38px;
-    padding: 0 16px;
-    background: var(--accent);
-    border: none;
-    border-radius: 9px;
-    color: #fff;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: inherit;
-}
-
-.scanBtn:hover {
-    background: var(--accent-hover);
-}
-
-.userChip {
+.empGreeting {
     display: flex;
     align-items: center;
     gap: 8px;
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
 }
 
-.userAvatar {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: var(--bg-soft-accent);
+.empGreetingIcon {
+    font-size: 18px;
     color: var(--accent);
+    flex-shrink: 0;
+}
+
+.empGreetingMobile {
+    display: none;
+}
+
+@media (max-width: 640px) {
+    .empGreetingFull {
+        display: none;
+    }
+
+    .empGreetingMobile {
+        display: inline;
+    }
+}
+
+.empGreetingSub {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 13px;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+}
+
+.empGreetingDate {
+    white-space: nowrap;
+}
+
+.empGreetingDivider {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    opacity: 0.5;
+    flex-shrink: 0;
+}
+
+.empWorkspaceTag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 10px 2px 4px;
+    border-radius: 999px;
+    background: var(--bg-surface-alt);
+    border: 0.5px solid var(--border-color);
     font-weight: 600;
+    color: var(--text-secondary);
+    max-width: 46vw;
     overflow: hidden;
 }
 
-.userAvatarImg {
+.empWorkspaceLogo {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-soft-accent);
+}
+
+.empWorkspaceLogo i {
+    font-size: 10px;
+    color: var(--accent);
+}
+
+.empWorkspaceLogoImg {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.userName {
-    font-size: 13px;
-    font-weight: 500;
+.empWorkspaceTag>*:last-child:not(.empWorkspaceLogo) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    .empGreetingIcon {
+        font-size: 16px;
+    }
+
+    .empGreetingSub {
+        gap: 6px;
+    }
+
+    .empWorkspaceTag {
+        max-width: 50vw;
+        padding: 2px 8px 2px 3px;
+    }
+}
+
+@media (max-width: 420px) {
+
+    /* Tightest phones: date and workspace tag rarely both fit on one
+       line at 12.5px next to a 17px heading — let them wrap onto their
+       own line rather than truncating the date. */
+    .empGreetingSub {
+        row-gap: 2px;
+    }
+}
+
+.topbarRight {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.notifBtn {
+    position: relative;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: var(--bg-surface-alt);
+    border: 0.5px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
     color: var(--text-primary);
 }
 
-.userRole {
-    font-size: 11px;
-    color: var(--text-secondary);
+.notifDot {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--danger);
+    border: 1.5px solid var(--bg-surface);
 }
 
+.inviteBtn {
+    height: 34px;
+    padding: 0 14px;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: inherit;
+    transition: background 0.15s;
+}
+
+.inviteBtn:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+
+.inviteBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Desktop-only — see the comment at PlanBadge's render site in
+   Dashboard.jsx. 900px matches every other desktop-only topbar item in
+   this file (.inviteBtn below, the sidebar/bottom-nav split, etc). */
+.planBadgeSlot {
+    display: flex;
+}
+
+@media (max-width: 900px) {
+    .planBadgeSlot {
+        display: none;
+    }
+}
+
+@media (max-width: 900px) {
+    .inviteBtn {
+        display: none;
+    }
+}
+
+/* ── Content ── */
 .content {
-    padding: 24px 28px 40px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.contentFull {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
+    padding: 20px 24px;
+    /* Extra breathing room at the end of scroll — set as a separate
+       property (not folded into the shorthand above) so it survives
+       any later shorthand `padding` overrides, same reasoning as the
+       .contentFull note below. */
+    padding-bottom: 35vh;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
 }
 
-/* ── Brand footer - sits at the very end of the scrollable content,
-   same spot regardless of which tab is active. Full opacity, no mobile
-   shrink, so it stays clearly visible on every screen size. Matches
-   Dashboard.module.css's employer-side footer. */
+/* Full-height content area (for tabs like Messages, Workforce, Attendance).
+   overflow-y: auto (rather than hidden) so any tab whose content is taller
+   than the viewport scrolls instead of getting clipped; tabs that already
+   manage their own internal scroll region (e.g. Messages) are unaffected
+   since their inner panes are sized to fit exactly.
+   NOTE: this must stay ABOVE the responsive media query below — it's a
+   plain (non-media) rule, and CSS applies same-specificity rules in source
+   order regardless of media queries, so if this appeared after the mobile
+   override further down, its shorthand `padding` would silently reset
+   padding-bottom back to 20px on every screen size and re-hide content
+   behind the fixed mobile bottom nav. */
+.contentFull {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 24px;
+    /* Extra breathing room at the end of scroll, see note above. */
+    padding-bottom: 35vh;
+    min-height: 0;
+    min-width: 0;
+}
+
+/* Attendance opted out of the standard card/box treatment and wants to
+   show as much table width as possible — same vertical rhythm as
+   .contentFull, much less horizontal margin eaten up on the sides. */
+.contentFullNarrow {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 10px;
+    min-height: 0;
+    min-width: 0;
+    /* Belt-and-braces alongside the matching fix in AttendanceSection /
+       QrcodeTab / BusinessSettingsTab's own .tabBody — those already stop
+       scroll-chaining at their own boundary, this stops it here too so
+       nothing can bleed past this container either. */
+    overscroll-behavior: contain;
+}
+
+@media (max-width: 480px) {
+    .contentFullNarrow {
+        padding: 14px 6px;
+    }
+}
+
+/* Messages tab only. It renders its own WhatsApp-style two-pane layout
+   (MessagingHub) which needs to reach the true edges of the content area
+   on EVERY device — not just fill the mobile-fullscreen case — so unlike
+   Attendance/Departments/etc. (.contentFullNarrow, still want a narrow
+   gutter around a table), this has zero padding unconditionally and
+   fills the full available height via flex:1/min-height:0 below. */
+.contentMessages {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    min-height: 0;
+    min-width: 0;
+    height: 100%;
+}
+
+
+/* Applied to .topbar / .dashboardFooter / .bottomNav while a chat thread
+   is open, so opening a chat on mobile takes over the whole screen —
+   same as any normal chat app — instead of sitting in a panel wedged
+   between a header and a bottom nav. No-op on desktop, where a thread
+   just occupies its usual pane inside the two-column chat layout. */
+.hiddenOnMobileChat {
+    /* intentionally empty above 900px */
+}
+
+@media (max-width: 900px) {
+    .hiddenOnMobileChat {
+        display: none !important;
+    }
+}
+
+/* ── Brand footer — sits at the very end of the scrollable content,
+   same spot regardless of which tab is active. margin-top pushes it below
+   whatever content precedes it without fighting the .content/.contentFull*
+   padding-bottom gutters. Full opacity and no mobile shrink so it stays
+   clearly visible (not a faint watermark) on every screen size. */
 .dashboardFooter {
     display: flex;
     justify-content: center;
@@ -290,64 +669,283 @@
     }
 }
 
-/* ── Greeting card ── */
-.greetingCard {
-    background: linear-gradient(135deg, var(--accent), var(--accent-hover));
-    border-radius: 16px;
-    padding: 22px 26px;
+/* ── Invite panel ── */
+.invitePanel {
+    position: relative;
+    background: var(--bg-soft-accent);
+    border: 0.5px solid var(--bg-soft-accent);
+    border-radius: 12px;
+    padding: 12px 40px 12px 16px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    color: #fff;
-    flex-wrap: wrap;
-    gap: 16px;
+    gap: 12px;
+    animation: invitePanelIn 0.22s ease;
 }
 
-.greetingHi {
-    font-size: 18px;
-    font-weight: 600;
-    margin: 0 0 4px;
+@keyframes invitePanelIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
-.greetingSub {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.85);
-    margin: 0;
+/* Plays while the card is being dismissed via the cancel button — the
+   card actually unmounts once this finishes (see dismissInviteLink),
+   so it reads as being cancelled off the screen rather than just
+   vanishing. */
+.invitePanelClosing {
+    animation: invitePanelOut 0.2s ease forwards;
+    pointer-events: none;
 }
 
-.qaBtn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    height: 42px;
-    padding: 0 18px;
+@keyframes invitePanelOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.97);
+    }
+}
+
+.invCancelBtn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 0.5px solid var(--border-color);
     background: var(--bg-surface);
-    border: none;
-    border-radius: 10px;
-    color: var(--accent);
-    font-size: 13px;
-    font-weight: 600;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
     cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.invCancelBtn:hover {
+    background: var(--bg-surface-alt);
+    color: var(--text-primary);
+}
+
+.inviteLinkInput {
+    flex: 1;
+    height: 34px;
+    padding: 0 12px;
+    border: 0.5px solid var(--bg-soft-accent);
+    border-radius: 8px;
+    font-size: 12px;
+    background: var(--bg-surface);
+    color: var(--accent-hover);
+    outline: none;
     font-family: inherit;
 }
 
-.qaBtn:hover {
+.invActions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.invActionBtn {
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    border: none;
+    transition: background 0.15s;
+}
+
+.invCopy {
+    background: var(--accent);
+    color: #fff;
+}
+
+.invCopy:hover {
+    background: var(--accent-hover);
+}
+
+.invWa {
+    background: var(--bg-surface);
+    color: var(--accent-hover);
+    border: 0.5px solid var(--bg-soft-accent);
+}
+
+.invWa:hover {
     background: var(--bg-soft-accent);
 }
 
-/* ── Grid / panels ── */
-.grid {
+/* Desktop/tablet: invite-link card sits in its usual spot near the top
+   of the page. Hidden on phones, where a second copy renders right
+   under the Quick actions row instead (see .inviteLinkMobileSlot) —
+   `display: contents` so this wrapper adds no box of its own when the
+   card is showing. */
+.inviteLinkDesktopSlot {
+    display: contents;
+}
+
+@media (max-width: 640px) {
+    .inviteLinkDesktopSlot {
+        display: none;
+    }
+}
+
+/* Phones only: the same invite-link card, rendered directly under the
+   Quick actions pill row inside the same card, so the generated link
+   shows up exactly where "Invite employee" was tapped instead of only
+   appearing near the top of the page. */
+.inviteLinkMobileSlot {
+    display: none;
+}
+
+@media (max-width: 640px) {
+    .inviteLinkMobileSlot {
+        display: block;
+        margin: 12px 16px 4px;
+    }
+
+    /* Icon + input + actions no longer fit comfortably in one row at
+       phone widths, so this stacks into a compact vertical card instead
+       of squeezing everything horizontally. */
+    .inviteLinkMobileSlot .invitePanel {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .inviteLinkMobileSlot .invActions {
+        gap: 8px;
+    }
+
+    .inviteLinkMobileSlot .invActionBtn {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+/* ── Today's Pulse (mobile-only hero widget) ── */
+.todaysPulseMobile {
+    display: none;
+}
+
+/* ── Stats ── */
+.statsGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.statCard {
+    background: var(--bg-surface);
+    border: 0.5px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.statIcon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+
+.teal {
+    background: var(--bg-soft-accent);
+}
+
+.teal i {
+    color: var(--accent);
+}
+
+.amber {
+    background: var(--warning-bg);
+}
+
+.amber i {
+    color: var(--warning-text);
+}
+
+.blue {
+    background: var(--info-bg);
+}
+
+.blue i {
+    color: var(--info-text);
+}
+
+.coral {
+    background: var(--danger-bg);
+}
+
+.coral i {
+    color: #993c1d;
+}
+
+/* This one icon color was left as a light-mode literal rather than a
+   variable when .teal/.amber/.blue were converted — harmless in light
+   mode, but it meant this specific icon ignored dark mode entirely.
+   Overridden here rather than switched to var() outright so light mode's
+   exact shade is untouched for now, per your "light mode later" note. */
+[data-theme="dark"] .coral i {
+    color: var(--danger-text);
+}
+
+.statNum {
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.statLabel {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.statTrend {
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+/* ── Row 2 ── */
+.row2 {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 16px;
+    min-width: 0;
 }
 
 .panel {
-    position: relative;
     background: var(--bg-surface);
-    border-radius: 14px;
-    padding: 20px 22px;
-    box-shadow: 0 1px 2px rgba(15, 23, 22, 0.04);
+    border: 0.5px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    min-width: 0;
 }
 
 .panelHdr {
@@ -357,313 +955,1154 @@
     margin-bottom: 14px;
 }
 
+/* Recent activity's header doubles as a collapse/expand control on mobile
+   and desktop alike — starts closed so the dashboard opens shorter. */
+.panelHdrToggle {
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.panelHdrToggle .panelHdr {
+    margin-bottom: 0;
+}
+
+.panelHdrToggle .dirHdr {
+    margin-bottom: 0;
+}
+
+.dirBody {
+    margin-top: 14px;
+}
+
+.panelHdrRight {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.panelChevron {
+    font-size: 16px;
+    color: var(--text-secondary);
+    transition: transform 0.15s;
+}
+
+.actBody {
+    flex: 1;
+    min-width: 0;
+}
+
 .panelTitle {
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 500;
     color: var(--text-primary);
+}
+
+/* Primary section headers on the employee dashboard home — "My attendance"
+   and "My payroll" — sized up from the shared .panelTitle (13px/500) so
+   they visually outrank secondary panels like "Quick actions" and "Recent
+   activity" on the same page. Deliberately a separate class rather than
+   changing .panelTitle itself, since that class is shared by panel
+   headers across both this dashboard and the employer's Dashboard.jsx —
+   changing it directly would have resized every panel title app-wide
+   instead of creating hierarchy on just this page. */
+.panelTitleLg {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.panelAction {
+    font-size: 12px;
+    color: var(--accent);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0;
+}
+
+.qaGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.qaBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--bg-surface-alt);
+    border: 0.5px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-family: inherit;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    text-align: left;
+}
+
+.qaBtn i {
+    font-size: 15px;
+    color: var(--text-secondary);
+    transition: color 0.15s;
+}
+
+.qaBtn:hover {
+    background: var(--bg-soft-accent);
+    border-color: var(--bg-soft-accent);
+    color: var(--accent-hover);
+}
+
+.qaBtn:hover i {
+    color: var(--accent);
+}
+
+/* Small colored icon chip inside each quick-action button — mirrors the
+   stat cards' teal/amber/blue/coral system so the two areas read as one
+   cohesive palette instead of introducing new colors. */
+.qaIconWrap {
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.qaIconWrap i {
+    font-size: 13px;
+}
+
+/* Only meaningful once the row becomes a horizontally scrolling pill
+   strip on phones — see the phone-layout media query below. */
+.qaScrollTrack {
+    display: none;
+}
+
+/* ── Activity ── */
+.activityList {
+    display: flex;
+    flex-direction: column;
+    margin-top: 14px;
+}
+
+.actItem {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 0.5px solid var(--border-color);
+}
+
+.actItem:last-child {
+    border-bottom: none;
+}
+
+.actDot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.dot_in {
+    background: var(--bg-soft-accent);
+}
+
+.dot_in i {
+    color: var(--accent);
+}
+
+.dot_out {
+    background: var(--danger-bg);
+}
+
+.dot_out i {
+    color: #993c1d;
+}
+
+[data-theme="dark"] .dot_out i {
+    color: var(--danger-text);
+}
+
+.dot_req {
+    background: var(--warning-bg);
+}
+
+.dot_req i {
+    color: var(--warning-text);
+}
+
+.dot_inv {
+    background: var(--info-bg);
+}
+
+.dot_inv i {
+    color: var(--info-text);
+}
+
+.actText {
+    font-size: 12px;
+    color: var(--text-primary);
+    line-height: 1.4;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.actTime {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+/* ── Empty / loading state text (pending approvals, pending leave
+   requests, latest attendance) — matched to Recent activity's type
+   scale rather than the browser's default paragraph size. ── */
+.emptyState {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    padding: 12px 0;
+}
+
+/* ── Directory ── */
+.dirPanel {
+    background: var(--bg-surface);
+    border: 0.5px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.dirHdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 12px;
+}
+
+.searchWrap {
+    position: relative;
+    max-width: 240px;
+    flex: 1;
+}
+
+.searchWrap i {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+.searchWrap input {
+    width: 100%;
+    height: 32px;
+    padding: 0 10px 0 32px;
+    border: 0.5px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 12px;
+    font-family: inherit;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    outline: none;
+}
+
+.searchWrap input:focus {
+    border-color: var(--accent);
+}
+
+.empTable {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+/* Lets a table scroll horizontally instead of squeezing its columns
+   until text wraps and overlaps — the actual working mobile pattern
+   for every data table on this page (Pending approvals, Pending leave
+   requests, Latest attendance). Pair with .attendanceTable's min-width
+   so columns keep a sane, readable width; the user scrolls sideways on
+   a phone rather than the table trying to compress to fit. */
+.tableScrollWrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    min-width: 0;
+}
+
+.empTable th {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-align: left;
+    padding: 0 10px 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.empTable td {
+    padding: 10px;
+    border-top: 0.5px solid var(--border-color);
+    font-size: 12px;
+    color: var(--text-primary);
+    vertical-align: middle;
+    /* table-layout: fixed gives every column a set width, but a long
+       unbroken string (an email address, for example) has no natural
+       break point — without this it silently overflows the cell and
+       bleeds into the next column instead of wrapping. */
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.empNameCell {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.panelAction {
-    background: none;
-    border: none;
-    color: var(--accent);
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: inherit;
+.attendanceTable {
+    min-width: 560px;
 }
 
-.panelAction:hover {
-    text-decoration: underline;
-}
-
-.emptyState {
-    font-size: 13px;
-    color: var(--text-secondary);
-    padding: 18px 0;
-    text-align: center;
-}
-
-/* ── Today's attendance card ── */
-.todayStats {
-    display: flex;
-    gap: 18px;
-}
-
-.todayStat {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    background: var(--bg-soft-accent);
-    border-radius: 10px;
-    padding: 12px 14px;
-}
-
-.todayStatLabel {
-    font-size: 11px;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-}
-
-.todayStatValue {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-/* ── HOD card ── */
-.hodCard {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.hodRow {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.hodLabel {
-    font-size: 11px;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-}
-
-.hodValue {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-.hodPerson {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.hodAvatar {
-    width: 32px;
-    height: 32px;
+.empAv {
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     background: var(--bg-soft-accent);
-    color: var(--accent);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
-    font-weight: 600;
-    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--accent-hover);
     overflow: hidden;
+    flex-shrink: 0;
 }
 
-.hodAvatarImg {
+.empAv img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.hodEmail {
+.empName {
+    font-weight: 500;
     font-size: 12px;
+}
+
+.empEmail {
+    font-size: 11px;
     color: var(--text-secondary);
 }
 
-/* ── Leave form ── */
-.field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-bottom: 14px;
+.muted {
+    color: var(--text-secondary);
 }
 
-.field label {
-    font-size: 12px;
-    color: var(--text-secondary);
+.statusPill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
     font-weight: 500;
 }
 
-.field input,
-.field textarea {
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 13px;
-    font-family: inherit;
-    color: var(--text-primary);
-    resize: vertical;
+.pill_present {
+    background: var(--bg-soft-accent);
+    color: var(--accent-hover);
 }
 
-.field input:focus,
-.field textarea:focus {
-    outline: none;
-    border-color: var(--accent);
-}
-
-.formRow {
-    display: flex;
-    gap: 14px;
-}
-
-.formRow .field {
-    flex: 1;
-}
-
-.submitBtn {
-    width: 100%;
-    height: 42px;
-    background: var(--accent);
-    border: none;
-    border-radius: 9px;
-    color: #fff;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-}
-
-.submitBtn:hover {
-    background: var(--accent-hover);
-}
-
-.submitBtn:disabled {
-    opacity: 0.6;
-    cursor: default;
-}
-
-.errorBox {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
+.pill_absent {
     background: var(--danger-bg);
     color: var(--danger-text);
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 12px;
-    margin-bottom: 14px;
 }
 
-/* ── Leave list ── */
-.leaveList {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    max-height: 420px;
-    overflow-y: auto;
-}
-
-.leaveItem {
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 12px 14px;
-}
-
-.leaveItemTop {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 6px;
-}
-
-.leaveDates {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-.leaveDays {
-    font-weight: 400;
-    color: var(--text-secondary);
-}
-
-.leaveReason {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin: 0;
-    line-height: 1.5;
-}
-
-.leaveNote {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin: 6px 0 0;
-    line-height: 1.5;
-}
-
-/* ── Pills ── */
-.pill {
-    font-size: 11px;
-    font-weight: 600;
-    padding: 3px 9px;
-    border-radius: 999px;
-    white-space: nowrap;
-}
-
-.pillPending {
+.pill_pending {
     background: var(--warning-bg);
     color: var(--warning-text);
 }
 
-.pillApproved {
-    background: var(--bg-soft-accent);
+.pill_late {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.pill_early {
+    background: var(--info-bg);
+    color: var(--info-text);
+}
+
+.tblActions {
+    display: flex;
+    gap: 6px;
+}
+
+.tblBtn {
+    height: 26px;
+    padding: 0 10px;
+    border: 0.5px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    font-family: inherit;
+    transition: background 0.15s;
+}
+
+.tblBtn:hover {
+    background: var(--bg-surface-alt);
+}
+
+.tblBtn.danger:hover {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border-color: var(--danger-border);
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+    .sidebar {
+        display: none;
+    }
+
+    .statsGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .row2 {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .content {
+        padding: 16px;
+        padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .contentFull {
+        padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .contentFullNarrow {
+        padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .contentMessages {
+        padding: 0;
+        padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .contentMessages.chatFullscreenActive {
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .topbar {
+        padding: 10px 16px;
+        padding-top: calc(10px + env(safe-area-inset-top, 0px));
+        min-height: 64px;
+        gap: 10px;
+    }
+
+    .topbarTitle {
+        font-size: 15px;
+    }
+
+    .topbarRight {
+        gap: 6px;
+        flex-shrink: 0;
+    }
+
+    .messageShortcut {
+        display: none;
+    }
+
+    .notifBtn {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+    }
+}
+
+/* ── Phone layout ──────────────────────────────────────────────────────
+   Stat cards collapse to one compact single-line row each (small icon,
+   label, number — no wasted vertical space), and Quick actions becomes a
+   horizontally scrollable pill strip, styled like WhatsApp's Unread /
+   Favourites / Groups filter row, so it reads as swipeable at a glance. */
+@media (max-width: 640px) {
+
+    .content {
+        padding-left: 14px;
+        padding-right: 14px;
+        gap: 14px;
+    }
+
+    .contentFull {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    /* Totals row (Total/Active/Pending/Unread) is dropped entirely on
+       phones — Today's Pulse + Quick actions + Recent activity carry
+       the dashboard instead. */
+    .statsGrid {
+        display: none;
+    }
+
+    .todaysPulseMobile {
+        display: block;
+        margin-bottom: 2px;
+    }
+
+    /* Mobile attention rail: intentionally separate from Today's Pulse.
+       It surfaces only real, actionable items and stays compact. */
+    .mobileAttention {
+        display: block;
+        padding: 2px 0 2px;
+    }
+
+    .mobileAttentionHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin: 2px 2px 8px;
+    }
+
+    .mobileSectionEyebrow {
+        display: block;
+        margin-bottom: 3px;
+        color: var(--accent);
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: .14em;
+    }
+
+    .mobileAttentionHeader h2 {
+        margin: 0;
+        color: var(--text-primary);
+        font-size: 18px;
+        line-height: 1.1;
+        letter-spacing: -.035em;
+    }
+
+    .mobileAttentionCount {
+        min-width: 26px;
+        height: 26px;
+        padding: 0 7px;
+        display: grid;
+        place-items: center;
+        border-radius: 999px;
+        background: var(--bg-soft-accent);
+        color: var(--accent);
+        font-size: 10px;
+        font-weight: 800;
+    }
+
+    .mobileAttentionList {
+        display: grid;
+        gap: 7px;
+    }
+
+    .mobileAttentionItem {
+        width: 100%;
+        min-height: 58px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        background: var(--bg-surface);
+        color: var(--text-primary);
+        text-align: left;
+        font: inherit;
+        cursor: pointer;
+        box-shadow: 0 2px 10px rgba(15, 30, 25, .025);
+        transition: transform .16s ease, border-color .16s ease, background .16s ease;
+    }
+
+    .mobileAttentionItem:active {
+        transform: scale(.99);
+    }
+
+    .mobileAttentionIcon {
+        width: 36px;
+        height: 36px;
+        flex: 0 0 36px;
+        display: grid;
+        place-items: center;
+        border-radius: 11px;
+        font-size: 16px;
+    }
+
+    .mobileAttentionBrand {
+        background: var(--bg-soft-accent);
+        color: var(--accent);
+    }
+
+    .mobileAttentionWarning {
+        background: var(--warning-bg);
+        color: var(--warning-text);
+    }
+
+    .mobileAttentionDanger {
+        background: var(--danger-bg);
+        color: var(--danger-text);
+    }
+
+    .mobileAttentionItem>span:nth-child(2) {
+        min-width: 0;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .mobileAttentionItem strong {
+        font-size: 12px;
+        line-height: 1.2;
+    }
+
+    .mobileAttentionItem small {
+        color: var(--text-secondary);
+        font-size: 10px;
+        line-height: 1.2;
+    }
+
+    .mobileAttentionItem>.ti:last-child {
+        color: var(--text-secondary);
+        font-size: 15px;
+    }
+
+    /* Quick actions loses its card chrome and title on phones so the
+       pill row reads as a native top filter strip (WhatsApp-style
+       All / Unread / Favourites / Groups), not a titled panel. */
+    .qaPanel {
+        background: none;
+        border: none;
+        padding: 0;
+    }
+
+    .qaPanelHdr {
+        display: none;
+    }
+
+    /* qaScrollWrap's bleed margin existed to cancel the panel's own
+       16px padding; with that padding gone on mobile, bleed only to
+       the content edge instead of past it. */
+    .qaPanel .qaScrollWrap {
+        margin: 0;
+    }
+
+    .qaPanel .qaGrid {
+        padding: 0 0 2px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        overflow: visible;
+        -webkit-mask-image: none;
+        mask-image: none;
+    }
+
+    /* Notification bell already surfaces this feed on phones. */
+    .recentActivityPanel {
+        display: none;
+    }
+
+    .statCard {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border-radius: 10px;
+    }
+
+    .statIcon {
+        order: 1;
+        width: 26px;
+        height: 26px;
+        border-radius: 7px;
+        margin-bottom: 0;
+        flex-shrink: 0;
+    }
+
+    .statIcon i {
+        font-size: 12px !important;
+    }
+
+    .statLabel {
+        order: 2;
+        flex: 1;
+        font-size: 12px;
+        color: var(--text-secondary);
+    }
+
+    .statNum {
+        order: 3;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    /* Trend detail dropped here — the single line is for label + number
+       only, keeping each row compact. */
+    .statTrend {
+        display: none;
+    }
+
+    /* ── Quick actions: scrollable pill strip ── */
+    .row2>.panel:first-child {
+        position: relative;
+        padding-bottom: 10px;
+    }
+
+    .qaScrollWrap {
+        position: relative;
+        margin: 0 -16px;
+        min-width: 0;
+    }
+
+    .qaGrid {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        min-width: 0;
+        /* Just a soft edge, not the main "you can scroll this" cue — that
+           job now belongs to the underline track below + the on-load
+           nudge. A wide fade was actually swallowing the third pill's
+           peek entirely, which is why it didn't read as scrollable. */
+        -webkit-mask-image: linear-gradient(to right,
+                #000 calc(100% - 16px),
+                transparent 100%);
+        mask-image: linear-gradient(to right,
+                #000 calc(100% - 16px),
+                transparent 100%);
+    }
+
+    .qaGrid::-webkit-scrollbar {
+        display: none;
+    }
+
+    .qaBtn {
+        min-width: 0;
+        width: 100%;
+        height: 52px;
+        padding: 0 10px;
+        border-radius: 15px;
+        white-space: nowrap;
+        box-shadow: none;
+        justify-content: flex-start;
+        border: 1px solid var(--border-color);
+        background: var(--bg-surface);
+        color: var(--text-primary);
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+    .qaBtn:active {
+        transform: scale(.985);
+    }
+
+    /* "Underneath line" scroll indicator — the thumb's width and position
+       genuinely reflect how much content there is and how far through
+       it you've scrolled (see useScrollThumb). Kept deliberately quiet —
+       thin, flat, muted — so it reads as a small "this scrolls" cue
+       rather than competing with the pills for attention. */
+    .qaScrollTrack {
+        display: none;
+        position: relative;
+        height: 2.5px;
+        margin: 8px 16px 0;
+        border-radius: 999px;
+        background: var(--border-color);
+        overflow: hidden;
+    }
+
+    .qaScrollThumb {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        min-width: 24px;
+        border-radius: 999px;
+        background: var(--accent);
+        opacity: 0.45;
+        transition: left 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+            width 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Pending approvals / pending leave requests / latest attendance —
+       a soft shadow instead of the flat hairline border reads as a real
+       elevated surface rather than a plain outlined box. */
+    .dirPanel {
+        border: none;
+        box-shadow: 0 1px 3px rgba(15, 30, 25, 0.06),
+            0 1px 2px rgba(15, 30, 25, 0.04);
+        border-radius: 14px;
+    }
+
+    /* ── Latest attendance: table → stacked cards ─────────────────────
+       A 6-column table has no room to breathe on a phone. Scoped to
+       .attendanceTable only (not the Pending approvals / leave-request
+       tables, which still scroll normally) — each row becomes its own
+       compact card: name up top, then Department/Clock in/Clock
+       out/Status as label:value rows, then actions along the bottom. */
+    .attendanceTable {
+        border: none;
+        border-collapse: separate;
+        border-spacing: 0 14px;
+        margin-top: -14px;
+        min-width: 0;
+    }
+
+    .attendanceTable thead {
+        display: none;
+    }
+
+    .attendanceTable,
+    .attendanceTable tbody,
+    .attendanceTable tr {
+        display: block;
+        width: 100%;
+    }
+
+    .attendanceTable tr {
+        border: 0.5px solid var(--border-color);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .attendanceTable td {
+        display: block;
+        padding: 8px 12px;
+        border-top: 0.5px solid var(--border-color);
+    }
+
+    /* Name cell — no label prefix, sits at the top of the card as-is. */
+    .attendanceTable td:first-child {
+        border-top: none;
+        padding: 12px 12px 10px;
+    }
+
+    /* Department / Clock in / Clock out / Status — label:value rows,
+       the label coming from the cell's own data-label attribute so no
+       extra markup is needed beyond what's already there. */
+    .attendanceTable td[data-label] {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 12.5px;
+    }
+
+    .attendanceTable td[data-label]::before {
+        content: attr(data-label);
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        flex-shrink: 0;
+    }
+
+    /* Actions — full-width row along the bottom of the card. */
+    .attendanceTable td:last-child {
+        padding: 10px 12px 12px;
+    }
+
+    .attendanceTable .tblActions {
+        justify-content: flex-end;
+    }
+}
+
+/* ── Mobile bottom navigation ──────────────────────────────────────────
+   Hidden entirely on desktop/tablet (≥901px); replaces the sidebar as the
+   primary navigation surface below that, since the sidebar is hidden there.
+   Every item is present in one strip — scroll sideways to reach the rest. */
+.bottomNav {
+    display: none;
+}
+
+.bottomNavScrollTrack {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    .bottomNav {
+        display: block;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 40;
+        background: var(--bg-surface);
+        border-top: 0.5px solid var(--border-color);
+        box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.06);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    /* Same quiet indicator pattern as the quick-actions row — a real,
+       scroll-linked cue rather than a static hint, kept thin and muted
+       so it doesn't compete with the nav icons above it. */
+    .bottomNavScrollTrack {
+        display: block;
+        position: relative;
+        height: 2.5px;
+        margin: 2px 16px 8px;
+        border-radius: 999px;
+        background: var(--border-color);
+        overflow: hidden;
+    }
+
+    .bottomNavScrollThumb {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        min-width: 24px;
+        border-radius: 999px;
+        background: var(--accent);
+        opacity: 0.45;
+        transition: left 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+            width 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+}
+
+.bottomNavScroll {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    min-width: 0;
+}
+
+.bottomNavScroll::-webkit-scrollbar {
+    display: none;
+}
+
+.bottomNavItem {
+    flex: 0 0 auto;
+    width: 72px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 10px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    min-height: 60px;
+    padding: 8px 4px 6px;
+    transition: color 0.15s;
+    white-space: nowrap;
+}
+
+.bottomNavIconWrap {
+    position: relative;
+    display: flex;
+    padding: 3px 10px;
+    border-radius: 999px;
+    transition: background 0.15s;
+}
+
+.bottomNavItem i {
+    font-size: 20px;
+}
+
+.bottomNavDot {
+    position: absolute;
+    top: 1px;
+    right: 4px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--danger);
+    border: 1.5px solid var(--bg-surface);
+}
+
+.bottomNavActive {
     color: var(--accent);
 }
 
-.pillRejected {
+.bottomNavActive .bottomNavIconWrap {
+    background: var(--bg-soft-accent);
+}
+
+/* ── Notification panel ──────────────────────────────────── */
+.notifWrapper {
+    position: relative;
+}
+
+.notifCount {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    min-width: 17px;
+    height: 17px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 10px;
+    border: 2px solid var(--bg-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3px;
+    line-height: 1;
+}
+
+.notifPanel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 360px;
+    background: var(--bg-surface);
+    border: 0.5px solid var(--border-color);
+    border-radius: 14px;
+    box-shadow: 0 8px 32px var(--shadow-color);
+    z-index: 200;
+    overflow: hidden;
+    animation: panelIn 0.15s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Small phones — a fixed 360px panel can overflow the viewport, so it
+   shrinks to fit with a small margin on each side instead. */
+@media (max-width: 420px) {
+    .notifPanel {
+        width: calc(100vw - 24px);
+        right: -12px;
+    }
+}
+
+@keyframes panelIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.notifPanelHdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 12px;
+    border-bottom: 0.5px solid var(--border-color);
+}
+
+.notifPanelTitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.notifMarkAll {
+    font-size: 11px;
+    color: var(--accent);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0;
+}
+
+.notifMarkAll:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.notifList {
+    max-height: 400px;
+    overflow-y: auto;
+    flex-shrink: 1;
+    min-height: 0;
+}
+
+.notifItem {
+    padding: 12px 16px;
+    border-bottom: 0.5px solid var(--border-color);
+    cursor: pointer;
+    transition: background 0.12s;
+}
+
+.notifItem:last-child {
+    border-bottom: none;
+}
+
+.notifItem:hover {
+    background: var(--bg-surface-alt);
+}
+
+.notifItem.unread {
+    background: var(--bg-soft-accent);
+}
+
+.notifItem.unread:hover {
+    background: var(--bg-soft-accent);
+}
+
+.notifItemTop {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.notifIcon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.notifIcon.reg {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.notifIcon.ok {
+    background: var(--bg-soft-accent);
+    color: var(--accent-hover);
+}
+
+.notifIcon.no {
     background: var(--danger-bg);
     color: var(--danger-text);
 }
 
-/* ── Notifications ── */
-.sbBadgeInline {
-    background: var(--warning);
-    color: var(--warning-text);
-    font-size: 10px;
-    font-weight: 700;
-    border-radius: 999px;
-    padding: 1px 7px;
-}
-
-.notifList {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.notifItem {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 12px 10px;
-    border-radius: 10px;
-    cursor: pointer;
-}
-
-.notifItem:hover {
-    background: var(--bg-soft-accent);
-}
-
-.notifUnread {
-    background: var(--bg-soft-accent);
-}
-
-.notifIcon {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: var(--bg-soft-accent);
-    color: var(--accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
-    flex-shrink: 0;
+.notifIcon.sys {
+    background: var(--info-bg);
+    color: var(--info-text);
 }
 
 .notifBody {
@@ -672,31 +2111,35 @@
 }
 
 .notifTitle {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 12px;
+    font-weight: 500;
     color: var(--text-primary);
+    line-height: 1.4;
 }
 
-.notifMessage {
-    font-size: 12px;
+.notifMsg {
+    font-size: 11px;
     color: var(--text-secondary);
     margin-top: 2px;
-    line-height: 1.5;
+    line-height: 1.45;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .notifTime {
-    font-size: 11px;
+    font-size: 10px;
     color: var(--text-secondary);
-    margin-top: 4px;
+    margin-top: 3px;
 }
 
-.unreadDot {
-    width: 8px;
-    height: 8px;
+.notifUnreadDot {
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
     background: var(--accent);
     flex-shrink: 0;
-    margin-top: 6px;
+    margin-top: 5px;
 }
 
 /* ── Per-item delete + its unread dot, stacked in a small right-hand rail ── */
@@ -706,13 +2149,13 @@
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
-    margin-top: 4px;
+    margin-top: 2px;
 }
 
 .notifDeleteBtn {
-    width: 26px;
-    height: 26px;
-    border-radius: 7px;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
     border: none;
     background: transparent;
     color: var(--text-secondary);
@@ -730,25 +2173,53 @@
     color: var(--danger-text);
 }
 
-/* ── Undo bar - floats above the bottom of the list whenever one or more
-   deletes are pending, so it always "pops" into view instead of being
-   pushed below the fold by a long notification list. ── */
+/* ── Undo bar — appears whenever one or more deletes are pending. Two
+   positioning variants share the same look:
+   - .undoBarPanel:  contained inside the small bell-dropdown panel.
+   - .undoBarFixed:  pinned to the viewport itself (not the scrolling
+     notifications list) so it can never end up scrolled out of view or
+     buried under a long list — and it sits above the fixed mobile bottom
+     nav (z-index + bottom offset) instead of getting hidden behind it. ── */
 .undoBar {
-    position: absolute;
-    left: 12px;
-    right: 12px;
-    bottom: 12px;
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 14px;
+    padding: 12px 16px;
     background: var(--bg-surface-alt);
-    border: 0.5px solid var(--border-color);
-    border-radius: 10px;
-    box-shadow: 0 8px 24px var(--shadow-color);
-    z-index: 5;
+    box-shadow: 0 -8px 24px var(--shadow-color);
     overflow: hidden;
     animation: undoBarIn 0.18s ease;
+}
+
+.undoBarPanel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-top: 0.5px solid var(--border-color);
+    z-index: 5;
+}
+
+.undoBarFixed {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 20px;
+    width: calc(100% - 32px);
+    max-width: 420px;
+    border: 0.5px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px var(--shadow-color);
+    z-index: 210;
+    animation: undoBarInFixed 0.18s ease;
+}
+
+/* Clears the fixed mobile bottom nav (see .bottomNav below) instead of
+   rendering underneath it. */
+@media (max-width: 900px) {
+    .undoBarFixed {
+        bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+    }
 }
 
 .undoBar i {
@@ -766,6 +2237,18 @@
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@keyframes undoBarInFixed {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
     }
 }
 
@@ -815,1494 +2298,720 @@
     color: var(--accent-hover);
 }
 
-/* ──────────────────────────────────────────────────────────────────────── */
-/* ── Leave tab design tokens ── */
-/* ──────────────────────────────────────────────────────────────────────── */
-
-.leavePageWrap {
-    --leave-brand: var(--accent);
-    --leave-brand-bg: var(--bg-soft-accent);
-    --leave-brand-border: var(--border-color);
-    --leave-warning: var(--warning-text);
-    --leave-warning-bg: var(--warning-bg);
-    --leave-danger: var(--danger-text);
-    --leave-danger-bg: var(--danger-bg);
-    --leave-danger-border: var(--danger-border);
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-}
-
-/* ── Leave sub-tabs ── */
-.leaveTabs {
+.notifActions {
     display: flex;
     gap: 6px;
-    background: var(--bg-surface);
-    padding: 6px;
-    border-radius: 12px;
-    box-shadow: 0 1px 2px rgba(15, 23, 22, 0.04);
-    width: fit-content;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 0.5px solid var(--border-color);
 }
 
-.leaveTab {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    height: 38px;
-    padding: 0 16px;
-    background: none;
+.notifApproveBtn {
+    height: 26px;
+    padding: 0 12px;
+    background: var(--accent);
+    color: #fff;
     border: none;
-    border-radius: 8px;
-    font-size: 13px;
+    border-radius: 6px;
+    font-size: 11px;
     font-weight: 500;
-    color: var(--text-secondary);
     cursor: pointer;
     font-family: inherit;
-    transition: background 0.15s, color 0.15s;
-    white-space: nowrap;
-}
-
-.leaveTab:hover {
-    background: var(--bg-soft-accent);
-    color: var(--text-primary);
-}
-
-.leaveTabActive {
-    background: var(--leave-brand-bg);
-    color: var(--leave-brand);
-}
-
-.leaveTab i {
-    font-size: 15px;
-}
-
-.leaveTabBadge {
-    background: var(--bg-surface-alt);
-    color: var(--text-secondary);
-    font-size: 10.5px;
-    font-weight: 700;
-    padding: 1px 7px;
-    border-radius: 999px;
-    min-width: 18px;
-    text-align: center;
-}
-
-.leaveTabActive .leaveTabBadge {
-    background: var(--leave-brand);
-    color: #fff;
-}
-
-.leaveTabBadgeAlert {
-    background: var(--warning);
-    color: var(--warning-text);
-    font-size: 10.5px;
-    font-weight: 700;
-    padding: 1px 7px;
-    border-radius: 999px;
-    min-width: 18px;
-    text-align: center;
-}
-
-/* ── Step bar (request wizard) ── */
-.stepBar {
+    transition: background 0.15s;
     display: flex;
     align-items: center;
-    margin-bottom: 24px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border-color);
+    gap: 4px;
 }
 
-.stepItem {
-    display: flex;
-    align-items: center;
-    flex: 1;
+.notifApproveBtn:hover:not(:disabled) {
+    background: var(--accent-hover);
 }
 
-.stepDot {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--bg-page);
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 700;
-    flex-shrink: 0;
-    transition: background 0.2s, color 0.2s;
-}
-
-.stepDotActive {
-    background: var(--leave-brand);
-    color: #fff;
-}
-
-.stepDotDone {
-    background: var(--leave-brand-bg);
-    color: var(--leave-brand);
-    border: 1.5px solid var(--leave-brand);
-}
-
-.stepLabel {
-    font-size: 12.5px;
-    color: var(--text-secondary);
-    margin-left: 9px;
-    white-space: nowrap;
-}
-
-.stepLabelActive {
-    font-size: 12.5px;
-    color: var(--text-primary);
-    font-weight: 600;
-    margin-left: 9px;
-    white-space: nowrap;
-}
-
-.stepLine {
-    flex: 1;
-    height: 2px;
-    background: var(--bg-surface-alt);
-    margin: 0 14px;
-    border-radius: 2px;
-}
-
-.stepLineDone {
-    background: var(--leave-brand);
-}
-
-.stepPane {
-    display: flex;
-    flex-direction: column;
-}
-
-.stepIntro {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14.5px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0 0 18px;
-}
-
-.stepIntro i {
-    color: var(--leave-brand);
-    font-size: 17px;
-}
-
-.changeTypeBtn {
-    margin-left: auto;
-    background: none;
-    border: none;
-    color: var(--leave-brand);
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-}
-
-.changeTypeBtn:hover {
-    text-decoration: underline;
-}
-
-.stepNav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-top: 22px;
-    padding-top: 18px;
-    border-top: 1px solid var(--border-color);
-}
-
-.stepNav .submitBtn,
-.stepNav .secondaryBtn {
-    width: auto;
-    min-width: 140px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-}
-
-.secondaryBtn {
-    height: 42px;
-    padding: 0 18px;
-    background: var(--bg-surface);
-    border: 1.5px solid var(--border-color);
-    border-radius: 9px;
-    color: var(--text-primary);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.secondaryBtn:hover {
-    background: var(--bg-soft-accent);
-    border-color: var(--border-color);
-}
-
-/* ── Leave type grid ── */
-.typeGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 12px;
-}
-
-.typeCard {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    background: var(--bg-surface-alt);
-    border: 1.5px solid var(--border-color);
-    border-radius: 12px;
-    padding: 14px;
-    cursor: pointer;
-    text-align: left;
-    font-family: inherit;
-    transition: border-color 0.15s, background 0.15s, transform 0.1s;
-}
-
-.typeCard:hover:not(:disabled) {
-    border-color: var(--border-color);
-    background: var(--bg-surface);
-    transform: translateY(-1px);
-}
-
-.typeCardActive {
-    border-color: var(--leave-brand);
-    background: var(--leave-brand-bg);
-}
-
-.typeCardExhausted {
+.notifApproveBtn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
 
-.typeCardTop {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    font-size: 19px;
-    color: var(--leave-brand);
-}
-
-.typeCardTop i:last-child {
-    font-size: 16px;
-    color: var(--leave-brand);
-}
-
-.typeCardName {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-primary);
-    line-height: 1.3;
-}
-
-.typeCardDays {
-    font-size: 11.5px;
-    font-weight: 600;
-}
-
-.typeCardBar {
-    width: 100%;
-    height: 4px;
-    background: var(--bg-surface-alt);
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.typeCardBarFill {
-    height: 100%;
-    border-radius: 4px;
-    transition: width 0.3s;
-}
-
-/* ── Balance hint ── */
-.balanceHint {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border: 1px solid;
-    border-radius: 9px;
-    padding: 10px 13px;
-    font-size: 12.5px;
-    font-weight: 500;
-    margin: -4px 0 16px;
-}
-
-/* ── Field hints / select ── */
-.fieldHint {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin: -2px 0 8px;
-    line-height: 1.5;
-}
-
-.fieldRequired {
-    color: var(--leave-danger);
-}
-
-.selectField {
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 13px;
-    font-family: inherit;
-    color: var(--text-primary);
+.notifRejectBtn {
+    height: 26px;
+    padding: 0 12px;
     background: var(--bg-surface);
-    cursor: pointer;
-}
-
-.selectField:focus {
-    outline: none;
-    border-color: var(--leave-brand);
-}
-
-.coverWarning {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    background: var(--leave-warning-bg);
-    color: var(--leave-warning);
-    border-radius: 9px;
-    padding: 11px 13px;
-    font-size: 12.5px;
-    line-height: 1.5;
-}
-
-.coverWarning i {
-    flex-shrink: 0;
-    margin-top: 1px;
-}
-
-/* ── Review card ── */
-.reviewCard {
-    background: var(--bg-surface-alt);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 16px 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 6px;
-}
-
-.reviewCardLabel {
-    font-size: 11.5px;
-    font-weight: 700;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin: 0;
-}
-
-.reviewRow {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    font-size: 13px;
-}
-
-.reviewKey {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--text-secondary);
+    color: var(--danger-text);
+    border: 0.5px solid var(--danger-border);
+    border-radius: 6px;
+    font-size: 11px;
     font-weight: 500;
-    flex-shrink: 0;
-}
-
-.reviewKey i {
-    color: var(--leave-brand);
-    font-size: 14px;
-}
-
-.reviewVal {
-    color: var(--text-primary);
-    font-weight: 600;
-    text-align: right;
-}
-
-.reviewReasonBlock {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    padding-top: 6px;
-    border-top: 1px dashed var(--border-color);
-}
-
-.reviewReasonText {
-    font-size: 13px;
-    color: var(--text-primary);
-    line-height: 1.6;
-    margin: 0;
-    white-space: pre-wrap;
-}
-
-/* ── Success state ── */
-.successState {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 36px 20px 20px;
-    gap: 6px;
-}
-
-.successIcon {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: var(--leave-brand-bg);
-    color: var(--leave-brand);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    margin-bottom: 8px;
-}
-
-.successTitle {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin: 0;
-}
-
-.successBody {
-    font-size: 13px;
-    color: var(--text-secondary);
-    line-height: 1.6;
-    max-width: 360px;
-    margin: 0 0 12px;
-}
-
-.successActions {
-    display: flex;
-    gap: 10px;
-    margin-top: 6px;
-}
-
-.successActions .submitBtn,
-.successActions .secondaryBtn {
-    width: auto;
-}
-
-/* ── Empty / invitation states ── */
-.invitationEmpty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 40px 24px;
-    gap: 6px;
-    color: var(--text-secondary);
-}
-
-.invitationEmpty i {
-    font-size: 34px;
-    color: var(--text-secondary);
-    margin-bottom: 8px;
-}
-
-.invitationEmptyTitle {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0;
-}
-
-.invitationEmptyBody {
-    font-size: 12.5px;
-    line-height: 1.6;
-    max-width: 320px;
-    margin: 0 0 14px;
-}
-
-/* ── Leave history list ── */
-.leaveHistoryList {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.historyCard {
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    overflow: hidden;
-    transition: border-color 0.15s;
-}
-
-.historyCardOpen {
-    border-color: var(--border-color);
-}
-
-.historyCardHead {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 13px 16px;
-    background: var(--bg-surface);
-    border: none;
     cursor: pointer;
     font-family: inherit;
-    text-align: left;
-}
-
-.historyCardHead:hover {
-    background: var(--bg-surface-alt);
-}
-
-.historyCardIcon {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    background: var(--leave-brand-bg);
-    color: var(--leave-brand);
+    transition: background 0.15s;
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 17px;
-    flex-shrink: 0;
-}
-
-.historyCardMain {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
     gap: 4px;
 }
 
-.historyCardTopRow {
-    display: flex;
-    align-items: center;
-    gap: 9px;
+.notifRejectBtn:hover:not(:disabled) {
+    background: var(--danger-bg);
 }
 
-.historyCardType {
-    font-size: 13.5px;
-    font-weight: 600;
-    color: var(--text-primary);
+.notifRejectBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
-.historyCardPill {
-    font-size: 10.5px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 999px;
-    white-space: nowrap;
-}
-
-.historyCardSubRow {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+.notifEmpty {
+    padding: 32px 16px;
+    text-align: center;
     font-size: 12px;
     color: var(--text-secondary);
 }
 
-.historyCardDot {
+.notifEmptyIcon {
+    font-size: 28px;
+    margin-bottom: 8px;
+    opacity: 0.4;
+}
+
+/* ── Small inline subtitle next to a panel title (e.g. today's date next
+   to "Latest attendance") ── */
+.panelSubtitle {
+    margin-left: 8px;
+    font-size: 11px;
+    font-weight: 400;
     color: var(--text-secondary);
+    text-transform: none;
+    letter-spacing: 0;
 }
 
-.historyCardChevron {
-    color: var(--text-secondary);
-    font-size: 15px;
-    flex-shrink: 0;
-    transition: transform 0.2s;
-}
-
-.historyCardOpen .historyCardChevron {
-    transform: rotate(180deg);
-}
-
-.historyCardBody {
-    padding: 0 16px 16px 68px;
+/* Remove-employee confirmation dialog styling now lives in
+   RemoveEmployeeModal.module.css, shared with WorkforceTab.jsx, so
+   there's only one place to update it. */
+/* ── Messages tab — let it fill the remaining content height ── */
+.messagesContent {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    overflow: hidden;
+    padding: 0;
+    height: 100%;
+}
+
+/* ── Notifications — full page (sidebar "Notifications" tab) ──────────────
+   Distinct from the bell icon's dropdown panel above: this is a full page
+   using the same notification-row styling, just laid out to fill the
+   content area instead of floating in a fixed-width popover. */
+.notifPageWrap {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+}
+
+.notifPageHdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 4px 14px;
+    border-bottom: 0.5px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.notifPageTitle {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notifPageBadge {
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.notifPageList {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Ehral Intelligence workspace. The Agent owns its own mobile viewport
+   behavior; the dashboard shell remains visible on desktop. */
+.contentAgent {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+}
+
+/* Desktop Agent workspace: remove the global Ehral brand footer so the
+   Intelligence conversation receives the full available vertical space.
+   The mobile Agent has its own fixed viewport and is intentionally left
+   unchanged. */
+@media (min-width: 901px) {
+    .contentAgent .dashboardFooter {
+        display: none;
+    }
+}
+
+.missingClockOutPanel {
+    border: 0.5px solid var(--border-color);
+    border-radius: 14px;
+    background: var(--card-bg, var(--surface));
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.missingClockOutPanel .dirHdr {
+    padding: 15px 18px;
+}
+
+.missingClockOutPanel .panelTitle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.missingClockOutBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: var(--warning-bg);
+    color: var(--warning-text);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.missingClockOutList {
+    display: flex;
+    flex-direction: column;
+}
+
+.missingClockOutRow {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.4fr) minmax(190px, 1fr) auto;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 18px;
     border-top: 1px solid var(--border-color);
-    margin-top: -1px;
+}
+
+.missingClockOutPerson {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+}
+
+.missingClockOutPerson>div:last-child {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.missingClockOutPerson strong {
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+.missingClockOutPerson span,
+.missingClockOutMeta span {
+    color: var(--text-secondary);
+    font-size: 11px;
+    margin-top: 2px;
+}
+
+.missingClockOutMeta {
+    display: flex;
+    flex-direction: column;
+}
+
+.missingClockOutStatus {
+    color: var(--warning-text) !important;
+    font-weight: 700;
+}
+
+.missingClockOutActions {
+    display: flex;
+    gap: 7px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.pill_missing_clock_out {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+    border-color: var(--warning-border);
+}
+
+@media (max-width: 1100px) and (min-width: 901px) {
+    .missingClockOutRow {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .missingClockOutActions {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 900px) {
+    .missingClockOutPanel {
+        margin-top: 12px;
+    }
+
+    .missingClockOutPanel .dirHdr {
+        padding: 13px 14px;
+    }
+
+    .missingClockOutRow {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 13px 14px;
+    }
+
+    .missingClockOutActions {
+        justify-content: flex-start;
+    }
+
+    .missingClockOutActions .tblBtn {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
+/* ========================================================================
+   EHRAL EMPLOYEE PREMIUM LAYER
+   ------------------------------------------------------------------------
+   This stylesheet is intentionally isolated from Dashboard.module.css so
+   the employer experience is not changed. The employee workspace uses the
+   same product language as My Accounts and the customer workspace, while
+   preserving the existing information architecture and responsive shell.
+   ======================================================================== */
+
+.dash {
+    --employee-radius-xl: 24px;
+    --employee-radius-lg: 18px;
+    --employee-radius-md: 14px;
+    --employee-shadow: 0 18px 48px -30px rgba(16, 24, 40, 0.34);
+    --employee-shadow-hover: 0 22px 56px -28px rgba(16, 24, 40, 0.38);
+    --employee-glow: 0 0 0 1px rgba(38, 166, 154, 0.07), 0 16px 42px -28px rgba(38, 166, 154, 0.34);
+    --employee-content-max: 1440px;
+}
+
+.main {
+    background:
+        radial-gradient(circle at 88% 0%, rgba(38, 166, 154, 0.055), transparent 30%),
+        var(--bg-page);
+}
+
+.topbar {
+    min-height: 78px;
+    padding: 16px 30px;
+    background: color-mix(in srgb, var(--bg-page) 91%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--border-color) 72%, transparent);
+    backdrop-filter: blur(18px);
+}
+
+.empTopbarHeading {
+    gap: 5px;
+}
+
+.empGreeting {
+    font-size: clamp(22px, 2.4vw, 31px);
+    line-height: 1.05;
+    letter-spacing: -0.045em;
+    font-weight: 800;
+}
+
+.empGreetingIcon {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 7px;
+    font-size: 17px;
+}
+
+.empGreetingSub {
+    margin-top: 7px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+.empWorkspaceTag {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-left: 8px;
+    padding: 4px 9px 4px 5px;
+    border: 1px solid color-mix(in srgb, var(--border-color) 78%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg-surface) 84%, transparent);
+    box-shadow: 0 5px 16px -12px rgba(0, 0, 0, .28);
+}
+
+.empWorkspaceLogo,
+.empWorkspaceLogoImg {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+}
+
+.topbarRight {
+    gap: 8px;
+}
+
+.notifBtn {
+    width: 40px;
+    height: 40px;
+    border-radius: 13px;
+    border: 1px solid color-mix(in srgb, var(--border-color) 72%, transparent);
+    background: color-mix(in srgb, var(--bg-surface) 88%, transparent);
+    box-shadow: 0 8px 22px -18px rgba(0, 0, 0, .4);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.notifBtn:hover {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--accent) 35%, var(--border-color));
+    box-shadow: 0 12px 26px -18px rgba(0, 0, 0, .45);
+}
+
+.content,
+.contentFull {
+    width: min(100%, var(--employee-content-max));
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.content {
+    padding: 30px clamp(18px, 3vw, 38px) 40px;
+}
+
+.contentFull {
+    padding: 24px clamp(18px, 3vw, 38px) 40px;
+}
+
+.heroCard,
+.hero,
+.panel,
+.statCard,
+.invitePanel,
+.qaPanel,
+.recentActivityPanel {
+    border-radius: var(--employee-radius-lg);
+    box-shadow: var(--employee-shadow);
+    border-color: color-mix(in srgb, var(--border-color) 76%, transparent);
+}
+
+/* Dashboard hero / welcome surface. */
+.hero {
+    padding: clamp(22px, 3vw, 32px);
+    border-radius: var(--employee-radius-xl);
+    background:
+        radial-gradient(circle at 100% 0%, rgba(38, 166, 154, .13), transparent 38%),
+        var(--bg-surface);
+    box-shadow: var(--employee-glow);
+}
+
+/* KPI cards become a quiet premium grid rather than a collection of boxes. */
+.statsGrid {
+    gap: 14px;
+}
+
+.statCard {
+    min-height: 132px;
+    padding: 19px 20px;
+    background:
+        linear-gradient(145deg, color-mix(in srgb, var(--bg-surface) 98%, transparent), color-mix(in srgb, var(--bg-surface-alt) 36%, transparent));
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.statCard:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--employee-shadow-hover);
+    border-color: color-mix(in srgb, var(--accent) 24%, var(--border-color));
+}
+
+.statIcon {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.statNum {
+    margin-top: 15px;
+    font-size: clamp(25px, 3vw, 32px);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-weight: 800;
+}
+
+.statLabel {
+    margin-top: 7px;
+    font-size: 11.5px;
+    font-weight: 650;
+    letter-spacing: .01em;
+}
+
+.row2 {
+    gap: 16px;
+}
+
+.panel {
+    background: var(--bg-surface);
+    overflow: hidden;
+}
+
+.panelHdr {
+    padding: 19px 21px;
+}
+
+.panelTitleLg,
+.panelTitle {
+    font-weight: 750;
+    letter-spacing: -0.015em;
+}
+
+.panelTitleLg {
+    font-size: 16px;
+}
+
+.panelTitle {
+    font-size: 14px;
+}
+
+.panelAction {
+    border-radius: 999px;
+    padding: 7px 11px;
+    font-weight: 650;
+}
+
+.qaPanel {
+    padding-bottom: 5px;
+}
+
+.qaGrid {
+    gap: 10px;
+    padding: 14px 18px 18px;
+}
+
+.qaBtn {
+    min-height: 88px;
+    border-radius: 15px;
+    border: 1px solid color-mix(in srgb, var(--border-color) 76%, transparent);
+    background: var(--bg-surface-alt);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.qaBtn:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--accent) 30%, var(--border-color));
+    box-shadow: 0 16px 30px -24px rgba(0, 0, 0, .42);
+}
+
+.qaIconWrap {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+}
+
+.recentActivityPanel {
+    margin-top: 16px;
+}
+
+.actItem {
+    padding: 14px 19px;
+    transition: background .18s ease;
+}
+
+.actItem:hover {
+    background: var(--bg-surface-alt);
+}
+
+/* Full-page employee tools use the same visual rhythm as the dashboard. */
+.notifPageWrap {
+    padding: 4px 0 30px;
+}
+
+.notifPageHdr {
+    padding: 10px 4px 17px;
+}
+
+.notifPageTitle {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -.025em;
+}
+
+.notifPageList {
+    gap: 9px;
     padding-top: 12px;
 }
 
-.leaveHistoryStage {
-    font-size: 12.5px;
-    font-weight: 500;
-    color: var(--leave-brand);
-    background: var(--leave-brand-bg);
-    border-radius: 8px;
-    padding: 8px 11px;
-    margin: 0;
-}
-
-.leaveReason {
-    font-size: 13px;
-    color: var(--text-primary);
-    line-height: 1.6;
-    margin: 0;
-    white-space: pre-wrap;
-}
-
-.leaveMetaRow {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 7px;
-    font-size: 12.5px;
-    color: var(--text-secondary);
-}
-
-.leaveMetaRow i {
-    color: var(--leave-brand);
-    font-size: 14px;
-}
-
-.metaPillGreen {
-    background: var(--leave-brand-bg);
-    color: var(--leave-brand);
-    font-size: 10.5px;
-    font-weight: 700;
-    padding: 1px 8px;
-    border-radius: 999px;
-}
-
-.metaPillRed {
-    background: var(--leave-danger-bg);
-    color: var(--leave-danger);
-    font-size: 10.5px;
-    font-weight: 700;
-    padding: 1px 8px;
-    border-radius: 999px;
-}
-
-.metaNote {
-    font-style: italic;
-    color: var(--text-secondary);
-}
-
-.leaveNoteBox {
-    display: flex;
-    align-items: flex-start;
-    gap: 7px;
-    background: var(--bg-soft-accent);
-    border: 1px solid var(--border-color);
-    border-radius: 9px;
-    padding: 10px 12px;
-    font-size: 12.5px;
-    color: var(--text-primary);
-    line-height: 1.55;
-}
-
-.leaveNoteBox i {
-    color: var(--leave-brand);
-    margin-top: 1px;
-    flex-shrink: 0;
-}
-
-.historyCardFooter {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-top: 4px;
-}
-
-.leaveHistoryFooter {
-    font-size: 11.5px;
-    color: var(--text-secondary);
-}
-
-.cancelLeaveBtn {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    background: none;
-    border: 1.5px solid var(--danger-border);
-    color: var(--leave-danger);
-    border-radius: 7px;
-    padding: 6px 12px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-}
-
-.cancelLeaveBtn:hover:not(:disabled) {
-    background: var(--leave-danger-bg);
-}
-
-.cancelLeaveBtn:disabled {
-    opacity: 0.6;
-    cursor: default;
-}
-
-/* ── Progress dots (history rows) ── */
-.progressDots {
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-}
-
-.progressDotWrap {
-    display: flex;
-    align-items: center;
-}
-
-.progressDot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--bg-surface-alt);
-    flex-shrink: 0;
-}
-
-.progressDot_done {
-    background: var(--leave-brand);
-}
-
-.progressDot_current {
-    background: var(--warning);
-    box-shadow: 0 0 0 3px rgba(240, 169, 58, 0.25);
-}
-
-.progressDot_pending {
-    background: var(--bg-surface-alt);
-}
-
-.progressDot_rejected {
-    background: var(--leave-danger);
-}
-
-.progressLine {
-    width: 16px;
-    height: 2px;
-    background: var(--bg-surface-alt);
-    margin: 0 2px;
-}
-
-.progressLineDone {
-    background: var(--leave-brand);
-}
-
-/* ── Cover requests ── */
-.coverCountBadge {
-    background: var(--warning-bg);
-    color: var(--leave-warning);
-    font-size: 11px;
-    font-weight: 700;
-    padding: 2px 9px;
-    border-radius: 999px;
-    margin-left: 8px;
-}
-
-.coverList {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.coverSectionLabel {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 11.5px;
-    font-weight: 700;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin: 4px 0 2px;
-}
-
-.coverItem {
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 14px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.coverItemPast {
-    background: var(--bg-surface-alt);
-}
-
-.coverItemHeader {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.coverAvatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: var(--leave-brand);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 700;
-    flex-shrink: 0;
-    overflow: hidden;
-}
-
-.coverAvatarImg {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.coverItemInfo {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    flex: 1;
-    min-width: 0;
-}
-
-.coverRequesterName {
-    font-size: 13.5px;
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.coverLeaveType {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 12px;
-    color: var(--text-secondary);
-}
-
-.coverLeaveType i {
-    color: var(--leave-brand);
-    font-size: 13px;
-}
-
-.coverDates {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-size: 12px;
-    color: var(--text-secondary);
-    flex-shrink: 0;
-    white-space: nowrap;
-}
-
-.coverDaysBadge {
-    background: var(--leave-brand-bg);
-    color: var(--leave-brand);
-    font-size: 10.5px;
-    font-weight: 700;
-    padding: 1px 7px;
-    border-radius: 999px;
-}
-
-.coverPastPill {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 999px;
-    flex-shrink: 0;
-}
-
-.coverReason {
-    display: flex;
-    align-items: flex-start;
-    gap: 7px;
-    font-size: 12.5px;
-    color: var(--text-primary);
-    line-height: 1.55;
-    margin: 0;
-    background: var(--bg-surface-alt);
-    border-radius: 8px;
-    padding: 9px 11px;
-}
-
-.coverReason i {
-    color: var(--text-secondary);
-    margin-top: 2px;
-    flex-shrink: 0;
-}
-
-.coverActions {
-    display: flex;
-    gap: 10px;
-}
-
-.coverAcceptBtn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    background: var(--leave-brand);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-}
-
-.coverAcceptBtn:hover:not(:disabled) {
-    background: var(--accent-hover);
-}
-
-.coverAcceptBtn:disabled {
-    opacity: 0.6;
-    cursor: default;
-}
-
-.coverDeclineBtn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
+.notifItem {
+    border: 1px solid color-mix(in srgb, var(--border-color) 72%, transparent);
+    border-radius: 16px;
     background: var(--bg-surface);
-    color: var(--leave-danger);
-    border: 1.5px solid var(--danger-border);
-    border-radius: 8px;
-    padding: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
+    box-shadow: 0 12px 30px -26px rgba(0, 0, 0, .38);
+    padding: 15px 17px;
 }
 
-.coverDeclineBtn:hover:not(:disabled) {
-    background: var(--leave-danger-bg);
+.notifItem:hover {
+    border-color: color-mix(in srgb, var(--accent) 25%, var(--border-color));
 }
 
-.coverDeclineBtn:disabled {
-    opacity: 0.6;
-    cursor: default;
-}
-
-/* ── HOD approvals ── */
-.hodList {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.hodItem {
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.hodItemHeader {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.hodCoverLine {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 6px;
-    font-size: 12.5px;
-    color: var(--text-secondary);
-    background: var(--leave-brand-bg);
-    border-radius: 8px;
-    padding: 8px 11px;
-}
-
-.hodCoverLine i {
-    color: var(--leave-brand);
-    font-size: 14px;
-}
-
-/* ── Responsive ── */
-@media (max-width: 720px) {
-    .typeGrid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+/* Keep the employee workspace comfortable on tablets. */
+@media (max-width: 1100px) {
+    .topbar {
+        padding-inline: 22px;
     }
 
-    .stepLabel,
-    .stepLabelActive {
-        display: none;
+    .content,
+    .contentFull {
+        padding-inline: 22px;
     }
 
-    .historyCardBody {
-        padding-left: 16px;
-    }
-
-    .leaveTabs {
-        width: 100%;
-        overflow-x: auto;
-        min-width: 0;
-    }
-
-    .coverActions,
-    .stepNav {
-        flex-direction: column;
-    }
-
-    .coverItemHeader,
-    .hodItemHeader {
-        flex-wrap: wrap;
-    }
-
-    .coverDates {
-        white-space: normal;
-        margin-left: 48px;
-        /* aligns under name, past the avatar */
-    }
-
-    .stepNav .submitBtn,
-    .stepNav .secondaryBtn,
-    .successActions .submitBtn,
-    .successActions .secondaryBtn {
-        width: 100%;
+    .statsGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
-/* ──────────────────────────────────────────────────────────────────────── */
-/* ── HOD Section: inner tabs (Pending / On Leave) ── */
-/* ──────────────────────────────────────────────────────────────────────── */
-
-.hodInnerTabs {
-    display: flex;
-    gap: 4px;
-    padding: 0 0 14px;
-    border-bottom: 1px solid var(--border-color);
-    margin-bottom: 14px;
-}
-
-.hodInnerTab {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    height: 36px;
-    padding: 0 14px;
-    background: none;
-    border: 1.5px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 12.5px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    cursor: pointer;
-    font-family: inherit;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
-}
-
-.hodInnerTab:hover {
-    background: var(--bg-soft-accent);
-    color: var(--text-primary);
-}
-
-.hodInnerTab i {
-    font-size: 14px;
-}
-
-.hodInnerTabActive {
-    background: var(--bg-soft-accent);
-    border-color: var(--accent);
-    color: var(--accent);
-    font-weight: 600;
-}
-
-.hodInnerBadge {
-    background: var(--warning-bg);
-    color: var(--warning-text);
-    font-size: 10.5px;
-    font-weight: 700;
-    padding: 1px 7px;
-    border-radius: 999px;
-    min-width: 18px;
-    text-align: center;
-}
-
-/* ── HOD empty state ── */
-.hodEmptyState {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    padding: 32px 16px;
-    color: var(--text-secondary);
-    font-size: 13px;
-}
-
-/* ── HOD On-Leave list ── */
-.hodOnLeaveList {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.hodOnLeaveCard {
-    border: 1px solid var(--border-color);
-    border-radius: 11px;
-    padding: 13px 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 9px;
-    background: var(--bg-surface);
-}
-
-.hodOnLeaveCardTop {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-}
-
-.hodOnLeaveDates {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin-left: 47px;
-    /* aligns under the name, past the avatar */
-}
-
-.hodOnLeaveDates i {
-    color: var(--accent);
-    font-size: 13px;
-}
-
-/* ── Days-left pill (shared between HOD and employer On Leave views) ── */
-.daysLeftPill {
-    margin-left: auto;
-    flex-shrink: 0;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 999px;
-    white-space: nowrap;
-}
-
-/* ──────────────────────────────────────────────────────────────────────── */
-/* ── HOD Section: Approved leave list ── */
-/* ──────────────────────────────────────────────────────────────────────── */
-
-.hodApprovedList {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.hodApprovedCard {
-    border: 1px solid var(--border-color);
-    border-radius: 11px;
-    padding: 13px 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 9px;
-    background: var(--bg-surface);
-}
-
-.hodApprovedTop {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-}
-
-.hodApprovedStatus {
-    margin-left: auto;
-    flex-shrink: 0;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 999px;
-    white-space: nowrap;
-}
-
-.hodApprovedNotes {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    background: var(--bg-soft-accent);
-    border-radius: 8px;
-    padding: 8px 11px;
-    font-size: 12px;
-    color: var(--text-primary);
-    line-height: 1.5;
-}
-
-.hodApprovedNotes i {
-    color: var(--accent);
-    margin-right: 4px;
-}
-
-/* ── Cover person availability picker ──────────────────────────────────── */
-
-.coverPickerList {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    max-height: 260px;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-right: 2px;
-}
-
-.coverPickerHint {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 9px 12px;
-    background: var(--info-bg);
-    border: 1px solid var(--info-border);
-    border-radius: 9px;
-    font-size: 12px;
-    color: var(--info-text);
-    margin-bottom: 4px;
-}
-
-.coverPickerHint i {
-    font-size: 14px;
-    flex-shrink: 0;
-}
-
-.coverPickerItem {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border: 1.5px solid var(--border-color);
-    border-radius: 10px;
-    background: var(--bg-surface-alt);
-    cursor: pointer;
-    transition: background 0.14s, border-color 0.14s;
-}
-
-.coverPickerItem:hover:not(.coverPickerItemUnavailable) {
-    background: var(--bg-soft-accent);
-    border-color: var(--accent);
-}
-
-.coverPickerItemSelected {
-    background: var(--bg-soft-accent) !important;
-    border-color: var(--accent) !important;
-}
-
-.coverPickerItemUnavailable {
-    opacity: 0.55;
-    cursor: not-allowed;
-    background: var(--bg-surface-alt);
-}
-
-.coverPickerAvatar {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: var(--accent);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    text-transform: uppercase;
-    overflow: hidden;
-}
-
-.coverPickerAvatarImg {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.coverPickerItemUnavailable .coverPickerAvatar {
-    background: var(--text-secondary);
-}
-
-.coverPickerInfo {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.coverPickerName {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.coverPickerWhy {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 11px;
-    color: var(--warning-text);
-    line-height: 1.35;
-}
-
-.coverPickerWhy i {
-    font-size: 12px;
-    flex-shrink: 0;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Ehral mobile polish: employee / HOD workspace
-   ───────────────────────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
     .main {
-        min-width: 0;
+        background: var(--bg-page);
     }
 
     .topbar {
-        min-height: 62px;
-        padding: 9px 12px;
+        min-height: 68px;
+        padding: 12px 16px;
     }
 
-    .pageTitle {
-        font-size: 15px;
-        letter-spacing: -.015em;
-    }
-
-    .pageSub {
-        font-size: 10px;
-    }
-
-    .topbarRight {
-        gap: 6px;
-    }
-
-    .scanBtn {
-        min-height: 40px;
-        border-radius: 11px;
-    }
-
-    .userChip {
-        padding: 4px 7px;
-        border-radius: 12px;
-    }
-
-    .userName {
-        font-size: 10px;
-    }
-
-    .userRole {
-        font-size: 8px;
-    }
-
-    .content {
-        padding: 12px;
-        padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px));
-    }
-
+    .content,
     .contentFull {
-        padding: 0 12px calc(92px + env(safe-area-inset-bottom, 0px));
+        width: 100%;
+        padding: 18px 14px 92px;
     }
 
-    .greetingCard {
-        border-radius: 20px;
+    .empGreeting {
+        font-size: 23px;
+    }
+
+    .empGreetingSub {
+        font-size: 11.5px;
+    }
+
+    .empWorkspaceTag {
+        max-width: 44vw;
+        margin-left: 4px;
+    }
+
+    .statsGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .statCard {
+        min-height: 116px;
         padding: 16px;
+        border-radius: 17px;
     }
 
-    .greetingHi {
-        font-size: 21px;
-    }
-
-    .greetingSub {
-        font-size: 11px;
-        line-height: 1.45;
-    }
-
-    .qaBtn {
-        min-height: 42px;
-        border-radius: 12px;
-    }
-
-    .grid {
+    .row2 {
         grid-template-columns: 1fr;
-        gap: 9px;
     }
 
     .panel {
         border-radius: 17px;
-        padding: 13px;
-        box-shadow: 0 4px 16px rgba(15, 23, 22, .04);
+    }
+}
+
+@media (max-width: 560px) {
+    .topbarRight .notifBtn {
+        width: 37px;
+        height: 37px;
+        border-radius: 12px;
     }
 
-    .panelHdr {
+    .content,
+    .contentFull {
+        padding-inline: 11px;
+    }
+
+    .hero {
+        padding: 18px;
+        border-radius: 19px;
+    }
+
+    .statsGrid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .statCard {
+        min-height: 108px;
+        padding: 14px;
+    }
+
+    .statNum {
+        font-size: 24px;
+    }
+
+    .statLabel {
+        font-size: 10.5px;
+    }
+
+    .qaGrid {
+        padding-inline: 13px;
+    }
+}
+
+@media (max-width: 380px) {
+
+    .content,
+    .contentFull {
+        padding-inline: 9px;
+    }
+
+    .statsGrid {
         gap: 8px;
     }
 
-    .panelTitle {
-        font-size: 12px;
-    }
-
-    .panelAction {
-        min-height: 34px;
-        border-radius: 10px;
-    }
-
-    .todayStats {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 6px;
-    }
-
-    .todayStat {
-        border-radius: 13px;
-        padding: 10px 7px;
-    }
-
-    .todayStatLabel {
-        font-size: 8px;
-    }
-
-    .todayStatValue {
-        font-size: 16px;
-    }
-
-    .hodCard {
-        border-radius: 15px;
+    .statCard {
         padding: 12px;
+        border-radius: 15px;
     }
 
-    .leaveItem,
-    .notifItem {
-        border-radius: 13px;
-        padding: 10px;
+    .empGreeting {
+        font-size: 21px;
     }
+}
 
-    .leaveReason,
-    .leaveNote,
-    .notifMessage {
-        font-size: 10px;
-        line-height: 1.45;
-    }
+@media (prefers-reduced-motion: reduce) {
 
-    .field input,
-    .field textarea {
-        min-height: 44px;
-        border-radius: 12px;
-    }
-
-    .submitBtn {
-        min-height: 44px;
-        border-radius: 12px;
+    .statCard,
+    .qaBtn,
+    .notifBtn,
+    .actItem {
+        transition: none;
     }
 }

@@ -456,3 +456,58 @@
         width: 100%;
     }
 }
+
+/* Employee premium surface */
+.wrap {
+    padding: 4px 0 28px;
+}
+
+.header {
+    margin-bottom: 18px;
+}
+
+.title {
+    font-size: clamp(22px, 3vw, 29px);
+    font-weight: 800;
+    letter-spacing: -.04em;
+}
+
+.subtitle {
+    margin-top: 6px;
+    font-size: 12.5px;
+    line-height: 1.55;
+}
+
+.card {
+    border-radius: 18px;
+    box-shadow: 0 18px 44px -30px rgba(0, 0, 0, .32);
+    border-color: color-mix(in srgb, var(--border-color) 72%, transparent);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 22px 48px -28px rgba(0, 0, 0, .38);
+    border-color: color-mix(in srgb, var(--accent) 25%, var(--border-color));
+}
+
+.headerBadge {
+    border-radius: 999px;
+    font-weight: 750;
+}
+
+.acceptBtn,
+.declineBtn {
+    border-radius: 999px;
+    font-weight: 700;
+}
+
+@media (max-width: 640px) {
+    .wrap {
+        padding-bottom: 24px;
+    }
+
+    .card {
+        border-radius: 16px;
+    }
+}
