@@ -144,10 +144,10 @@ const TABS = [
     label: "Customer",
     icon: "ti-shopping-bag",
     // Deliberately NOT "accounts" - there is exactly one Customer context
-    // per Identity. This tab is a directory of the businesses that
-    // context is connected to, not a set of separate accounts to switch
-    // between - see the CUSTOMER branch of `pick()` below.
-    blurb: "One customer account, connected to every business below.",
+    // per Identity, so this tab isn't a list to pick from the way Employer
+    // and Employee are. It's a single, standing entry point (see the
+    // customerStage branch below).
+    blurb: "One customer account - the same one everywhere on Ehral.",
   },
 ];
 
@@ -298,26 +298,18 @@ export default function MyAccountsPage() {
     return byType;
   }, [accounts]);
 
+  // Only ever called for EMPLOYER/EMPLOYEE cards now - the Customer tab's
+  // one action goes through switchToCustomer instead (see below).
   const pick = async (acc) => {
     if (acc.active) return;
     setSwitchingId(acc.membershipId);
     setError("");
     try {
-      // For EMPLOYER/EMPLOYEE this really is switching to a different
-      // account (a different membership, a different login-level
-      // identity relationship). For CUSTOMER it isn't - the person never
-      // leaves the Customer context, this just points that one context at
-      // a different connected business (see switchContext's CUSTOMER
-      // case and its comment). Same API call either way; only the label
-      // shown to the person differs (see cardAction below).
       const data = await switchContext(acc.type, acc.membershipId);
       navigate(destinationFor(data.contextType));
     } catch (err) {
       const msg =
-        acc.type === "CUSTOMER"
-          ? "Couldn't open that business."
-          : err?.response?.data?.message ||
-            "Couldn't switch to that workspace.";
+        err?.response?.data?.message || "Couldn't switch to that workspace.";
       setError(typeof msg === "string" ? msg : "Something went wrong.");
     } finally {
       setSwitchingId(null);
@@ -381,7 +373,7 @@ export default function MyAccountsPage() {
         safeString(a.businessName).toLowerCase().includes(q),
       )
     : allInTab;
-  const showSearch = allInTab.length > 4;
+  const showSearch = activeTab !== "CUSTOMER" && allInTab.length > 4;
 
   const current = accounts.find((a) => a.active) || null;
   const rolesInUse = TABS.filter((t) => grouped[t.key]?.length > 0).length;
@@ -411,16 +403,23 @@ export default function MyAccountsPage() {
     selectTab(TABS[next].key);
   };
 
-  const discoverBusinesses = async () => {
+  // The Customer tab's one action: there's only ever one customer
+  // identity, so "switching" here just points that identity-wide context
+  // back at the customer dashboard - never at a specific business. Finding
+  // and messaging the businesses it's already connected to (or connecting
+  // to new ones) happens inside that dashboard, not in this switcher.
+  const switchToCustomer = async () => {
     setError("");
+    setSwitchingId("CUSTOMER");
     try {
       const data = await switchContext("CUSTOMER", null);
-      navigate(destinationFor(data.contextType) + "?tab=discover");
+      navigate(destinationFor(data.contextType));
     } catch (err) {
       const msg =
-        err?.response?.data?.message ||
-        "Couldn't open the Customer experience.";
+        err?.response?.data?.message || "Couldn't open your customer account.";
       setError(typeof msg === "string" ? msg : "Something went wrong.");
+    } finally {
+      setSwitchingId(null);
     }
   };
 
@@ -495,7 +494,9 @@ export default function MyAccountsPage() {
           >
             <i className={`ti ${t.icon}`} aria-hidden="true" />
             <span>{t.label}</span>
-            {grouped[t.key]?.length > 0 && <b>{grouped[t.key].length}</b>}
+            {t.key !== "CUSTOMER" && grouped[t.key]?.length > 0 && (
+              <b>{grouped[t.key].length}</b>
+            )}
           </button>
         ))}
       </div>
@@ -537,6 +538,51 @@ export default function MyAccountsPage() {
                   </span>
                 </div>
               ))}
+            </div>
+          ) : activeTab === "CUSTOMER" ? (
+            /* One identity, one customer context - so this tab is a single
+               standing entry point rather than a list to choose from. Where
+               to find the businesses that context is connected to (or
+               explore new ones) is explained on the tag below, not laid
+               out here as more choices. */
+            <div className={styles.customerStage}>
+              <button
+                type="button"
+                className={`${styles.customerCard} ${current?.type === "CUSTOMER" ? styles.customerCardActive : ""}`}
+                disabled={switchingId !== null}
+                onClick={switchToCustomer}
+              >
+                <span className={styles.customerIcon}>
+                  <i className="ti ti-user-circle" aria-hidden="true" />
+                </span>
+                <span className={styles.customerBody}>
+                  <strong>Switch to your customer account</strong>
+                  <small>
+                    One account - works the same across every business on Ehral.
+                  </small>
+                </span>
+                <span className={styles.cardAction}>
+                  {current?.type === "CUSTOMER" ? (
+                    <span className={styles.here}>
+                      <span className={styles.liveDot} aria-hidden="true" />{" "}
+                      Viewing
+                    </span>
+                  ) : switchingId === "CUSTOMER" ? (
+                    <span className={styles.spinner} aria-label="Opening" />
+                  ) : (
+                    <span className={styles.go}>
+                      Open{" "}
+                      <i className="ti ti-arrow-right" aria-hidden="true" />
+                    </span>
+                  )}
+                </span>
+              </button>
+
+              <p className={styles.glowTag}>
+                <i className="ti ti-sparkles" aria-hidden="true" />
+                You can find the businesses you're connected to on Ehral and
+                explore other businesses on Ehral.
+              </p>
             </div>
           ) : (
             <div className={styles.grid}>
@@ -580,18 +626,13 @@ export default function MyAccountsPage() {
                     {acc.active ? (
                       <span className={styles.here}>
                         <span className={styles.liveDot} aria-hidden="true" />{" "}
-                        {acc.type === "CUSTOMER" ? "Viewing" : "Current"}
+                        Current
                       </span>
                     ) : switchingId === acc.membershipId ? (
-                      <span
-                        className={styles.spinner}
-                        aria-label={
-                          acc.type === "CUSTOMER" ? "Opening" : "Switching"
-                        }
-                      />
+                      <span className={styles.spinner} aria-label="Switching" />
                     ) : (
                       <span className={styles.go}>
-                        {acc.type === "CUSTOMER" ? "Open" : "Switch"}{" "}
+                        Switch{" "}
                         <i className="ti ti-arrow-right" aria-hidden="true" />
                       </span>
                     )}
@@ -600,27 +641,6 @@ export default function MyAccountsPage() {
               ))}
 
               {/* Add / discover tiles, per role */}
-              {!q && activeTab === "CUSTOMER" && (
-                <button
-                  type="button"
-                  className={styles.tile}
-                  onClick={discoverBusinesses}
-                  style={{ "--d": Math.min(list.length, 8) }}
-                >
-                  <span className={styles.tileIcon}>
-                    <i className="ti ti-compass" aria-hidden="true" />
-                  </span>
-                  <span className={styles.tileText}>
-                    <strong>Discover businesses on Ehral</strong>
-                    <small>Find shops and services, connect, and order.</small>
-                  </span>
-                  <i
-                    className={`ti ti-arrow-up-right ${styles.tileGo}`}
-                    aria-hidden="true"
-                  />
-                </button>
-              )}
-
               {!q &&
                 activeTab === "EMPLOYER" &&
                 (canCreateBusiness ? (
@@ -687,24 +707,23 @@ export default function MyAccountsPage() {
             </div>
           )}
 
-          {!loading && list.length === 0 && (
+          {!loading && activeTab !== "CUSTOMER" && list.length === 0 && (
             <p className={styles.empty}>
               {q
                 ? `No workspace matches "${query.trim()}".`
                 : activeTab === "EMPLOYER"
                   ? "You don't own or administer any businesses yet."
-                  : activeTab === "CUSTOMER"
-                    ? "You aren't a customer of any business yet."
-                    : "You aren't listed as an employee on any business yet."}
+                  : "You aren't listed as an employee on any business yet."}
             </p>
           )}
 
-          <p className={styles.note}>
-            <i className="ti ti-shield-check" aria-hidden="true" />
-            {activeTab === "CUSTOMER"
-              ? "You have one customer account - opening a business just brings up your orders and conversation with them."
-              : "Switching keeps you signed in - each role opens its own dashboard, and you can come back here any time."}
-          </p>
+          {activeTab !== "CUSTOMER" && (
+            <p className={styles.note}>
+              <i className="ti ti-shield-check" aria-hidden="true" />
+              Switching keeps you signed in - each role opens its own dashboard,
+              and you can come back here any time.
+            </p>
+          )}
         </section>
       )}
 

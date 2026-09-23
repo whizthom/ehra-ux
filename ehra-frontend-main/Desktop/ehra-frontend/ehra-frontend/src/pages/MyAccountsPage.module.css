@@ -610,6 +610,146 @@
     animation: maSpin 0.8s linear infinite;
 }
 
+/* ── Customer tab: one standing entry point, not a list ─────────────── */
+
+.customerStage {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.customerCard {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 16px;
+    min-height: 96px;
+    padding: 20px 22px;
+    border: 1px solid var(--ma-line);
+    border-radius: 24px;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    animation: maRise 0.5s var(--ma-ease) both;
+    transition: transform 0.3s var(--ma-ease), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+@media (hover: hover) {
+    .customerCard:hover:not(:disabled) {
+        transform: translateY(-4px);
+        border-color: color-mix(in srgb, var(--accent) 45%, var(--ma-line));
+        box-shadow: 0 22px 40px -26px rgba(15, 110, 86, 0.55);
+    }
+
+    .customerCard:hover:not(:disabled) .go {
+        background: var(--accent);
+        color: #fff;
+    }
+
+    .customerCard:hover:not(:disabled) .go i {
+        transform: translateX(3px);
+    }
+}
+
+.customerCard:active:not(:disabled) {
+    transform: scale(0.99);
+}
+
+.customerCard:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+.customerCard:disabled {
+    cursor: not-allowed;
+}
+
+.customerCard:disabled:not(.customerCardActive) {
+    opacity: 0.6;
+}
+
+.customerCardActive {
+    border-color: var(--accent);
+    background:
+        radial-gradient(90% 120% at 0% 0%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%),
+        var(--bg-surface);
+    box-shadow:
+        0 0 0 1px var(--accent),
+        0 24px 44px -28px color-mix(in srgb, var(--accent) 80%, transparent);
+}
+
+.customerIcon {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    border-radius: 18px;
+    background: linear-gradient(140deg, #0b3d30, var(--accent) 70%, #55e0ae);
+    color: #fff;
+    font-size: 26px;
+    box-shadow: 0 14px 26px -14px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+.customerBody {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.customerBody strong {
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.customerBody small {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ma-muted);
+}
+
+/* A gently glowing pill rather than a plain note, since it's now the only
+   pointer to where the connected/explorable businesses actually live. */
+.glowTag {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 13px 18px;
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--accent) 10%, var(--bg-surface));
+    color: var(--text-primary);
+    font-size: 13px;
+    line-height: 1.55;
+    animation: maRise 0.5s var(--ma-ease) both, maGlow 2.6s ease-in-out infinite;
+    animation-delay: 90ms, 0s;
+}
+
+.glowTag i {
+    flex-shrink: 0;
+    font-size: 17px;
+    color: var(--accent);
+}
+
+@keyframes maGlow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 40%, transparent);
+    }
+
+    50% {
+        box-shadow: 0 0 0 7px color-mix(in srgb, var(--accent) 0%, transparent);
+    }
+}
+
 /* ── Add / discover tiles ───────────────────────────────────────────── */
 
 .tile {
@@ -976,6 +1116,24 @@
         min-height: 92px;
     }
 
+    .customerCard {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 14px;
+        padding: 16px;
+        border-radius: 20px;
+    }
+
+    .customerIcon {
+        width: 46px;
+        height: 46px;
+        border-radius: 15px;
+        font-size: 22px;
+    }
+
+    .customerBody strong {
+        font-size: 0.95rem;
+    }
+
     .formGrid {
         grid-template-columns: 1fr;
         gap: 20px;
@@ -999,6 +1157,10 @@
     .segBtn i {
         display: none;
     }
+
+    .customerBody small {
+        display: none;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1010,7 +1172,9 @@
     .skeleton,
     .createWrap,
     .skLogo,
-    .skLines span {
+    .skLines span,
+    .customerCard,
+    .glowTag {
         animation: none;
     }
 
