@@ -2857,10 +2857,20 @@
     display: none;
   }
 
-  .discoverySearchRow,
+  /* !important here is deliberate: a later, unconditional (non-media)
+     .discoverySearch rule further down this file redeclares flex-basis,
+     which was quietly winning the cascade for viewports between 700-900px
+     and keeping the bar from stretching. This guarantees full width on
+     every mobile size, regardless of source order elsewhere in the file. */
+  .discoverySearchRow {
+    width: 100% !important;
+    flex: 1 1 100% !important;
+  }
+
   .discoverySearch {
-    width: 100%;
-    flex: 1 1 100%;
+    width: 100% !important;
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
   }
 
   .content {
