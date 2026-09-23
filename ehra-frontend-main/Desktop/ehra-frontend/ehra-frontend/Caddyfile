@@ -1,0 +1,64 @@
+# Served by Dockerfile's Caddy stage on Railway. See ../../../DEPLOY.md
+# ("Deploying to Railway") for the reasoning behind the header split
+# below - short version: index.html, the Workbox service worker, and the
+# manifest must always be revalidated, or an open/returning browser can
+# get stuck on an old deploy indefinitely (the exact bug this whole
+# change fixes). Hashed files under /assets/ are safe to cache forever
+# because Vite gives each one a new filename whenever its content
+# changes - there is nothing to "invalidate", the URL itself changes.
+
+{
+	admin off         # no admin API needed in Railway's environment
+	persist_config off # storage isn't persistent anyway
+	auto_https off     # Railway terminates TLS for us; this would conflict
+	log {
+		format json
+	}
+	servers {
+		trusted_proxies static private_ranges 100.0.0.0/8
+	}
+}
+
+# Railway assigns $PORT at runtime and routes public traffic to it.
+:{$PORT:3000} {
+	log {
+		format json
+	}
+
+	root * dist
+	encode gzip
+
+	# Health check target Railway can hit without touching the SPA route.
+	rewrite /health /*
+
+	# --- Cache-Control -------------------------------------------------
+	# Order matters: Caddy uses the first matching route per request, so
+	# the most specific paths are listed first and each is scoped with
+	# `file_server` + explicit path matchers rather than one broad `/*`
+	# rule layered under more specific overrides.
+
+	@appShell {
+		path /index.html /sw.js /workbox-*.js /manifest.webmanifest
+	}
+	header @appShell Cache-Control "no-cache"
+
+	@hashedAssets {
+		path /assets/*
+	}
+	header @hashedAssets Cache-Control "public, max-age=31536000, immutable"
+
+	# Everything else that actually exists on disk (icons, splash images,
+	# favicon, push-notifications.js, etc.) - Vite's own reasonable
+	# per-file defaults are fine; Caddy's file_server doesn't add an
+	# aggressive cache header on its own, so browsers fall back to
+	# normal heuristic caching for these, which is fine since none of
+	# them gate whether an update is detected.
+
+	file_server
+
+	# Client-side routing (react-router): only fall back to index.html
+	# when the requested path isn't a real file in dist/ (so /assets/*,
+	# /sw.js, /manifest.webmanifest, icons, etc. are always served as
+	# themselves, never swallowed by the SPA fallback).
+	try_files {path} /index.html
+}

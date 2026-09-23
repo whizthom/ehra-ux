@@ -7,7 +7,16 @@ export default defineConfig({
     react(),
 
     VitePWA({
-      registerType: "autoUpdate",
+      // "prompt" (not "autoUpdate"): a new service worker installs and
+      // waits rather than seizing control of open tabs on its own.
+      // EHRAL is full of forms (leave requests, employee edits, payroll,
+      // messaging) - autoUpdate forces workbox.skipWaiting/clientsClaim
+      // to true, which activates a new worker over an open tab the
+      // instant it's installed, out from under whatever the user is
+      // mid-typing. UpdateToast.jsx (src/pwa/UpdateToast.jsx) already
+      // implements the prompt workflow - it just wasn't matched by this
+      // setting. See that file for how/when the update is applied.
+      registerType: "prompt",
 
       manifest: {
         name: "Ehral",
@@ -47,9 +56,18 @@ export default defineConfig({
       },
 
       workbox: {
+        // Old precached JS/CSS/HTML from the previous deploy are removed
+        // once the new worker actually activates - not before, so an
+        // already-open tab never has an asset vanish out from under it
+        // mid-session.
         cleanupOutdatedCaches: true,
-        clientsClaim: true,
-        skipWaiting: true,
+        // Left at their workbox defaults (false): the new worker installs
+        // and waits. It only calls self.skipWaiting() when it receives
+        // the SKIP_WAITING message that updateServiceWorker(true) sends
+        // (see UpdateToast.jsx) - and only then does it claim existing
+        // clients and the page reload onto it. Forcing these to true here
+        // (autoUpdate's behavior) is what made the previous config fight
+        // with UpdateToast's own prompt/reload logic.
       },
     }),
   ],
