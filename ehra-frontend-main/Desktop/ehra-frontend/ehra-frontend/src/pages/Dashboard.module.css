@@ -561,6 +561,7 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
+    min-height: 0;
     min-width: 0;
 }
 
@@ -1759,20 +1760,17 @@
         border-radius: 14px;
     }
 
-    /* ── Latest attendance: table → horizontal card carousel ──────────
-       A 6-column table has no room to breathe on a phone, and stacking
-       every field vertically made each entry tall enough that you had
-       to scroll *down* just to read one person's row. Instead each
-       attendance entry becomes a compact, self-contained card — every
-       field (name, department, clock in/out, status, actions) visible
-       at once with no folding or truncation — and the set of cards
-       scrolls *horizontally*, snapping one at a time, so browsing the
-       list is a sideways swipe rather than a long vertical read.
-       Scoped to .attendanceTable only; Pending approvals / leave-request
-       tables keep their normal vertical horizontal-scroll-wrap. */
+    /* ── Latest attendance: table → stacked cards ─────────────────────
+       A 6-column table has no room to breathe on a phone. Scoped to
+       .attendanceTable only (not the Pending approvals / leave-request
+       tables, which still scroll normally) — each row becomes its own
+       compact card: name up top, then Department/Clock in/Clock
+       out/Status as label:value rows, then actions along the bottom. */
     .attendanceTable {
-        display: block;
         border: none;
+        border-collapse: separate;
+        border-spacing: 0 14px;
+        margin-top: -14px;
         min-width: 0;
     }
 
@@ -1780,40 +1778,17 @@
         display: none;
     }
 
-    .attendanceTable tbody {
-        display: flex;
-        gap: 10px;
-        overflow-x: auto;
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch;
-        scroll-snap-type: x proximity;
-        scrollbar-width: none;
-        padding: 2px 2px 6px;
-        margin: -2px -2px 0;
-        -webkit-mask-image: linear-gradient(to right,
-                #000 calc(100% - 20px),
-                transparent 100%);
-        mask-image: linear-gradient(to right,
-                #000 calc(100% - 20px),
-                transparent 100%);
-    }
-
-    .attendanceTable tbody::-webkit-scrollbar {
-        display: none;
+    .attendanceTable,
+    .attendanceTable tbody,
+    .attendanceTable tr {
+        display: block;
+        width: 100%;
     }
 
     .attendanceTable tr {
-        scroll-snap-align: start;
-        flex: 0 0 auto;
-        width: 250px;
-        display: flex;
-        flex-direction: column;
         border: 0.5px solid var(--border-color);
-        border-radius: 14px;
-        background: var(--bg-surface);
+        border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 1px 3px rgba(15, 30, 25, 0.06),
-            0 1px 2px rgba(15, 30, 25, 0.04);
     }
 
     .attendanceTable td {
@@ -1825,11 +1800,7 @@
     /* Name cell — no label prefix, sits at the top of the card as-is. */
     .attendanceTable td:first-child {
         border-top: none;
-        padding: 14px 12px 10px;
-    }
-
-    .attendanceTable td:first-child .empName {
-        font-size: 13px;
+        padding: 12px 12px 10px;
     }
 
     /* Department / Clock in / Clock out / Status — label:value rows,
@@ -1845,7 +1816,7 @@
 
     .attendanceTable td[data-label]::before {
         content: attr(data-label);
-        font-size: 10.5px;
+        font-size: 11px;
         font-weight: 600;
         color: var(--text-secondary);
         text-transform: uppercase;
@@ -1853,26 +1824,13 @@
         flex-shrink: 0;
     }
 
-    /* Actions — pinned to the bottom of the card (the card is a flex
-       column, so margin-top: auto pushes it down) regardless of how
-       many label rows sit above it, keeping every card's footer level
-       with its neighbours as you swipe through them. */
+    /* Actions — full-width row along the bottom of the card. */
     .attendanceTable td:last-child {
-        margin-top: auto;
         padding: 10px 12px 12px;
-        border-top: 0.5px solid var(--border-color);
     }
 
     .attendanceTable .tblActions {
         justify-content: flex-end;
-    }
-}
-
-/* Small phones — trim the card width a touch further so at least a
-   sliver of the next card peeks in as a scroll affordance. */
-@media (max-width: 380px) {
-    .attendanceTable tr {
-        width: 224px;
     }
 }
 
@@ -2977,9 +2935,19 @@
         padding: 8px 14px;
     }
 
+    /* NOTE: longhand on purpose - a shorthand `padding` here would reset
+       padding-bottom to 0 and silently undo the safe-area/bottom-nav
+       clearance set above (padding-bottom: calc(92px + ...)), which is
+       exactly what happened before: the brand footer (and, on pages like
+       the employee profile view, whatever content sits last in a tab)
+       ended up flush against - and hidden behind - the fixed mobile
+       bottom nav, with no scroll room left to reach it. Keep this to
+       top/left/right only so that earlier padding-bottom rule survives. */
     .content,
     .contentFull {
-        padding: 14px 14px 0;
+        padding-top: 14px;
+        padding-left: 14px;
+        padding-right: 14px;
         gap: 14px;
     }
 
@@ -3091,19 +3059,5 @@
         background: transparent;
         border: 0;
         box-shadow: none;
-    }
-}
-
-/* ── Latest attendance card carousel: cascade safety net ─────────────────
-   The "EHRAL EMPLOYER PREMIUM LAYER" above sets `.empTable { min-width:
-   720px }` unconditionally (no media query), and since it's declared
-   later in this file it would otherwise win over the mobile card-carousel
-   rule for `.attendanceTable` earlier up (equal specificity, later
-   source order wins) and force the card row wider than the viewport.
-   Re-asserted here, after that layer, so the horizontal card carousel
-   actually gets to size itself on phones. */
-@media (max-width: 640px) {
-    .attendanceTable {
-        min-width: 0;
     }
 }
