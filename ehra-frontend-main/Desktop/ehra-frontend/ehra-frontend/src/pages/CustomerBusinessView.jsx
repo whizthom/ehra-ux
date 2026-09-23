@@ -7,6 +7,7 @@ import { getCustomerBusinessView } from "../api/commerceApi";
 import { createCustomerBusinessConversation } from "../api/messagingApi";
 import { buildWhatsAppLink } from "../api/whatsappApi";
 import useBusinessConnection from "../hooks/useBusinessConnection";
+import DisconnectConfirmModal from "../components/DisconnectConfirmModal";
 import {
   DAYS,
   dayIndex,
@@ -49,8 +50,11 @@ export default function CustomerBusinessView() {
   const { businessId } = useParams();
   const nav = useNavigate();
   const location = useLocation();
-  const { connect: linkBusiness, disconnect: unlinkBusiness, phaseOf } =
-    useBusinessConnection();
+  const {
+    connect: linkBusiness,
+    disconnect: unlinkBusiness,
+    phaseOf,
+  } = useBusinessConnection();
 
   const [view, setView] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -62,6 +66,10 @@ export default function CustomerBusinessView() {
   const [clock, setClock] = useState(() => new Date());
   const [nudgeConnect, setNudgeConnect] = useState(false);
   const ctaRef = useRef(null);
+  // Disconnecting asks first, using the same confirmation dialog as
+  // everywhere else the customer can disconnect from a business.
+  const [confirmDisconnect, setConfirmDisconnect] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
 
   useEffect(() => {
     let dead = false;
@@ -189,6 +197,26 @@ export default function CustomerBusinessView() {
             ? "We couldn't disconnect you from this business."
             : "We couldn't connect you to this business."),
       );
+    }
+  };
+
+  // Connecting happens right away, but disconnecting asks first - this is
+  // the entry point the hero button and phone dock call. It only opens the
+  // confirmation dialog for the "leaving" direction; connecting still goes
+  // straight through to toggleConnection above.
+  const requestToggleConnection = () => {
+    if (!business || working) return;
+    if (business.connected) setConfirmDisconnect(true);
+    else toggleConnection();
+  };
+
+  const confirmDisconnectBusiness = async () => {
+    setDisconnecting(true);
+    try {
+      await toggleConnection();
+    } finally {
+      setDisconnecting(false);
+      setConfirmDisconnect(false);
     }
   };
 
@@ -370,7 +398,7 @@ export default function CustomerBusinessView() {
               )}
               <button
                 className={`${styles.ghost} ${nudgeConnect ? styles.nudge : ""}`}
-                onClick={toggleConnection}
+                onClick={requestToggleConnection}
                 disabled={working}
               >
                 <i
@@ -625,7 +653,7 @@ export default function CustomerBusinessView() {
         ) : !business.connected ? (
           <button
             className={styles.dockPrimary}
-            onClick={toggleConnection}
+            onClick={requestToggleConnection}
             disabled={working}
             tabIndex={showDock ? 0 : -1}
           >
@@ -636,7 +664,7 @@ export default function CustomerBusinessView() {
         {(storeOpen || business.connected) && (
           <button
             className={styles.dockIcon}
-            onClick={toggleConnection}
+            onClick={requestToggleConnection}
             disabled={working}
             aria-label={
               business.connected
@@ -662,6 +690,14 @@ export default function CustomerBusinessView() {
           <i className="ti ti-message-circle" aria-hidden="true" />
         </button>
       </div>
+
+      <DisconnectConfirmModal
+        open={confirmDisconnect}
+        businessName={business.businessName}
+        loading={disconnecting}
+        onCancel={() => !disconnecting && setConfirmDisconnect(false)}
+        onConfirm={confirmDisconnectBusiness}
+      />
     </div>
   );
 }
