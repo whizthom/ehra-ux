@@ -232,7 +232,16 @@
   color: var(--accent);
   font-weight: 800;
   border: 1px solid var(--border-color);
-  font-size: 13px
+  font-size: 13px;
+  overflow: hidden;
+  flex-shrink: 0
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover
 }
 
 .content {
@@ -796,41 +805,56 @@ td small {
   color: var(--text-primary)
 }
 
-/* ── Retail staff permissions panel: a responsive card per employee so it
-   never relies on a horizontally-scrolling table, on any device size. ── */
-.staffGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 14px;
-}
-
-.staffCard {
+/* ── Retail staff permissions panel: a compact collapsed row per employee
+   (avatar, name, phone) that expands to reveal role + permissions, so a
+   long roster stays easy to scan and search through. ── */
+.staffList {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 16px;
+  gap: 8px;
+}
+
+.staffRow {
   border: 1px solid var(--border-color);
   border-radius: 14px;
   background: var(--bg-surface);
   box-shadow: 0 3px 14px var(--shadow-color);
-  transition: opacity .15s ease;
+  transition: opacity .15s ease, box-shadow .15s ease;
+  overflow: hidden;
 }
 
-.staffCardBusy {
+.staffRowBusy {
   opacity: .6;
 }
 
-.staffCardHead {
+.staffRowOpen {
+  box-shadow: 0 6px 20px var(--shadow-color);
+}
+
+.staffRowHead {
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 
-.staffCardName {
+.staffRowHead:hover {
+  background: var(--bg-surface-alt);
+}
+
+.staffRowName {
   min-width: 0;
+  flex: 1 1 auto;
 }
 
-.staffCardName b {
+.staffRowName b {
   display: block;
   font-size: 14px;
   overflow: hidden;
@@ -838,35 +862,47 @@ td small {
   white-space: nowrap;
 }
 
-.staffCardName small {
+.staffRowName small {
   display: block;
   font-size: 11px;
   color: var(--text-secondary);
   margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.staffRoleField {
+.staffChevron {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+  transition: transform .18s ease, color .18s ease;
+}
+
+.staffRowOpen .staffChevron {
+  transform: rotate(180deg);
+  color: var(--accent);
+}
+
+.staffRowBody {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 14px;
+  padding: 4px 14px 16px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 14px;
+  animation: staffRowOpen .16s ease;
 }
 
-.staffRoleField span {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
+@keyframes staffRowOpen {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
 
-.staffRoleField select {
-  width: 100%;
-  height: 42px;
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 0 12px;
-  background: var(--bg-surface);
-  color: var(--text-primary);
-  font-size: 13px;
-  box-sizing: border-box;
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .staffPermLabel {
@@ -924,24 +960,9 @@ td small {
   white-space: nowrap;
 }
 
-@media(max-width:900px) {
-  .staffGrid {
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  }
-}
-
 @media(max-width:680px) {
-  .staffGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .staffCard {
-    padding: 15px;
-    border-radius: 16px;
-  }
-
-  .staffRoleField select {
-    height: 46px;
+  .staffRowHead {
+    padding: 13px;
   }
 
   .staffPermGrid {
@@ -2335,6 +2356,15 @@ td small {
 }
 
 .descriptionField textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 12px;
+  outline: none;
   min-height: 132px;
   line-height: 1.55;
   padding: 12px;
@@ -4547,10 +4577,6 @@ td small {
     align-items: flex-start;
     flex-direction: column;
     gap: 5px
-  }
-
-  .historyTimelineTop time {
-    white-space: normal
   }
 
   .historyTimelineItem {

@@ -57,6 +57,7 @@ function RetailEmployees() {
   const [items, setItems] = useState([]);
   const [error, setError] = useState("");
   const [savingId, setSavingId] = useState(null);
+  const [openId, setOpenId] = useState(null);
   useEffect(() => {
     import("../../../api/retailApi")
       .then((m) => m.getRetailEmployees())
@@ -108,53 +109,84 @@ function RetailEmployees() {
   return (
     <Panel
       title="Retail staff permissions"
-      sub="The employer controls which employees can enter the Retail Workspace and which business functions they can use. Roles describe the employee's position. The permissions below are the employer's final business-specific authority."
+      sub="The employer controls which employees can enter the Retail Workspace and which business functions they can use. Roles describe the employee's position. The permissions below are the employer's final business-specific authority. Tap an employee to see and edit their role and permissions."
     >
       {error && <div className={s.error}>{error}</div>}
-      <div className={s.staffGrid}>
+      <div className={s.staffList}>
         {items.map((x) => {
           const busy = savingId === x.membershipId;
+          const open = openId === x.membershipId;
           return (
             <div
-              className={`${s.staffCard} ${busy ? s.staffCardBusy : ""}`}
+              className={`${s.staffRow} ${busy ? s.staffRowBusy : ""} ${open ? s.staffRowOpen : ""}`}
               key={x.membershipId}
             >
-              <div className={s.staffCardHead}>
+              <button
+                type="button"
+                className={s.staffRowHead}
+                aria-expanded={open}
+                onClick={() => setOpenId(open ? null : x.membershipId)}
+              >
                 <div className={s.avatar}>
-                  {(x.firstName || "?").slice(0, 1).toUpperCase()}
+                  {x.profileImage ? (
+                    <img src={x.profileImage} alt="" />
+                  ) : (
+                    (x.firstName || "?").slice(0, 1).toUpperCase()
+                  )}
                 </div>
-                <div className={s.staffCardName}>
+                <div className={s.staffRowName}>
                   <b>
                     {x.firstName} {x.lastName}
                   </b>
                   <small>{x.phone || "No phone on file"}</small>
                 </div>
-              </div>
-              <GlassSelect
-                label="Role"
-                value={x.role || "EMPLOYEE"}
-                disabled={busy}
-                onChange={(v) => change(x.membershipId, v)}
-                options={ROLE_OPTIONS}
-              />
-              <div className={s.staffPermLabel}>Business function access</div>
-              <div className={s.staffPermGrid}>
-                {PERMISSIONS.map(([key, label, hint]) => (
-                  <label
-                    className={s.staffPermToggle}
-                    key={key}
-                    title={hint || undefined}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={!!x[key]}
-                      disabled={busy}
-                      onChange={() => toggle(x, key)}
-                    />
-                    <span>{label}</span>
-                  </label>
-                ))}
-              </div>
+                <svg
+                  className={s.staffChevron}
+                  width="15"
+                  height="15"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                >
+                  <path
+                    d="M5 8l5 5 5-5"
+                    stroke="currentColor"
+                    strokeWidth="1.7"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+              {open && (
+                <div className={s.staffRowBody}>
+                  <GlassSelect
+                    label="Role"
+                    value={x.role || "EMPLOYEE"}
+                    disabled={busy}
+                    onChange={(v) => change(x.membershipId, v)}
+                    options={ROLE_OPTIONS}
+                  />
+                  <div className={s.staffPermLabel}>
+                    Business function access
+                  </div>
+                  <div className={s.staffPermGrid}>
+                    {PERMISSIONS.map(([key, label, hint]) => (
+                      <label
+                        className={s.staffPermToggle}
+                        key={key}
+                        title={hint || undefined}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={!!x[key]}
+                          disabled={busy}
+                          onChange={() => toggle(x, key)}
+                        />
+                        <span>{label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
