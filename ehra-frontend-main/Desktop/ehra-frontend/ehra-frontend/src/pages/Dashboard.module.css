@@ -3033,3 +3033,20 @@
         font-size: 9px;
     }
 }
+
+/* ── Employer header: clean transparent shell ────────────────────────────
+   The employer workspace keeps its premium content surfaces, but the
+   global header sits directly on the page background with no divider. */
+.topbar {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+}
+
+@media (max-width: 900px) {
+    .topbar {
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+    }
+}

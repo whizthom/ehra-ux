@@ -3045,3 +3045,113 @@
         font-weight: 700;
     }
 }
+
+/* ── Final compact mobile header refinement ──────────────────────────────
+   Keep the employee name at the normal, readable mobile scale while
+   restructuring the header into a compact two-row block. The secondary
+   context line remains available, but the header never grows into a large
+   hero area on a phone. */
+@media (max-width: 640px) {
+    .topbar {
+        min-height: 54px;
+        height: auto;
+        padding: 5px 12px;
+        gap: 8px;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+    }
+
+    .empTopbarHeading {
+        flex: 1 1 auto;
+        min-width: 0;
+        gap: 0;
+    }
+
+    .empGreeting {
+        min-width: 0;
+        max-width: 100%;
+        font-size: 15px;
+        line-height: 1.15;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .empGreetingIcon {
+        font-size: 15px;
+    }
+
+    .empGreetingMobile {
+        display: block;
+        min-width: 0;
+        max-width: 15ch;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: inherit;
+        line-height: inherit;
+        font-weight: 700;
+    }
+
+    .empGreetingSub {
+        min-width: 0;
+        max-width: 100%;
+        gap: 5px;
+        flex-wrap: nowrap;
+        overflow: hidden;
+        font-size: 10.5px;
+        line-height: 1.15;
+        white-space: nowrap;
+    }
+
+    .empGreetingDate {
+        flex-shrink: 0;
+    }
+
+    .empWorkspaceTag {
+        min-width: 0;
+        max-width: 42vw;
+        padding: 1px 6px 1px 3px;
+        gap: 4px;
+        border: 0;
+        background: transparent;
+    }
+
+    .empWorkspaceLogo {
+        width: 15px;
+        height: 15px;
+        border-radius: 4px;
+    }
+
+    .topbarRight {
+        flex: 0 0 auto;
+        gap: 5px;
+    }
+
+    .topbarRight .notifBtn {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+    }
+}
+
+@media (max-width: 380px) {
+    .topbar {
+        min-height: 51px;
+        padding: 4px 10px;
+    }
+
+    .empGreeting {
+        font-size: 15px;
+    }
+
+    .empGreetingSub {
+        font-size: 9.5px;
+    }
+
+    .topbarRight .notifBtn {
+        width: 30px;
+        height: 30px;
+        border-radius: 9px;
+    }
+}
