@@ -2871,8 +2871,16 @@
     overflow: auto;
 }
 
-.empTable {
-    min-width: 720px;
+/* Desktop/tablet only - on a phone this unconditional min-width forced
+   every .empTable (including the "Latest attendance" panel's
+   .attendanceTable, even though it switches to stacked cards at
+   max-width:640px above) to stay 720px wide, so .tableScrollWrap kept
+   scrolling horizontally to show the rest instead of the whole card
+   list being visible at once. */
+@media (min-width: 641px) {
+    .empTable {
+        min-width: 720px;
+    }
 }
 
 .empTable th {
@@ -2905,10 +2913,6 @@
 .invitePanel {
     border-radius: 16px;
     box-shadow: var(--emp-shadow-soft);
-}
-
-.dashboardFooter {
-    opacity: .72;
 }
 
 @media (max-width: 1100px) and (min-width: 901px) {
