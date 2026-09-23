@@ -18,14 +18,12 @@ function initials(name) {
 }
 
 // Membership-type → display label. Explicit map instead of a binary
-// ternary so a type nobody's handled yet (CUSTOMER, or whatever comes
-// after it) shows something honest rather than silently being mislabeled
-// as "Employee" or "Owner · Admin". Kept in sync with the same map in
+// ternary so a type nobody's handled yet shows something honest rather
+// than silently being mislabeled. Kept in sync with the same map in
 // MyAccountsPanel.jsx, which renders this identical list elsewhere.
 const ROLE_LABEL = {
   EMPLOYER: "Owner · Admin",
   EMPLOYEE: "Employee",
-  CUSTOMER: "Customer",
 };
 function roleLabel(type) {
   return ROLE_LABEL[type] || type;
@@ -44,6 +42,12 @@ function destinationFor(contextType) {
 // time from the "My Accounts" nav - this page and that panel share the
 // same data (GET /api/auth/my-accounts) and the same switch action
 // (POST /api/auth/context).
+//
+// One identity only ever has one customer account - it isn't tied to a
+// specific business the way an EMPLOYER/EMPLOYEE membership is, so it
+// doesn't belong in a list of "accounts to pick between". It gets its own
+// standing entry point instead, separate from (and always above) the
+// scrollable list of businesses below it.
 export default function SelectWorkspace() {
   const { switchContext } = useAuth();
   const navigate = useNavigate();
@@ -53,14 +57,27 @@ export default function SelectWorkspace() {
   const [error, setError] = useState("");
   const [switching, setSwitching] = useState(null);
 
-  const customerEntry = { type: "CUSTOMER", membershipId: null, businessId: null, businessName: "Customer", businessLogo: null, role: "CUSTOMER", status: null, active: false, discovery: true };
-
   useEffect(() => {
     getMyAccounts()
       .then(setAccounts)
       .catch(() => setError("Couldn't load your accounts. Please try again."))
       .finally(() => setLoading(false));
   }, []);
+
+  const businesses = accounts.filter((acc) => acc.type !== "CUSTOMER");
+  const customerAccount = accounts.find((acc) => acc.type === "CUSTOMER");
+  const customerEntry = customerAccount || {
+    type: "CUSTOMER",
+    membershipId: null,
+    businessId: null,
+    businessName: "Customer",
+    businessLogo: null,
+    role: "CUSTOMER",
+    status: null,
+    active: false,
+    discovery: true,
+  };
+  const customerKey = customerEntry.membershipId ?? "CUSTOMER";
 
   const pick = async (acc) => {
     setSwitching(acc.membershipId ?? acc.type);
@@ -86,95 +103,122 @@ export default function SelectWorkspace() {
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.card}>
-        <div className={styles.logoRow}>
-          <Logo variant="horizontal" size={64} />
-        </div>
+      <span className={styles.orbA} aria-hidden="true" />
+      <span className={styles.orbB} aria-hidden="true" />
 
-        <h1 className={styles.title}>Choose a workspace</h1>
-        <p className={styles.subtitle}>
-          You're connected to more than one business. Pick where you want to go
-          - you can switch anytime from My Accounts.
-        </p>
+      <div className={styles.page}>
+        <header className={styles.top}>
+          <Logo variant="horizontal" size={38} />
+          <button
+            type="button"
+            className={styles.logoutBtn}
+            onClick={handleLogout}
+          >
+            <i className="ti ti-logout" aria-hidden="true" />
+            <span>Log out</span>
+          </button>
+        </header>
+
+        <div className={styles.intro}>
+          <span className={styles.kicker}>Welcome back</span>
+          <h1>Where would you like to go?</h1>
+          <p>
+            Jump into your customer account, or pick a business you manage - you
+            can always switch again later from My Accounts.
+          </p>
+        </div>
 
         {error && (
           <div className={styles.errorBox} role="alert">
-            <i className="ti ti-alert-circle" />
+            <i className="ti ti-alert-circle" aria-hidden="true" />
             <span>{error}</span>
-          </div>
-        )}
-
-        {loading ? (
-          <div className={styles.loading}>
-            <span className={styles.spinner} />
-            <span>Loading your accounts…</span>
-          </div>
-        ) : (
-          <div className={styles.list}>
-            {accounts.map((acc) => (
-              <button
-                key={`${acc.type}-${acc.membershipId}`}
-                type="button"
-                className={styles.item}
-                disabled={switching !== null}
-                onClick={() => pick(acc)}
-              >
-                <div className={styles.avatar}>
-                  {acc.businessLogo ? (
-                    <img src={acc.businessLogo} alt="" />
-                  ) : (
-                    initials(acc.businessName)
-                  )}
-                </div>
-                <div className={styles.itemBody}>
-                  <span className={styles.itemName}>{acc.businessName}</span>
-                  <span className={styles.itemMeta}>
-                    {roleLabel(acc.type)}
-                    {acc.status && acc.status !== "ACTIVE"
-                      ? ` · ${acc.status.replace("_", " ").toLowerCase()}`
-                      : ""}
-                  </span>
-                </div>
-                {switching === acc.membershipId ? (
-                  <span className={styles.itemSpinner} />
-                ) : (
-                  <i className={`ti ti-chevron-right ${styles.itemChevron}`} />
-                )}
-              </button>
-            ))}
-
-            {!accounts.some((acc) => acc.type === "CUSTOMER") && (
-              <button
-                type="button"
-                className={styles.item}
-                disabled={switching !== null}
-                onClick={() => pick(customerEntry)}
-              >
-                <div className={styles.avatar}><i className="ti ti-compass" /></div>
-                <div className={styles.itemBody}>
-                  <span className={styles.itemName}>Customer</span>
-                  <span className={styles.itemMeta}>Discover businesses and services on Ehral</span>
-                </div>
-                {switching === "CUSTOMER" ? <span className={styles.itemSpinner} /> : <i className={`ti ti-chevron-right ${styles.itemChevron}`} />}
-              </button>
-            )}
-
-            {accounts.length === 0 && !loading && (
-              <p className={styles.empty}>
-                You don't currently have any active business memberships.
-              </p>
-            )}
           </div>
         )}
 
         <button
           type="button"
-          className={styles.logoutLink}
-          onClick={handleLogout}
+          className={styles.customerCard}
+          disabled={switching !== null}
+          onClick={() => pick(customerEntry)}
         >
-          <i className="ti ti-logout" />
-          Log out
+          <span className={styles.customerIcon}>
+            <i className="ti ti-compass" aria-hidden="true" />
+          </span>
+          <span className={styles.customerText}>
+            <strong>Continue as customer</strong>
+            <small>Browse, order from and message any business on Ehral</small>
+          </span>
+          {switching === customerKey ? (
+            <span className={styles.itemSpinner} aria-hidden="true" />
+          ) : (
+            <i className="ti ti-arrow-right" aria-hidden="true" />
+          )}
         </button>
+
+        {loading ? (
+          <div className={styles.skeletonGrid} aria-hidden="true">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className={styles.skeletonCard}
+                style={{ "--i": i }}
+              />
+            ))}
+          </div>
+        ) : businesses.length > 0 ? (
+          <>
+            <div className={styles.sectionHead}>
+              <span>Your businesses</span>
+              <span className={styles.count}>{businesses.length}</span>
+            </div>
+            <div className={styles.listMask}>
+              <div className={styles.list}>
+                {businesses.map((acc, i) => (
+                  <button
+                    key={`${acc.type}-${acc.membershipId}`}
+                    type="button"
+                    className={styles.item}
+                    style={{ "--i": i }}
+                    disabled={switching !== null}
+                    onClick={() => pick(acc)}
+                  >
+                    <span className={styles.avatar}>
+                      {acc.businessLogo ? (
+                        <img src={acc.businessLogo} alt="" />
+                      ) : (
+                        initials(acc.businessName)
+                      )}
+                    </span>
+                    <span className={styles.itemBody}>
+                      <span className={styles.itemName}>
+                        {acc.businessName}
+                      </span>
+                      <span className={styles.itemMeta}>
+                        {roleLabel(acc.type)}
+                        {acc.status && acc.status !== "ACTIVE"
+                          ? ` · ${acc.status.replace("_", " ").toLowerCase()}`
+                          : ""}
+                      </span>
+                    </span>
+                    {switching === acc.membershipId ? (
+                      <span className={styles.itemSpinner} aria-hidden="true" />
+                    ) : (
+                      <i
+                        className={`ti ti-chevron-right ${styles.itemChevron}`}
+                        aria-hidden="true"
+                      />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className={styles.empty}>
+            <i className="ti ti-building-store" aria-hidden="true" />
+            <p>You don't manage any businesses on Ehral yet.</p>
+          </div>
+        )}
       </div>
     </div>
   );
