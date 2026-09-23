@@ -15,20 +15,27 @@ import styles from "./UpdateToast.module.css";
  *   `updateServiceWorker(true)` below tells it to skip waiting, claim the
  *   page, and reload.
  *
- * Detection: `onRegisteredSW` starts a ~2s interval (production only -
- * see the `import.meta.env.PROD` guard) that does a plain, cache-busted
- * `fetch(swUrl)` and only calls the real `registration.update()` when
- * that fetch actually succeeds. This mirrors vite-plugin-pwa's own
- * documented pattern for periodic checks: `registration.update()` alone
- * re-downloads and diffs the whole sw.js against the installed copy on
- * every tick regardless of network state, so gating it behind a cheap
- * fetch first means a flaky/offline connection costs one small failed
- * request every 2s instead of a full service-worker update attempt. The
- * interval is a single ref-guarded instance, stops on unmount, pauses
- * while the tab is hidden (`visibilitychange`) or the browser reports
- * offline, and resumes on `online`/visible again - so a tab left open
- * for hours doesn't burn battery/network chattering in the background,
- * but a tab you're actually looking at picks up a new deployment fast.
+ * Detection: `onRegisteredSW` schedules a background check every
+ * ~45-60s (BASE_CHECK_INTERVAL_MS + random jitter - see the constants
+ * below) that does a *conditional* `fetch(swUrl, { cache: "no-cache" })`
+ * and only calls the real `registration.update()` when that comes back
+ * 200 (a genuine change), not 304 (unchanged). This is deliberately
+ * tuned for an app with a large concurrent user base: a flat,
+ * unconditional, synchronized-interval poll from every open tab scales
+ * badly - at a few thousand users it's noise, at millions of open tabs
+ * it's a self-inflicted traffic spike on your own origin every single
+ * tick. Jitter spreads that load out instead of bursting it, and
+ * `cache: "no-cache"` (as opposed to `"no-store"`) lets the request go
+ * out as a conditional GET against the ETag Caddy already sets on sw.js,
+ * so an unchanged file costs a ~0-byte 304 instead of a full response -
+ * cheap for the origin (or a CDN in front of it) even at very high
+ * concurrency. Responsiveness for the tab someone's actually watching
+ * isn't given up, though: `onVisibility`/`onOnline` below trigger an
+ * immediate out-of-band check the moment a tab regains focus or comes
+ * back online, rather than waiting out the rest of the interval. The
+ * interval is a single ref-guarded instance, single-flight (won't stack
+ * overlapping requests if one is slow), stops on unmount, and pauses
+ * entirely while the tab is hidden or the browser reports offline.
  *
  * Reload safety: EHRAL is full of forms (leave requests, employee edits,
  * payroll, messaging composers). Reloading the instant a new version is
@@ -51,7 +58,21 @@ import styles from "./UpdateToast.module.css";
  * exercising the new code.
  */
 
-const CHECK_INTERVAL_MS = 2000;
+// At small/medium scale a flat 2s poll from every open tab is fine. At
+// "millions of users" scale it isn't: millions of tabs on a synchronized
+// 2s tick is a self-inflicted DDoS on your own origin. Two changes fix
+// that without giving up fast detection for the tab someone's actually
+// looking at:
+//
+// 1. The *base* interval is wider (45s) but every tab adds up to 15s of
+//    random jitter on top, so instead of one huge synchronized spike
+//    every 2s, load smears out continuously across a 45-60s window.
+// 2. `runCheck` regains near-2s responsiveness the moment it matters -
+//    on tab focus/visibility-regain and on reconnect - since that's when
+//    someone's actually watching for the update, not on an idle
+//    background tab nobody's looking at.
+const BASE_CHECK_INTERVAL_MS = 45_000;
+const CHECK_JITTER_MS = 15_000;
 const AUTO_RELOAD_GRACE_MS = 2500;
 
 function isFormFieldActive() {
@@ -82,30 +103,52 @@ export default function UpdateToast() {
       if (!import.meta.env.PROD) return;
 
       let timerId = null;
+      let checking = false;
 
       const runCheck = async () => {
+        // Single-flight: if a check is still in the air (slow network,
+        // etc.) when the next tick or a visibility/online event fires,
+        // skip rather than piling up overlapping requests.
+        if (checking) return;
+        checking = true;
         try {
           if (document.hidden) return;
           if ("onLine" in navigator && !navigator.onLine) return;
-          const resp = await fetch(swUrl, {
-            cache: "no-store",
-            headers: { "cache-control": "no-cache" },
-          });
+          // `cache: "no-cache"` (not "no-store") means the browser is
+          // allowed to send the request conditionally - with
+          // If-None-Match / If-Modified-Since, using the ETag/
+          // Last-Modified Caddy's file_server already sets on sw.js. If
+          // sw.js hasn't changed, the origin (or an edge/CDN cache in
+          // front of it) answers with a ~0-byte 304 instead of resending
+          // the whole file. That's what keeps this cheap at scale - every
+          // open tab still "checks" on every tick, but almost all of
+          // those checks are 304s, not full downloads.
+          const resp = await fetch(swUrl, { cache: "no-cache" });
           if (resp && resp.status === 200) {
             await registration.update();
           }
         } catch {
           // Network hiccup / offline / server briefly unavailable - never
           // fatal, just try again on the next tick.
+        } finally {
+          checking = false;
         }
       };
 
+      const scheduleNext = () => {
+        clearTimeout(timerId);
+        const delay = BASE_CHECK_INTERVAL_MS + Math.random() * CHECK_JITTER_MS;
+        timerId = setTimeout(async () => {
+          await runCheck();
+          scheduleNext();
+        }, delay);
+      };
       const startInterval = () => {
         if (timerId) return;
-        timerId = setInterval(runCheck, CHECK_INTERVAL_MS);
+        scheduleNext();
       };
       const stopInterval = () => {
-        clearInterval(timerId);
+        clearTimeout(timerId);
         timerId = null;
       };
 

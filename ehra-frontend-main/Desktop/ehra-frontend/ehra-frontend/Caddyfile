@@ -7,6 +7,24 @@
 # because Vite gives each one a new filename whenever its content
 # changes - there is nothing to "invalidate", the URL itself changes.
 
+# --- Scaling beyond a single origin -----------------------------------
+# This Caddyfile is correct at any scale, but it's one container. At a
+# "millions of users" concurrency level, put a CDN (Cloudflare, Railway's
+# own CDN/edge product, Fastly, etc.) in front of this service rather
+# than pointing traffic straight at it:
+#   - /assets/* is already `immutable` - a CDN can cache it at the edge
+#     indefinitely and never touch this origin again for that file.
+#   - index.html / sw.js / manifest.webmanifest stay `no-cache`, so they
+#     always revalidate - but revalidation is a conditional GET (Caddy's
+#     file_server sets ETag/Last-Modified on static files automatically),
+#     so most of those revalidations resolve as a CDN-served 304 instead
+#     of reaching this origin at all. src/pwa/UpdateToast.jsx's periodic
+#     check relies on exactly this: it sends `cache: "no-cache"`, not
+#     `"no-store"`, so it participates in that conditional-GET/304 path.
+# Also run more than one replica of this container behind Railway's load
+# balancer at that scale, rather than a single instance.
+# -----------------------------------------------------------------------
+
 {
 	admin off         # no admin API needed in Railway's environment
 	persist_config off # storage isn't persistent anyway
