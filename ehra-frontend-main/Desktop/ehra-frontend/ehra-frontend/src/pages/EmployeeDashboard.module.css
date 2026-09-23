@@ -2600,7 +2600,6 @@
         min-width: 0;
     }
 }
-
 /* ========================================================================
    EHRAL EMPLOYEE PREMIUM LAYER
    ------------------------------------------------------------------------
@@ -2694,14 +2693,14 @@
     border-radius: 13px;
     border: 1px solid color-mix(in srgb, var(--border-color) 72%, transparent);
     background: color-mix(in srgb, var(--bg-surface) 88%, transparent);
-    box-shadow: 0 8px 22px -18px rgba(0, 0, 0, .4);
+    box-shadow: 0 8px 22px -18px rgba(0,0,0,.4);
     transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
 
 .notifBtn:hover {
     transform: translateY(-1px);
     border-color: color-mix(in srgb, var(--accent) 35%, var(--border-color));
-    box-shadow: 0 12px 26px -18px rgba(0, 0, 0, .45);
+    box-shadow: 0 12px 26px -18px rgba(0,0,0,.45);
 }
 
 .content,
@@ -2736,7 +2735,7 @@
     padding: clamp(22px, 3vw, 32px);
     border-radius: var(--employee-radius-xl);
     background:
-        radial-gradient(circle at 100% 0%, rgba(38, 166, 154, .13), transparent 38%),
+        radial-gradient(circle at 100% 0%, rgba(38,166,154,.13), transparent 38%),
         var(--bg-surface);
     box-shadow: var(--employee-glow);
 }
@@ -2837,7 +2836,7 @@
 .qaBtn:hover {
     transform: translateY(-2px);
     border-color: color-mix(in srgb, var(--accent) 30%, var(--border-color));
-    box-shadow: 0 16px 30px -24px rgba(0, 0, 0, .42);
+    box-shadow: 0 16px 30px -24px rgba(0,0,0,.42);
 }
 
 .qaIconWrap {
@@ -2883,7 +2882,7 @@
     border: 1px solid color-mix(in srgb, var(--border-color) 72%, transparent);
     border-radius: 16px;
     background: var(--bg-surface);
-    box-shadow: 0 12px 30px -26px rgba(0, 0, 0, .38);
+    box-shadow: 0 12px 30px -26px rgba(0,0,0,.38);
     padding: 15px 17px;
 }
 
@@ -2996,7 +2995,6 @@
 }
 
 @media (max-width: 380px) {
-
     .content,
     .contentFull {
         padding-inline: 9px;
@@ -3017,7 +3015,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-
     .statCard,
     .qaBtn,
     .notifBtn,
