@@ -3015,3 +3015,33 @@
         transition: none;
     }
 }
+
+
+/* Final employee-header refinement: transparent, borderless header and a
+   compact mobile employee name that keeps a 15-character name on one line. */
+.topbar {
+    background: transparent;
+    border-bottom: none;
+    box-shadow: none;
+}
+
+@media (max-width: 640px) {
+    .topbar {
+        background: transparent;
+        border-bottom: none;
+        box-shadow: none;
+    }
+
+    .empGreetingMobile {
+        display: inline-block;
+        max-width: 15ch;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 11px;
+        line-height: 1.15;
+        letter-spacing: 0;
+        font-weight: 700;
+    }
+}

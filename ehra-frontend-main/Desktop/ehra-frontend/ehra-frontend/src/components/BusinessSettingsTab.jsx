@@ -2,7 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { uploadBusinessLogo } from "../api/businessApi";
 import ProfileTab from "./ProfileTab";
 import SecuritySettingsSection from "./SecuritySettingsSection";
-import { getWhatsAppSettings, saveWhatsAppSettings, deleteWhatsAppSettings } from "../api/whatsappApi";
+import {
+  getWhatsAppSettings,
+  saveWhatsAppSettings,
+  deleteWhatsAppSettings,
+} from "../api/whatsappApi";
 import styles from "./BusinessSettingsTab.module.css";
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -245,7 +249,117 @@ function AttendanceProfilePanel({ setting, onToggle }) {
  * @param {function} props.onMyProfileUpdated () => Promise<void> - refetch admin's own profile
  */
 
-function WhatsAppPanel(){const [settings,setSettings]=useState(null);const [phone,setPhone]=useState("");const [countryCode,setCountryCode]=useState("234");const [enabled,setEnabled]=useState(true);const [saving,setSaving]=useState(false);const [message,setMessage]=useState("");useEffect(()=>{getWhatsAppSettings().then(r=>{const d=r.data||{};setSettings(d);setPhone(d.phoneNumber?`+${d.phoneNumber}`:"");setEnabled(d.enabled!==false)}).catch(()=>setMessage("Could not load WhatsApp settings."))},[]);const save=async()=>{setSaving(true);setMessage("");try{const r=await saveWhatsAppSettings({phoneNumber:phone,countryCode,enabled});setSettings(r.data);setMessage("WhatsApp settings saved.")}catch(e){setMessage(e?.response?.data?.message||"Could not save WhatsApp settings.")}finally{setSaving(false)}};const remove=async()=>{if(!confirm("Remove the business WhatsApp number?"))return;await deleteWhatsAppSettings();setPhone("");setSettings(null);setMessage("WhatsApp has been disconnected.")};return <div className={styles.businessPad}><div className={styles.header}><div className={styles.attIconWrap}><i className="ti ti-brand-whatsapp"/></div><div><h3 className={styles.headerName}>WhatsApp for Your Business</h3><p className={styles.headerSub}>Let customers contact your business and prepare order messages without the WhatsApp Business API.</p></div></div><div className={styles.infoBox}><i className="ti ti-info-circle"/><span>V1 opens WhatsApp or WhatsApp Web with a pre-filled message. Ehral never sends the message automatically. The user reviews it and presses Send.</span></div>{message&&<div className={styles.successBox}><i className="ti ti-circle-check"/> {message}</div>}<div className={styles.grid2}><FormField label="WhatsApp number" value={phone} onChange={e=>setPhone(e.target.value)} placeholder="+2348012345678"/><FormField label="Country calling code" value={countryCode} onChange={e=>setCountryCode(e.target.value.replace(/\D/g,"").slice(0,8))} placeholder="234"/></div><div className={styles.saveRow}><label style={{display:"flex",gap:8,alignItems:"center"}}><input type="checkbox" checked={enabled} onChange={e=>setEnabled(e.target.checked)}/> Enable WhatsApp contact</label><button className={styles.saveBtn} disabled={saving||!phone} onClick={save}><i className="ti ti-brand-whatsapp"/>{saving?"Saving…":"Connect WhatsApp"}</button>{settings?.phoneNumber&&<button className={styles.saveBtn} style={{background:"var(--danger-bg)",color:"var(--danger-text)"}} onClick={remove}>Remove</button>}</div></div>}
+function WhatsAppPanel() {
+  const [settings, setSettings] = useState(null);
+  const [phone, setPhone] = useState("");
+  const [countryCode, setCountryCode] = useState("234");
+  const [enabled, setEnabled] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  useEffect(() => {
+    getWhatsAppSettings()
+      .then((r) => {
+        const d = r.data || {};
+        setSettings(d);
+        setPhone(d.phoneNumber ? `+${d.phoneNumber}` : "");
+        setEnabled(d.enabled !== false);
+      })
+      .catch(() => setMessage("Could not load WhatsApp settings."));
+  }, []);
+  const save = async () => {
+    setSaving(true);
+    setMessage("");
+    try {
+      const r = await saveWhatsAppSettings({
+        phoneNumber: phone,
+        countryCode,
+        enabled,
+      });
+      setSettings(r.data);
+      setMessage("WhatsApp settings saved.");
+    } catch (e) {
+      setMessage(
+        e?.response?.data?.message || "Could not save WhatsApp settings.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+  const remove = async () => {
+    if (!confirm("Remove the business WhatsApp number?")) return;
+    await deleteWhatsAppSettings();
+    setPhone("");
+    setSettings(null);
+    setMessage("WhatsApp has been disconnected.");
+  };
+  return (
+    <div className={styles.businessPad}>
+      <div className={styles.header}>
+        <div className={styles.attIconWrap}>
+          <i className="ti ti-brand-whatsapp" />
+        </div>
+        <div>
+          <h3 className={styles.headerName}>WhatsApp for Your Business</h3>
+          <p className={styles.headerSub}>
+            Let customers contact your business and prepare order messages
+            without the WhatsApp Business API.
+          </p>
+        </div>
+      </div>
+      {message && (
+        <div className={styles.successBox}>
+          <i className="ti ti-circle-check" /> {message}
+        </div>
+      )}
+      <div className={styles.grid2}>
+        <FormField
+          label="WhatsApp number"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="+2348012345678"
+        />
+        <FormField
+          label="Country calling code"
+          value={countryCode}
+          onChange={(e) =>
+            setCountryCode(e.target.value.replace(/\D/g, "").slice(0, 8))
+          }
+          placeholder="234"
+        />
+      </div>
+      <div className={styles.saveRow}>
+        <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <input
+            type="checkbox"
+            checked={enabled}
+            onChange={(e) => setEnabled(e.target.checked)}
+          />{" "}
+          Enable WhatsApp contact
+        </label>
+        <button
+          className={styles.saveBtn}
+          disabled={saving || !phone}
+          onClick={save}
+        >
+          <i className="ti ti-brand-whatsapp" />
+          {saving ? "Saving…" : "Connect WhatsApp"}
+        </button>
+        {settings?.phoneNumber && (
+          <button
+            className={styles.saveBtn}
+            style={{
+              background: "var(--danger-bg)",
+              color: "var(--danger-text)",
+            }}
+            onClick={remove}
+          >
+            Remove
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function BusinessSettingsTab({
   business,

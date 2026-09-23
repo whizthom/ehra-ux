@@ -191,62 +191,35 @@
     }
 }
 
+
+/* Attendance workspace: the Today, History, Schedule, Settings and Security
+   sections sit directly on the dashboard background rather than inside a
+   surrounding panel. */
 .layout {
-    gap: 16px;
-}
-
-.tabBar {
-    padding: 5px;
-    border-radius: 15px;
-    background: var(--bg-surface-alt);
-    border: 1px solid color-mix(in srgb, var(--border-color) 78%, transparent);
-    box-shadow: 0 12px 30px -28px rgba(0, 0, 0, .45);
-}
-
-.tabBtn {
-    min-height: 40px;
-    border-radius: 11px;
-    font-weight: 750;
-    transition: all .18s ease;
-}
-
-.tabBtn:hover {
-    transform: translateY(-1px);
+    background: transparent;
+    border: 0;
+    box-shadow: none;
 }
 
 .tabBody {
-    border-radius: 18px;
-    border: 1px solid color-mix(in srgb, var(--border-color) 80%, transparent);
-    background: var(--bg-surface);
-    box-shadow: 0 18px 45px -34px rgba(0, 0, 0, .4);
-}
-
-.historyFilters {
-    border-radius: 14px;
-    background: color-mix(in srgb, var(--bg-surface-alt) 75%, transparent);
-    border: 1px solid color-mix(in srgb, var(--border-color) 75%, transparent);
-}
-
-.applyBtn {
-    border-radius: 11px;
-    font-weight: 750;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
 }
 
 @media (max-width: 640px) {
-    .tabBar {
-        overflow-x: auto;
-        scrollbar-width: none;
-    }
 
-    .tabBar::-webkit-scrollbar {
-        display: none;
-    }
-
-    .tabBtn {
-        flex: 0 0 auto;
-    }
-
+    .layout,
     .tabBody {
-        border-radius: 15px;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+    }
+
+    .historyFilters {
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+        padding: 0;
     }
 }

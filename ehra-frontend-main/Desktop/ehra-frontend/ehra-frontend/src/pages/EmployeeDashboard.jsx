@@ -109,7 +109,7 @@ function fullName(first, last) {
 }
 
 // Mobile header only - same rule as the employer dashboard's company name.
-function truncateName(name, max = 13) {
+function truncateName(name, max = 15) {
   const s = safeString(name);
   return s.length > max ? `${s.slice(0, max)}...` : s;
 }
