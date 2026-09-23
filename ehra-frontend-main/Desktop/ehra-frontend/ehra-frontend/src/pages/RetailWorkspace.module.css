@@ -581,7 +581,7 @@ td {
   white-space: nowrap
 }
 
-@media(max-width:560px) {
+@media(max-width:680px) {
 
   /* Below the width where label + wrapped sentence can sit side by side
      comfortably, stack each row into its own block instead: label on
@@ -606,6 +606,53 @@ td {
   .feeInfoTable td {
     padding: 2px 0;
     border-bottom: 0
+  }
+
+  /* Fee-explainer "examples" table: genuine 4-column numeric data, so it
+     stays a real table down to tablet widths - but on a phone, a table
+     that still has to be scrolled sideways to see the last column reads
+     as broken. Turn each row into its own labelled card instead. */
+  .examplesTable thead {
+    display: none
+  }
+
+  .examplesTable,
+  .examplesTable tbody,
+  .examplesTable tr {
+    display: block;
+    width: 100%
+  }
+
+  .examplesTable tr {
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px
+  }
+
+  .examplesTable tr:last-child {
+    margin-bottom: 0
+  }
+
+  .examplesTable td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 0;
+    white-space: normal;
+    text-align: right
+  }
+
+  .examplesTable td::before {
+    content: attr(data-label);
+    color: var(--text-secondary);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    text-align: left
   }
 }
 

@@ -75,7 +75,7 @@ function FeeExplainer({ terms, money }) {
       <div className={s.fieldWide}>
         <span className={s.sectionLabel}>Examples</span>
         <div className={s.tableWrap} style={{ marginTop: 8 }}>
-          <table>
+          <table className={s.examplesTable}>
             <thead>
               <tr>
                 <th>Order value</th>
@@ -87,10 +87,10 @@ function FeeExplainer({ terms, money }) {
             <tbody>
               {(terms.examples || []).map((ex) => (
                 <tr key={ex.orderAmount}>
-                  <td>{money(ex.orderAmount)}</td>
-                  <td>{money(ex.paystackFee)}</td>
-                  <td>{money(ex.ehralFee)}</td>
-                  <td>
+                  <td data-label="Order value">{money(ex.orderAmount)}</td>
+                  <td data-label="Paystack fee">{money(ex.paystackFee)}</td>
+                  <td data-label="Ehral fee">{money(ex.ehralFee)}</td>
+                  <td data-label="Estimated settlement">
                     <strong>{money(ex.estimatedSettlement)}</strong>
                   </td>
                 </tr>
