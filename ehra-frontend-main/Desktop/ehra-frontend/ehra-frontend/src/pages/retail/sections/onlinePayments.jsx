@@ -11,6 +11,7 @@ import {
   getOrderPaymentSummary,
 } from "../../../api/orderPaymentApi";
 import { Panel, Metric } from "./shared";
+import { GlassSelect } from "./GlassSelect";
 
 const firstOfMonth = () => {
   const d = new Date();
@@ -35,15 +36,24 @@ function FeeExplainer({ terms, money }) {
           <table>
             <tbody>
               <tr>
-                <td><strong>Ehral platform fee</strong></td>
-                <td>{pct(terms.ehralFeeRatePercent)} of every successfully completed order</td>
+                <td>
+                  <strong>Ehral platform fee</strong>
+                </td>
+                <td>
+                  {pct(terms.ehralFeeRatePercent)} of every successfully
+                  completed order
+                </td>
               </tr>
               <tr>
-                <td><strong>Paystack processing fee</strong></td>
                 <td>
-                  {pct(terms.paystackPercentageRatePercent)} + {money(terms.paystackFlatFee)}
-                  {" "}(the {money(terms.paystackFlatFee)} flat component is waived below{" "}
-                  {money(terms.paystackFlatFeeWaiverThreshold)}; capped at {money(terms.paystackFeeCap)} per transaction)
+                  <strong>Paystack processing fee</strong>
+                </td>
+                <td>
+                  {pct(terms.paystackPercentageRatePercent)} +{" "}
+                  {money(terms.paystackFlatFee)} (the{" "}
+                  {money(terms.paystackFlatFee)} flat component is waived below{" "}
+                  {money(terms.paystackFlatFeeWaiverThreshold)}; capped at{" "}
+                  {money(terms.paystackFeeCap)} per transaction)
                 </td>
               </tr>
             </tbody>
@@ -55,9 +65,10 @@ function FeeExplainer({ terms, money }) {
         <span className={s.sectionLabel}>Who pays these fees?</span>
         <p style={{ marginTop: 6 }}>
           Your business bears the applicable Paystack processing fee and Ehral's{" "}
-          {pct(terms.ehralFeeRatePercent)} platform fee. These charges are deducted from
-          your settlement. Your customers are charged exactly the order price you set -
-          Ehral never adds these fees on top of what your customer pays.
+          {pct(terms.ehralFeeRatePercent)} platform fee. These charges are
+          deducted from your settlement. Your customers are charged exactly the
+          order price you set - Ehral never adds these fees on top of what your
+          customer pays.
         </p>
       </div>
 
@@ -79,15 +90,17 @@ function FeeExplainer({ terms, money }) {
                   <td>{money(ex.orderAmount)}</td>
                   <td>{money(ex.paystackFee)}</td>
                   <td>{money(ex.ehralFee)}</td>
-                  <td><strong>{money(ex.estimatedSettlement)}</strong></td>
+                  <td>
+                    <strong>{money(ex.estimatedSettlement)}</strong>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
         <div className={s.fieldHint}>
-          These are examples. Actual Paystack charges may depend on Paystack's applicable
-          pricing/configuration at the time of the transaction.
+          These are examples. Actual Paystack charges may depend on Paystack's
+          applicable pricing/configuration at the time of the transaction.
         </div>
       </div>
     </div>
@@ -110,13 +123,16 @@ function ActivationFlow({ terms, onActivated, money }) {
   const termsBodyRef = useRef(null);
 
   useEffect(() => {
-    listSettlementBanks().then(setBanks).catch(() => setBanks([]));
+    listSettlementBanks()
+      .then(setBanks)
+      .catch(() => setBanks([]));
   }, []);
 
   const handleTermsScroll = () => {
     const el = termsBodyRef.current;
     if (!el) return;
-    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 24) setReachedEnd(true);
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 24)
+      setReachedEnd(true);
   };
 
   const resolveAccount = async () => {
@@ -131,7 +147,10 @@ function ActivationFlow({ terms, onActivated, money }) {
       const r = await resolveSettlementAccount(bankCode, accountNumber.trim());
       setResolved(r);
     } catch (e) {
-      setError(e?.response?.data?.message || "Could not resolve that account number with the selected bank.");
+      setError(
+        e?.response?.data?.message ||
+          "Could not resolve that account number with the selected bank.",
+      );
     } finally {
       setResolving(false);
     }
@@ -140,11 +159,15 @@ function ActivationFlow({ terms, onActivated, money }) {
   const activate = async () => {
     setError("");
     if (!resolved) {
-      setError("Resolve and confirm your settlement account before continuing.");
+      setError(
+        "Resolve and confirm your settlement account before continuing.",
+      );
       return;
     }
     if (!accepted) {
-      setError("You must accept the complete Online Ordering & Payment Terms to continue.");
+      setError(
+        "You must accept the complete Online Ordering & Payment Terms to continue.",
+      );
       return;
     }
     setActivating(true);
@@ -157,7 +180,10 @@ function ActivationFlow({ terms, onActivated, money }) {
       });
       onActivated(account);
     } catch (e) {
-      setError(e?.response?.data?.message || "Could not enable online payments. Please try again.");
+      setError(
+        e?.response?.data?.message ||
+          "Could not enable online payments. Please try again.",
+      );
     } finally {
       setActivating(false);
     }
@@ -176,54 +202,90 @@ function ActivationFlow({ terms, onActivated, money }) {
       <div className={s.formGrid} style={{ marginTop: 18 }}>
         <div className={s.fieldWide}>
           <span className={s.sectionLabel}>Settlement bank account</span>
-          <small>Customer payments settle to this account, via a Paystack subaccount created automatically for your business.</small>
+          <small>
+            Customer payments settle to this account, via a Paystack subaccount
+            created automatically for your business.
+          </small>
         </div>
-        <label className={s.field}>
-          <span>Bank</span>
-          <select value={bankCode} onChange={(e) => { setBankCode(e.target.value); setResolved(null); }}>
-            <option value="">Select your bank</option>
-            {banks.map((b) => (
-              <option key={b.code} value={b.code}>{b.name}</option>
-            ))}
-          </select>
-        </label>
+        <GlassSelect
+          label="Bank"
+          value={bankCode}
+          onChange={(v) => {
+            setBankCode(v);
+            setResolved(null);
+          }}
+          options={banks.map((b) => ({ value: b.code, label: b.name }))}
+          placeholder="Select your bank"
+        />
         <label className={s.field}>
           <span>Account number</span>
           <input
             value={accountNumber}
-            onChange={(e) => { setAccountNumber(e.target.value.replace(/\D/g, "").slice(0, 10)); setResolved(null); }}
+            onChange={(e) => {
+              setAccountNumber(e.target.value.replace(/\D/g, "").slice(0, 10));
+              setResolved(null);
+            }}
             placeholder="0123456789"
             inputMode="numeric"
           />
         </label>
         <div className={s.field}>
           <span>&nbsp;</span>
-          <button type="button" className={s.outline} onClick={resolveAccount} disabled={resolving}>
+          <button
+            type="button"
+            className={s.outline}
+            onClick={resolveAccount}
+            disabled={resolving}
+          >
             {resolving ? "Resolving…" : "Resolve account"}
           </button>
         </div>
         {resolved && (
           <div className={s.fieldWide}>
             <div className={s.copyConfirmation}>
-              <i className="ti ti-check" /> Account resolved: <strong>{resolved.accountName}</strong> ({resolved.bankName})
+              <i className="ti ti-check" /> Account resolved:{" "}
+              <strong>{resolved.accountName}</strong> ({resolved.bankName})
             </div>
           </div>
         )}
       </div>
 
-      <div className={`${s.fieldWide} ${s.descriptionField}`} style={{ marginTop: 18 }}>
-        <div className={s.fieldLabelRow}><span>Full Online Ordering & Payment Terms (v{terms.termsVersion})</span></div>
+      <div
+        className={`${s.fieldWide} ${s.descriptionField}`}
+        style={{ marginTop: 18 }}
+      >
+        <div className={s.fieldLabelRow}>
+          <span>
+            Full Online Ordering & Payment Terms (v{terms.termsVersion})
+          </span>
+        </div>
         <div
           ref={termsBodyRef}
           onScroll={handleTermsScroll}
-          style={{ maxHeight: 260, overflowY: "auto", whiteSpace: "pre-wrap", border: "1px solid var(--border,#e4e4e7)", borderRadius: 10, padding: 16, fontSize: 13.5, lineHeight: 1.6 }}
+          style={{
+            maxHeight: 260,
+            overflowY: "auto",
+            whiteSpace: "pre-wrap",
+            border: "1px solid var(--border,#e4e4e7)",
+            borderRadius: 10,
+            padding: 16,
+            fontSize: 13.5,
+            lineHeight: 1.6,
+          }}
         >
           {terms.fullTermsText}
         </div>
-        {!reachedEnd && <div className={s.fieldHint}>Scroll to the end of the terms to continue.</div>}
+        {!reachedEnd && (
+          <div className={s.fieldHint}>
+            Scroll to the end of the terms to continue.
+          </div>
+        )}
       </div>
 
-      <label className={s.toggleCard} style={{ marginTop: 16, opacity: canCheckAccept ? 1 : 0.6 }}>
+      <label
+        className={s.toggleCard}
+        style={{ marginTop: 16, opacity: canCheckAccept ? 1 : 0.6 }}
+      >
         <input
           type="checkbox"
           checked={accepted}
@@ -231,16 +293,30 @@ function ActivationFlow({ terms, onActivated, money }) {
           onChange={(e) => setAccepted(e.target.checked)}
         />
         <span>
-          <b>I have read, understood, and accept the complete Ehral Online Ordering & Payment Terms</b>
-          <small>Including the Ehral {pct(terms.ehralFeeRatePercent)} platform fee and applicable Paystack processing charges.</small>
+          <b>
+            I have read, understood, and accept the complete Ehral Online
+            Ordering & Payment Terms
+          </b>
+          <small>
+            Including the Ehral {pct(terms.ehralFeeRatePercent)} platform fee
+            and applicable Paystack processing charges.
+          </small>
         </span>
       </label>
 
-      {error && <div className={s.error} style={{ marginTop: 12 }}>{error}</div>}
+      {error && (
+        <div className={s.error} style={{ marginTop: 12 }}>
+          {error}
+        </div>
+      )}
 
       <div className={s.toolbar} style={{ marginTop: 18 }}>
         <div />
-        <button className={s.primary} disabled={!canActivate} onClick={activate}>
+        <button
+          className={s.primary}
+          disabled={!canActivate}
+          onClick={activate}
+        >
           {activating ? "Enabling…" : "Accept Terms & Enable Online Ordering"}
         </button>
       </div>
@@ -277,7 +353,9 @@ function AccountDashboard({ account, terms, onSuspend, onResume, money }) {
     }
   };
 
-  useEffect(() => { loadSummary(range.from, range.to); }, [range.from, range.to]);
+  useEffect(() => {
+    loadSummary(range.from, range.to);
+  }, [range.from, range.to]);
 
   const toggleStatus = async () => {
     setBusy(true);
@@ -294,26 +372,68 @@ function AccountDashboard({ account, terms, onSuspend, onResume, money }) {
       <div className={s.toolbar}>
         <div>
           <h2>Online payments</h2>
-          <p>Customer order payments settle to your account, minus the applicable Paystack and Ehral fees.</p>
+          <p>
+            Customer order payments settle to your account, minus the applicable
+            Paystack and Ehral fees.
+          </p>
         </div>
-        <button className={account.status === "ACTIVE" ? s.dangerButton : s.primary} disabled={busy} onClick={toggleStatus}>
-          {busy ? "Please wait…" : account.status === "ACTIVE" ? "Suspend online payments" : "Resume online payments"}
+        <button
+          className={account.status === "ACTIVE" ? s.dangerButton : s.primary}
+          disabled={busy}
+          onClick={toggleStatus}
+        >
+          {busy
+            ? "Please wait…"
+            : account.status === "ACTIVE"
+              ? "Suspend online payments"
+              : "Resume online payments"}
         </button>
       </div>
 
       <div className={s.grid2}>
-        <Panel title="Payment account" sub="Your customer-order settlement setup.">
+        <Panel
+          title="Payment account"
+          sub="Your customer-order settlement setup."
+        >
           <div className={s.formGrid}>
-            <div className={s.field}><span>Status</span><div><StatusBadge status={account.status} /></div></div>
-            <div className={s.field}><span>Provider</span><div>{account.provider}</div></div>
-            <div className={s.field}><span>Bank</span><div>{account.bankName || "—"}</div></div>
-            <div className={s.field}><span>Account number</span><div>{account.accountNumberMasked || "—"}</div></div>
-            <div className={s.field}><span>Account name</span><div>{account.accountName || "—"}</div></div>
-            <div className={s.field}><span>Terms accepted</span><div>v{account.termsVersionAccepted} {account.termsAcceptedAt ? `on ${new Date(account.termsAcceptedAt).toLocaleDateString()}` : ""}</div></div>
+            <div className={s.field}>
+              <span>Status</span>
+              <div>
+                <StatusBadge status={account.status} />
+              </div>
+            </div>
+            <div className={s.field}>
+              <span>Provider</span>
+              <div>{account.provider}</div>
+            </div>
+            <div className={s.field}>
+              <span>Bank</span>
+              <div>{account.bankName || "—"}</div>
+            </div>
+            <div className={s.field}>
+              <span>Account number</span>
+              <div>{account.accountNumberMasked || "—"}</div>
+            </div>
+            <div className={s.field}>
+              <span>Account name</span>
+              <div>{account.accountName || "—"}</div>
+            </div>
+            <div className={s.field}>
+              <span>Terms accepted</span>
+              <div>
+                v{account.termsVersionAccepted}{" "}
+                {account.termsAcceptedAt
+                  ? `on ${new Date(account.termsAcceptedAt).toLocaleDateString()}`
+                  : ""}
+              </div>
+            </div>
           </div>
         </Panel>
 
-        <Panel title="Fee schedule" sub="Deducted from every successful order settlement.">
+        <Panel
+          title="Fee schedule"
+          sub="Deducted from every successful order settlement."
+        >
           <FeeExplainer terms={terms} money={money} />
         </Panel>
       </div>
@@ -322,9 +442,22 @@ function AccountDashboard({ account, terms, onSuspend, onResume, money }) {
         title="Payment summary"
         sub={`Reporting period: ${range.from} to ${range.to}`}
         action={
-          <div style={{ display: "flex", gap: 8 }}>
-            <input type="date" value={range.from} max={range.to} onChange={(e) => setRange((r) => ({ ...r, from: e.target.value }))} />
-            <input type="date" value={range.to} min={range.from} max={today()} onChange={(e) => setRange((r) => ({ ...r, to: e.target.value }))} />
+          <div className={s.dateRange}>
+            <input
+              type="date"
+              value={range.from}
+              max={range.to}
+              onChange={(e) =>
+                setRange((r) => ({ ...r, from: e.target.value }))
+              }
+            />
+            <input
+              type="date"
+              value={range.to}
+              min={range.from}
+              max={today()}
+              onChange={(e) => setRange((r) => ({ ...r, to: e.target.value }))}
+            />
           </div>
         }
       >
@@ -334,12 +467,20 @@ function AccountDashboard({ account, terms, onSuspend, onResume, money }) {
           <div className={s.metrics}>
             <Metric label="Paid orders" value={summary.paidOrderCount} />
             <Metric label="Sales processed" value={money(summary.totalSales)} />
-            <Metric label="Paystack fees" value={money(summary.totalPaystackFees)} />
+            <Metric
+              label="Paystack fees"
+              value={money(summary.totalPaystackFees)}
+            />
             <Metric label="Ehral fees" value={money(summary.totalEhralFees)} />
-            <Metric label="Net settlements" value={money(summary.totalNetSettlements)} />
+            <Metric
+              label="Net settlements"
+              value={money(summary.totalNetSettlements)}
+            />
           </div>
         ) : (
-          <div className={s.empty}><p>No payment activity for this period yet.</p></div>
+          <div className={s.empty}>
+            <p>No payment activity for this period yet.</p>
+          </div>
         )}
       </Panel>
     </>
@@ -356,24 +497,37 @@ function OnlinePayments({ owner, money }) {
     setLoading(true);
     setLoadError("");
     try {
-      const [t, a] = await Promise.all([getOnlinePaymentTerms(), getOnlinePaymentAccountStatus()]);
+      const [t, a] = await Promise.all([
+        getOnlinePaymentTerms(),
+        getOnlinePaymentAccountStatus(),
+      ]);
       setTerms(t);
       setAccount(a);
     } catch (e) {
-      setLoadError(e?.response?.data?.message || "Could not load your online payment settings.");
+      setLoadError(
+        e?.response?.data?.message ||
+          "Could not load your online payment settings.",
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   if (loading) return <div className={s.loading}>Loading…</div>;
   if (loadError) return <div className={s.error}>{loadError}</div>;
   if (!owner) {
     return (
-      <Panel title="Online payments" sub="Only the business owner can view and manage payment setup.">
-        <div className={s.empty}><p>Ask the business owner to enable or manage online payments.</p></div>
+      <Panel
+        title="Online payments"
+        sub="Only the business owner can view and manage payment setup."
+      >
+        <div className={s.empty}>
+          <p>Ask the business owner to enable or manage online payments.</p>
+        </div>
       </Panel>
     );
   }
@@ -384,12 +538,17 @@ function OnlinePayments({ owner, money }) {
     <>
       {account?.configured && account?.reacceptanceRequired && (
         <div className={s.warning} style={{ marginBottom: 16 }}>
-          Ehral's Online Ordering & Payment Terms have been updated to version {terms.termsVersion}.
-          Please review and accept the latest terms to keep online payments active.
+          Ehral's Online Ordering & Payment Terms have been updated to version{" "}
+          {terms.termsVersion}. Please review and accept the latest terms to
+          keep online payments active.
         </div>
       )}
       {needsActivation ? (
-        <ActivationFlow terms={terms} money={money} onActivated={(a) => setAccount(a)} />
+        <ActivationFlow
+          terms={terms}
+          money={money}
+          onActivated={(a) => setAccount(a)}
+        />
       ) : (
         <AccountDashboard
           account={account}

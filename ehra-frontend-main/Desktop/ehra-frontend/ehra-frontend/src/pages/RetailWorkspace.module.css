@@ -339,8 +339,14 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 17px
+}
+
+.panelHeadAction {
+  flex-shrink: 0;
+  min-width: 0
 }
 
 .panelHead h3 {
@@ -1595,6 +1601,10 @@ td small {
 
   .panelHead {
     margin-bottom: 13px
+  }
+
+  .panelHeadAction {
+    width: 100%
   }
 
   .quickGrid {
