@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import styles from "./UpdateToast.module.css";
 
@@ -73,7 +73,11 @@ import styles from "./UpdateToast.module.css";
 //    background tab nobody's looking at.
 const BASE_CHECK_INTERVAL_MS = 45_000;
 const CHECK_JITTER_MS = 15_000;
-const AUTO_RELOAD_GRACE_MS = 2500;
+// Short debounce, not a "wait around" delay: just enough to not yank the
+// page out from under someone tabbing between two fields in the same
+// form. Once they're genuinely done (no focusout for this long), apply
+// right away.
+const AUTO_RELOAD_GRACE_MS = 400;
 
 function isFormFieldActive() {
   const el = typeof document !== "undefined" ? document.activeElement : null;
@@ -87,6 +91,12 @@ function isFormFieldActive() {
 export default function UpdateToast() {
   const stopPollingRef = useRef(null);
   const autoReloadTimerRef = useRef(null);
+  // The poller below is set up once inside onRegisteredSW, so it can't
+  // see fresh React state on later renders - these refs give it a live
+  // read of "is an update already pending/applying" without re-wiring
+  // the whole registration.
+  const needRefreshRef = useRef(false);
+  const applyingRef = useRef(false);
 
   const {
     offlineReady: [offlineReady, setOfflineReady],
@@ -110,6 +120,11 @@ export default function UpdateToast() {
         // etc.) when the next tick or a visibility/online event fires,
         // skip rather than piling up overlapping requests.
         if (checking) return;
+        // Also skip while an update is already pending or being applied -
+        // calling registration.update() again on top of an in-flight
+        // skip-waiting/activation can interfere with it and stall the
+        // reload instead of speeding anything up.
+        if (needRefreshRef.current || applyingRef.current) return;
         checking = true;
         try {
           if (document.hidden) return;
@@ -190,10 +205,20 @@ export default function UpdateToast() {
     };
   }, []);
 
-  const [reloading, setReloading] = useState(false);
+  // Keep the poller's live-read ref in sync with the real state.
+  useEffect(() => {
+    needRefreshRef.current = needRefresh;
+  }, [needRefresh]);
 
   const applyUpdate = useCallback(async () => {
-    setReloading(true);
+    if (applyingRef.current) return;
+    applyingRef.current = true;
+    // Hide the toast the instant a reload starts - there's nothing
+    // useful to show while the browser swaps in the new service worker
+    // and reloads, and no reason to make the user wait on it visually.
+    setOfflineReady(false);
+    setNeedRefresh(false);
+    clearTimeout(autoReloadTimerRef.current);
     try {
       await updateServiceWorker(true);
     } catch {
@@ -202,13 +227,15 @@ export default function UpdateToast() {
       // pick up whatever is currently live.
       window.location.reload();
     }
-  }, [updateServiceWorker]);
+  }, [updateServiceWorker, setOfflineReady, setNeedRefresh]);
 
   // Auto-reload path: only when it's safe. Runs whenever `needRefresh`
   // turns on, and re-arms on every focusout so a form the user just
-  // finished with doesn't keep blocking the update indefinitely.
+  // finished with doesn't keep blocking the update indefinitely. The
+  // grace window itself is short (AUTO_RELOAD_GRACE_MS) - this is a
+  // debounce against mid-form tabbing, not a deliberate wait.
   useEffect(() => {
-    if (!needRefresh || reloading) return undefined;
+    if (!needRefresh) return undefined;
 
     const tryAutoReload = () => {
       clearTimeout(autoReloadTimerRef.current);
@@ -224,7 +251,7 @@ export default function UpdateToast() {
       clearTimeout(autoReloadTimerRef.current);
       document.removeEventListener("focusout", tryAutoReload);
     };
-  }, [needRefresh, reloading, applyUpdate]);
+  }, [needRefresh, applyUpdate]);
 
   const close = () => {
     setOfflineReady(false);
@@ -233,7 +260,6 @@ export default function UpdateToast() {
   };
 
   const handleReload = () => {
-    if (reloading) return;
     applyUpdate();
   };
 
@@ -244,12 +270,10 @@ export default function UpdateToast() {
       <div className={styles.body}>
         <p className={styles.title}>
           {needRefresh
-            ? reloading
-              ? "Updating Ehral…"
-              : "A new version of Ehral is available."
+            ? "A new version of Ehral is available."
             : "Ehral is ready to work offline."}
         </p>
-        {needRefresh && !reloading && (
+        {needRefresh && (
           <p className={styles.subtitle}>
             Applying automatically in a moment. Reload now, or keep working and
             it'll update as soon as you're done with this field.
@@ -259,21 +283,15 @@ export default function UpdateToast() {
       <div className={styles.actions}>
         {needRefresh ? (
           <>
-            <button
-              type="button"
-              className={styles.later}
-              onClick={close}
-              disabled={reloading}
-            >
+            <button type="button" className={styles.later} onClick={close}>
               Later
             </button>
             <button
               type="button"
               className={styles.reload}
               onClick={handleReload}
-              disabled={reloading}
             >
-              {reloading ? "Reloading…" : "Reload now"}
+              Reload now
             </button>
           </>
         ) : (
