@@ -294,8 +294,12 @@ const customerMore = [
 ];
 
 function getPrimary(activeNav, role) {
-  if (activeNav === "messages") return "Messages";
-  if (activeNav === "home") return "Home";
+  // Customer uses lowercase keys ("home", "messages"); employer/employee use
+  // "Dashboard" and "Messages". Recognize both so the highlighted bottom-nav
+  // button always follows the tab that's actually open, instead of falling
+  // through to "More" for employer/employee.
+  if (activeNav === "messages" || activeNav === "Messages") return "Messages";
+  if (activeNav === "home" || activeNav === "Dashboard") return "Home";
   if (role === "customer") {
     if (["discover", "businesses"].includes(activeNav)) return "Businesses";
     if (["approvals", "orders", "receipts", "spending"].includes(activeNav))
