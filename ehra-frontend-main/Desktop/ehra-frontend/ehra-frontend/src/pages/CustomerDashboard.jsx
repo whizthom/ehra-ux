@@ -28,6 +28,7 @@ import NotificationToastStack from "../components/notifications/NotificationToas
 import BusinessCard from "../components/BusinessCard";
 import BrandSplash from "../components/BrandSplash";
 import LogoutConfirmModal from "../components/LogoutConfirmModal";
+import DisconnectConfirmModal from "../components/DisconnectConfirmModal";
 import PremiumReceipt from "../components/PremiumReceipt";
 import styles from "./CustomerDashboard.module.css";
 
@@ -652,6 +653,11 @@ export default function CustomerDashboard() {
   // same confirmation dialog as the sidebar and mobile menu.
   const [confirmSignOut, setConfirmSignOut] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  // Disconnecting from a business asks first, using the same confirmation
+  // dialog design as "Sign out of Ehral". Holds the business pending
+  // confirmation (or null when the dialog is closed).
+  const [confirmDisconnect, setConfirmDisconnect] = useState(null);
+  const [disconnecting, setDisconnecting] = useState(false);
   const [discovery, setDiscovery] = useState([]);
   const [discoveryLoading, setDiscoveryLoading] = useState(false);
   const [discoveryQuery, setDiscoveryQuery] = useState("");
@@ -1012,6 +1018,28 @@ export default function CustomerDashboard() {
             ? "We couldn't disconnect you from this business. Please try again."
             : "We couldn't connect you to this business. Please try again."),
       );
+    }
+  };
+
+  // Connecting happens right away, but disconnecting asks first - this is
+  // the entry point the Discover cards call. It only opens the confirmation
+  // dialog for the "leaving" direction; connecting still goes straight
+  // through to toggleConnection above.
+  const requestToggleConnection = (business) => {
+    const id = business?.businessId;
+    if (!id || phaseOf(id)) return;
+    if (business.connected) setConfirmDisconnect(business);
+    else toggleConnection(business);
+  };
+
+  const confirmDisconnectBusiness = async () => {
+    if (!confirmDisconnect) return;
+    setDisconnecting(true);
+    try {
+      await toggleConnection(confirmDisconnect);
+    } finally {
+      setDisconnecting(false);
+      setConfirmDisconnect(null);
     }
   };
 
@@ -1456,7 +1484,7 @@ export default function CustomerDashboard() {
                     key={b.businessId}
                     business={b}
                     phase={phaseOf(b.businessId)}
-                    onToggle={toggleConnection}
+                    onToggle={requestToggleConnection}
                     onView={(business) =>
                       nav(`/customer/business/${business.businessId}`, {
                         state: { fromTab: tab },
@@ -2407,6 +2435,14 @@ export default function CustomerDashboard() {
             setConfirmSignOut(false);
           }
         }}
+      />
+
+      <DisconnectConfirmModal
+        open={Boolean(confirmDisconnect)}
+        businessName={confirmDisconnect?.businessName}
+        loading={disconnecting}
+        onCancel={() => !disconnecting && setConfirmDisconnect(null)}
+        onConfirm={confirmDisconnectBusiness}
       />
 
       {selectedOrder && (
