@@ -13,6 +13,7 @@ const EVENT_LABELS = {
   MULTIPLE_EMPLOYEES_SAME_DEVICE: "Multiple employees / same device",
   SUSPICIOUS_ATTENDANCE: "Suspicious attendance",
   NEW_DEVICE_REGISTERED: "New device registered",
+  DEVICE_BINDING_FAILED: "New device could not be saved (system error)",
 };
 
 function formatDate(value) {
