@@ -566,6 +566,49 @@ td {
   white-space: nowrap
 }
 
+/* Fee-explainer "how it works" table: two columns of prose (a short label,
+   then a full sentence), not row-per-record data like the tables above -
+   the base nowrap rule was forcing that whole sentence onto one line,
+   which is what was running off the edge of the screen on mobile. Let it
+   wrap like normal text; only the label column stays on one line. */
+.feeInfoTable td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  vertical-align: top
+}
+
+.feeInfoTable td:first-child {
+  white-space: nowrap
+}
+
+@media(max-width:560px) {
+
+  /* Below the width where label + wrapped sentence can sit side by side
+     comfortably, stack each row into its own block instead: label on
+     its own line, then the explanation under it. */
+  .feeInfoTable,
+  .feeInfoTable tbody,
+  .feeInfoTable tr,
+  .feeInfoTable td {
+    display: block;
+    width: 100%
+  }
+
+  .feeInfoTable tr {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color)
+  }
+
+  .feeInfoTable tr:last-child {
+    border-bottom: 0
+  }
+
+  .feeInfoTable td {
+    padding: 2px 0;
+    border-bottom: 0
+  }
+}
+
 td b,
 td small {
   display: block
@@ -2627,6 +2670,7 @@ td small {
 
 .copyConfirmation {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 7px;
   margin-top: 9px;
@@ -2635,7 +2679,12 @@ td small {
   background: var(--bg-soft-accent);
   color: var(--accent);
   font-size: 10px;
-  font-weight: 750
+  font-weight: 750;
+  overflow-wrap: anywhere
+}
+
+.copyConfirmation i {
+  flex-shrink: 0
 }
 
 .channelInfo {

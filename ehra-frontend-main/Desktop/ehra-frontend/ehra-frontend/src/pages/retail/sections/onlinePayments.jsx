@@ -33,7 +33,7 @@ function FeeExplainer({ terms, money }) {
       <div className={s.fieldWide}>
         <span className={s.sectionLabel}>How payment fees work</span>
         <div className={`${s.tableWrap}`} style={{ marginTop: 8 }}>
-          <table>
+          <table className={s.feeInfoTable}>
             <tbody>
               <tr>
                 <td>
