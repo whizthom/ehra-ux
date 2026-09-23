@@ -2854,12 +2854,13 @@
   }
 
   .searchButton {
-    padding: 8px;
-    width: 42px;
+    display: none;
   }
 
-  .searchButton input {
-    display: none;
+  .discoverySearchRow,
+  .discoverySearch {
+    width: 100%;
+    flex: 1 1 100%;
   }
 
   .content {
