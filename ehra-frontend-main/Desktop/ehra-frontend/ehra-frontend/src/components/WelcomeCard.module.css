@@ -106,3 +106,42 @@
     opacity: 0.6;
     cursor: not-allowed;
 }
+
+.card {
+    border-radius: 22px;
+    border: 1px solid color-mix(in srgb, var(--border-color) 72%, transparent);
+    background: linear-gradient(145deg, var(--bg-surface), color-mix(in srgb, var(--bg-surface) 91%, var(--accent) 9%));
+    box-shadow: 0 24px 60px -40px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.title {
+    font-size: clamp(22px, 3vw, 34px);
+    font-weight: 900;
+    letter-spacing: -.055em;
+}
+
+.desc {
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.primaryBtn,
+.secondaryBtn {
+    border-radius: 11px;
+    min-height: 40px;
+    font-weight: 750;
+}
+
+@media (max-width: 560px) {
+    .card {
+        border-radius: 17px;
+    }
+
+    .actions {
+        flex-direction: column;
+    }
+
+    .actions button {
+        width: 100%;
+    }
+}

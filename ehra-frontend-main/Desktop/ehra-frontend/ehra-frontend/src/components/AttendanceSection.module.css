@@ -133,16 +133,120 @@
    Ehral mobile polish: attendance workspace
    ───────────────────────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
-  .tabBar { margin: 0 -2px; border-bottom-color: color-mix(in srgb, var(--border-color) 75%, transparent); }
-  .tabBtn { flex: 1 0 auto; min-height: 44px; padding: 10px 13px; font-size: 11px; }
-  .tabBody { padding-top: 12px; }
-  .historyFilters { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; }
-  .dateField { min-width: 0; }
-  .dateField label { font-size: 9px; }
-  .dateField input { width: 100%; min-height: 42px; border-radius: 11px; font-size: 12px; }
-  .applyBtn { grid-column: 1 / -1; min-height: 42px; border-radius: 11px; }
+    .tabBar {
+        margin: 0 -2px;
+        border-bottom-color: color-mix(in srgb, var(--border-color) 75%, transparent);
+    }
+
+    .tabBtn {
+        flex: 1 0 auto;
+        min-height: 44px;
+        padding: 10px 13px;
+        font-size: 11px;
+    }
+
+    .tabBody {
+        padding-top: 12px;
+    }
+
+    .historyFilters {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        padding: 10px;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+    }
+
+    .dateField {
+        min-width: 0;
+    }
+
+    .dateField label {
+        font-size: 9px;
+    }
+
+    .dateField input {
+        width: 100%;
+        min-height: 42px;
+        border-radius: 11px;
+        font-size: 12px;
+    }
+
+    .applyBtn {
+        grid-column: 1 / -1;
+        min-height: 42px;
+        border-radius: 11px;
+    }
 }
+
 @media (max-width: 380px) {
-  .historyFilters { grid-template-columns: 1fr; }
-  .applyBtn { grid-column: auto; }
+    .historyFilters {
+        grid-template-columns: 1fr;
+    }
+
+    .applyBtn {
+        grid-column: auto;
+    }
+}
+
+.layout {
+    gap: 16px;
+}
+
+.tabBar {
+    padding: 5px;
+    border-radius: 15px;
+    background: var(--bg-surface-alt);
+    border: 1px solid color-mix(in srgb, var(--border-color) 78%, transparent);
+    box-shadow: 0 12px 30px -28px rgba(0, 0, 0, .45);
+}
+
+.tabBtn {
+    min-height: 40px;
+    border-radius: 11px;
+    font-weight: 750;
+    transition: all .18s ease;
+}
+
+.tabBtn:hover {
+    transform: translateY(-1px);
+}
+
+.tabBody {
+    border-radius: 18px;
+    border: 1px solid color-mix(in srgb, var(--border-color) 80%, transparent);
+    background: var(--bg-surface);
+    box-shadow: 0 18px 45px -34px rgba(0, 0, 0, .4);
+}
+
+.historyFilters {
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--bg-surface-alt) 75%, transparent);
+    border: 1px solid color-mix(in srgb, var(--border-color) 75%, transparent);
+}
+
+.applyBtn {
+    border-radius: 11px;
+    font-weight: 750;
+}
+
+@media (max-width: 640px) {
+    .tabBar {
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .tabBar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tabBtn {
+        flex: 0 0 auto;
+    }
+
+    .tabBody {
+        border-radius: 15px;
+    }
 }

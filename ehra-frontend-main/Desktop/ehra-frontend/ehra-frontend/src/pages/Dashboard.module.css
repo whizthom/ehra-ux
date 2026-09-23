@@ -2590,3 +2590,446 @@
         min-width: 0;
     }
 }
+
+/* =========================================================================
+   EHRAL EMPLOYER PREMIUM LAYER
+   -------------------------------------------------------------------------
+   Employer workspace only. This layer upgrades the existing information
+   architecture without changing business logic, data flow, or navigation.
+   The visual language follows the stronger EHRAL account/customer surfaces,
+   while giving the employer workspace a more executive, operations-grade
+   finish.
+========================================================================= */
+
+.dash {
+    --emp-radius-xl: 24px;
+    --emp-radius-lg: 18px;
+    --emp-radius-md: 14px;
+    --emp-shadow-soft: 0 18px 50px -34px color-mix(in srgb, var(--accent) 28%, transparent);
+    --emp-shadow-card: 0 10px 34px -28px rgba(15, 23, 42, .42);
+    --emp-line: color-mix(in srgb, var(--border-color) 82%, transparent);
+    background:
+        radial-gradient(circle at 88% -8%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 32%),
+        radial-gradient(circle at 35% 0%, color-mix(in srgb, var(--accent) 4%, transparent), transparent 30%),
+        var(--bg-page);
+}
+
+.sidebar {
+    width: 244px;
+    padding: 8px 10px;
+    border-right: 1px solid color-mix(in srgb, var(--border-color) 75%, transparent);
+    box-shadow: 18px 0 50px -46px rgba(0, 0, 0, .5);
+}
+
+.sbLogo {
+    margin: 2px 4px 8px;
+    padding: 16px 12px 18px;
+    border-bottom: 0;
+    border-radius: 18px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, .075), rgba(255, 255, 255, .025));
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .05);
+}
+
+.sbLogoIcon,
+.sbLogoImg {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+}
+
+.sbLogoIcon {
+    box-shadow: 0 10px 24px -16px var(--accent);
+}
+
+.sbLogoText {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -.035em;
+}
+
+.sbNav {
+    padding: 8px 4px;
+    scrollbar-width: thin;
+}
+
+.sbSection {
+    padding: 14px 12px 7px;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .16em;
+    opacity: .72;
+}
+
+.sbItem {
+    position: relative;
+    margin: 2px 0;
+    padding: 11px 12px;
+    min-height: 42px;
+    border-radius: 12px;
+    gap: 11px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: -.01em;
+}
+
+.sbItem i {
+    width: 20px;
+    text-align: center;
+    font-size: 17px;
+    opacity: .86;
+}
+
+.sbItem:hover {
+    background: rgba(255, 255, 255, .075);
+    transform: translateX(1px);
+}
+
+.sbItem.active {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 23%, rgba(255, 255, 255, .08)), rgba(255, 255, 255, .09));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent), 0 10px 26px -24px var(--accent);
+}
+
+.sbItem.active::before {
+    content: "";
+    position: absolute;
+    left: 3px;
+    top: 10px;
+    bottom: 10px;
+    width: 3px;
+    border-radius: 999px;
+    background: var(--accent-hover);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--accent-hover) 70%, transparent);
+}
+
+.sbFooter {
+    margin: 8px 4px 4px;
+    padding: 12px;
+    border: 0;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .055);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .045);
+}
+
+.topbar {
+    min-height: 68px;
+    padding: 10px 28px;
+    background: color-mix(in srgb, var(--bg-surface) 90%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--border-color) 70%, transparent);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.topbarTitle {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -.025em;
+}
+
+.topbarSub {
+    font-size: 11px;
+    opacity: .78;
+}
+
+.content,
+.contentFull,
+.contentFullNarrow {
+    padding-left: clamp(14px, 2.5vw, 30px);
+    padding-right: clamp(14px, 2.5vw, 30px);
+}
+
+.content,
+.contentFull {
+    padding-top: clamp(16px, 2.2vw, 26px);
+    gap: 18px;
+}
+
+.statsGrid {
+    gap: 14px;
+}
+
+.statCard {
+    position: relative;
+    overflow: hidden;
+    min-height: 154px;
+    padding: 18px;
+    border-radius: var(--emp-radius-lg);
+    border: 1px solid var(--emp-line);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--bg-surface) 98%, var(--accent) 2%), var(--bg-surface));
+    box-shadow: var(--emp-shadow-card);
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.statCard::after {
+    content: "";
+    position: absolute;
+    width: 110px;
+    height: 110px;
+    right: -58px;
+    top: -58px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    pointer-events: none;
+}
+
+.statCard:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--accent) 24%, var(--border-color));
+    box-shadow: 0 22px 48px -34px color-mix(in srgb, var(--accent) 42%, transparent);
+}
+
+.statIcon {
+    width: 40px;
+    height: 40px;
+    border-radius: 13px;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08);
+}
+
+.statNum {
+    margin-top: 4px;
+    font-size: clamp(25px, 2.2vw, 32px);
+    line-height: 1;
+    font-weight: 850;
+    letter-spacing: -.055em;
+}
+
+.statLabel {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .01em;
+}
+
+.statTrend {
+    font-size: 10px;
+    font-weight: 650;
+}
+
+.row2 {
+    gap: 18px;
+}
+
+.panel,
+.dirPanel,
+.missingClockOutPanel {
+    border-radius: var(--emp-radius-lg);
+    border: 1px solid var(--emp-line);
+    background: color-mix(in srgb, var(--bg-surface) 97%, var(--accent) 3%);
+    box-shadow: var(--emp-shadow-card);
+}
+
+.panel {
+    padding: 18px;
+}
+
+.panelHdr,
+.dirHdr {
+    min-height: 28px;
+}
+
+.panelTitle {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: -.015em;
+}
+
+.panelTitleLg {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -.035em;
+}
+
+.qaGrid {
+    gap: 10px;
+}
+
+.qaBtn {
+    min-height: 54px;
+    padding: 10px 12px;
+    border-radius: 13px;
+    border: 1px solid var(--emp-line);
+    background: var(--bg-surface-alt);
+    font-size: 11px;
+    font-weight: 750;
+    transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+.qaBtn:hover {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--accent) 30%, var(--border-color));
+    box-shadow: 0 12px 24px -22px var(--accent);
+}
+
+.qaIconWrap {
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+}
+
+.tableScrollWrap {
+    border-radius: 14px;
+    border: 1px solid var(--emp-line);
+    overflow: auto;
+}
+
+.empTable {
+    min-width: 720px;
+}
+
+.empTable th {
+    background: color-mix(in srgb, var(--bg-surface-alt) 90%, var(--accent) 10%);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.empTable td {
+    padding-top: 13px;
+    padding-bottom: 13px;
+    font-size: 11px;
+}
+
+.tblBtn {
+    border-radius: 10px;
+    min-height: 32px;
+    padding-inline: 10px;
+}
+
+.emptyState {
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--bg-surface-alt) 72%, transparent);
+    border: 1px dashed var(--emp-line);
+    padding: 28px 18px;
+}
+
+.invitePanel {
+    border-radius: 16px;
+    box-shadow: var(--emp-shadow-soft);
+}
+
+.dashboardFooter {
+    opacity: .72;
+}
+
+@media (max-width: 1100px) and (min-width: 901px) {
+    .sidebar {
+        width: 224px;
+    }
+
+    .statsGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .row2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+    .dash {
+        background: var(--bg-page);
+    }
+
+    .topbar {
+        min-height: 62px;
+        padding: 8px 14px;
+    }
+
+    .content,
+    .contentFull {
+        padding: 14px 14px 0;
+        gap: 14px;
+    }
+
+    .statsGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .statCard {
+        min-height: 132px;
+        padding: 15px;
+        border-radius: 16px;
+    }
+
+    .row2 {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .panel,
+    .dirPanel,
+    .missingClockOutPanel {
+        border-radius: 16px;
+    }
+
+    .panel {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 560px) {
+
+    .content,
+    .contentFull {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .statsGrid {
+        gap: 8px;
+    }
+
+    .statCard {
+        min-height: 124px;
+        padding: 13px;
+        border-radius: 15px;
+    }
+
+    .statIcon {
+        width: 36px;
+        height: 36px;
+        border-radius: 11px;
+    }
+
+    .statNum {
+        font-size: 24px;
+    }
+
+    .panel {
+        padding: 13px;
+    }
+
+    .qaGrid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .qaBtn {
+        min-height: 52px;
+        padding: 9px;
+    }
+
+    .qaIconWrap {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+@media (max-width: 380px) {
+    .statsGrid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .statCard {
+        min-height: 118px;
+        padding: 11px;
+    }
+
+    .statLabel {
+        font-size: 10px;
+    }
+
+    .statTrend {
+        font-size: 9px;
+    }
+}

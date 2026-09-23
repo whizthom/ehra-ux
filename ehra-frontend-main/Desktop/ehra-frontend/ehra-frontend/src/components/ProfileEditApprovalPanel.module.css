@@ -847,3 +847,28 @@
         max-width: none;
     }
 }
+
+.wrap {
+    border-radius: 18px;
+}
+
+.profileCard,
+.editCard,
+.panel,
+.requestCard {
+    border-radius: 17px;
+}
+
+button {
+    border-radius: 11px;
+}
+
+@media (max-width: 640px) {
+
+    .profileCard,
+    .editCard,
+    .panel,
+    .requestCard {
+        border-radius: 14px;
+    }
+}
