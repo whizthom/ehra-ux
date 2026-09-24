@@ -235,15 +235,17 @@
 }
 
 
-/* Was previously hidden on the employer home dashboard for mobile
-   (display:none !important below max-width:900px) - now shown on every
-   screen size, per request, so Pending approvals / Pending leave
-   requests are reachable on mobile too. */
+/* Temporarily hidden on the employer home dashboard for mobile. The data
+   and approval logic remain intact so desktop behavior is unchanged. */
 .mobileHiddenHomePanel {
     display: block;
 }
 
 @media (max-width: 900px) {
+    .mobileHiddenHomePanel {
+        display: none !important;
+    }
+
     .topbar {
         background: transparent;
         border-bottom: none;
@@ -2787,7 +2789,7 @@
     margin-top: 4px;
     font-size: clamp(25px, 2.2vw, 32px);
     line-height: 1;
-    font-weight: 600;
+    font-weight: 850;
     letter-spacing: -.055em;
 }
 
