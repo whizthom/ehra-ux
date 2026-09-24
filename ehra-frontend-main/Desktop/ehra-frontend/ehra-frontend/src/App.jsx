@@ -35,7 +35,6 @@ import Terms from "./pages/public/Terms";
 import Privacy from "./pages/public/Privacy";
 import Storefront from "./pages/public/Storefront";
 import CustomerDashboard from "./pages/CustomerDashboard";
-import EhralCredits from "./pages/EhralCredits";
 
 import NotFound from "./pages/NotFound";
 
@@ -192,11 +191,13 @@ function App() {
               }
             />
 
+            {/* Ehral Credits belongs to the active business-type workspace.
+                Keep this legacy path only as a compatibility redirect for old bookmarks. */}
             <Route
               path="/ehral-credits"
               element={
                 <ProtectedRoute roles={["ROLE_ADMIN"]}>
-                  <EhralCredits />
+                  <Navigate to="/retail" replace />
                 </ProtectedRoute>
               }
             />

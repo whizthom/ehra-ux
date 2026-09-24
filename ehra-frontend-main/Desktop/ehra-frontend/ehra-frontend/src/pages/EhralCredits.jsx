@@ -8,7 +8,7 @@ const AMOUNTS = [1000, 2500, 5000, 10000];
 const money = (n) => `₦${Number(n || 0).toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const label = (code = "") => code.toLowerCase().replaceAll("_", " ").replace(/\b\w/g, x => x.toUpperCase());
 
-export default function EhralCredits() {
+export default function EhralCredits({ onBack } = {}) {
   const navigate = useNavigate();
   const [data, setData] = useState(null); const [loading, setLoading] = useState(true); const [error, setError] = useState("");
   const [selected, setSelected] = useState(5000); const [custom, setCustom] = useState(""); const [buyOpen, setBuyOpen] = useState(false); const [agreementOpen, setAgreementOpen] = useState(false); const [processing, setProcessing] = useState(false); const [message, setMessage] = useState("");
@@ -20,7 +20,7 @@ export default function EhralCredits() {
   const purchase = async () => { if (!data?.agreementAccepted) { setBuyOpen(false); setAgreementOpen(true); return; } if (!amount || amount < 1) { setMessage("Enter a valid amount."); return; } setProcessing(true); try { const init = await initializeCreditPurchase(amount); await payWithPaystack({ email: init.email, amountNaira: Number(init.amount), reference: init.reference, publicKey: init.publicKey, onSuccess: async (ref) => { try { await verifyCreditPurchase(ref); setMessage("Your Ehral Credits have been added successfully."); setBuyOpen(false); await load(); } catch (e) { setMessage(e?.response?.data?.message || "Payment was received, but verification is still pending. Please refresh shortly."); } finally { setProcessing(false); } }, onClose: () => setProcessing(false) }); } catch (e) { setMessage(e?.response?.data?.message || e?.message || "We couldn't start the payment."); setProcessing(false); } };
   if (loading) return <div className={styles.page}><div className={styles.skeletonHero}/><div className={styles.loadingLine}>Loading your Ehral Credits…</div></div>;
   return <div className={styles.page}>
-    <div className={styles.topRow}><div><button className={styles.back} onClick={() => navigate("/dashboard")}><i className="ti ti-arrow-left"/> Dashboard</button><p className={styles.eyebrow}>EHRAL CREDITS</p><h1>{data?.businessTypeLabel || "Business"} Credits</h1><p className={styles.subtitle}>Power your business with Ehral services.</p></div><button className={styles.buyTop} onClick={() => setBuyOpen(true)}><i className="ti ti-plus"/> Add Credits</button></div>
+    <div className={styles.topRow}><div><button className={styles.back} onClick={() => (onBack ? onBack() : navigate("/retail"))}><i className="ti ti-arrow-left"/> Dashboard</button><p className={styles.eyebrow}>EHRAL CREDITS</p><h1>{data?.businessTypeLabel || "Business"} Credits</h1><p className={styles.subtitle}>Power your business with Ehral services.</p></div><button className={styles.buyTop} onClick={() => setBuyOpen(true)}><i className="ti ti-plus"/> Add Credits</button></div>
     {error && <div className={styles.error}>{error}<button onClick={load}>Retry</button></div>}
     {message && <div className={styles.notice} role="status"><span>{message}</span><button onClick={() => setMessage("")} aria-label="Dismiss"><i className="ti ti-x"/></button></div>}
     <section className={styles.hero}>

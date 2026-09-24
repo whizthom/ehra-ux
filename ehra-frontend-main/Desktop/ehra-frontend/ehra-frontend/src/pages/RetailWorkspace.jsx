@@ -60,6 +60,7 @@ import MessagingHub from "../components/messaging/MessagingHub";
 import NotificationToastStack from "../components/notifications/NotificationToastStack";
 import useMessagingConnection from "../hooks/useMessagingConnection";
 import useCustomerInboxBadge from "../hooks/useCustomerInboxBadge";
+import EhralCredits from "./EhralCredits";
 
 const today = () => new Date().toISOString().slice(0, 10);
 const NAV = [
@@ -78,6 +79,7 @@ const NAV = [
   ["Suppliers", "⇄", "finance"],
   ["Reports", "▥", "finance"],
   ["Payments", "$", "finance"],
+  ["Ehral Credits", "◉", "credits"],
   ["Settings", "⚙", "settings"],
 ];
 const PERM = {
@@ -88,6 +90,7 @@ const PERM = {
   sales: "canSales",
   finance: "canFinance",
   messages: "canMessages",
+  credits: "canCredits",
 };
 
 export default function RetailWorkspace() {
