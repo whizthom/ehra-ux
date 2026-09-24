@@ -11,7 +11,14 @@ import {
 } from "../api/commerceApi";
 import { getMyAccounts } from "../api/authApi";
 import { createCustomerBusinessConversation } from "../api/messagingApi";
-import { payForOrderOnline } from "../api/orderPaymentApi";
+import {
+  payForOrderOnline,
+  initializeOrderBankTransfer,
+  initializeOrderUssd,
+  initializeOrderBank,
+  listOrderPayWithBankBanks,
+  verifyOrderPayment,
+} from "../api/orderPaymentApi";
 import { useAuth } from "../context/AuthContext";
 import {
   cartKey,
@@ -357,6 +364,12 @@ export default function CustomerStore() {
   const [payingOnline, setPayingOnline] = useState(false);
   const [onlinePaymentResult, setOnlinePaymentResult] = useState(null);
   const [onlinePaymentError, setOnlinePaymentError] = useState("");
+  const [paymentMethodOpen, setPaymentMethodOpen] = useState(false);
+  const [directPayment, setDirectPayment] = useState(null);
+  const [paymentBanks, setPaymentBanks] = useState([]);
+  const [selectedPaymentBank, setSelectedPaymentBank] = useState("");
+  const [paymentAccountNumber, setPaymentAccountNumber] = useState("");
+  const [paymentBusy, setPaymentBusy] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [toast, setToast] = useState("");
   const [formError, setFormError] = useState("");
@@ -702,6 +715,9 @@ export default function CustomerStore() {
       setPlaced(r.data);
       setOnlinePaymentResult(null);
       setOnlinePaymentError("");
+      setPaymentMethodOpen(false);
+      setDirectPayment(null);
+      setPaymentAccountNumber("");
       setCart({});
       setCheckoutOpen(false);
     } catch (err) {
@@ -721,6 +737,7 @@ export default function CustomerStore() {
     try {
       const result = await payForOrderOnline(placed.id);
       setOnlinePaymentResult(result);
+      setPaymentMethodOpen(false);
     } catch (e) {
       setOnlinePaymentError(
         e?.response?.data?.message ||
@@ -729,6 +746,78 @@ export default function CustomerStore() {
       );
     } finally {
       setPayingOnline(false);
+    }
+  };
+
+  const openPaymentMethods = async () => {
+    setPaymentMethodOpen(true);
+    setOnlinePaymentError("");
+    try {
+      const banks = await listOrderPayWithBankBanks();
+      setPaymentBanks(Array.isArray(banks) ? banks : []);
+      if (!selectedPaymentBank && Array.isArray(banks) && banks.length) {
+        setSelectedPaymentBank(banks[0].code);
+      }
+    } catch (e) {
+      setPaymentBanks([]);
+    }
+  };
+
+  const startDirectPayment = async (method) => {
+    if (!placed?.id || paymentBusy) return;
+    setPaymentBusy(true);
+    setOnlinePaymentError("");
+    try {
+      let result;
+      if (method === "transfer") {
+        result = await initializeOrderBankTransfer(placed.id);
+      } else if (method === "ussd") {
+        result = await initializeOrderUssd(placed.id);
+      } else {
+        if (!selectedPaymentBank || !paymentAccountNumber.trim()) {
+          throw new Error(
+            "Select your bank and enter your bank account number.",
+          );
+        }
+        result = await initializeOrderBank(
+          placed.id,
+          selectedPaymentBank,
+          paymentAccountNumber.trim(),
+          form.customerPhone?.trim() || undefined,
+        );
+      }
+      setDirectPayment({ method, ...result });
+      setPaymentMethodOpen(false);
+    } catch (e) {
+      setOnlinePaymentError(
+        e?.response?.data?.message ||
+          e?.message ||
+          "We could not start this payment method. Please try again.",
+      );
+    } finally {
+      setPaymentBusy(false);
+    }
+  };
+
+  const checkDirectPayment = async () => {
+    if (!placed?.id || !directPayment?.reference || paymentBusy) return;
+    setPaymentBusy(true);
+    setOnlinePaymentError("");
+    try {
+      const result = await verifyOrderPayment(
+        placed.id,
+        directPayment.reference,
+      );
+      setOnlinePaymentResult(result);
+      if (result?.status === "SUCCESS") setDirectPayment(null);
+    } catch (e) {
+      setOnlinePaymentError(
+        e?.response?.data?.message ||
+          e?.message ||
+          "We could not confirm the payment yet.",
+      );
+    } finally {
+      setPaymentBusy(false);
     }
   };
 
@@ -1797,15 +1886,157 @@ export default function CustomerStore() {
                 {money(placed.currency || currency, placed.total)}
               </strong>
             </div>
-            {storefront?.onlinePaymentsEnabled && !onlinePaymentResult && (
-              <button
-                className={styles.primary}
-                disabled={payingOnline}
-                onClick={payNow}
+            {storefront?.onlinePaymentsEnabled &&
+              !onlinePaymentResult &&
+              !directPayment && (
+                <button
+                  className={styles.primary}
+                  disabled={payingOnline}
+                  onClick={openPaymentMethods}
+                >
+                  {payingOnline
+                    ? "Opening secure payment…"
+                    : "Choose payment method"}
+                  <i className="ti ti-credit-card" aria-hidden="true" />
+                </button>
+              )}
+
+            {paymentMethodOpen && !directPayment && !onlinePaymentResult && (
+              <div
+                className={styles.successTotal}
+                style={{ textAlign: "left" }}
               >
-                {payingOnline ? "Opening secure payment…" : "Pay online now"}
-                <i className="ti ti-credit-card" aria-hidden="true" />
-              </button>
+                <strong style={{ display: "block", marginBottom: 10 }}>
+                  Choose how to pay
+                </strong>
+                <button
+                  className={styles.primary}
+                  disabled={payingOnline}
+                  onClick={payNow}
+                >
+                  {payingOnline
+                    ? "Opening Paystack…"
+                    : "Card / Paystack Checkout"}
+                  <i className="ti ti-credit-card" aria-hidden="true" />
+                </button>
+                <button
+                  className={styles.primary}
+                  disabled={paymentBusy}
+                  onClick={() => startDirectPayment("transfer")}
+                >
+                  {paymentBusy ? "Starting…" : "Bank transfer"}
+                  <i className="ti ti-building-bank" aria-hidden="true" />
+                </button>
+                <button
+                  className={styles.primary}
+                  disabled={paymentBusy}
+                  onClick={() => startDirectPayment("ussd")}
+                >
+                  {paymentBusy ? "Starting…" : "USSD (*737)"}
+                  <i className="ti ti-device-mobile" aria-hidden="true" />
+                </button>
+                <div style={{ marginTop: 10 }}>
+                  <select
+                    value={selectedPaymentBank}
+                    onChange={(e) => setSelectedPaymentBank(e.target.value)}
+                    style={{ width: "100%", marginBottom: 8 }}
+                  >
+                    <option value="">Pay with bank account</option>
+                    {paymentBanks.map((b) => (
+                      <option key={b.code} value={b.code}>
+                        {b.name}
+                      </option>
+                    ))}
+                  </select>
+                  {selectedPaymentBank && (
+                    <>
+                      <input
+                        value={paymentAccountNumber}
+                        onChange={(e) =>
+                          setPaymentAccountNumber(
+                            e.target.value.replace(/\D/g, "").slice(0, 10),
+                          )
+                        }
+                        placeholder="Bank account number"
+                        inputMode="numeric"
+                        style={{ width: "100%", marginBottom: 8 }}
+                      />
+                      <button
+                        className={styles.primary}
+                        disabled={paymentBusy}
+                        onClick={() => startDirectPayment("bank")}
+                      >
+                        {paymentBusy ? "Starting…" : "Continue with bank"}
+                        <i className="ti ti-building-bank" aria-hidden="true" />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {directPayment && !onlinePaymentResult && (
+              <div
+                className={styles.successTotal}
+                style={{ textAlign: "left" }}
+              >
+                <strong style={{ display: "block", marginBottom: 8 }}>
+                  {directPayment.method === "transfer"
+                    ? "Bank transfer details"
+                    : directPayment.method === "ussd"
+                      ? "USSD payment"
+                      : "Bank payment"}
+                </strong>
+                {directPayment.displayText && (
+                  <p>{directPayment.displayText}</p>
+                )}
+                {directPayment.method === "transfer" && (
+                  <div>
+                    <p>
+                      <b>Bank:</b> {directPayment.bankName || "Paystack"}
+                    </p>
+                    <p>
+                      <b>Account name:</b> {directPayment.accountName}
+                    </p>
+                    <p>
+                      <b>Account number:</b> {directPayment.accountNumber}
+                    </p>
+                    {directPayment.accountExpiresAt && (
+                      <p>
+                        <b>Expires:</b> {directPayment.accountExpiresAt}
+                      </p>
+                    )}
+                  </div>
+                )}
+                {directPayment.ussdCode && (
+                  <p>
+                    <b>Dial:</b> {directPayment.ussdCode}
+                  </p>
+                )}
+                {directPayment.authorizationUrl && (
+                  <button
+                    className={styles.primary}
+                    onClick={() =>
+                      window.open(
+                        directPayment.authorizationUrl,
+                        "_blank",
+                        "noopener,noreferrer",
+                      )
+                    }
+                  >
+                    Continue securely
+                    <i className="ti ti-external-link" aria-hidden="true" />
+                  </button>
+                )}
+                <button
+                  className={styles.primary}
+                  disabled={paymentBusy}
+                  onClick={checkDirectPayment}
+                >
+                  {paymentBusy ? "Checking…" : "I've completed payment"}
+                  <i className="ti ti-refresh" aria-hidden="true" />
+                </button>
+              </div>
             )}
             {onlinePaymentError && (
               <div className={styles.formError} role="alert">
@@ -1843,6 +2074,9 @@ export default function CustomerStore() {
                 setPlaced(null);
                 setOnlinePaymentResult(null);
                 setOnlinePaymentError("");
+                setPaymentMethodOpen(false);
+                setDirectPayment(null);
+                setPaymentAccountNumber("");
               }}
             >
               Continue shopping

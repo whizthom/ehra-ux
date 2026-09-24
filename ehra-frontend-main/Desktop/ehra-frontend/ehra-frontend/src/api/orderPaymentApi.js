@@ -72,16 +72,44 @@ export const verifyOrderPayment = (orderId, reference) =>
 export const getCustomerOrderPaymentStatus = (orderId) =>
   API.get(`/customer/orders/${orderId}/payments/status`).then((r) => r.data);
 
+export const initializeOrderBankTransfer = (orderId) =>
+  API.post(`/customer/orders/${orderId}/payments/bank-transfer`).then(
+    (r) => r.data
+  );
+
+export const initializeOrderUssd = (orderId) =>
+  API.post(`/customer/orders/${orderId}/payments/ussd`).then((r) => r.data);
+
+export const initializeOrderBank = (
+  orderId,
+  bankCode,
+  accountNumber,
+  phone
+) =>
+  API.post(`/customer/orders/${orderId}/payments/bank`, null, {
+    params: {
+      bankCode,
+      accountNumber,
+      ...(phone ? { phone } : {}),
+    },
+  }).then((r) => r.data);
+
+export const listOrderPayWithBankBanks = () =>
+  API.get("/customer/payment-methods/banks").then((r) => r.data);
+
 // Paystack InlineJS v2. The order payment is initialized on Ehral's backend
 // first. The frontend MUST resume that exact transaction with accessCode.
 // Do not call newTransaction() here because that would create a second
 // browser-side transaction instead of completing the server-initialized one.
 const PAYSTACK_SCRIPT_SRC = "https://js.paystack.co/v2/inline.js";
+
 let paystackScriptPromise = null;
 
 function loadPaystackScript() {
   if (typeof window === "undefined") {
-    return Promise.reject(new Error("Paystack can only load in the browser."));
+    return Promise.reject(
+      new Error("Paystack can only load in the browser.")
+    );
   }
 
   if (window.PaystackPop) {
@@ -95,20 +123,33 @@ function loadPaystackScript() {
       );
 
       if (existing) {
-        existing.addEventListener("load", () => resolve(), { once: true });
+        existing.addEventListener(
+          "load",
+          () => resolve(),
+          { once: true }
+        );
+
         existing.addEventListener(
           "error",
           () => reject(new Error("Failed to load Paystack.")),
           { once: true }
         );
+
         return;
       }
 
       const script = document.createElement("script");
+
       script.src = PAYSTACK_SCRIPT_SRC;
       script.async = true;
+
       script.onload = () => resolve();
-      script.onerror = () => reject(new Error("Failed to load Paystack."));
+
+      script.onerror = () =>
+        reject(
+          new Error("Failed to load Paystack.")
+        );
+
       document.body.appendChild(script);
     });
   }
@@ -130,9 +171,14 @@ function loadPaystackScript() {
  * @param {{onClose?: () => void, onPending?: () => void}} [options]
  * @returns {Promise<{status:string, orderStatus:string, reference:string}>}
  */
-export async function payForOrderOnline(orderId, { onClose, onPending } = {}) {
+export async function payForOrderOnline(
+  orderId,
+  { onClose, onPending } = {}
+) {
   if (!orderId) {
-    throw new Error("A valid order is required before starting payment.");
+    throw new Error(
+      "A valid order is required before starting payment."
+    );
   }
 
   const init = await initializeOrderPayment(orderId);
@@ -151,7 +197,9 @@ export async function payForOrderOnline(orderId, { onClose, onPending } = {}) {
 
     const finish = (fn, value) => {
       if (settled) return;
+
       settled = true;
+
       fn(value);
     };
 
@@ -174,6 +222,7 @@ export async function payForOrderOnline(orderId, { onClose, onPending } = {}) {
                 "Paystack completed the transaction but did not return a payment reference."
               )
             );
+
             return;
           }
 
@@ -193,7 +242,9 @@ export async function payForOrderOnline(orderId, { onClose, onPending } = {}) {
         },
 
         onCancel: () => {
-          if (successCallbackStarted) return;
+          if (successCallbackStarted) {
+            return;
+          }
 
           onClose?.();
 
