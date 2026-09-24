@@ -78,38 +78,82 @@ export const getCustomerOrderPaymentStatus = (orderId) =>
   API.get(`/customer/orders/${orderId}/payments/status`).then((r) => r.data);
 
 /**
- * The full customer checkout in one call: initialize on the backend, open
- * the Paystack popup, then re-verify server-side once it closes - the
- * same "never trust the popup's own onSuccess" pattern
- * subscriptionApi.payWithPaystack already documents. Never marks anything
- * paid client-side; the returned status reflects the backend's own
- * verification result (which itself only trusts Paystack, not this call).
+ * Complete customer payment for an existing order.
  *
- * @param {number} orderId
- * @param {() => void} [onClose] - called if the customer dismisses the
- *   popup without paying (order stays PAYMENT PENDING/FAILED).
- * @returns {Promise<{status:string, orderStatus:string, reference:string}>}
+ * IMPORTANT:
+ * The transaction is initialized by the Ehral backend first.
+ * Paystack returns an accessCode for that exact transaction.
+ * The frontend then resumes that transaction with Paystack rather
+ * than creating a second transaction in the browser.
+ *
+ * The backend remains the authority for payment confirmation.
  */
 export async function payForOrderOnline(orderId, { onClose } = {}) {
   const init = await initializeOrderPayment(orderId);
+
+  if (!init?.accessCode) {
+    throw new Error(
+      "Paystack did not return a payment access code."
+    );
+  }
+
+  /*
+   * Paystack Popup V2 is loaded by the application's existing
+   * Paystack integration. We use the access code returned by the
+   * server-side initialization to resume the exact transaction.
+   */
+  if (!window.PaystackPop) {
+    throw new Error(
+      "Paystack payment system is not available. Please try again."
+    );
+  }
+
   return new Promise((resolve, reject) => {
-    payWithPaystack({
-      email: init.email,
-      amountNaira: init.amount,
-      reference: init.reference,
-      publicKey: init.publicKey,
-      onSuccess: async (reference) => {
-        try {
-          const result = await verifyOrderPayment(orderId, reference);
-          resolve(result);
-        } catch (err) {
-          reject(err);
-        }
-      },
-      onClose: () => {
-        onClose?.();
-        reject(new Error("Payment window closed before completing."));
-      },
-    }).catch(reject);
+    try {
+      const popup = new window.PaystackPop();
+
+      popup.resumeTransaction(init.accessCode, {
+        onSuccess: async (transaction) => {
+          try {
+            const reference =
+              transaction?.reference || init.reference;
+
+            if (!reference) {
+              throw new Error(
+                "Paystack did not return a transaction reference."
+              );
+            }
+
+            /*
+             * Never mark the order paid from the browser callback.
+             * The backend verifies the transaction directly with
+             * Paystack before changing the order payment status.
+             */
+            const result = await verifyOrderPayment(
+              orderId,
+              reference
+            );
+
+            resolve(result);
+          } catch (err) {
+            reject(err);
+          }
+        },
+
+        onCancel: () => {
+          if (typeof onClose === "function") {
+            onClose();
+          }
+
+          reject(
+            new Error(
+              "Payment window closed before completing."
+            )
+          );
+        },
+      });
+    } catch (err) {
+      reject(err);
+    }
   });
 }
