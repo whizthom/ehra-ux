@@ -1862,9 +1862,9 @@ export default function CustomerStore() {
 
       {/* ── Order placed ─────────────────────────────────────────── */}
       {placed && (
-        <div className={styles.overlay}>
+        <div className={`${styles.overlay} ${styles.orderOverlay}`}>
           <section
-            className={styles.dialog}
+            className={`${styles.dialog} ${styles.orderDialog}`}
             role="dialog"
             aria-modal="true"
             aria-label="Order confirmed"
@@ -1902,44 +1902,71 @@ export default function CustomerStore() {
               )}
 
             {paymentMethodOpen && !directPayment && !onlinePaymentResult && (
-              <div
-                className={styles.successTotal}
-                style={{ textAlign: "left" }}
-              >
-                <strong style={{ display: "block", marginBottom: 10 }}>
-                  Choose how to pay
-                </strong>
-                <button
-                  className={styles.primary}
-                  disabled={payingOnline}
-                  onClick={payNow}
-                >
-                  {payingOnline
-                    ? "Opening Paystack…"
-                    : "Card / Paystack Checkout"}
-                  <i className="ti ti-credit-card" aria-hidden="true" />
-                </button>
-                <button
-                  className={styles.primary}
-                  disabled={paymentBusy}
-                  onClick={() => startDirectPayment("transfer")}
-                >
-                  {paymentBusy ? "Starting…" : "Bank transfer"}
-                  <i className="ti ti-building-bank" aria-hidden="true" />
-                </button>
-                <button
-                  className={styles.primary}
-                  disabled={paymentBusy}
-                  onClick={() => startDirectPayment("ussd")}
-                >
-                  {paymentBusy ? "Starting…" : "USSD (*737)"}
-                  <i className="ti ti-device-mobile" aria-hidden="true" />
-                </button>
-                <div style={{ marginTop: 10 }}>
+              <div className={styles.paymentChooser}>
+                <div className={styles.paymentChooserHead}>
+                  <strong>Choose how to pay</strong>
+                  <span>Select a payment method below</span>
+                </div>
+                <div className={styles.paymentOptions}>
+                  <button
+                    className={styles.paymentOption}
+                    disabled={payingOnline || paymentBusy}
+                    onClick={payNow}
+                  >
+                    <span className={styles.paymentOptionIcon}>
+                      <i className="ti ti-credit-card" aria-hidden="true" />
+                    </span>
+                    <span className={styles.paymentOptionCopy}>
+                      <strong>
+                        {payingOnline ? "Opening Paystack…" : "Card"}
+                      </strong>
+                      <small>Pay securely with Paystack</small>
+                    </span>
+                    <i className="ti ti-chevron-right" aria-hidden="true" />
+                  </button>
+                  <button
+                    className={styles.paymentOption}
+                    disabled={paymentBusy || payingOnline}
+                    onClick={() => startDirectPayment("transfer")}
+                  >
+                    <span className={styles.paymentOptionIcon}>
+                      <i className="ti ti-building-bank" aria-hidden="true" />
+                    </span>
+                    <span className={styles.paymentOptionCopy}>
+                      <strong>
+                        {paymentBusy ? "Starting…" : "Bank transfer"}
+                      </strong>
+                      <small>Transfer to the secure payment account</small>
+                    </span>
+                    <i className="ti ti-chevron-right" aria-hidden="true" />
+                  </button>
+                  <button
+                    className={styles.paymentOption}
+                    disabled={paymentBusy || payingOnline}
+                    onClick={() => startDirectPayment("ussd")}
+                  >
+                    <span className={styles.paymentOptionIcon}>
+                      <i className="ti ti-device-mobile" aria-hidden="true" />
+                    </span>
+                    <span className={styles.paymentOptionCopy}>
+                      <strong>{paymentBusy ? "Starting…" : "USSD"}</strong>
+                      <small>Pay with your bank using USSD</small>
+                    </span>
+                    <i className="ti ti-chevron-right" aria-hidden="true" />
+                  </button>
+                </div>
+                <div className={styles.bankPaymentBox}>
+                  <div className={styles.bankPaymentTitle}>
+                    <i className="ti ti-building-bank" aria-hidden="true" />
+                    <span>
+                      <strong>Pay with bank account</strong>
+                      <small>Enter your bank details securely</small>
+                    </span>
+                  </div>
                   <select
                     value={selectedPaymentBank}
                     onChange={(e) => setSelectedPaymentBank(e.target.value)}
-                    style={{ width: "100%", marginBottom: 8 }}
+                    className={styles.paymentField}
                   >
                     <option value="">Pay with bank account</option>
                     {paymentBanks.map((b) => (
@@ -1959,10 +1986,10 @@ export default function CustomerStore() {
                         }
                         placeholder="Bank account number"
                         inputMode="numeric"
-                        style={{ width: "100%", marginBottom: 8 }}
+                        className={styles.paymentField}
                       />
                       <button
-                        className={styles.primary}
+                        className={`${styles.primary} ${styles.bankContinue}`}
                         disabled={paymentBusy}
                         onClick={() => startDirectPayment("bank")}
                       >
@@ -1976,11 +2003,8 @@ export default function CustomerStore() {
             )}
 
             {directPayment && !onlinePaymentResult && (
-              <div
-                className={styles.successTotal}
-                style={{ textAlign: "left" }}
-              >
-                <strong style={{ display: "block", marginBottom: 8 }}>
+              <div className={styles.directPaymentPanel}>
+                <strong className={styles.directPaymentTitle}>
                   {directPayment.method === "transfer"
                     ? "Bank transfer details"
                     : directPayment.method === "ussd"
@@ -1988,10 +2012,12 @@ export default function CustomerStore() {
                       : "Bank payment"}
                 </strong>
                 {directPayment.displayText && (
-                  <p>{directPayment.displayText}</p>
+                  <p className={styles.directPaymentMessage}>
+                    {directPayment.displayText}
+                  </p>
                 )}
                 {directPayment.method === "transfer" && (
-                  <div>
+                  <div className={styles.transferDetails}>
                     <p>
                       <b>Bank:</b> {directPayment.bankName || "Paystack"}
                     </p>
@@ -2009,13 +2035,13 @@ export default function CustomerStore() {
                   </div>
                 )}
                 {directPayment.ussdCode && (
-                  <p>
-                    <b>Dial:</b> {directPayment.ussdCode}
+                  <p className={styles.ussdCode}>
+                    <b>Dial:</b> <span>{directPayment.ussdCode}</span>
                   </p>
                 )}
                 {directPayment.authorizationUrl && (
                   <button
-                    className={styles.primary}
+                    className={`${styles.primary} ${styles.secondaryPaymentAction}`}
                     onClick={() =>
                       window.open(
                         directPayment.authorizationUrl,
@@ -2029,7 +2055,7 @@ export default function CustomerStore() {
                   </button>
                 )}
                 <button
-                  className={styles.primary}
+                  className={`${styles.primary} ${styles.secondaryPaymentAction}`}
                   disabled={paymentBusy}
                   onClick={checkDirectPayment}
                 >
@@ -2058,29 +2084,31 @@ export default function CustomerStore() {
                   : "We could not confirm this payment yet. You can try again."}
               </div>
             )}
-            <button
-              className={styles.primary}
-              onClick={() => nav("/customer-dashboard?tab=orders")}
-            >
-              View my orders{" "}
-              <i className="ti ti-arrow-right" aria-hidden="true" />
-            </button>
-            <button className={styles.textBtn} onClick={() => askAbout(null)}>
-              Message the store
-            </button>
-            <button
-              className={styles.textBtn}
-              onClick={() => {
-                setPlaced(null);
-                setOnlinePaymentResult(null);
-                setOnlinePaymentError("");
-                setPaymentMethodOpen(false);
-                setDirectPayment(null);
-                setPaymentAccountNumber("");
-              }}
-            >
-              Continue shopping
-            </button>
+            <div className={styles.orderDialogActions}>
+              <button
+                className={styles.primary}
+                onClick={() => nav("/customer-dashboard?tab=orders")}
+              >
+                View my orders{" "}
+                <i className="ti ti-arrow-right" aria-hidden="true" />
+              </button>
+              <button className={styles.textBtn} onClick={() => askAbout(null)}>
+                Message the store
+              </button>
+              <button
+                className={styles.textBtn}
+                onClick={() => {
+                  setPlaced(null);
+                  setOnlinePaymentResult(null);
+                  setOnlinePaymentError("");
+                  setPaymentMethodOpen(false);
+                  setDirectPayment(null);
+                  setPaymentAccountNumber("");
+                }}
+              >
+                Continue shopping
+              </button>
+            </div>
           </section>
         </div>
       )}
