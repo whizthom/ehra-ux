@@ -6655,83 +6655,237 @@
   }
 }
 
-/* Pending online order payment recovery */
-.orderActions {
-  display: flex;
+/* Premium Ehral action for unpaid online orders */
+.payOrderButton {
+  position: relative;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  justify-content: flex-end;
-  flex-wrap: wrap
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 10px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 11px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  color: #fff;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .01em;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 24%, transparent);
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
 }
 
-.payOrderButton {
-  border: 0;
-  border-radius: 10px;
-  padding: 9px 13px;
-  font-weight: 700;
-  cursor: pointer;
-  background: var(--brand, #1f6feb);
-  color: #fff
+.payOrderButton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 28%, color-mix(in srgb, #fff 24%, transparent) 50%, transparent 72%);
+  transform: translateX(-125%);
+  transition: transform .45s ease;
+  pointer-events: none;
+}
+
+.payOrderButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+  box-shadow: 0 12px 26px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.payOrderButton:hover:not(:disabled)::after {
+  transform: translateX(125%);
+}
+
+.payOrderButton:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.payOrderButton:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  outline-offset: 2px;
 }
 
 .payOrderButton:disabled {
-  opacity: .55;
-  cursor: not-allowed
+  opacity: .58;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Pending online order payment recovery */
+.paymentRecoveryOverlay {
+  background: color-mix(in srgb, var(--accent) 8%, rgba(0, 0, 0, .52));
+  backdrop-filter: blur(12px) saturate(115%);
+  -webkit-backdrop-filter: blur(12px) saturate(115%);
+  padding: 20px;
 }
 
 .paymentRecoveryModal {
   position: relative;
-  width: min(620px, calc(100vw - 28px));
-  max-height: min(88vh, 760px);
+  width: min(640px, calc(100vw - 32px));
+  max-height: min(88vh, 780px);
   overflow: auto;
   background: var(--surface, #fff);
-  border-radius: 22px;
-  padding: 28px;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, .24)
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border, #e5e7eb));
+  border-radius: 26px;
+  padding: 32px;
+  box-shadow:
+    0 30px 90px color-mix(in srgb, var(--accent) 20%, rgba(0, 0, 0, .24)),
+    0 8px 28px rgba(0, 0, 0, .10),
+    inset 0 1px 0 color-mix(in srgb, var(--accent) 10%, #fff);
+  animation: paymentRecoveryIn .22s ease-out;
+}
+
+.paymentRecoveryModal::before {
+  content: "";
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  top: 0;
+  height: 3px;
+  border-radius: 0 0 999px 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover), var(--accent));
+}
+
+@keyframes paymentRecoveryIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(.985)
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1)
+  }
+}
+
+.paymentRecoveryClose {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 3;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border, #e5e7eb));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 5%, var(--surface, #fff));
+  color: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 10%, transparent);
+  transition: transform .18s ease, background .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.paymentRecoveryClose:hover {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--accent) 11%, var(--surface, #fff));
+  border-color: color-mix(in srgb, var(--accent) 34%, var(--border, #e5e7eb));
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.paymentRecoveryClose:active {
+  transform: translateY(0)
+}
+
+.paymentRecoveryClose:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 24%, transparent);
+  outline-offset: 2px
 }
 
 .paymentRecoveryHead {
-  padding-right: 28px;
-  margin-bottom: 20px
+  padding: 4px 48px 0 2px;
+  margin-bottom: 22px
+}
+
+.paymentRecoveryHead .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 5px 9px;
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .08em
 }
 
 .paymentRecoveryHead h2 {
-  margin: 5px 0 8px
+  margin: 12px 0 8px;
+  font-size: 26px;
+  line-height: 1.12;
+  letter-spacing: -.025em
 }
 
 .paymentRecoveryHead p {
   margin: 0 0 14px;
   line-height: 1.55;
-  color: var(--text-muted, #667085)
+  color: var(--text-muted, #667085);
+  font-size: 13px
 }
 
 .paymentRecoveryHead>strong {
-  font-size: 1.35rem
+  display: block;
+  color: var(--accent);
+  font-size: 25px;
+  letter-spacing: -.025em
 }
 
 .paymentRecoveryOptions {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px
+  gap: 11px
 }
 
 .paymentRecoveryOptions>button {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 13px;
+  min-height: 76px;
   text-align: left;
-  border: 1px solid var(--border, #e5e7eb);
+  border: 1px solid color-mix(in srgb, var(--accent) 12%, var(--border, #e5e7eb));
   background: var(--surface, #fff);
-  border-radius: 14px;
-  padding: 14px;
-  cursor: pointer
+  color: inherit;
+  border-radius: 16px;
+  padding: 15px;
+  cursor: pointer;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, .045);
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
 }
 
-.paymentRecoveryOptions>button:hover {
-  border-color: var(--brand, #1f6feb)
+.paymentRecoveryOptions>button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 38%, var(--border, #e5e7eb));
+  background: color-mix(in srgb, var(--accent) 4%, var(--surface, #fff));
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--accent) 12%, rgba(0, 0, 0, .08));
 }
 
-.paymentRecoveryOptions i {
+.paymentRecoveryOptions>button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  outline-offset: 2px
+}
+
+.paymentRecoveryOptions>button:disabled {
+  opacity: .55;
+  cursor: not-allowed
+}
+
+.paymentRecoveryOptions>button>i,
+.payWithBankRecovery>div>i {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  color: var(--accent);
   font-size: 20px
 }
 
@@ -6739,103 +6893,180 @@
 .payWithBankRecovery span {
   display: flex;
   flex-direction: column;
-  gap: 3px
+  gap: 4px
+}
+
+.paymentRecoveryOptions b,
+.payWithBankRecovery b {
+  font-size: 13px
 }
 
 .paymentRecoveryOptions small,
 .payWithBankRecovery small {
-  color: var(--text-muted, #667085)
+  color: var(--text-muted, #667085);
+  font-size: 11px;
+  line-height: 1.35
 }
 
 .payWithBankRecovery {
   grid-column: 1/-1;
-  border: 1px solid var(--border, #e5e7eb);
-  border-radius: 14px;
-  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--accent) 12%, var(--border, #e5e7eb));
+  border-radius: 16px;
+  padding: 15px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px
+  gap: 10px;
+  background: color-mix(in srgb, var(--accent) 2.5%, var(--surface, #fff))
 }
 
 .payWithBankRecovery>div {
   grid-column: 1/-1;
   display: flex;
   align-items: center;
-  gap: 12px
+  gap: 13px;
+  margin-bottom: 2px
 }
 
 .payWithBankRecovery select,
 .payWithBankRecovery input {
   width: 100%;
+  min-height: 44px;
   border: 1px solid var(--border, #d9dde5);
-  border-radius: 10px;
-  padding: 11px;
-  background: var(--surface, #fff)
+  border-radius: 11px;
+  padding: 11px 12px;
+  background: var(--surface, #fff);
+  color: inherit;
+  outline: none;
+  transition: border-color .18s ease, box-shadow .18s ease
+}
+
+.payWithBankRecovery select:focus,
+.payWithBankRecovery input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent)
 }
 
 .payWithBankRecovery>button {
-  border: 0;
-  border-radius: 10px;
-  background: var(--brand, #1f6feb);
+  min-height: 44px;
+  border: 1px solid var(--accent);
+  border-radius: 11px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
   color: #fff;
-  font-weight: 700;
-  cursor: pointer
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 22%, transparent);
+  transition: transform .18s ease, box-shadow .18s ease
+}
+
+.payWithBankRecovery>button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px color-mix(in srgb, var(--accent) 28%, transparent)
 }
 
 .payWithBankRecovery>button:disabled {
-  opacity: .55
+  opacity: .55;
+  cursor: not-allowed;
+  box-shadow: none
 }
 
 .directPaymentRecovery {
-  border: 1px solid var(--border, #e5e7eb);
-  border-radius: 16px;
-  padding: 18px
+  border: 1px solid color-mix(in srgb, var(--accent) 13%, var(--border, #e5e7eb));
+  border-radius: 17px;
+  padding: 20px;
+  background: color-mix(in srgb, var(--accent) 2.5%, var(--surface, #fff))
 }
 
 .directPaymentRecovery h3 {
-  margin-top: 0
+  margin: 0 0 8px;
+  font-size: 18px
 }
 
 .directPaymentRecovery p {
-  color: var(--text-muted, #667085)
+  color: var(--text-muted, #667085);
+  line-height: 1.5
 }
 
 .recoveryCode {
-  font: 700 1.15rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
-  background: var(--surface-muted, #f4f6f8);
-  padding: 12px;
-  border-radius: 10px;
-  margin: 12px 0
+  font: 800 1.15rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface-muted, #f4f6f8));
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 14%, var(--border, #e5e7eb));
+  padding: 13px;
+  border-radius: 11px;
+  margin: 14px 0
 }
 
 .paymentRecoveryActions {
   display: flex;
   gap: 9px;
   flex-wrap: wrap;
-  margin-top: 16px
+  margin-top: 17px
 }
 
 .secondaryPaymentAction {
-  border: 1px solid var(--border, #d9dde5);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border, #d9dde5));
   background: transparent;
-  border-radius: 10px;
-  padding: 9px 13px;
-  font-weight: 700;
-  cursor: pointer
+  color: var(--accent);
+  border-radius: 11px;
+  padding: 10px 13px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease
+}
+
+.secondaryPaymentAction:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 34%, var(--border, #d9dde5))
+}
+
+.secondaryPaymentAction:disabled {
+  opacity: .55;
+  cursor: not-allowed
 }
 
 .paymentRecoveryError {
   margin-top: 14px;
   padding: 11px 13px;
-  border-radius: 10px;
-  background: #fff1f0;
-  color: #b42318
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface, #fff));
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border, #e5e7eb));
+  color: var(--accent);
+  font-size: 12px;
+  line-height: 1.45
 }
 
 @media(max-width:640px) {
+  .paymentRecoveryOverlay {
+    padding: 0;
+    align-items: flex-end
+  }
+
   .paymentRecoveryModal {
-    padding: 22px 16px;
-    border-radius: 18px
+    width: 100vw;
+    max-height: 92vh;
+    padding: 28px 16px 20px;
+    border-radius: 24px 24px 0 0
+  }
+
+  .paymentRecoveryModal::before {
+    left: 18px;
+    right: 18px
+  }
+
+  .paymentRecoveryClose {
+    top: 14px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+    border-radius: 11px
+  }
+
+  .paymentRecoveryHead {
+    padding-right: 48px
+  }
+
+  .paymentRecoveryHead h2 {
+    font-size: 23px
   }
 
   .paymentRecoveryOptions {
@@ -6852,7 +7083,7 @@
   }
 
   .payWithBankRecovery>button {
-    min-height: 44px
+    min-height: 46px
   }
 
   .orderActions {

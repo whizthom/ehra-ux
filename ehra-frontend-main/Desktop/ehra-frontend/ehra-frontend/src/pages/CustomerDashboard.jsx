@@ -2578,18 +2578,24 @@ export default function CustomerDashboard() {
 
       {paymentOrder && (
         <div
-          className={styles.overlay}
+          className={`${styles.overlay} ${styles.paymentRecoveryOverlay}`}
           role="dialog"
           aria-modal="true"
           aria-label="Complete order payment"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget && !paymentBusy)
+              setPaymentOrder(null);
+          }}
         >
           <section className={styles.paymentRecoveryModal}>
             <button
-              className={styles.modalClose}
+              type="button"
+              className={styles.paymentRecoveryClose}
               onClick={() => !paymentBusy && setPaymentOrder(null)}
               aria-label="Close payment"
+              title="Close"
             >
-              <i className="ti ti-x" />
+              <i className="ti ti-x" aria-hidden="true" />
             </button>
             <div className={styles.paymentRecoveryHead}>
               <span className={styles.eyebrow}>PAYMENT REQUIRED</span>
