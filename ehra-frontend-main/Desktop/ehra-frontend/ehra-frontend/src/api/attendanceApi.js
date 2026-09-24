@@ -156,21 +156,31 @@ export async function submitScanWithDeviceProof(token, coords, action) {
     : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
   let proof = null;
+  let deviceProofError = null;
 
   try {
     proof = await buildAttendanceDeviceProof(action);
   } catch (err) {
     // Device proof is deliberately best-effort. Attendance must continue
     // even if secure storage, challenge creation, or signing is unavailable.
+    // console.warn alone is invisible for the overwhelming majority of real
+    // scans, which happen on an employee's phone with no attached DevTools -
+    // so the error is also sent along with the scan itself (see
+    // deviceProofError below) purely as a diagnostic breadcrumb the backend
+    // logs, not something it trusts or acts on.
     console.warn(
       "Attendance device proof unavailable; submitting attendance without proof.",
       err
     );
+    deviceProofError = `${err?.name || "Error"}: ${
+      err?.message || String(err)
+    }`.slice(0, 500);
   }
 
   return submitScan(token, coords, {
     ...(proof || {}),
     requestId,
+    ...(deviceProofError ? { deviceProofError } : {}),
   });
 }
 
