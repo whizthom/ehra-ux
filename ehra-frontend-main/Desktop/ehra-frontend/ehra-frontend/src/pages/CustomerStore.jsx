@@ -738,6 +738,18 @@ export default function CustomerStore() {
       const result = await payForOrderOnline(placed.id);
       setOnlinePaymentResult(result);
       setPaymentMethodOpen(false);
+      if (result?.status === "SUCCESS") {
+        setPlaced((current) =>
+          current
+            ? {
+                ...current,
+                status: "CONFIRMED",
+                paymentStatus: "PAID",
+                amountPaid: current.total,
+              }
+            : current,
+        );
+      }
     } catch (e) {
       setOnlinePaymentError(
         e?.response?.data?.message ||
@@ -809,7 +821,19 @@ export default function CustomerStore() {
         directPayment.reference,
       );
       setOnlinePaymentResult(result);
-      if (result?.status === "SUCCESS") setDirectPayment(null);
+      if (result?.status === "SUCCESS") {
+        setDirectPayment(null);
+        setPlaced((current) =>
+          current
+            ? {
+                ...current,
+                status: "CONFIRMED",
+                paymentStatus: "PAID",
+                amountPaid: current.total,
+              }
+            : current,
+        );
+      }
     } catch (e) {
       setOnlinePaymentError(
         e?.response?.data?.message ||
@@ -1867,18 +1891,48 @@ export default function CustomerStore() {
             className={`${styles.dialog} ${styles.orderDialog}`}
             role="dialog"
             aria-modal="true"
-            aria-label="Order confirmed"
+            aria-label={
+              onlinePaymentResult?.status === "SUCCESS"
+                ? "Order confirmed"
+                : "Payment required"
+            }
           >
             <div className={styles.sheetGrab} aria-hidden="true" />
             <div className={styles.successMark}>
-              <i className="ti ti-check" aria-hidden="true" />
+              <i
+                className={
+                  onlinePaymentResult?.status === "SUCCESS"
+                    ? "ti ti-check"
+                    : "ti ti-receipt"
+                }
+                aria-hidden="true"
+              />
             </div>
-            <span className={styles.kicker}>ORDER CONFIRMED</span>
-            <h2>Thank you!</h2>
+            <span className={styles.kicker}>
+              {onlinePaymentResult?.status === "SUCCESS"
+                ? "ORDER CONFIRMED"
+                : "ORDER CREATED"}
+            </span>
+            <h2>
+              {onlinePaymentResult?.status === "SUCCESS"
+                ? "Payment confirmed!"
+                : "Complete your payment"}
+            </h2>
             <p>
-              Your order <b>#{placed.orderNumber}</b> with{" "}
-              {business.businessName} is in. Your receipt appears in My Ehral
-              once it's fully paid.
+              {onlinePaymentResult?.status === "SUCCESS" ? (
+                <>
+                  Your payment for order <b>#{placed.orderNumber}</b> has been
+                  verified by Paystack. Your order is now confirmed and your
+                  full receipt is available in My Ehral.
+                </>
+              ) : (
+                <>
+                  Order <b>#{placed.orderNumber}</b> has been created, but it
+                  has not been sent to {business.businessName} yet. Complete
+                  payment and wait for Paystack verification to confirm the
+                  order.
+                </>
+              )}
             </p>
             <div className={styles.successTotal}>
               <span>Total</span>
@@ -2080,13 +2134,26 @@ export default function CustomerStore() {
                 role="status"
               >
                 {onlinePaymentResult.status === "SUCCESS"
-                  ? "Payment received. Your order is now paid."
+                  ? "Payment verified. The business can now receive and process this order."
                   : "We could not confirm this payment yet. You can try again."}
               </div>
             )}
             <div className={styles.orderDialogActions}>
+              {onlinePaymentResult?.status === "SUCCESS" && (
+                <button
+                  className={styles.primary}
+                  onClick={() => nav("/customer-dashboard?tab=orders")}
+                >
+                  View receipt
+                  <i className="ti ti-receipt" aria-hidden="true" />
+                </button>
+              )}
               <button
-                className={styles.primary}
+                className={
+                  onlinePaymentResult?.status === "SUCCESS"
+                    ? styles.textBtn
+                    : styles.primary
+                }
                 onClick={() => nav("/customer-dashboard?tab=orders")}
               >
                 View my orders{" "}
