@@ -35,6 +35,7 @@ import Terms from "./pages/public/Terms";
 import Privacy from "./pages/public/Privacy";
 import Storefront from "./pages/public/Storefront";
 import CustomerDashboard from "./pages/CustomerDashboard";
+import EhralCredits from "./pages/EhralCredits";
 
 import NotFound from "./pages/NotFound";
 
@@ -187,6 +188,15 @@ function App() {
               element={
                 <ProtectedRoute roles={["ROLE_ADMIN", "ROLE_EMPLOYEE"]}>
                   <RetailWorkspace />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/ehral-credits"
+              element={
+                <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                  <EhralCredits />
                 </ProtectedRoute>
               }
             />

@@ -94,6 +94,13 @@ const NAV = [
   },
   {
     icon: "ti-credit-card",
+    label: "Ehral Credits",
+    section: "account",
+    isFullPage: true,
+    route: "/ehral-credits",
+  },
+  {
+    icon: "ti-credit-card",
     label: "Plans",
     section: "account",
     isFullPage: true,
