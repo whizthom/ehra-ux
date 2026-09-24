@@ -11,6 +11,7 @@ import {
 } from "../api/commerceApi";
 import { getMyAccounts } from "../api/authApi";
 import { createCustomerBusinessConversation } from "../api/messagingApi";
+import { payForOrderOnline } from "../api/orderPaymentApi";
 import { useAuth } from "../context/AuthContext";
 import {
   cartKey,
@@ -353,6 +354,9 @@ export default function CustomerStore() {
   const [connectOpen, setConnectOpen] = useState(false);
   const [placed, setPlaced] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [payingOnline, setPayingOnline] = useState(false);
+  const [onlinePaymentResult, setOnlinePaymentResult] = useState(null);
+  const [onlinePaymentError, setOnlinePaymentError] = useState("");
   const [connecting, setConnecting] = useState(false);
   const [toast, setToast] = useState("");
   const [formError, setFormError] = useState("");
@@ -696,6 +700,8 @@ export default function CustomerStore() {
         })),
       });
       setPlaced(r.data);
+      setOnlinePaymentResult(null);
+      setOnlinePaymentError("");
       setCart({});
       setCheckoutOpen(false);
     } catch (err) {
@@ -705,6 +711,24 @@ export default function CustomerStore() {
       );
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const payNow = async () => {
+    if (!placed?.id || payingOnline) return;
+    setPayingOnline(true);
+    setOnlinePaymentError("");
+    try {
+      const result = await payForOrderOnline(placed.id);
+      setOnlinePaymentResult(result);
+    } catch (e) {
+      setOnlinePaymentError(
+        e?.response?.data?.message ||
+          e?.message ||
+          "Payment could not be completed. Please try again.",
+      );
+    } finally {
+      setPayingOnline(false);
     }
   };
 
@@ -1773,6 +1797,36 @@ export default function CustomerStore() {
                 {money(placed.currency || currency, placed.total)}
               </strong>
             </div>
+            {storefront?.onlinePaymentsEnabled && !onlinePaymentResult && (
+              <button
+                className={styles.primary}
+                disabled={payingOnline}
+                onClick={payNow}
+              >
+                {payingOnline ? "Opening secure payment…" : "Pay online now"}
+                <i className="ti ti-credit-card" aria-hidden="true" />
+              </button>
+            )}
+            {onlinePaymentError && (
+              <div className={styles.formError} role="alert">
+                <i className="ti ti-alert-circle" aria-hidden="true" />{" "}
+                {onlinePaymentError}
+              </div>
+            )}
+            {onlinePaymentResult && (
+              <div
+                className={
+                  onlinePaymentResult.status === "SUCCESS"
+                    ? styles.successTotal
+                    : styles.formError
+                }
+                role="status"
+              >
+                {onlinePaymentResult.status === "SUCCESS"
+                  ? "Payment received. Your order is now paid."
+                  : "We could not confirm this payment yet. You can try again."}
+              </div>
+            )}
             <button
               className={styles.primary}
               onClick={() => nav("/customer-dashboard?tab=orders")}
@@ -1783,7 +1837,14 @@ export default function CustomerStore() {
             <button className={styles.textBtn} onClick={() => askAbout(null)}>
               Message the store
             </button>
-            <button className={styles.textBtn} onClick={() => setPlaced(null)}>
+            <button
+              className={styles.textBtn}
+              onClick={() => {
+                setPlaced(null);
+                setOnlinePaymentResult(null);
+                setOnlinePaymentError("");
+              }}
+            >
               Continue shopping
             </button>
           </section>
