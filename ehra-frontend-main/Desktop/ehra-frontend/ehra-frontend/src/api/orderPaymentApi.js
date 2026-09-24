@@ -1,11 +1,9 @@
 import API from "./authApi";
-import { payWithPaystack } from "./subscriptionApi";
 
 // ── Business: Online Ordering payment setup & reporting ─────────────────────
 // Backend: com.Ehra.payments.controller.BusinessOrderPaymentController
 // (/api/business/order-payments/**). Separate from Ehral's own
-// subscription billing (subscriptionApi.js) - this is the "customer pays
-// the business, Ehral takes a 0.1% cut" flow.
+// subscription billing. This is the customer-pays-business order flow.
 
 export const getOnlinePaymentTerms = () =>
   API.get("/business/order-payments/terms").then((r) => r.data);
@@ -22,9 +20,6 @@ export const resolveSettlementAccount = (bankCode, accountNumber) =>
     accountNumber,
   }).then((r) => r.data);
 
-// The one call that actually turns online payments on. The backend
-// independently re-verifies termsAccepted/termsVersion - disabling the
-// button on the frontend is a UX nicety, never the real gate.
 export const activateOnlinePayments = ({
   bankCode,
   accountNumber,
@@ -77,83 +72,158 @@ export const verifyOrderPayment = (orderId, reference) =>
 export const getCustomerOrderPaymentStatus = (orderId) =>
   API.get(`/customer/orders/${orderId}/payments/status`).then((r) => r.data);
 
+// Paystack InlineJS v2. The order payment is initialized on Ehral's backend
+// first. The frontend MUST resume that exact transaction with accessCode.
+// Do not call newTransaction() here because that would create a second
+// browser-side transaction instead of completing the server-initialized one.
+const PAYSTACK_SCRIPT_SRC = "https://js.paystack.co/v2/inline.js";
+let paystackScriptPromise = null;
+
+function loadPaystackScript() {
+  if (typeof window === "undefined") {
+    return Promise.reject(new Error("Paystack can only load in the browser."));
+  }
+
+  if (window.PaystackPop) {
+    return Promise.resolve();
+  }
+
+  if (!paystackScriptPromise) {
+    paystackScriptPromise = new Promise((resolve, reject) => {
+      const existing = document.querySelector(
+        `script[src="${PAYSTACK_SCRIPT_SRC}"]`
+      );
+
+      if (existing) {
+        existing.addEventListener("load", () => resolve(), { once: true });
+        existing.addEventListener(
+          "error",
+          () => reject(new Error("Failed to load Paystack.")),
+          { once: true }
+        );
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = PAYSTACK_SCRIPT_SRC;
+      script.async = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error("Failed to load Paystack."));
+      document.body.appendChild(script);
+    });
+  }
+
+  return paystackScriptPromise;
+}
+
 /**
- * Complete customer payment for an existing order.
+ * Complete an already initialized order payment.
  *
- * IMPORTANT:
- * The transaction is initialized by the Ehral backend first.
- * Paystack returns an accessCode for that exact transaction.
- * The frontend then resumes that transaction with Paystack rather
- * than creating a second transaction in the browser.
+ * The backend creates the Paystack transaction and returns its accessCode.
+ * InlineJS resumeTransaction() then opens the checkout for that exact
+ * transaction. On successful completion, the reference is sent back to
+ * Ehral's backend for server-side Paystack verification.
  *
- * The backend remains the authority for payment confirmation.
+ * The frontend never marks an order as paid by itself.
+ *
+ * @param {number} orderId
+ * @param {{onClose?: () => void, onPending?: () => void}} [options]
+ * @returns {Promise<{status:string, orderStatus:string, reference:string}>}
  */
-export async function payForOrderOnline(orderId, { onClose } = {}) {
+export async function payForOrderOnline(orderId, { onClose, onPending } = {}) {
+  if (!orderId) {
+    throw new Error("A valid order is required before starting payment.");
+  }
+
   const init = await initializeOrderPayment(orderId);
 
   if (!init?.accessCode) {
     throw new Error(
-      "Paystack did not return a payment access code."
+      "Paystack did not return a payment access code. The transaction could not be opened."
     );
   }
 
-  /*
-   * Paystack Popup V2 is loaded by the application's existing
-   * Paystack integration. We use the access code returned by the
-   * server-side initialization to resume the exact transaction.
-   */
-  if (!window.PaystackPop) {
-    throw new Error(
-      "Paystack payment system is not available. Please try again."
-    );
-  }
+  await loadPaystackScript();
 
   return new Promise((resolve, reject) => {
+    let settled = false;
+    let successCallbackStarted = false;
+
+    const finish = (fn, value) => {
+      if (settled) return;
+      settled = true;
+      fn(value);
+    };
+
     try {
       const popup = new window.PaystackPop();
 
       popup.resumeTransaction(init.accessCode, {
         onSuccess: async (transaction) => {
+          successCallbackStarted = true;
+
+          const reference =
+            transaction?.reference ||
+            transaction?.trxref ||
+            init.reference;
+
+          if (!reference) {
+            finish(
+              reject,
+              new Error(
+                "Paystack completed the transaction but did not return a payment reference."
+              )
+            );
+            return;
+          }
+
           try {
-            const reference =
-              transaction?.reference || init.reference;
-
-            if (!reference) {
-              throw new Error(
-                "Paystack did not return a transaction reference."
-              );
-            }
-
-            /*
-             * Never mark the order paid from the browser callback.
-             * The backend verifies the transaction directly with
-             * Paystack before changing the order payment status.
-             */
+            // This call verifies the reference against Paystack on the
+            // server. The client-side onSuccess callback alone is never
+            // treated as proof that money was received.
             const result = await verifyOrderPayment(
               orderId,
               reference
             );
 
-            resolve(result);
-          } catch (err) {
-            reject(err);
+            finish(resolve, result);
+          } catch (error) {
+            finish(reject, error);
           }
         },
 
         onCancel: () => {
-          if (typeof onClose === "function") {
-            onClose();
-          }
+          if (successCallbackStarted) return;
 
-          reject(
+          onClose?.();
+
+          finish(
+            reject,
             new Error(
-              "Payment window closed before completing."
+              "Payment window closed before payment was completed."
             )
           );
         },
+
+        onError: (error) => {
+          finish(
+            reject,
+            new Error(
+              error?.message ||
+                "Paystack could not open the payment checkout."
+            )
+          );
+        },
+
+        // Bank-transfer flows can remain pending until Paystack confirms
+        // the transfer. Pending is not success, so leave the order pending
+        // and let the backend webhook/verification finalize it.
+        onBankTransferConfirmationPending: () => {
+          onPending?.();
+        },
       });
-    } catch (err) {
-      reject(err);
+    } catch (error) {
+      finish(reject, error);
     }
   });
 }
