@@ -10,6 +10,13 @@ import styles from "./EhralCredits.module.css";
 
 const AMOUNTS = [1000, 2500, 5000, 10000];
 
+// Keep in sync with CURRENT_AGREEMENT_VERSION in CreditServiceImpl.java.
+// When the terms change, bump both values and update the text below —
+// prior acceptances are keyed by version, so businesses are asked to
+// accept again rather than being silently carried over.
+const CREDITS_AGREEMENT_VERSION = "1.0";
+const CREDITS_AGREEMENT_EFFECTIVE_DATE = "September 25, 2026";
+
 const money = (n) =>
   `₦${Number(n || 0).toLocaleString("en-NG", {
     minimumFractionDigits: 2,
@@ -446,45 +453,155 @@ export default function EhralCredits() {
               <i className="ti ti-x" />
             </button>
             <span className={styles.kicker}>EHRAL CREDITS TERMS</span>
-            <h2>How your Credits work</h2>
+            <h2>Ehral Credits — Terms of Use</h2>
             <p className={styles.sheetSub}>
-              Ehral Credits are prepaid service credits used only for eligible
-              Ehral services.
+              Please read and accept these terms before purchasing or using
+              Ehral Credits.
             </p>
-            <div className={styles.termsList}>
-              <div>
-                <i className="ti ti-check" />
-                <span>Purchased credits do not expire.</span>
-              </div>
-              <div>
-                <i className="ti ti-check" />
-                <span>
-                  Purchased credits are not refundable or transferable between
-                  businesses.
-                </span>
-              </div>
-              <div>
-                <i className="ti ti-check" />
-                <span>
-                  Promotional credits may have an expiration date and additional
-                  promotion terms.
-                </span>
-              </div>
-              <div>
-                <i className="ti ti-check" />
-                <span>
-                  Ehral uses eligible promotional credits before purchased
-                  credits.
-                </span>
-              </div>
-              <div>
-                <i className="ti ti-check" />
-                <span>
-                  Service prices are shown through the current Ehral billing
-                  configuration.
-                </span>
-              </div>
+
+            <div className={styles.agreementBody}>
+              <h4>1. What Ehral Credits Are</h4>
+              <p>
+                Ehral Credits are prepaid service credits that your business
+                purchases or receives, used to access eligible services within
+                the Ehral platform. Ehral Credits are:
+              </p>
+              <ul>
+                <li>
+                  <strong>Not cash.</strong> They are not a bank balance, a
+                  deposit, or a store of monetary value.
+                </li>
+                <li>
+                  <strong>Not withdrawable.</strong> Ehral Credits cannot be
+                  converted back into cash or paid out to you.
+                </li>
+                <li>
+                  <strong>Not transferable.</strong> Credits cannot be sent,
+                  sold, or moved between businesses — including between
+                  different businesses you may operate.
+                </li>
+                <li>
+                  <strong>Not a general payment method.</strong> Credits cannot
+                  be used to pay for anything outside of eligible Ehral
+                  services; they are not a wallet for arbitrary third-party
+                  purchases.
+                </li>
+              </ul>
+
+              <h4>2. Purchased Credits</h4>
+              <ul>
+                <li>
+                  Credits you purchase directly (via Paystack, through Ehral's
+                  payment system) never expire.
+                </li>
+                <li>
+                  Purchased Credits are not refundable once purchased, except
+                  where Ehral, at its discretion, issues a correction for a
+                  payment error, duplicate charge, fraud, or chargeback.
+                </li>
+              </ul>
+
+              <h4>3. Promotional Credits</h4>
+              <ul>
+                <li>
+                  Ehral may grant you credits as part of a promotion (for
+                  example, a Welcome Credit grant for new businesses, or a
+                  first-purchase bonus).
+                </li>
+                <li>
+                  Promotional Credits may expire. Where an expiration period
+                  applies, it will be clearly shown to you (for example,
+                  "expires in 7 days").
+                </li>
+                <li>
+                  Promotional Credits are not refundable and are never
+                  transferable.
+                </li>
+                <li>
+                  Promotional Credits may be subject to additional terms
+                  specific to that promotion (such as eligibility requirements,
+                  minimum purchase amounts, or maximum bonus limits), which will
+                  be disclosed at the time the promotion is offered.
+                </li>
+                <li>
+                  Where you hold both Promotional and Purchased Credits,
+                  Promotional Credits are normally used first, before Purchased
+                  Credits are drawn down.
+                </li>
+              </ul>
+
+              <h4>4. Eligible Use</h4>
+              <ul>
+                <li>
+                  Ehral Credits can only be used to access eligible Ehral
+                  services — the specific services available to you depend on
+                  your business type, and are shown to you within your Ehral
+                  Credits dashboard.
+                </li>
+                <li>
+                  Credits cannot be used to purchase anything outside of these
+                  designated services.
+                </li>
+              </ul>
+
+              <h4>5. Pricing</h4>
+              <ul>
+                <li>
+                  The price of a given Ehral service may change in the future.
+                  Any such change will apply only to actions taken after the
+                  change — it will not alter what you were already charged for
+                  past usage.
+                </li>
+                <li>
+                  Where a chargeable action is about to consume credits, the
+                  applicable price will be shown to you before the action is
+                  taken, wherever practical.
+                </li>
+              </ul>
+
+              <h4>6. What Happens If Your Credits Run Out</h4>
+              <ul>
+                <li>
+                  If your available Ehral Credits reach zero, you will not be
+                  able to perform actions that require credits until you add
+                  more.
+                </li>
+                <li>
+                  This does not lock you out of your account. You will still be
+                  able to log in, view your business profile, view customers,
+                  view historical records and receipts, view orders, and access
+                  any part of Ehral that does not require credits.
+                </li>
+              </ul>
+
+              <h4>7. Chargebacks, Reversals, and Corrections</h4>
+              <ul>
+                <li>
+                  If a credit purchase is later reversed, disputed, or found to
+                  be fraudulent, Ehral may adjust your credit balance
+                  accordingly, including revoking any Promotional Credits that
+                  were granted as a result of that purchase.
+                </li>
+                <li>
+                  All such adjustments will be recorded and made visible in your
+                  credit activity history.
+                </li>
+              </ul>
+
+              <h4>8. Acceptance</h4>
+              <p>
+                By proceeding to purchase or use Ehral Credits, you confirm that
+                you have read and agree to these terms. Your acceptance
+                (including the version of these terms and the date/time) will be
+                recorded against your business account.
+              </p>
             </div>
+
+            <p className={styles.agreementFooter}>
+              Version {data?.agreementVersion || CREDITS_AGREEMENT_VERSION} —{" "}
+              {CREDITS_AGREEMENT_EFFECTIVE_DATE}
+            </p>
+
             <button
               className={styles.payButton}
               onClick={async () => {
