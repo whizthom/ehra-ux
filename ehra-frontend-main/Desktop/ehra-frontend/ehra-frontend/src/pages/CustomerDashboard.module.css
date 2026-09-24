@@ -6654,3 +6654,213 @@
     max-width: 84px;
   }
 }
+
+/* Pending online order payment recovery */
+.orderActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap
+}
+
+.payOrderButton {
+  border: 0;
+  border-radius: 10px;
+  padding: 9px 13px;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--brand, #1f6feb);
+  color: #fff
+}
+
+.payOrderButton:disabled {
+  opacity: .55;
+  cursor: not-allowed
+}
+
+.paymentRecoveryModal {
+  position: relative;
+  width: min(620px, calc(100vw - 28px));
+  max-height: min(88vh, 760px);
+  overflow: auto;
+  background: var(--surface, #fff);
+  border-radius: 22px;
+  padding: 28px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .24)
+}
+
+.paymentRecoveryHead {
+  padding-right: 28px;
+  margin-bottom: 20px
+}
+
+.paymentRecoveryHead h2 {
+  margin: 5px 0 8px
+}
+
+.paymentRecoveryHead p {
+  margin: 0 0 14px;
+  line-height: 1.55;
+  color: var(--text-muted, #667085)
+}
+
+.paymentRecoveryHead>strong {
+  font-size: 1.35rem
+}
+
+.paymentRecoveryOptions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px
+}
+
+.paymentRecoveryOptions>button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  border: 1px solid var(--border, #e5e7eb);
+  background: var(--surface, #fff);
+  border-radius: 14px;
+  padding: 14px;
+  cursor: pointer
+}
+
+.paymentRecoveryOptions>button:hover {
+  border-color: var(--brand, #1f6feb)
+}
+
+.paymentRecoveryOptions i {
+  font-size: 20px
+}
+
+.paymentRecoveryOptions span,
+.payWithBankRecovery span {
+  display: flex;
+  flex-direction: column;
+  gap: 3px
+}
+
+.paymentRecoveryOptions small,
+.payWithBankRecovery small {
+  color: var(--text-muted, #667085)
+}
+
+.payWithBankRecovery {
+  grid-column: 1/-1;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 14px;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px
+}
+
+.payWithBankRecovery>div {
+  grid-column: 1/-1;
+  display: flex;
+  align-items: center;
+  gap: 12px
+}
+
+.payWithBankRecovery select,
+.payWithBankRecovery input {
+  width: 100%;
+  border: 1px solid var(--border, #d9dde5);
+  border-radius: 10px;
+  padding: 11px;
+  background: var(--surface, #fff)
+}
+
+.payWithBankRecovery>button {
+  border: 0;
+  border-radius: 10px;
+  background: var(--brand, #1f6feb);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer
+}
+
+.payWithBankRecovery>button:disabled {
+  opacity: .55
+}
+
+.directPaymentRecovery {
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 16px;
+  padding: 18px
+}
+
+.directPaymentRecovery h3 {
+  margin-top: 0
+}
+
+.directPaymentRecovery p {
+  color: var(--text-muted, #667085)
+}
+
+.recoveryCode {
+  font: 700 1.15rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: var(--surface-muted, #f4f6f8);
+  padding: 12px;
+  border-radius: 10px;
+  margin: 12px 0
+}
+
+.paymentRecoveryActions {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin-top: 16px
+}
+
+.secondaryPaymentAction {
+  border: 1px solid var(--border, #d9dde5);
+  background: transparent;
+  border-radius: 10px;
+  padding: 9px 13px;
+  font-weight: 700;
+  cursor: pointer
+}
+
+.paymentRecoveryError {
+  margin-top: 14px;
+  padding: 11px 13px;
+  border-radius: 10px;
+  background: #fff1f0;
+  color: #b42318
+}
+
+@media(max-width:640px) {
+  .paymentRecoveryModal {
+    padding: 22px 16px;
+    border-radius: 18px
+  }
+
+  .paymentRecoveryOptions {
+    grid-template-columns: 1fr
+  }
+
+  .payWithBankRecovery {
+    grid-column: auto;
+    grid-template-columns: 1fr
+  }
+
+  .payWithBankRecovery>div {
+    grid-column: auto
+  }
+
+  .payWithBankRecovery>button {
+    min-height: 44px
+  }
+
+  .orderActions {
+    justify-content: flex-start
+  }
+
+  .payOrderButton,
+  .receiptButton {
+    min-height: 40px
+  }
+}

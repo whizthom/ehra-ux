@@ -17,6 +17,14 @@ import {
   getMyPosReceipts,
 } from "../api/commerceApi";
 import { createCustomerBusinessConversation } from "../api/messagingApi";
+import {
+  payForOrderOnline,
+  verifyOrderPayment,
+  initializeOrderBankTransfer,
+  initializeOrderUssd,
+  initializeOrderBank,
+  listOrderPayWithBankBanks,
+} from "../api/orderPaymentApi";
 import { useAuth } from "../context/AuthContext";
 import useMessagingConnection from "../hooks/useMessagingConnection";
 import { subscribeToUserQueue } from "../services/messagingSocket";
@@ -486,7 +494,7 @@ function ConnectedBusinessCard({ business, onVisit, onChat, detailed }) {
   );
 }
 
-function OrderList({ orders, onReceipt }) {
+function OrderList({ orders, onReceipt, onPay }) {
   if (!orders.length) {
     return (
       <div className={styles.emptyState}>
@@ -543,18 +551,30 @@ function OrderList({ orders, onReceipt }) {
               </span>
               <strong>{money(o.currency, o.total)}</strong>
             </div>
-            <button
-              className={styles.receiptButton}
-              onClick={() => onReceipt(o)}
-              disabled={!settled}
-            >
-              <i className="ti ti-receipt" />{" "}
-              {o.receiptAvailable
-                ? "Receipt"
-                : settled
-                  ? "Paid"
-                  : "Payment pending"}
-            </button>
+            <div className={styles.orderActions}>
+              {!settled &&
+                String(o.paymentStatus || "UNPAID").toUpperCase() !== "PAID" &&
+                String(o.status || "").toUpperCase() !== "CANCELLED" && (
+                  <button
+                    className={styles.payOrderButton}
+                    onClick={() => onPay(o)}
+                  >
+                    <i className="ti ti-credit-card" /> Complete payment
+                  </button>
+                )}
+              <button
+                className={styles.receiptButton}
+                onClick={() => onReceipt(o)}
+                disabled={!settled}
+              >
+                <i className="ti ti-receipt" />{" "}
+                {o.receiptAvailable
+                  ? "Receipt"
+                  : settled
+                    ? "Paid"
+                    : "Payment pending"}
+              </button>
+            </div>
           </article>
         );
       })}
@@ -644,6 +664,13 @@ export default function CustomerDashboard() {
     useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [paymentOrder, setPaymentOrder] = useState(null);
+  const [paymentBanks, setPaymentBanks] = useState([]);
+  const [selectedPaymentBank, setSelectedPaymentBank] = useState("");
+  const [paymentAccountNumber, setPaymentAccountNumber] = useState("");
+  const [paymentBusy, setPaymentBusy] = useState(false);
+  const [paymentError, setPaymentError] = useState("");
+  const [directPayment, setDirectPayment] = useState(null);
   const [query, setQuery] = useState("");
   const [notice, setNotice] = useState("");
   // The "Sign out of Ehral" button on the Account page asks first, using the
@@ -1050,6 +1077,109 @@ export default function CustomerDashboard() {
         e?.response?.data?.message ||
           "Messaging is temporarily unavailable for this business.",
       );
+    }
+  };
+
+  const openPendingPayment = async (order) => {
+    if (!order?.id) return;
+    setPaymentOrder(order);
+    setPaymentError("");
+    setDirectPayment(null);
+    setPaymentAccountNumber("");
+    try {
+      const banks = await listOrderPayWithBankBanks();
+      const list = Array.isArray(banks) ? banks : [];
+      setPaymentBanks(list);
+      setSelectedPaymentBank((current) => current || list[0]?.code || "");
+    } catch {
+      setPaymentBanks([]);
+    }
+  };
+
+  const completePendingPayment = async () => {
+    if (!paymentOrder?.id || paymentBusy) return;
+    setPaymentBusy(true);
+    setPaymentError("");
+    try {
+      const result = await payForOrderOnline(paymentOrder.id);
+      if (String(result?.status || "").toUpperCase() === "SUCCESS") {
+        setPaymentOrder(null);
+        setDirectPayment(null);
+        await load();
+      }
+    } catch (e) {
+      setPaymentError(
+        e?.response?.data?.message ||
+          e?.message ||
+          "Payment could not be completed. Please try again.",
+      );
+    } finally {
+      setPaymentBusy(false);
+    }
+  };
+
+  const startPendingDirectPayment = async (method) => {
+    if (!paymentOrder?.id || paymentBusy) return;
+    setPaymentBusy(true);
+    setPaymentError("");
+    try {
+      let result;
+      if (method === "transfer") {
+        result = await initializeOrderBankTransfer(paymentOrder.id);
+      } else if (method === "ussd") {
+        result = await initializeOrderUssd(paymentOrder.id);
+      } else {
+        if (!selectedPaymentBank || !paymentAccountNumber.trim()) {
+          throw new Error(
+            "Select your bank and enter your bank account number.",
+          );
+        }
+        result = await initializeOrderBank(
+          paymentOrder.id,
+          selectedPaymentBank,
+          paymentAccountNumber.trim(),
+          paymentOrder.customerPhone || undefined,
+        );
+      }
+      setDirectPayment({ method, ...result });
+    } catch (e) {
+      setPaymentError(
+        e?.response?.data?.message ||
+          e?.message ||
+          "We could not start this payment method. Please try again.",
+      );
+    } finally {
+      setPaymentBusy(false);
+    }
+  };
+
+  const checkPendingDirectPayment = async () => {
+    if (!paymentOrder?.id || !directPayment?.reference || paymentBusy) return;
+    setPaymentBusy(true);
+    setPaymentError("");
+    try {
+      const result = await verifyOrderPayment(
+        paymentOrder.id,
+        directPayment.reference,
+      );
+      if (String(result?.status || "").toUpperCase() === "SUCCESS") {
+        setPaymentOrder(null);
+        setDirectPayment(null);
+        await load();
+      } else {
+        setPaymentError(
+          result?.message ||
+            "Payment has not been confirmed yet. If you have completed the payment, try checking again shortly.",
+        );
+      }
+    } catch (e) {
+      setPaymentError(
+        e?.response?.data?.message ||
+          e?.message ||
+          "We could not verify the payment yet.",
+      );
+    } finally {
+      setPaymentBusy(false);
     }
   };
 
@@ -1748,7 +1878,11 @@ export default function CustomerDashboard() {
                 Everything you have bought through your Ehral customer account.
               </p>
             </div>
-            <OrderList orders={filteredOrders} onReceipt={setSelectedOrder} />
+            <OrderList
+              orders={filteredOrders}
+              onReceipt={setSelectedOrder}
+              onPay={openPendingPayment}
+            />
           </section>
         )}
 
@@ -2441,6 +2575,160 @@ export default function CustomerDashboard() {
         onCancel={() => !disconnecting && setConfirmDisconnect(null)}
         onConfirm={confirmDisconnectBusiness}
       />
+
+      {paymentOrder && (
+        <div
+          className={styles.overlay}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Complete order payment"
+        >
+          <section className={styles.paymentRecoveryModal}>
+            <button
+              className={styles.modalClose}
+              onClick={() => !paymentBusy && setPaymentOrder(null)}
+              aria-label="Close payment"
+            >
+              <i className="ti ti-x" />
+            </button>
+            <div className={styles.paymentRecoveryHead}>
+              <span className={styles.eyebrow}>PAYMENT REQUIRED</span>
+              <h2>Complete your order</h2>
+              <p>
+                Order #{paymentOrder.orderNumber} at {paymentOrder.businessName}{" "}
+                is still pending payment. Complete payment to confirm the order
+                with the business.
+              </p>
+              <strong>
+                {money(paymentOrder.currency, paymentOrder.total)}
+              </strong>
+            </div>
+
+            {directPayment ? (
+              <div className={styles.directPaymentRecovery}>
+                <h3>
+                  {directPayment.method === "transfer"
+                    ? "Bank transfer"
+                    : directPayment.method === "ussd"
+                      ? "USSD payment"
+                      : "Pay with bank"}
+                </h3>
+                {directPayment.displayText && (
+                  <p>{directPayment.displayText}</p>
+                )}
+                {directPayment.accountName && (
+                  <p>
+                    <b>Account:</b> {directPayment.accountName}
+                  </p>
+                )}
+                {directPayment.accountNumber && (
+                  <p>
+                    <b>Account number:</b> {directPayment.accountNumber}
+                  </p>
+                )}
+                {directPayment.bankName && (
+                  <p>
+                    <b>Bank:</b> {directPayment.bankName}
+                  </p>
+                )}
+                {directPayment.ussdCode && (
+                  <div className={styles.recoveryCode}>
+                    {directPayment.ussdCode}
+                  </div>
+                )}
+                <div className={styles.paymentRecoveryActions}>
+                  <button
+                    className={styles.payOrderButton}
+                    disabled={paymentBusy}
+                    onClick={checkPendingDirectPayment}
+                  >
+                    {paymentBusy ? "Checking…" : "I have paid · Check payment"}
+                  </button>
+                  <button
+                    className={styles.secondaryPaymentAction}
+                    disabled={paymentBusy}
+                    onClick={() => setDirectPayment(null)}
+                  >
+                    Choose another method
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className={styles.paymentRecoveryOptions}>
+                  <button
+                    disabled={paymentBusy}
+                    onClick={completePendingPayment}
+                  >
+                    <i className="ti ti-credit-card" />
+                    <span>
+                      <b>Card</b>
+                      <small>Pay securely with Paystack</small>
+                    </span>
+                  </button>
+                  <button
+                    disabled={paymentBusy}
+                    onClick={() => startPendingDirectPayment("transfer")}
+                  >
+                    <i className="ti ti-building-bank" />
+                    <span>
+                      <b>Bank transfer</b>
+                      <small>Get payment account details</small>
+                    </span>
+                  </button>
+                  <button
+                    disabled={paymentBusy}
+                    onClick={() => startPendingDirectPayment("ussd")}
+                  >
+                    <i className="ti ti-device-mobile" />
+                    <span>
+                      <b>USSD</b>
+                      <small>Pay using your bank USSD code</small>
+                    </span>
+                  </button>
+                  <div className={styles.payWithBankRecovery}>
+                    <div>
+                      <i className="ti ti-building-bank" />
+                      <span>
+                        <b>Pay with bank</b>
+                        <small>Authorize from your bank account</small>
+                      </span>
+                    </div>
+                    <select
+                      value={selectedPaymentBank}
+                      onChange={(e) => setSelectedPaymentBank(e.target.value)}
+                    >
+                      <option value="">Select bank</option>
+                      {paymentBanks.map((b) => (
+                        <option key={b.code} value={b.code}>
+                          {b.name}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      value={paymentAccountNumber}
+                      onChange={(e) => setPaymentAccountNumber(e.target.value)}
+                      placeholder="Bank account number"
+                      inputMode="numeric"
+                    />
+                    <button
+                      disabled={paymentBusy}
+                      onClick={() => startPendingDirectPayment("bank")}
+                    >
+                      {paymentBusy ? "Starting…" : "Continue"}
+                    </button>
+                  </div>
+                </div>
+                {paymentError && (
+                  <div className={styles.paymentRecoveryError}>
+                    {paymentError}
+                  </div>
+                )}
+              </>
+            )}
+          </section>
+        </div>
+      )}
 
       {selectedOrder && (
         <ReceiptView
