@@ -565,6 +565,9 @@ export default function RetailWorkspace() {
           {tab === "Payments" && (
             <OnlinePayments owner={context.owner} money={money} />
           )}{" "}
+          {tab === "Ehral Credits" && context.owner && (
+            <EhralCredits onBack={() => setTab("Dashboard")} />
+          )}{" "}
           {tab === "Settings" && (
             <Settings
               type={type}
