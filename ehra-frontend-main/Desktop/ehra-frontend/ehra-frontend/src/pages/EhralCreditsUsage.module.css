@@ -1,0 +1,488 @@
+/* =========================================================================
+   EHRAL CREDITS — USAGE HISTORY
+   -------------------------------------------------------------------------
+   Same theme-token treatment as EhralCredits.module.css (this page sits
+   directly on the workspace's --bg-page, cards use --bg-surface + a
+   hairline border), so it reads as part of the same feature rather than a
+   bolted-on page. Built mobile-first: filters collapse behind a toggle and
+   become horizontally-scrollable chip rows once the viewport narrows.
+========================================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+.page {
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.topRow {
+    display: flex;
+}
+
+.backButton {
+    border: 0;
+    background: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-weight: 700;
+    font-size: 13px;
+    font-family: inherit;
+    padding: 8px 4px;
+    margin: -8px -4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.backButton:hover {
+    color: var(--accent);
+}
+
+.eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    font-weight: 800;
+    color: var(--accent);
+    margin: 0 0 8px;
+    text-transform: uppercase;
+}
+
+.page h1 {
+    font-size: clamp(22px, 3.2vw, 32px);
+    letter-spacing: -0.03em;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    margin: 8px 0 0;
+    font-size: 14px;
+    max-width: 640px;
+}
+
+/* ── Filter toggle (mobile-first) ────────────────────────────────── */
+
+.filterToggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    border: 0.5px solid var(--border-color);
+    background: var(--bg-surface);
+    border-radius: 14px;
+    padding: 13px 16px;
+    font-weight: 800;
+    font-size: 13.5px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.filterToggle span:first-child {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filterBadge {
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    border-radius: 999px;
+    min-width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+}
+
+/* ── Filters panel ────────────────────────────────────────────────── */
+
+.filters {
+    display: none;
+    flex-direction: column;
+    gap: 16px;
+    background: var(--bg-surface);
+    border: 0.5px solid var(--border-color);
+    border-radius: 18px;
+    padding: 18px;
+}
+
+.filtersOpen {
+    display: flex;
+}
+
+.filterGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    min-width: 0;
+}
+
+.filterLabel {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 800;
+    color: var(--text-secondary);
+}
+
+.chipRow {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+}
+
+.chipRow::-webkit-scrollbar {
+    display: none;
+}
+
+.chip,
+.chipActive {
+    flex: 0 0 auto;
+    border: 0.5px solid var(--border-color);
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+    border-radius: 999px;
+    padding: 9px 14px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 38px;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.chipActive {
+    background: var(--bg-soft-accent);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.dateRange {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.dateRange label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    flex: 1 1 150px;
+}
+
+.dateRange input {
+    border: 0.5px solid var(--border-color);
+    background: var(--bg-surface);
+    border-radius: 11px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: var(--text-primary);
+    font-family: inherit;
+    min-height: 42px;
+}
+
+/* ── Section / list ───────────────────────────────────────────────── */
+
+.section {
+    background: var(--bg-surface);
+    border: 0.5px solid var(--border-color);
+    border-radius: 20px;
+    box-shadow: 0 12px 35px var(--shadow-color);
+    padding: 20px;
+}
+
+.sectionHead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sectionHead h2 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-secondary);
+}
+
+.dayGroup {
+    margin-top: 18px;
+}
+
+.dayGroup:first-child {
+    margin-top: 12px;
+}
+
+.dayLabel {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.activityRow {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 14px 0;
+    border-bottom: 0.5px solid var(--border-color);
+}
+
+.dayGroup .activityRow:last-child {
+    border-bottom: 0;
+}
+
+.activityIcon {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    font-size: 16px;
+}
+
+.minus {
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+}
+
+.plus {
+    background: color-mix(in srgb, var(--accent) 20%, var(--bg-soft-accent));
+    color: var(--accent);
+}
+
+.activityInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.activityInfo strong,
+.activityInfo span {
+    display: block;
+}
+
+.activityInfo strong {
+    font-size: 13.5px;
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.activityInfo span {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.activityAmountWrap {
+    flex: 0 0 auto;
+    text-align: right;
+}
+
+.activityAmount {
+    font-weight: 850;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.activityBalance {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 3px;
+    white-space: nowrap;
+}
+
+.positive {
+    color: var(--accent);
+}
+
+.loadMore {
+    width: 100%;
+    margin-top: 18px;
+    border: 0.5px solid var(--border-color);
+    background: var(--bg-surface-alt);
+    color: var(--text-primary);
+    border-radius: 13px;
+    min-height: 46px;
+    font-weight: 800;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.loadMore:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--accent) 40%, var(--border-color));
+    color: var(--accent);
+}
+
+.loadMore:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.loadMore i.ti-loader-2 {
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Empty / loading states ───────────────────────────────────────── */
+
+.empty {
+    text-align: center;
+    padding: 44px 20px;
+    color: var(--text-secondary);
+}
+
+.empty i {
+    font-size: 26px;
+    color: var(--accent);
+}
+
+.empty h3 {
+    color: var(--text-primary);
+    margin: 10px 0 5px;
+    font-size: 15px;
+}
+
+.empty p {
+    font-size: 13px;
+    margin: 0;
+}
+
+.skeletonList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.skeletonRow {
+    height: 58px;
+    border-radius: 14px;
+    background: linear-gradient(90deg, var(--bg-surface-alt), var(--bg-surface), var(--bg-surface-alt));
+    background-size: 200% 100%;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        background-position: 0% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ── Banner ───────────────────────────────────────────────────────── */
+
+.error {
+    padding: 13px 16px;
+    border-radius: 14px;
+    background: var(--danger-bg);
+    border: 0.5px solid var(--danger-border);
+    color: var(--danger-text);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+}
+
+.error button {
+    border: 0;
+    background: none;
+    cursor: pointer;
+    color: inherit;
+    font-weight: 700;
+    flex: 0 0 auto;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────── */
+/* Above 780px there's room to keep filters permanently visible and lay
+   the filter groups out side by side instead of stacked. */
+
+@media (min-width: 780px) {
+    .filterToggle {
+        display: none;
+    }
+
+    .filters {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+    }
+}
+
+@media (max-width: 640px) {
+    .page {
+        gap: 14px;
+    }
+
+    .section {
+        border-radius: 16px;
+        padding: 16px;
+    }
+
+    .filters {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .activityRow {
+        align-items: flex-start;
+    }
+
+    .activityAmount {
+        font-size: 13px;
+    }
+
+    .activityBalance {
+        display: none;
+    }
+}
+
+@media (max-width: 380px) {
+    .activityInfo strong {
+        font-size: 13px;
+    }
+
+    .chip,
+    .chipActive {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+}

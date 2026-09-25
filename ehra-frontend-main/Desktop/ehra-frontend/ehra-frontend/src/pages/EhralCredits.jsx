@@ -6,6 +6,7 @@ import {
   acceptCreditAgreement,
 } from "../api/creditsApi";
 import { payWithPaystack } from "../api/subscriptionApi";
+import EhralCreditsUsage from "./EhralCreditsUsage";
 import styles from "./EhralCredits.module.css";
 
 const AMOUNTS = [1000, 2500, 5000, 10000];
@@ -57,6 +58,7 @@ const DEFAULT_SERVICE_ICON = "ti-apps";
 const serviceIcon = (code = "") => SERVICE_ICONS[code] || DEFAULT_SERVICE_ICON;
 
 export default function EhralCredits() {
+  const [view, setView] = useState("dashboard"); // "dashboard" | "usage"
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -157,6 +159,15 @@ export default function EhralCredits() {
     );
   }
 
+  if (view === "usage") {
+    return (
+      <EhralCreditsUsage
+        onBack={() => setView("dashboard")}
+        services={services}
+      />
+    );
+  }
+
   return (
     <div className={styles.page}>
       <div className={styles.topRow}>
@@ -205,9 +216,17 @@ export default function EhralCredits() {
                 : ""}
             </span>
           </div>
-          <button className={styles.primary} onClick={() => setBuyOpen(true)}>
-            <i className="ti ti-wallet" /> Add Credits
-          </button>
+          <div className={styles.heroActions}>
+            <button className={styles.primary} onClick={() => setBuyOpen(true)}>
+              <i className="ti ti-wallet" /> Add Credits
+            </button>
+            <button
+              className={styles.heroSecondary}
+              onClick={() => setView("usage")}
+            >
+              <i className="ti ti-history" /> View all usage
+            </button>
+          </div>
         </div>
       </section>
 

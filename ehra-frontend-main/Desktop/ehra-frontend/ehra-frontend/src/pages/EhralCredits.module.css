@@ -191,6 +191,12 @@
     opacity: 0.6;
 }
 
+.heroActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
 .hero .primary {
     background: var(--cred-glow);
     color: var(--cred-grad-1);
@@ -198,6 +204,31 @@
 }
 
 .hero .primary:hover {
+    transform: translateY(-1px);
+}
+
+/* "View all usage" - same pill as .primary but a quieter, glass-style
+   treatment so it reads as the secondary action beside "Add Credits". */
+.heroSecondary {
+    border: 1px solid color-mix(in srgb, #fff 30%, transparent);
+    border-radius: 13px;
+    background: color-mix(in srgb, #fff 10%, transparent);
+    color: #fff;
+    font-weight: 800;
+    font-size: 13px;
+    cursor: pointer;
+    min-height: 46px;
+    padding: 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: inherit;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.heroSecondary:hover {
+    background: color-mix(in srgb, #fff 18%, transparent);
     transform: translateY(-1px);
 }
 
@@ -790,7 +821,12 @@
         padding: 18px 20px;
     }
 
-    .hero .primary {
+    .heroActions {
+        flex-direction: column;
+    }
+
+    .hero .primary,
+    .heroSecondary {
         width: 100%;
     }
 
