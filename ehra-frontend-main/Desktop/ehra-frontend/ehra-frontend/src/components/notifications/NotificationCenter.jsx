@@ -113,6 +113,7 @@ export default function NotificationCenter({
   fetchUnreadCount,
   markAllRead,
   onViewAll,
+  onNotificationClick,
   enabled = true,
 }) {
   const [open, setOpen] = useState(false);
@@ -265,7 +266,13 @@ export default function NotificationCenter({
                 <div
                   key={n.id}
                   className={`${styles.notifItem} ${!n.isRead ? styles.unread : ""}`}
-                  onClick={() => markOne(n.id)}
+                  onClick={() => {
+                    markOne(n.id);
+                    if (onNotificationClick) {
+                      setOpen(false);
+                      onNotificationClick(n);
+                    }
+                  }}
                 >
                   <div className={styles.notifItemTop}>
                     <div className={iconClass(n.type)}>
@@ -331,6 +338,7 @@ export function NotificationsPage({
   onMarkAllRead,
   onMarkOneRead,
   onDelete,
+  onItemClick,
 }) {
   return (
     <section className={styles.notifPageWrap}>
@@ -362,7 +370,10 @@ export function NotificationsPage({
             <div
               key={n.id}
               className={`${styles.notifItem} ${!n.isRead ? styles.unread : ""}`}
-              onClick={() => onMarkOneRead(n.id)}
+              onClick={() => {
+                onMarkOneRead(n.id);
+                onItemClick?.(n);
+              }}
             >
               <div className={styles.notifItemTop}>
                 <div className={iconClass(n.type)}>
@@ -400,6 +411,7 @@ export function NotificationsPageView({
   fetchNotifications,
   fetchUnreadCount,
   markAllRead,
+  onNotificationClick,
 }) {
   const filter = mode === "retail" ? RETAIL_TYPES : CUSTOMER_TYPES;
   const [notifs, setNotifs] = useState([]);
@@ -492,6 +504,7 @@ export function NotificationsPageView({
         onMarkAllRead={markAll}
         onMarkOneRead={markOne}
         onDelete={remove}
+        onItemClick={onNotificationClick}
       />
       {pendingDeletes.size > 0 && (
         <div className={styles.notifUndoStack}>

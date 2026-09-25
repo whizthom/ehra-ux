@@ -566,6 +566,14 @@ td {
   white-space: nowrap
 }
 
+/* Landed on by tapping an "Approval slip accepted/declined" bell
+   notification - briefly outlines the exact row so it's unmistakable
+   among the rest of the table, not just scrolled into view. */
+.rowHighlighted td {
+  background: color-mix(in srgb, var(--accent, #0f6e56) 12%, transparent);
+  box-shadow: inset 0 0 0 1px var(--accent, #0f6e56);
+}
+
 /* Fee-explainer "how it works" table: two columns of prose (a short label,
    then a full sentence), not row-per-record data like the tables above -
    the base nowrap rule was forcing that whole sentence onto one line,

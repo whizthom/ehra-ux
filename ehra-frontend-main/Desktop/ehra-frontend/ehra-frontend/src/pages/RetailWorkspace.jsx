@@ -62,8 +62,14 @@ import NotificationToastStack from "../components/notifications/NotificationToas
 import useMessagingConnection from "../hooks/useMessagingConnection";
 import useCustomerInboxBadge from "../hooks/useCustomerInboxBadge";
 import EhralCredits from "./EhralCredits";
-import NotificationCenter, { NotificationsPageView } from "../components/notifications/NotificationCenter";
-import { getRetailNotifications, getRetailUnreadCount, markAllRetailRead } from "../api/notificationApi";
+import NotificationCenter, {
+  NotificationsPageView,
+} from "../components/notifications/NotificationCenter";
+import {
+  getRetailNotifications,
+  getRetailUnreadCount,
+  markAllRetailRead,
+} from "../api/notificationApi";
 
 const today = () => new Date().toISOString().slice(0, 10);
 const NAV = [
@@ -132,6 +138,20 @@ export default function RetailWorkspace() {
   const [messagesDeepLink, setMessagesDeepLink] = useState(null);
   const [activeMessageConversationId, setActiveMessageConversationId] =
     useState(null);
+  // Set when an "Approval slip accepted/declined" bell notification is
+  // tapped, so the POS tab's Approval slips table can scroll to and outline
+  // that exact row once it renders.
+  const [approvalHighlightId, setApprovalHighlightId] = useState(null);
+  const handleNotificationClick = (n) => {
+    if (
+      (n?.type === "RETAIL_SALE_APPROVAL_ACCEPTED" ||
+        n?.type === "RETAIL_SALE_APPROVAL_DECLINED") &&
+      n?.referenceId
+    ) {
+      setApprovalHighlightId(n.referenceId);
+      setTab("Sales / POS");
+    }
+  };
   const canMessage = Boolean(context && (context.owner || context.canMessages));
   const inbox = useCustomerInboxBadge({ enabled: canMessage });
   const money = (n) =>
@@ -350,6 +370,7 @@ export default function RetailWorkspace() {
                 fetchUnreadCount={getRetailUnreadCount}
                 markAllRead={markAllRetailRead}
                 onViewAll={() => setTab("Notifications")}
+                onNotificationClick={handleNotificationClick}
                 enabled={tab !== "Notifications"}
               />
               <div className={s.avatar}>
@@ -387,6 +408,7 @@ export default function RetailWorkspace() {
               fetchNotifications={getRetailNotifications}
               fetchUnreadCount={getRetailUnreadCount}
               markAllRead={markAllRetailRead}
+              onNotificationClick={handleNotificationClick}
             />
           )}
           {tab === "Dashboard" && (
@@ -521,6 +543,8 @@ export default function RetailWorkspace() {
                 return r;
               }}
               onApprovalsChanged={runLoad}
+              highlightApprovalId={approvalHighlightId}
+              onHighlightConsumed={() => setApprovalHighlightId(null)}
               canFinance={context.owner || context.canFinance}
               onRefund={async (id) => {
                 if (confirm("Refund this sale and restore its inventory?")) {

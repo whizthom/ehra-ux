@@ -289,6 +289,11 @@ function POS({
   onApprovalsChanged,
   money,
   canFinance = false,
+  // Set by RetailWorkspace when an "Approval slip accepted/declined" bell
+  // notification is tapped - the matching row is scrolled to and outlined,
+  // then onHighlightConsumed() clears it so it doesn't linger on later visits.
+  highlightApprovalId,
+  onHighlightConsumed,
 }) {
   const [receipt, setReceipt] = useState(null);
   const [paymentSale, setPaymentSale] = useState(null);
@@ -310,8 +315,12 @@ function POS({
   const [sentSlip, setSentSlip] = useState(null);
   const [approvals, setApprovals] = useState([]);
   const [approvalsBusy, setApprovalsBusy] = useState(null);
+  // Fetches every slip, not just the open ones - a customer's decline needs
+  // to still be visible here (with their reason) after the fact, both for
+  // the "Approval slip declined" notification to have somewhere to land and
+  // so staff can review it without hunting through history.
   const loadApprovals = () =>
-    getSaleApprovals("OPEN")
+    getSaleApprovals()
       .then((r) => setApprovals(r.data || []))
       .catch(() => {});
   useEffect(() => {
@@ -333,6 +342,17 @@ function POS({
       }
     });
   }, []);
+  // Landed here from an "Approval slip accepted/declined" bell notification:
+  // scroll to that exact row once it's actually in the DOM (approvals may
+  // still be loading when this tab first mounts), then let the highlight
+  // fade after a few seconds.
+  useEffect(() => {
+    if (!highlightApprovalId) return;
+    const el = document.getElementById(`approval-slip-${highlightApprovalId}`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    const timer = setTimeout(() => onHighlightConsumed?.(), 4000);
+    return () => clearTimeout(timer);
+  }, [highlightApprovalId, approvals]);
   const add = (p) =>
     setCart((c) => {
       const x = c.find((i) => i.productId === p.id);
@@ -711,8 +731,14 @@ function POS({
               </tr>
             </thead>
             <tbody>
-              {approvals.map((a) => (
-                <tr key={a.id}>
+              {approvals.slice(0, 20).map((a) => (
+                <tr
+                  key={a.id}
+                  id={`approval-slip-${a.id}`}
+                  className={
+                    highlightApprovalId === a.id ? s.rowHighlighted : ""
+                  }
+                >
                   <td>
                     <b>{a.slipNumber}</b>
                   </td>
@@ -720,6 +746,18 @@ function POS({
                   <td>{money(a.total)}</td>
                   <td>
                     <ApprovalStatusBadge status={a.status} />
+                    {a.status === "CUSTOMER_DECLINED" && a.declineReason && (
+                      <div
+                        style={{
+                          fontSize: 10,
+                          color: "#a33b32",
+                          marginTop: 4,
+                          maxWidth: 220,
+                        }}
+                      >
+                        “{a.declineReason}”
+                      </div>
+                    )}
                   </td>
                   <td>
                     {a.createdAt ? new Date(a.createdAt).toLocaleString() : ""}

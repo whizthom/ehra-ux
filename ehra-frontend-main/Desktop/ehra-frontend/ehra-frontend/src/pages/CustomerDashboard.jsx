@@ -39,8 +39,14 @@ import LogoutConfirmModal from "../components/LogoutConfirmModal";
 import DisconnectConfirmModal from "../components/DisconnectConfirmModal";
 import PremiumReceipt from "../components/PremiumReceipt";
 import styles from "./CustomerDashboard.module.css";
-import NotificationCenter, { NotificationsPageView } from "../components/notifications/NotificationCenter";
-import { getCustomerNotifications, getCustomerUnreadCount, markAllCustomerRead } from "../api/notificationApi";
+import NotificationCenter, {
+  NotificationsPageView,
+} from "../components/notifications/NotificationCenter";
+import {
+  getCustomerNotifications,
+  getCustomerUnreadCount,
+  markAllCustomerRead,
+} from "../api/notificationApi";
 
 // Matches Ehral\'s employer/employee mobile navigation behavior.
 function useScrollThumb(ref) {
@@ -694,6 +700,10 @@ export default function CustomerDashboard() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [approvals, setApprovals] = useState([]);
   const [approvalsLoading, setApprovalsLoading] = useState(false);
+  // Set when a "New approval slip" bell notification is tapped, so the
+  // Approvals tab can scroll to and outline that exact slip once it renders.
+  // Cleared a few seconds after landing so the outline doesn't linger forever.
+  const [approvalHighlightId, setApprovalHighlightId] = useState(null);
   const [decisionBusy, setDecisionBusy] = useState(null);
   const [decisionError, setDecisionError] = useState("");
   const [decliningApproval, setDecliningApproval] = useState(null);
@@ -1025,6 +1035,26 @@ export default function CustomerDashboard() {
     if (id === "receipts") loadPosReceipts();
   };
 
+  // Tapping a "New approval slip" bell notification jumps straight to the
+  // Approvals tab and outlines the exact slip it was about, instead of just
+  // dropping the customer on the tab to hunt for it themselves.
+  const handleNotificationClick = (n) => {
+    if (n?.type === "CUSTOMER_SALE_APPROVAL_RECEIVED" && n?.referenceId) {
+      setApprovalHighlightId(n.referenceId);
+      changeTab("approvals");
+    }
+  };
+
+  // Scrolls to and briefly outlines the slip once it's actually in the DOM
+  // (approvals may still be loading when the tab first switches in).
+  useEffect(() => {
+    if (tab !== "approvals" || !approvalHighlightId) return;
+    const el = document.getElementById(`approval-${approvalHighlightId}`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    const timer = setTimeout(() => setApprovalHighlightId(null), 4000);
+    return () => clearTimeout(timer);
+  }, [tab, approvalHighlightId, approvals]);
+
   const visitBusiness = (business) => {
     // Remember which tab this was opened from, so the profile's back arrow can
     // return to exactly here.
@@ -1268,7 +1298,10 @@ export default function CustomerDashboard() {
   }
 
   const navItems = CUSTOMER_NAV_ITEMS;
-  const title = tab === "notifications" ? "Notifications" : (navItems.find((x) => x[0] === tab)?.[1] || "Dashboard");
+  const title =
+    tab === "notifications"
+      ? "Notifications"
+      : navItems.find((x) => x[0] === tab)?.[1] || "Dashboard";
 
   return (
     <>
@@ -1296,6 +1329,7 @@ export default function CustomerDashboard() {
             fetchUnreadCount={getCustomerUnreadCount}
             markAllRead={markAllCustomerRead}
             onViewAll={() => changeTab("notifications")}
+            onNotificationClick={handleNotificationClick}
             enabled={tab !== "notifications"}
           />
         }
@@ -1326,6 +1360,7 @@ export default function CustomerDashboard() {
             fetchNotifications={getCustomerNotifications}
             fetchUnreadCount={getCustomerUnreadCount}
             markAllRead={markAllCustomerRead}
+            onNotificationClick={handleNotificationClick}
           />
         )}
         {tab === "home" && (
@@ -1744,7 +1779,11 @@ export default function CustomerDashboard() {
                           ? styles.approvalStatusDeclined
                           : styles.approvalStatusDefault;
                   return (
-                    <div key={a.id} className={styles.approvalCard}>
+                    <div
+                      key={a.id}
+                      id={`approval-${a.id}`}
+                      className={`${styles.approvalCard} ${approvalHighlightId === a.id ? styles.approvalCardHighlighted : ""}`}
+                    >
                       <div className={styles.approvalHead}>
                         <div className={styles.approvalWho}>
                           <div

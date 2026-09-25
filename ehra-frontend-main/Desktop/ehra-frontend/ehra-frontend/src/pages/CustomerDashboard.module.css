@@ -5915,6 +5915,16 @@
   border-radius: 18px;
   padding: 18px 20px;
   box-shadow: 0 20px 45px rgba(0, 0, 0, 0.18);
+  transition: box-shadow 0.3s ease, outline-color 0.3s ease;
+}
+
+/* Landed on by tapping a "New approval slip" bell notification - a
+   temporary outline so the exact slip the notification was about is
+   unmistakable among the rest of the list, not just scrolled into view. */
+.approvalCardHighlighted {
+  outline: 2px solid #35d68f;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px rgba(53, 214, 143, 0.18), 0 20px 45px rgba(0, 0, 0, 0.18);
 }
 
 .approvalHead {
