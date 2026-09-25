@@ -29,6 +29,21 @@ const label = (code = "") =>
     .replaceAll("_", " ")
     .replace(/\b\w/g, (x) => x.toUpperCase());
 
+// Most services bill a flat per-use amount, so the generic
+// "{billing model} · ₦X credits" line covers them fine. A few need to be
+// spelled out explicitly so people don't mistake a recurring charge for a
+// one-off — Product Activation is a monthly fee per product, not a
+// one-time unlock, so state that plainly instead of leaning on the raw
+// "Per Use" billing-model label.
+const SERVICE_BILLING_NOTE = {
+  PRODUCT_ACTIVATION: (s) =>
+    `${money(s.amount)} credits/month for each product activated`,
+};
+
+const serviceBillingText = (s) =>
+  SERVICE_BILLING_NOTE[s.serviceCode]?.(s) ??
+  `${label(s.billingModel)} · ${money(s.amount)} ${s.currency === "NGN" ? "credits" : s.currency}`;
+
 // Each known Ehral service gets an icon that actually represents what it
 // does, instead of reusing one generic "AI sparkle" glyph for everything.
 // Anything not yet in this map (a future service) falls back to a neutral
@@ -180,38 +195,19 @@ export default function EhralCredits() {
             <span className={styles.liveDot} /> Available Ehral Credits
           </div>
           <div className={styles.balance}>{money(data?.availableCredits)}</div>
-          <p>Available to access eligible Ehral services for this business.</p>
-          <div className={styles.heroActions}>
-            <button className={styles.primary} onClick={() => setBuyOpen(true)}>
-              <i className="ti ti-wallet" /> Buy Credits
-            </button>
-            <button
-              className={styles.secondary}
-              onClick={() =>
-                document
-                  .getElementById("creditActivity")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }
-            >
-              View activity
-            </button>
-          </div>
-        </div>
-        <div className={styles.breakdown}>
-          <div>
-            <span>Purchased</span>
-            <strong>{money(data?.purchasedCredits)}</strong>
-            <small>Never expires</small>
-          </div>
-          <div>
-            <span>Promotional</span>
-            <strong>{money(data?.promotionalCredits)}</strong>
-            <small>
+          <div className={styles.breakdownInline}>
+            <span>{money(data?.purchasedCredits)} purchased</span>
+            <span className={styles.breakdownSep} />
+            <span>
+              {money(data?.promotionalCredits)} promo
               {data?.promotionalExpiresAt
-                ? `Expires ${new Date(data.promotionalExpiresAt).toLocaleDateString()}`
-                : "Use promotional credits first"}
-            </small>
+                ? ` · expires ${new Date(data.promotionalExpiresAt).toLocaleDateString()}`
+                : ""}
+            </span>
           </div>
+          <button className={styles.primary} onClick={() => setBuyOpen(true)}>
+            <i className="ti ti-wallet" /> Add Credits
+          </button>
         </div>
       </section>
 
@@ -283,10 +279,7 @@ export default function EhralCredits() {
               </div>
               <div className={styles.serviceMain}>
                 <h3>{label(s.serviceCode)}</h3>
-                <p>
-                  {label(s.billingModel)} · {money(s.amount)}{" "}
-                  {s.currency === "NGN" ? "credits" : s.currency}
-                </p>
+                <p>{serviceBillingText(s)}</p>
               </div>
               <span className={styles.serviceArrow}>
                 <i className="ti ti-chevron-right" />
