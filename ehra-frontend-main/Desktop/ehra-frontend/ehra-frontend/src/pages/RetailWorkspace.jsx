@@ -27,6 +27,7 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
+  activateProduct,
   getOrders,
   getCustomers,
   getStorefront,
@@ -413,6 +414,17 @@ export default function RetailWorkspace() {
                 await deleteProduct(p.id);
                 runLoad();
               }}
+              onActivate={async (p) => {
+                try {
+                  await activateProduct(p.id);
+                  runLoad();
+                } catch (e) {
+                  alert(
+                    e?.response?.data?.message ||
+                      "Couldn't activate this product. Please try again.",
+                  );
+                }
+              }}
               money={money}
             />
           )}{" "}
@@ -586,11 +598,34 @@ export default function RetailWorkspace() {
           categories={productCategories}
           onClose={() => setModal(null)}
           onSave={async (d) => {
-            editing
-              ? await updateProduct(editing.id, d)
-              : await createProduct(d);
-            setModal(null);
-            runLoad();
+            // This used to have no try/catch at all: any failure (a
+            // validation error, an insufficient-Ehral-Credits charge, or
+            // anything else) threw silently — the modal stayed open, the
+            // Save button just looked like it did nothing, with no
+            // indication of why.
+            try {
+              const saved = editing
+                ? (await updateProduct(editing.id, d))?.data
+                : (await createProduct(d))?.data;
+              setModal(null);
+              runLoad();
+              // A brand-new product that couldn't be charged for
+              // PRODUCT_ACTIVATION still saves — it's just not visible to
+              // customers yet. Tell the person why, since nothing else
+              // will (no error was thrown for this case).
+              if (!editing && saved && saved.creditActive === false) {
+                alert(
+                  (saved.activationBlockedReason ||
+                    "Insufficient Ehral Credits.") +
+                    "\n\nThe product was saved, but it won't show up on your storefront until it's activated. Top up your Ehral Credits, then hit Activate on it from the catalog.",
+                );
+              }
+            } catch (e) {
+              alert(
+                e?.response?.data?.message ||
+                  "Couldn't save this product. Please check the details and try again.",
+              );
+            }
           }}
         />
       )}

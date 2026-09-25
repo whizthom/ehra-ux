@@ -14,7 +14,16 @@ import {
   today,
 } from "./shared";
 import { ConfirmModal } from "./modals";
-function Products({ items, query, setQuery, onAdd, onEdit, onDelete, money }) {
+function Products({
+  items,
+  query,
+  setQuery,
+  onAdd,
+  onEdit,
+  onDelete,
+  onActivate,
+  money,
+}) {
   const [archiveTarget, setArchiveTarget] = useState(null);
   const archive = async () => {
     if (!archiveTarget) return;
@@ -89,11 +98,28 @@ function Products({ items, query, setQuery, onAdd, onEdit, onDelete, money }) {
                   </td>
                   <td>
                     <span className={s.badge}>{p.status}</span>
+                    {p.creditActive === false && (
+                      <span
+                        className={s.badge}
+                        title="Not shown to customers until its Ehral Credits charge is paid"
+                        style={{ marginLeft: 6 }}
+                      >
+                        Not activated
+                      </span>
+                    )}
                   </td>
                   <td>
                     <button className={s.textBtn} onClick={() => onEdit(p)}>
                       Edit
                     </button>
+                    {p.creditActive === false && (
+                      <button
+                        className={s.textBtn}
+                        onClick={() => onActivate?.(p)}
+                      >
+                        Activate
+                      </button>
+                    )}
                     <button
                       className={s.textDanger}
                       onClick={() => setArchiveTarget(p)}

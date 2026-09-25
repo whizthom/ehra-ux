@@ -8,7 +8,7 @@ import {
   getPublicStorefront,
   getCustomerOverview,
 } from "../../api/commerceApi";
-import { buildWhatsAppLink } from "../../api/whatsappApi";
+import { buildWhatsAppLink, chargeWhatsAppClick } from "../../api/whatsappApi";
 import {
   verifyOtp,
   checkPhone,
@@ -2387,12 +2387,28 @@ export default function Storefront() {
             {store.whatsappNumber && (
               <button
                 className={styles.textCta}
-                onClick={() =>
-                  (window.location.href = buildWhatsAppLink(
+                onClick={async () => {
+                  const link = buildWhatsAppLink(
                     store.whatsappNumber,
                     `Hello, I just placed order #${placed.orderNumber} through Ehral and would like to follow up.`,
-                  ))
-                }
+                  );
+                  // Ehral Credits WHATSAPP_CLICK — this used to jump
+                  // straight to WhatsApp with nothing charged; the
+                  // billing rule for it already existed but nothing ever
+                  // called it. If the business is out of credits, don't
+                  // open the link — just say so, rather than the business
+                  // silently getting free clicks or the click looking
+                  // broken with no explanation.
+                  try {
+                    await chargeWhatsAppClick(slug);
+                    window.location.href = link;
+                  } catch (e) {
+                    alert(
+                      e?.response?.data?.message ||
+                        "This contact option isn't available right now. Please try another way to reach us.",
+                    );
+                  }
+                }}
               >
                 Continue on WhatsApp <i className="ti ti-brand-whatsapp" />
               </button>

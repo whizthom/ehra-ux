@@ -5,7 +5,7 @@ import BrandSplash from "../components/BrandSplash";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
 import { getCustomerBusinessView } from "../api/commerceApi";
 import { createCustomerBusinessConversation } from "../api/messagingApi";
-import { buildWhatsAppLink } from "../api/whatsappApi";
+import { buildWhatsAppLink, chargeWhatsAppClick } from "../api/whatsappApi";
 import useBusinessConnection from "../hooks/useBusinessConnection";
 import DisconnectConfirmModal from "../components/DisconnectConfirmModal";
 import {
@@ -569,6 +569,27 @@ export default function CustomerBusinessView() {
                       )}
                       target="_blank"
                       rel="noreferrer"
+                      onClick={(e) => {
+                        // Ehral Credits WHATSAPP_CLICK — the billing rule
+                        // for this already existed but nothing ever called
+                        // it, so this link was free. Charge the business
+                        // first; only actually open WhatsApp once that
+                        // succeeds, and let the person know instead of a
+                        // click that just silently does nothing if it fails.
+                        e.preventDefault();
+                        const link = buildWhatsAppLink(
+                          details.whatsapp,
+                          `Hello ${business.businessName}, I found you on Ehral.`,
+                        );
+                        chargeWhatsAppClick(storefront?.slug)
+                          .then(() => window.open(link, "_blank", "noreferrer"))
+                          .catch((err) =>
+                            alert(
+                              err?.response?.data?.message ||
+                                "This contact option isn't available right now. Please try another way to reach us.",
+                            ),
+                          );
+                      }}
                     >
                       <i className="ti ti-brand-whatsapp" aria-hidden="true" />
                       <span>

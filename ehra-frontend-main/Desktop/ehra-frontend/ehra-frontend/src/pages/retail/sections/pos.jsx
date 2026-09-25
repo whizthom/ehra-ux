@@ -406,6 +406,15 @@ function POS({
       setReceipt(approvalToReceipt(r.data));
       loadApprovals();
       onApprovalsChanged && onApprovalsChanged();
+      // POS_RECEIPT Ehral Credits charge — best-effort on the backend, so
+      // the sale is already recorded either way. Just let the person know
+      // if it couldn't be billed, since nothing else will.
+      if (r.data?.creditNotice) {
+        alert(
+          r.data.creditNotice +
+            "\n\nThe sale was still recorded — this only affects your Ehral Credits balance.",
+        );
+      }
     } catch (e) {
       alert(e?.response?.data?.message || "Could not confirm this payment.");
     } finally {
@@ -654,7 +663,14 @@ function POS({
                       quantity: i.quantity,
                     })),
                   });
-                  setReceipt(r?.data || r);
+                  const sale = r?.data || r;
+                  setReceipt(sale);
+                  if (sale?.creditNotice) {
+                    alert(
+                      sale.creditNotice +
+                        "\n\nThe sale was still recorded — this only affects your Ehral Credits balance.",
+                    );
+                  }
                 }}
               >
                 Complete sale · {money(total)}
