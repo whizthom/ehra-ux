@@ -4,10 +4,13 @@
    A brand-green cover with the logo sitting across its edge; everything
    below the cover intentionally stays OFF green so the card doesn't read
    as a wall of green - body text/borders use --bc-ink (black/near-black),
-   and component fills use --warning (Ehral's other brand color, the same
-   gold used on the "Today's Pulse" widget) instead of a second green. All
-   colour comes from the app's theme tokens, so it repaints in light and
-   dark. The only frosted-glass touch is the status pill on the cover.
+   and component fills use plain --bc-ink-tinted neutrals (no hue at all),
+   not a second brand colour - --warning/--info are already spoken for as
+   this app's real status colours (see the order-status pills in
+   CustomerDashboard.module.css), so reusing either here would make a
+   plain "Connect"/"View business" button look like a caution/info state.
+   All colour comes from the app's theme tokens, so it repaints in light
+   and dark. The only frosted-glass touch is the status pill on the cover.
 ========================================================================= */
 
 .card {
@@ -16,10 +19,8 @@
     --bc-line: color-mix(in srgb, var(--text-primary) 11%, transparent);
     /* Body of the card is deliberately kept off the brand green (see
        component doc) - only the cover/badge stay green. Everything below
-       reads in --bc-ink (black/near-black) with --warning (Ehral's other
-       brand color, already used for the "Today's Pulse" gold accent) for
-       component fills instead of a second green. */
-    --bc-primary-ink: var(--bc-ink);
+       reads in --bc-ink (black/near-black); component fills are neutral
+       color-mixes of --bc-ink itself, not a second hue. */
     position: relative;
     display: flex;
     flex-direction: column;
@@ -106,7 +107,7 @@
     place-items: center;
     overflow: hidden;
     border-radius: 18px;
-    background: color-mix(in srgb, var(--warning) 18%, var(--bg-surface));
+    background: color-mix(in srgb, var(--bc-ink) 10%, var(--bg-surface));
     color: var(--bc-ink);
     font-size: 18px;
     font-weight: 900;
@@ -163,7 +164,7 @@
     grid-template-columns: minmax(0, 3fr) minmax(0, 7fr);
     border: 1px solid var(--bc-line);
     border-radius: 14px;
-    background: color-mix(in srgb, var(--warning) 8%, var(--bg-surface));
+    background: color-mix(in srgb, var(--bc-ink) 5%, var(--bg-surface));
 }
 
 .stats>div {
@@ -226,8 +227,8 @@
 }
 
 .facts .factAccent {
-    border-color: color-mix(in srgb, var(--warning) 40%, transparent);
-    background: color-mix(in srgb, var(--warning) 16%, transparent);
+    border-color: color-mix(in srgb, var(--bc-ink) 30%, transparent);
+    background: color-mix(in srgb, var(--bc-ink) 8%, transparent);
     color: var(--bc-ink);
 }
 
@@ -272,23 +273,27 @@
 }
 
 .primary {
-    background: var(--warning);
-    color: var(--bc-primary-ink);
-    box-shadow: 0 10px 20px -12px color-mix(in srgb, var(--warning) 70%, transparent);
+    /* Inverted fill instead of a second brand hue: solid near-black on
+       light theme, solid near-white on dark theme (--bc-ink flips with
+       the theme; --bg-surface is its own theme's page-surface tone,
+       giving reliable contrast against --bc-ink either way). */
+    background: var(--bc-ink);
+    color: var(--bg-surface);
+    box-shadow: 0 10px 20px -12px color-mix(in srgb, var(--bc-ink) 45%, transparent);
 }
 
 .primary:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--warning) 85%, var(--bc-ink));
+    background: color-mix(in srgb, var(--bc-ink) 85%, var(--bg-surface));
     transform: translateY(-1px);
 }
 
 .soft {
-    background: color-mix(in srgb, var(--warning) 16%, var(--bg-surface));
+    background: color-mix(in srgb, var(--bc-ink) 8%, var(--bg-surface));
     color: var(--bc-ink);
 }
 
 .soft:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--warning) 28%, var(--bg-surface));
+    background: color-mix(in srgb, var(--bc-ink) 16%, var(--bg-surface));
 }
 
 .outline {
@@ -298,7 +303,7 @@
 }
 
 .outline:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--warning) 12%, transparent);
+    background: color-mix(in srgb, var(--bc-ink) 8%, transparent);
     border-color: var(--bc-ink) !important;
 }
 
