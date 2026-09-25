@@ -5,15 +5,20 @@ import styles from "./BusinessCard.module.css";
 // "Your businesses" and the home "Businesses you use" strip - so a business
 // looks the same wherever the customer meets it.
 //
+// Laid out as a contact row (avatar beside the name, status as a small
+// dot) rather than a hero card, on purpose - the rest of this app already
+// borrows WhatsApp's own vocabulary for how a business is introduced, so
+// this card follows the same idiom instead of a generic boxed-card kit.
+//
 //   name, logo      identity (logo falls back to initials)
 //   subtitle        one line under the name, e.g. "Retail · Fashion & Apparel"
-//   badge           { label, icon } - status pill on the cover, or omit
+//   badge           { label, icon } - live-status dot next to the subtitle, or omit
 //   description     short about text (clamped to two lines)
-//   stats           [{ label, value }] - a two-up strip for numbers
-//   facts           [{ icon, label, accent }] - small chips (address, store...)
+//   stats           [{ label, value }] - a ledger line for numbers
+//   facts           [{ icon, label, accent }] - plain detail lines (address, store...)
 //   actions         [{ key, label, icon, onClick, variant, busy, disabled,
-//                      ariaLabel }]  variant: "primary" | "soft" | "outline"
-//   linked          true when the customer is connected (adds a green edge)
+//                      ariaLabel }]  variant: "primary" (filled) | "soft"/"outline" (quiet text)
+//   linked          true when the customer is connected (adds a subtle edge)
 export default function BusinessCard({
   name,
   logo,
@@ -27,22 +32,29 @@ export default function BusinessCard({
 }) {
   return (
     <article className={`${styles.card} ${linked ? styles.linked : ""}`}>
-      <div className={styles.cover} aria-hidden="true">
-        {badge && (
-          <span className={styles.badge}>
-            {badge.icon && <i className={`ti ${badge.icon}`} />}
-            {badge.label}
-          </span>
-        )}
-      </div>
+      <div className={styles.ribbon} aria-hidden="true" />
 
       <div className={styles.body}>
-        <div className={styles.logo}>
-          {logo ? <img src={logo} alt="" /> : <span>{initials(name)}</span>}
+        <div className={styles.identity}>
+          <div className={styles.logo}>
+            {logo ? <img src={logo} alt="" /> : <span>{initials(name)}</span>}
+          </div>
+          <div className={styles.identityText}>
+            <h3 className={styles.name}>{name}</h3>
+            <p className={styles.subtitleRow}>
+              {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
+              {badge && (
+                <span className={styles.status}>
+                  <i
+                    className={`ti ${badge.icon || "ti-point-filled"}`}
+                    aria-hidden="true"
+                  />
+                  {badge.label}
+                </span>
+              )}
+            </p>
+          </div>
         </div>
-
-        <h3 className={styles.name}>{name}</h3>
-        {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
 
         {description && <p className={styles.about}>{description}</p>}
 
@@ -50,8 +62,8 @@ export default function BusinessCard({
           <dl className={styles.stats}>
             {stats.map((s) => (
               <div key={s.label}>
-                <dt>{s.label}</dt>
                 <dd>{s.value}</dd>
+                <dt>{s.label}</dt>
               </div>
             ))}
           </dl>

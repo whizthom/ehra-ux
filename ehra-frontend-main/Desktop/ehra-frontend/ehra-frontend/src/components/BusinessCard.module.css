@@ -1,26 +1,32 @@
 /* =========================================================================
    Business card - shared by Discover, "Your businesses" and the home strip.
    -------------------------------------------------------------------------
-   A brand-green cover with the logo sitting across its edge; everything
-   below the cover intentionally stays OFF green so the card doesn't read
-   as a wall of green - body text/borders use --bc-ink (black/near-black),
-   and component fills use plain --bc-ink-tinted neutrals (no hue at all),
-   not a second brand colour - --warning/--info are already spoken for as
-   this app's real status colours (see the order-status pills in
-   CustomerDashboard.module.css), so reusing either here would make a
-   plain "Connect"/"View business" button look like a caution/info state.
-   All colour comes from the app's theme tokens, so it repaints in light
-   and dark. The only frosted-glass touch is the status pill on the cover.
+   A contact-row layout (avatar beside the name, live status as a small
+   dot) rather than a hero card with a big cover and pill row - this app
+   already speaks WhatsApp's visual language for "meeting a business", so
+   this card follows that idiom instead of a generic boxed-card kit.
+
+   Colour is disciplined on purpose: the brand gradient only appears on the
+   1px top ribbon, and the ONE other place it's allowed back in is the
+   "Connected" status dot - everything else (text, dividers, the logo
+   circle, the filled button) is plain --bc-ink, so the card reads calm in
+   a long feed instead of competing with the header for attention.
+   Structure comes from a repeated hairline-rule rhythm (ribbon → stats
+   line → facts line → actions line) instead of filled boxes/pills - the
+   one consistent device carried through the whole card.
+
+   Opts into Inter (already loaded app-wide for CustomerBusinessView, the
+   page "View business" actually opens) rather than inheriting the shell's
+   plain Arial fallback, so the card and the page it leads to feel like one
+   typographic system.
 ========================================================================= */
 
 .card {
     --bc-ink: var(--text-primary);
-    --bc-muted: color-mix(in srgb, var(--text-primary) 64%, transparent);
+    --bc-muted: color-mix(in srgb, var(--text-primary) 62%, transparent);
+    --bc-faint: color-mix(in srgb, var(--text-primary) 42%, transparent);
     --bc-line: color-mix(in srgb, var(--text-primary) 11%, transparent);
-    /* Body of the card is deliberately kept off the brand green (see
-       component doc) - only the cover/badge stay green. Everything below
-       reads in --bc-ink (black/near-black); component fills are neutral
-       color-mixes of --bc-ink itself, not a second hue. */
+
     position: relative;
     display: flex;
     flex-direction: column;
@@ -28,66 +34,30 @@
     height: 100%;
     overflow: hidden;
     border: 1px solid var(--border-color);
-    border-radius: 22px;
+    border-radius: 16px;
     background: var(--bg-surface);
     color: var(--bc-ink);
-    box-shadow:
-        0 1px 2px color-mix(in srgb, var(--shadow-color) 60%, transparent),
-        0 12px 30px -18px var(--shadow-color);
-    transition: transform 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease;
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
 }
 
 .card:hover {
-    transform: translateY(-3px);
-    border-color: color-mix(in srgb, var(--bc-ink) 40%, var(--border-color));
-    box-shadow:
-        0 2px 4px color-mix(in srgb, var(--shadow-color) 60%, transparent),
-        0 22px 44px -20px var(--shadow-color);
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--bc-ink) 30%, var(--border-color));
+    box-shadow: 0 14px 28px -20px var(--shadow-color);
 }
 
 .linked {
-    border-color: color-mix(in srgb, var(--bc-ink) 28%, var(--border-color));
+    border-color: color-mix(in srgb, var(--bc-ink) 22%, var(--border-color));
 }
 
-/* ── Cover ─────────────────────────────────────────────────────────────── */
+/* ── Ribbon ────────────────────────────────────────────────────────────── */
+/* A thin brand strip, not a cover photo - identity without weight. */
 
-.cover {
-    position: relative;
+.ribbon {
     flex: 0 0 auto;
-    height: 76px;
-    display: flex;
-    justify-content: flex-end;
-    align-items: flex-start;
-    padding: 12px;
-    background:
-        radial-gradient(circle at 10% 130%, color-mix(in srgb, var(--cust-glow) 55%, transparent), transparent 55%),
-        repeating-radial-gradient(circle at 94% -40%, transparent 0 30px, rgba(255, 255, 255, 0.09) 30px 31px),
-        linear-gradient(125deg, var(--cust-grad-1) 0%, var(--cust-grad-2) 58%, var(--cust-grad-3) 100%);
-}
-
-.badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    max-width: 100%;
-    padding: 5px 10px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.16);
-    -webkit-backdrop-filter: blur(10px) saturate(1.4);
-    backdrop-filter: blur(10px) saturate(1.4);
-    color: #fff;
-    font-size: 10.5px;
-    font-weight: 800;
-    line-height: 1.2;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.badge i {
-    font-size: 13px;
-    color: var(--cust-glow);
+    height: 6px;
+    background: linear-gradient(90deg, var(--cust-grad-1) 0%, var(--cust-grad-2) 55%, var(--cust-grad-3) 100%);
 }
 
 /* ── Body ──────────────────────────────────────────────────────────────── */
@@ -95,25 +65,29 @@
 .body {
     flex: 1 1 auto;
     min-width: 0;
-    padding: 0 20px;
+    padding: 16px 20px 0;
+}
+
+.identity {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
 }
 
 .logo {
     position: relative;
-    width: 60px;
-    height: 60px;
-    margin-top: -30px;
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
     display: grid;
     place-items: center;
     overflow: hidden;
-    border-radius: 18px;
-    background: color-mix(in srgb, var(--bc-ink) 10%, var(--bg-surface));
+    border-radius: 13px;
+    border: 1px solid var(--border-color);
+    background: color-mix(in srgb, var(--bc-ink) 6%, var(--bg-surface));
     color: var(--bc-ink);
-    font-size: 18px;
-    font-weight: 900;
-    box-shadow:
-        0 0 0 4px var(--bg-surface),
-        0 10px 20px -10px var(--shadow-color);
+    font-size: 15px;
+    font-weight: 700;
 }
 
 .logo img {
@@ -122,12 +96,18 @@
     object-fit: cover;
 }
 
+.identityText {
+    min-width: 0;
+    flex: 1 1 auto;
+    padding-top: 1px;
+}
+
 .name {
-    margin: 14px 0 0;
-    font-size: 16.5px;
-    font-weight: 800;
-    line-height: 1.25;
-    letter-spacing: -0.02em;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
     color: var(--bc-ink);
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -136,12 +116,37 @@
     overflow-wrap: anywhere;
 }
 
+.subtitleRow {
+    margin: 3px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
 .subtitle {
-    margin: 4px 0 0;
-    font-size: 11.5px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--bc-muted);
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex: 0 0 auto;
+    font-size: 11px;
     font-weight: 700;
-    line-height: 1.45;
     color: var(--bc-ink);
+    white-space: nowrap;
+}
+
+.status i {
+    font-size: 8px;
+    color: var(--accent);
 }
 
 .about {
@@ -155,70 +160,70 @@
     overflow: hidden;
 }
 
-/* Two-up numbers strip (orders / spent). Orders gets 30% and Spent gets
-   70%, giving the currency value substantially more room while making the
-   order count visibly more prominent than a narrow 20% column. */
+/* ── Stats ─────────────────────────────────────────────────────────────── */
+/* A ledger line, not a filled box - value first, label underneath. */
+
 .stats {
     margin: 16px 0 0;
-    display: grid;
-    grid-template-columns: minmax(0, 3fr) minmax(0, 7fr);
-    border: 1px solid var(--bc-line);
-    border-radius: 14px;
-    background: color-mix(in srgb, var(--bc-ink) 5%, var(--bg-surface));
+    padding-top: 14px;
+    border-top: 1px solid var(--bc-line);
+    display: flex;
+    gap: 28px;
 }
 
 .stats>div {
     min-width: 0;
-    padding: 10px 14px;
-}
-
-.stats>div+div {
-    border-left: 1px solid var(--bc-line);
-}
-
-.stats dt {
-    font-size: 10.5px;
-    font-weight: 700;
-    color: var(--bc-muted);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .stats dd {
-    margin: 3px 0 0;
-    font-size: 14px;
-    font-weight: 800;
+    margin: 0;
+    font-size: 19px;
+    font-weight: 700;
     letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
     color: var(--bc-ink);
     overflow-wrap: anywhere;
 }
 
+.stats dt {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--bc-faint);
+}
+
+/* ── Facts ─────────────────────────────────────────────────────────────── */
+/* Plain detail lines, not chips - the hairline above does the separating. */
+
 .facts {
     list-style: none;
     margin: 14px 0 0;
-    padding: 0;
+    padding: 12px 0 0;
+    border-top: 1px solid var(--bc-line);
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 7px;
 }
 
 .facts li {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 6px;
-    max-width: 100%;
-    padding: 5px 10px;
-    border-radius: 999px;
-    border: 1px solid var(--bc-line);
-    background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+    gap: 9px;
+    min-width: 0;
     color: var(--bc-muted);
-    font-size: 11px;
-    font-weight: 700;
-    line-height: 1.3;
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1.4;
 }
 
 .facts li i {
     flex: 0 0 auto;
-    font-size: 14px;
-    color: var(--bc-ink);
+    width: 15px;
+    text-align: center;
+    font-size: 14.5px;
+    color: var(--bc-faint);
 }
 
 .facts li span {
@@ -227,36 +232,42 @@
 }
 
 .facts .factAccent {
-    border-color: color-mix(in srgb, var(--bc-ink) 30%, transparent);
-    background: color-mix(in srgb, var(--bc-ink) 8%, transparent);
+    color: var(--bc-ink);
+    font-weight: 700;
+}
+
+.facts .factAccent i {
     color: var(--bc-ink);
 }
 
 /* ── Actions ───────────────────────────────────────────────────────────── */
+/* One real button, one quiet text link - not two identical pills. */
 
 .actions {
+    margin-top: 16px;
+    padding: 14px 20px 18px;
+    border-top: 1px solid var(--bc-line);
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 18px 20px 20px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
 }
 
 .actions button {
-    flex: 1 1 120px;
-    min-height: 42px;
-    padding: 0 14px;
+    flex: 0 0 auto;
+    min-height: 40px;
     display: inline-flex;
     align-items: center;
-    justify-content: center;
     gap: 7px;
-    border-radius: 13px;
-    border: 1px solid transparent;
+    border: 0;
+    background: none;
+    padding: 0;
     font: inherit;
-    font-size: 12px;
-    font-weight: 800;
+    font-size: 13px;
+    font-weight: 700;
     white-space: nowrap;
     cursor: pointer;
-    transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    transition: opacity 0.15s ease, text-decoration-color 0.15s ease;
 }
 
 .actions button i {
@@ -264,52 +275,48 @@
 }
 
 .actions button:active:not(:disabled) {
-    transform: scale(0.97);
+    opacity: 0.75;
 }
 
 .actions button:disabled {
-    opacity: 0.7;
+    opacity: 0.5;
     cursor: progress;
 }
 
 .primary {
-    /* Inverted fill instead of a second brand hue: solid near-black on
-       light theme, solid near-white on dark theme (--bc-ink flips with
-       the theme; --bg-surface is its own theme's page-surface tone,
-       giving reliable contrast against --bc-ink either way). */
+    padding: 0 16px;
+    border-radius: 10px;
     background: var(--bc-ink);
     color: var(--bg-surface);
-    box-shadow: 0 10px 20px -12px color-mix(in srgb, var(--bc-ink) 45%, transparent);
 }
 
 .primary:hover:not(:disabled) {
     background: color-mix(in srgb, var(--bc-ink) 85%, var(--bg-surface));
-    transform: translateY(-1px);
 }
 
-.soft {
-    background: color-mix(in srgb, var(--bc-ink) 8%, var(--bg-surface));
-    color: var(--bc-ink);
-}
-
-.soft:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--bc-ink) 16%, var(--bg-surface));
-}
-
+.soft,
 .outline {
-    background: transparent;
-    border-color: color-mix(in srgb, var(--bc-ink) 45%, transparent) !important;
     color: var(--bc-ink);
+    text-underline-offset: 3px;
+    text-decoration: underline;
+    text-decoration-color: transparent;
 }
 
+.soft:hover:not(:disabled),
 .outline:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--bc-ink) 8%, transparent);
-    border-color: var(--bc-ink) !important;
+    text-decoration-color: currentColor;
+}
+
+/* Outline keeps a standing underline - it's still a real toggle (e.g.
+   "Disconnect"), just deliberately quieter than the filled primary. */
+.outline {
+    text-decoration-color: color-mix(in srgb, var(--bc-ink) 35%, transparent);
 }
 
 .actions button:focus-visible {
     outline: 2px solid var(--bc-ink);
-    outline-offset: 2px;
+    outline-offset: 3px;
+    border-radius: 4px;
 }
 
 .spinner {
@@ -349,6 +356,7 @@
 
 .card,
 .body,
+.identity,
 .actions,
 .stats,
 .stats>div {
@@ -360,8 +368,9 @@
     min-height: 0;
 }
 
-.cover,
 .body,
+.identity,
+.identityText,
 .actions {
     min-width: 0;
 }
@@ -376,42 +385,27 @@
     min-width: 0;
 }
 
-.actions button {
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
 @media (max-width: 640px) {
     .card {
-        border-radius: 18px;
-    }
-
-    .cover {
-        height: 70px;
-        padding: 10px;
+        border-radius: 14px;
     }
 
     .body {
-        padding: 0 16px;
+        padding: 14px 16px 0;
     }
 
     .logo {
-        width: 54px;
-        height: 54px;
-        margin-top: -27px;
-        border-radius: 16px;
-        box-shadow:
-            0 0 0 3px var(--bg-surface),
-            0 8px 18px -10px var(--shadow-color);
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
     }
 
     .name {
-        margin-top: 12px;
-        font-size: 15.5px;
+        font-size: 15px;
     }
 
     .subtitle {
-        font-size: 11px;
+        font-size: 11.5px;
     }
 
     .about {
@@ -422,74 +416,45 @@
 
     .stats {
         margin-top: 13px;
-        grid-template-columns: minmax(0, 30%) minmax(0, 70%);
-        border-radius: 12px;
-    }
-
-    .stats>div {
-        padding: 9px 10px;
-    }
-
-    .stats dt {
-        font-size: 9.5px;
+        padding-top: 12px;
+        gap: 22px;
     }
 
     .stats dd {
-        font-size: 13px;
+        font-size: 17px;
+    }
+
+    .stats dt {
+        font-size: 10px;
     }
 
     .facts {
-        margin-top: 11px;
+        margin-top: 12px;
+        padding-top: 11px;
         gap: 6px;
     }
 
     .facts li {
-        max-width: 100%;
-        padding: 5px 8px;
-        font-size: 10.5px;
+        font-size: 12px;
     }
 
     .actions {
-        gap: 7px;
-        padding: 14px 16px 16px;
+        margin-top: 14px;
+        padding: 12px 16px 16px;
     }
 
     .actions button {
-        flex: 1 1 100px;
-        min-height: 40px;
-        padding: 0 11px;
-        font-size: 11.5px;
-    }
-}
-
-@media (max-width: 400px) {
-    .body {
-        padding: 0 14px;
-    }
-
-    .stats>div {
-        padding: 8px;
-    }
-
-    .stats dd {
+        min-height: 38px;
         font-size: 12.5px;
     }
 
-    .actions {
-        padding: 12px 14px 14px;
-    }
-
-    .actions button {
-        flex-basis: 100%;
+    .primary {
+        padding: 0 14px;
     }
 }
 
 @media (hover: none) and (pointer: coarse) {
     .card:hover {
-        transform: none;
-    }
-
-    .actions button:hover:not(:disabled) {
         transform: none;
     }
 }
