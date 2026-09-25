@@ -39,6 +39,8 @@ import LogoutConfirmModal from "../components/LogoutConfirmModal";
 import DisconnectConfirmModal from "../components/DisconnectConfirmModal";
 import PremiumReceipt from "../components/PremiumReceipt";
 import styles from "./CustomerDashboard.module.css";
+import NotificationCenter, { NotificationsPageView } from "../components/notifications/NotificationCenter";
+import { getCustomerNotifications, getCustomerUnreadCount, markAllCustomerRead } from "../api/notificationApi";
 
 // Matches Ehral\'s employer/employee mobile navigation behavior.
 function useScrollThumb(ref) {
@@ -1266,7 +1268,7 @@ export default function CustomerDashboard() {
   }
 
   const navItems = CUSTOMER_NAV_ITEMS;
-  const title = navItems.find((x) => x[0] === tab)?.[1] || "Dashboard";
+  const title = tab === "notifications" ? "Notifications" : (navItems.find((x) => x[0] === tab)?.[1] || "Dashboard");
 
   return (
     <>
@@ -1287,6 +1289,16 @@ export default function CustomerDashboard() {
         onSignOut={signOut}
         banner={<Toast message={notice} onClose={() => setNotice("")} />}
         contentClassName={tab === "messages" ? styles.contentMessages : ""}
+        notificationControl={
+          <NotificationCenter
+            mode="customer"
+            fetchNotifications={getCustomerNotifications}
+            fetchUnreadCount={getCustomerUnreadCount}
+            markAllRead={markAllCustomerRead}
+            onViewAll={() => changeTab("notifications")}
+            enabled={tab !== "notifications"}
+          />
+        }
         topActionsBefore={
           <label className={styles.searchButton}>
             <i className="ti ti-search" />
@@ -1308,6 +1320,14 @@ export default function CustomerDashboard() {
           </label>
         }
       >
+        {tab === "notifications" && (
+          <NotificationsPageView
+            mode="customer"
+            fetchNotifications={getCustomerNotifications}
+            fetchUnreadCount={getCustomerUnreadCount}
+            markAllRead={markAllCustomerRead}
+          />
+        )}
         {tab === "home" && (
           <>
             <section

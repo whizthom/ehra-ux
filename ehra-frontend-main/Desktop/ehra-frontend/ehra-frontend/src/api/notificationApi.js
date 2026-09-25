@@ -32,3 +32,13 @@ export const deleteAnnouncement = (id) => API.delete(`/announcements/${id}`);
 // ── Announcements (Messages) - Employee ──────────────────────────────────────
 export const getMyAnnouncements = () => API.get("/announcements/me");
 export const markAnnouncementRead = (id) => API.put(`/announcements/${id}/read`);
+
+// ── Retail workspace ────────────────────────────────────────────────────────
+export const getRetailNotifications = () => API.get("/notifications/retail");
+export const getRetailUnreadCount = () => API.get("/notifications/retail/unread-count");
+export const markAllRetailRead = () => API.put("/notifications/retail/read-all");
+
+// ── Customer-owned notifications ────────────────────────────────────────────
+export const getCustomerNotifications = () => API.get("/notifications/customer");
+export const getCustomerUnreadCount = () => API.get("/notifications/customer/unread-count");
+export const markAllCustomerRead = () => API.put("/notifications/customer/read-all");

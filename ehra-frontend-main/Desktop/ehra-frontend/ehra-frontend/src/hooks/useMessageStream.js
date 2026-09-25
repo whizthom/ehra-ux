@@ -21,7 +21,7 @@ const EVENT_HANDLER_KEYS = {
 };
 
 export default function useMessageStream(
-  { onNewMessage, onReadUpdate, onNewNotification, onLeaveUpdate, onNewChatMessage, onChatRead } = {},
+  { onNewMessage, onReadUpdate, onNewNotification, onLeaveUpdate, onNewChatMessage, onChatRead, notificationFilter } = {},
   enabled = true
 ) {
   // Always-current handlers, read from inside the subscription callbacks
@@ -30,7 +30,7 @@ export default function useMessageStream(
   // resubscribe/reconnect, exactly like the previous implementation.
   const handlersRef = useRef({});
   useEffect(() => {
-    handlersRef.current = { onNewMessage, onReadUpdate, onNewNotification, onLeaveUpdate, onNewChatMessage, onChatRead };
+    handlersRef.current = { onNewMessage, onReadUpdate, onNewNotification, onLeaveUpdate, onNewChatMessage, onChatRead, notificationFilter };
   });
 
   // Browser audio playback needs a real user gesture before it's allowed
@@ -63,6 +63,7 @@ export default function useMessageStream(
           // same event firing this twice the way multiple parallel
           // EventSources previously could.
           if (eventType === "new_notification") {
+            if (notificationFilter && !notificationFilter(payload)) return;
             playNotificationSound(payload);
           } else if (eventType === "new_chat_message") {
             playNotificationSound({ ...payload, kind: "message", id: payload.id });

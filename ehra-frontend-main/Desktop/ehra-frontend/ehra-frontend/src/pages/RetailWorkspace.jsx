@@ -62,6 +62,8 @@ import NotificationToastStack from "../components/notifications/NotificationToas
 import useMessagingConnection from "../hooks/useMessagingConnection";
 import useCustomerInboxBadge from "../hooks/useCustomerInboxBadge";
 import EhralCredits from "./EhralCredits";
+import NotificationCenter, { NotificationsPageView } from "../components/notifications/NotificationCenter";
+import { getRetailNotifications, getRetailUnreadCount, markAllRetailRead } from "../api/notificationApi";
 
 const today = () => new Date().toISOString().slice(0, 10);
 const NAV = [
@@ -135,7 +137,7 @@ export default function RetailWorkspace() {
   const money = (n) =>
     `${businessCurrency} ${Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const allowed = useMemo(() => {
-    const a = new Set(["Dashboard"]);
+    const a = new Set(["Dashboard", "Notifications"]);
     if (!context) return a;
     NAV.forEach(([name, , p]) => {
       if (!p || context.owner || context[PERM[p]]) a.add(name);
@@ -342,6 +344,14 @@ export default function RetailWorkspace() {
               <h1>{tab}</h1>
             </div>
             <div className={s.headerActions}>
+              <NotificationCenter
+                mode="retail"
+                fetchNotifications={getRetailNotifications}
+                fetchUnreadCount={getRetailUnreadCount}
+                markAllRead={markAllRetailRead}
+                onViewAll={() => setTab("Notifications")}
+                enabled={tab !== "Notifications"}
+              />
               <div className={s.avatar}>
                 {(business?.name || "B").slice(0, 1).toUpperCase()}
               </div>
@@ -370,6 +380,14 @@ export default function RetailWorkspace() {
                 onBadgeChange={inbox.refresh}
               />
             </div>
+          )}
+          {tab === "Notifications" && (
+            <NotificationsPageView
+              mode="retail"
+              fetchNotifications={getRetailNotifications}
+              fetchUnreadCount={getRetailUnreadCount}
+              markAllRead={markAllRetailRead}
+            />
           )}
           {tab === "Dashboard" && (
             <Dashboard

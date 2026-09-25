@@ -3063,3 +3063,38 @@
         box-shadow: none;
     }
 }
+/* Shared notification-center additions used by Retail and Customer surfaces. */
+.notifViewAll {
+    width: 100%;
+    padding: 11px 14px;
+    border: 0;
+    border-top: 0.5px solid var(--border-color);
+    background: var(--bg-surface);
+    color: var(--accent);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.notifViewAll:hover { background: var(--bg-soft-accent); }
+.notifUndoStack {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.notifUndoStack button {
+    border: 0.5px solid var(--border-color);
+    border-radius: 10px;
+    padding: 9px 12px;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    box-shadow: 0 8px 24px var(--shadow-color);
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+}
+.notifUndoStack button:hover { background: var(--bg-soft-accent); }

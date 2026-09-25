@@ -52,6 +52,7 @@ export default function CustomerShell({
   onSignOut,
   accountsActive = false,
   topActionsBefore = null,
+  notificationControl = null,
   banner = null,
   contentClassName = "",
   children,
@@ -164,6 +165,7 @@ export default function CustomerShell({
           </div>
           <div className={styles.topActions}>
             {topActionsBefore}
+            {notificationControl}
             {/* Light/dark switch - same self-contained component as the employer
                 dashboard, so switching themes behaves identically everywhere. */}
             <ThemeToggleMenu />
