@@ -1645,6 +1645,7 @@ export default function Dashboard() {
         setActiveNav={setActiveNav}
         navigate={navigate}
         hidden={chatThreadOpen}
+        canRetailWorkspace={Boolean(retailContext?.canWorkspace)}
         badges={{
           Messages: messagesUnread,
           Notifications: unreadCount,

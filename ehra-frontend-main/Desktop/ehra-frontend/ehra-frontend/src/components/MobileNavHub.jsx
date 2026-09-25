@@ -346,6 +346,7 @@ export default function MobileNavHub({
   isHod = false,
   onLogout,
   employeePremium = false,
+  canRetailWorkspace = false,
 }) {
   const [hub, setHub] = useState(null);
 
@@ -365,12 +366,34 @@ export default function MobileNavHub({
       ).filter((item) => !item.hodOnly || isHod),
     [role, isHod],
   );
-  const operations =
-    role === "employer"
-      ? employerOperations
-      : role === "customer"
-        ? customerOperations
-        : employeeOperations;
+  // FIX: the desktop sidebar (EmployeeDashboard.jsx's NAV array) only shows
+  // "Retail Workspace" once an employee's membership has canWorkspace, but
+  // this mobile bottom-nav/"More" sheet had no equivalent entry at all - an
+  // employee on mobile had no way to reach /retail regardless of what the
+  // employer had granted them. Mirror the same gate here, as a plain
+  // full-page `route` item (same pattern as employerMore's "Plans &
+  // Subscription" / "My Accounts" entries).
+  const operations = useMemo(() => {
+    const base =
+      role === "employer"
+        ? employerOperations
+        : role === "customer"
+          ? customerOperations
+          : employeeOperations;
+    if (role === "employee" && canRetailWorkspace) {
+      return [
+        ...base,
+        {
+          key: "Retail Workspace",
+          label: "Retail Workspace",
+          icon: "ti-building-store",
+          description: "Open your Retail Workspace.",
+          route: "/retail",
+        },
+      ];
+    }
+    return base;
+  }, [role, canRetailWorkspace]);
   const more =
     role === "employer"
       ? employerMore
