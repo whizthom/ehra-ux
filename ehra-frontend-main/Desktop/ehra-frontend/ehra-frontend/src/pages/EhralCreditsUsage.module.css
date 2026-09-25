@@ -440,10 +440,39 @@
         display: none;
     }
 
+    /* Full-width, stacked rows instead of a 3-column grid: a chip row
+       squeezed into a narrow grid column (with its scrollbar hidden for
+       mobile's swipe feel) reads as "cut off" on desktop, with no visible
+       way to see the rest. Giving each filter the page's full width and
+       letting chips wrap onto extra lines keeps every option visible with
+       nothing to scroll or discover. */
     .filters {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .filterGroup {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .filterLabel {
+        flex: 0 0 130px;
+        padding-top: 10px;
+    }
+
+    .chipRow,
+    .dateRange {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .chipRow {
+        flex-wrap: wrap;
+        overflow-x: visible;
+        padding-bottom: 0;
     }
 }
 
