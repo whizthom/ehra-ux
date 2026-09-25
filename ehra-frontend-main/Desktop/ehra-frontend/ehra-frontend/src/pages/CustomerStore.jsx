@@ -47,6 +47,9 @@ import styles from "./CustomerStore.module.css";
 // public storefront uses, so the business sees them in its Orders exactly the
 // same way.
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const isValidEmail = (value) => EMAIL_PATTERN.test(String(value || "").trim());
+
 const SORTS = [
   ["featured", "Featured"],
   ["sale", "Best offers"],
@@ -697,6 +700,12 @@ export default function CustomerStore() {
     if (!form.customerName.trim() || !form.customerPhone.trim()) {
       setFormError(
         "Your name and phone number are needed so the store can reach you.",
+      );
+      return;
+    }
+    if (!isValidEmail(form.customerEmail)) {
+      setFormError(
+        "Enter a valid email address so the store can send your receipt.",
       );
       return;
     }
@@ -1779,7 +1788,7 @@ export default function CustomerStore() {
                   />
                 </label>
                 <label>
-                  Email <span>(optional)</span>
+                  Email
                   <input
                     type="email"
                     value={form.customerEmail}
@@ -1787,6 +1796,7 @@ export default function CustomerStore() {
                       setForm({ ...form, customerEmail: e.target.value })
                     }
                     autoComplete="email"
+                    required
                   />
                 </label>
               </div>
@@ -1868,7 +1878,13 @@ export default function CustomerStore() {
 
             <button
               className={styles.primary}
-              disabled={submitting || !cartItems.length}
+              disabled={
+                submitting ||
+                !cartItems.length ||
+                !form.customerName.trim() ||
+                !form.customerPhone.trim() ||
+                !isValidEmail(form.customerEmail)
+              }
             >
               {submitting
                 ? "Placing order…"

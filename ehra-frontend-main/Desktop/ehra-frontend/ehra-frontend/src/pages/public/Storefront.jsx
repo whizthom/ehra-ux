@@ -29,6 +29,8 @@ import { useAuth } from "../../context/AuthContext";
 import Logo from "../../components/Logo";
 import styles from "./Storefront.module.css";
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const isValidEmail = (value) => EMAIL_PATTERN.test(String(value || "").trim());
 const CART_KEY = (slug) => `ehral:storefront:cart:${slug || "unknown"}`;
 const WISHLIST_KEY = (slug) => `ehral:storefront:wishlist:${slug || "unknown"}`;
 const RECENT_KEY = (slug) => `ehral:storefront:recent:${slug || "unknown"}`;
@@ -343,6 +345,10 @@ function CustomerGate({ store, slug, gate, setGate, onComplete }) {
   const createAccount = async () => {
     if (!gate.phoneVerificationToken || !gate.firstName.trim()) {
       setMessage("Enter your first name to continue.");
+      return;
+    }
+    if (!isValidEmail(gate.email)) {
+      setMessage("Enter a valid email address to continue.");
       return;
     }
     try {
@@ -729,11 +735,10 @@ function CustomerGate({ store, slug, gate, setGate, onComplete }) {
               </div>
             </div>
             <div>
-              <label className={styles.customerGateLabel}>
-                Email address <span>(optional)</span>
-              </label>
+              <label className={styles.customerGateLabel}>Email address</label>
               <input
                 type="email"
+                required
                 placeholder="you@example.com"
                 value={gate.email}
                 onChange={(e) =>
@@ -746,7 +751,11 @@ function CustomerGate({ store, slug, gate, setGate, onComplete }) {
               your full profile from the customer dashboard after signing in.
             </small>
             <button
-              disabled={!gate.firstName.trim() || gate.step === "creating"}
+              disabled={
+                !gate.firstName.trim() ||
+                !isValidEmail(gate.email) ||
+                gate.step === "creating"
+              }
               onClick={createAccount}
             >
               {gate.step === "creating"
@@ -1258,6 +1267,10 @@ export default function Storefront() {
       (store?.pickupEnabled || store?.deliveryEnabled)
     ) {
       setActionError("Choose a fulfilment method before placing your order.");
+      return;
+    }
+    if (!isValidEmail(form.customerEmail)) {
+      setActionError("Enter a valid email address before placing your order.");
       return;
     }
     setSubmitting(true);
@@ -2268,11 +2281,20 @@ export default function Storefront() {
                   <span>Verified phone</span>
                   <strong>{form.customerPhone}</strong>
                 </div>
-                <div>
-                  <span>Email</span>
-                  <strong>{form.customerEmail || "Not added"}</strong>
-                </div>
                 <i className="ti ti-shield-check" />
+              </div>
+              <div>
+                <label>Email</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="you@example.com"
+                  value={form.customerEmail}
+                  onChange={(e) =>
+                    setForm({ ...form, customerEmail: e.target.value })
+                  }
+                  autoComplete="email"
+                />
               </div>
               {store.pickupEnabled || store.deliveryEnabled ? (
                 <div>
@@ -2319,7 +2341,11 @@ export default function Storefront() {
               {actionError && <div className={styles.error}>{actionError}</div>}
               <button
                 className={styles.checkoutCta}
-                disabled={submitting || !cartItems.length}
+                disabled={
+                  submitting ||
+                  !cartItems.length ||
+                  !isValidEmail(form.customerEmail)
+                }
               >
                 {submitting ? "Placing order…" : "Place order"}
                 <i className="ti ti-arrow-right" />

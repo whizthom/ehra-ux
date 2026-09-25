@@ -882,6 +882,25 @@ export default function CustomerDashboard() {
         .includes(q),
     );
   }, [orders, query]);
+  // Receipts tab shows both storefront-order receipts and in-store POS
+  // receipts in one feed. They come from two different endpoints/shapes,
+  // so merge them into a single tagged list and sort by date - otherwise
+  // one source always renders above the other regardless of recency.
+  const receiptFeed = useMemo(() => {
+    const onlineReceipts = filteredOrders
+      .filter((o) => o.receiptAvailable)
+      .map((o) => ({ type: "order", createdAt: o.createdAt, data: o }));
+    const posReceiptRows = posReceipts.map((r) => ({
+      type: "pos",
+      createdAt: r.createdAt,
+      data: r,
+    }));
+    return [...onlineReceipts, ...posReceiptRows].sort((a, b) => {
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return bTime - aTime;
+    });
+  }, [filteredOrders, posReceipts]);
   const completed = orders.filter(
     (o) => String(o.paymentStatus || "").toUpperCase() === "PAID",
   );
@@ -1897,69 +1916,67 @@ export default function CustomerDashboard() {
               </p>
             </div>
             <div className={styles.receiptGrid}>
-              {filteredOrders
-                .filter((o) => o.receiptAvailable)
-                .map((o) => (
+              {receiptFeed.map((entry) =>
+                entry.type === "order" ? (
                   <button
-                    key={`order-${o.id}`}
+                    key={`order-${entry.data.id}`}
                     className={styles.receiptCard}
-                    onClick={() => setSelectedOrder(o)}
+                    onClick={() => setSelectedOrder(entry.data)}
                   >
                     <div className={styles.receiptCardTop}>
                       <div className={styles.avatar}>
-                        {o.businessLogo ? (
-                          <img src={o.businessLogo} alt="" />
+                        {entry.data.businessLogo ? (
+                          <img src={entry.data.businessLogo} alt="" />
                         ) : (
-                          initials(o.businessName)
+                          initials(entry.data.businessName)
                         )}
                       </div>
-                      <span>{o.paymentStatus || "RECORDED"}</span>
+                      <span>{entry.data.paymentStatus || "RECORDED"}</span>
                     </div>
-                    <strong>{o.businessName}</strong>
+                    <strong>{entry.data.businessName}</strong>
                     <small>
-                      #{o.orderNumber} · {date(o.createdAt)}
+                      #{entry.data.orderNumber} · {date(entry.data.createdAt)}
                     </small>
-                    <b>{money(o.currency, o.total)}</b>
+                    <b>{money(entry.data.currency, entry.data.total)}</b>
                     <em>
                       View receipt <i className="ti ti-arrow-up-right" />
                     </em>
                   </button>
-                ))}
-              {posReceipts.map((r) => (
-                <button
-                  key={`pos-${r.saleId}`}
-                  className={styles.receiptCard}
-                  onClick={() => setSelectedPosReceipt(r)}
-                >
-                  <div className={styles.receiptCardTop}>
-                    <div className={styles.avatar}>
-                      {r.businessLogo ? (
-                        <img src={r.businessLogo} alt="" />
-                      ) : (
-                        initials(r.businessName)
-                      )}
+                ) : (
+                  <button
+                    key={`pos-${entry.data.saleId}`}
+                    className={styles.receiptCard}
+                    onClick={() => setSelectedPosReceipt(entry.data)}
+                  >
+                    <div className={styles.receiptCardTop}>
+                      <div className={styles.avatar}>
+                        {entry.data.businessLogo ? (
+                          <img src={entry.data.businessLogo} alt="" />
+                        ) : (
+                          initials(entry.data.businessName)
+                        )}
+                      </div>
+                      <span>IN-STORE</span>
                     </div>
-                    <span>IN-STORE</span>
-                  </div>
-                  <strong>{r.businessName}</strong>
-                  <small>
-                    #{r.saleNumber} · {date(r.createdAt)}
-                  </small>
-                  <b>{money(r.currency, r.total)}</b>
-                  <em>
-                    View receipt <i className="ti ti-arrow-up-right" />
-                  </em>
-                </button>
-              ))}
-            </div>
-            {!filteredOrders.some((o) => o.receiptAvailable) &&
-              !posReceipts.length && (
-                <div className={styles.emptyState}>
-                  <i className="ti ti-receipt-off" />
-                  <h3>No receipts yet</h3>
-                  <p>Your completed Ehral purchases will appear here.</p>
-                </div>
+                    <strong>{entry.data.businessName}</strong>
+                    <small>
+                      #{entry.data.saleNumber} · {date(entry.data.createdAt)}
+                    </small>
+                    <b>{money(entry.data.currency, entry.data.total)}</b>
+                    <em>
+                      View receipt <i className="ti ti-arrow-up-right" />
+                    </em>
+                  </button>
+                ),
               )}
+            </div>
+            {!receiptFeed.length && (
+              <div className={styles.emptyState}>
+                <i className="ti ti-receipt-off" />
+                <h3>No receipts yet</h3>
+                <p>Your completed Ehral purchases will appear here.</p>
+              </div>
+            )}
           </section>
         )}
 
