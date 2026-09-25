@@ -1,17 +1,25 @@
 /* =========================================================================
    Business card - shared by Discover, "Your businesses" and the home strip.
    -------------------------------------------------------------------------
-   A brand-green cover with the logo sitting across its edge, then the
-   business's details on the theme surface. All colour comes from the app's
-   theme tokens (--accent, --cust-* ...), so it repaints in light and dark.
-   The only frosted-glass touch is the status pill on the cover.
+   A brand-green cover with the logo sitting across its edge; everything
+   below the cover intentionally stays OFF green so the card doesn't read
+   as a wall of green - body text/borders use --bc-ink (black/near-black),
+   and component fills use --warning (Ehral's other brand color, the same
+   gold used on the "Today's Pulse" widget) instead of a second green. All
+   colour comes from the app's theme tokens, so it repaints in light and
+   dark. The only frosted-glass touch is the status pill on the cover.
 ========================================================================= */
 
 .card {
     --bc-ink: var(--text-primary);
     --bc-muted: color-mix(in srgb, var(--text-primary) 64%, transparent);
     --bc-line: color-mix(in srgb, var(--text-primary) 11%, transparent);
-    --bc-primary-ink: #fff;
+    /* Body of the card is deliberately kept off the brand green (see
+       component doc) - only the cover/badge stay green. Everything below
+       reads in --bc-ink (black/near-black) with --warning (Ehral's other
+       brand color, already used for the "Today's Pulse" gold accent) for
+       component fills instead of a second green. */
+    --bc-primary-ink: var(--bc-ink);
     position: relative;
     display: flex;
     flex-direction: column;
@@ -28,20 +36,16 @@
     transition: transform 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease;
 }
 
-[data-theme="dark"] .card {
-    --bc-primary-ink: var(--cust-grad-1);
-}
-
 .card:hover {
     transform: translateY(-3px);
-    border-color: color-mix(in srgb, var(--accent) 50%, var(--border-color));
+    border-color: color-mix(in srgb, var(--bc-ink) 40%, var(--border-color));
     box-shadow:
         0 2px 4px color-mix(in srgb, var(--shadow-color) 60%, transparent),
         0 22px 44px -20px var(--shadow-color);
 }
 
 .linked {
-    border-color: color-mix(in srgb, var(--accent) 34%, var(--border-color));
+    border-color: color-mix(in srgb, var(--bc-ink) 28%, var(--border-color));
 }
 
 /* ── Cover ─────────────────────────────────────────────────────────────── */
@@ -102,8 +106,8 @@
     place-items: center;
     overflow: hidden;
     border-radius: 18px;
-    background: var(--bg-soft-accent);
-    color: var(--accent);
+    background: color-mix(in srgb, var(--warning) 18%, var(--bg-surface));
+    color: var(--bc-ink);
     font-size: 18px;
     font-weight: 900;
     box-shadow:
@@ -136,7 +140,7 @@
     font-size: 11.5px;
     font-weight: 700;
     line-height: 1.45;
-    color: var(--accent);
+    color: var(--bc-ink);
 }
 
 .about {
@@ -159,7 +163,7 @@
     grid-template-columns: minmax(0, 3fr) minmax(0, 7fr);
     border: 1px solid var(--bc-line);
     border-radius: 14px;
-    background: color-mix(in srgb, var(--accent) 5%, var(--bg-surface));
+    background: color-mix(in srgb, var(--warning) 8%, var(--bg-surface));
 }
 
 .stats>div {
@@ -213,7 +217,7 @@
 .facts li i {
     flex: 0 0 auto;
     font-size: 14px;
-    color: var(--accent);
+    color: var(--bc-ink);
 }
 
 .facts li span {
@@ -222,9 +226,9 @@
 }
 
 .facts .factAccent {
-    border-color: color-mix(in srgb, var(--accent) 30%, transparent);
-    background: color-mix(in srgb, var(--accent) 10%, transparent);
-    color: var(--accent);
+    border-color: color-mix(in srgb, var(--warning) 40%, transparent);
+    background: color-mix(in srgb, var(--warning) 16%, transparent);
+    color: var(--bc-ink);
 }
 
 /* ── Actions ───────────────────────────────────────────────────────────── */
@@ -268,38 +272,38 @@
 }
 
 .primary {
-    background: var(--accent);
+    background: var(--warning);
     color: var(--bc-primary-ink);
-    box-shadow: 0 10px 20px -12px color-mix(in srgb, var(--accent) 90%, transparent);
+    box-shadow: 0 10px 20px -12px color-mix(in srgb, var(--warning) 70%, transparent);
 }
 
 .primary:hover:not(:disabled) {
-    background: var(--accent-hover);
+    background: color-mix(in srgb, var(--warning) 85%, var(--bc-ink));
     transform: translateY(-1px);
 }
 
 .soft {
-    background: var(--bg-soft-accent);
-    color: var(--accent);
+    background: color-mix(in srgb, var(--warning) 16%, var(--bg-surface));
+    color: var(--bc-ink);
 }
 
 .soft:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--accent) 18%, var(--bg-soft-accent));
+    background: color-mix(in srgb, var(--warning) 28%, var(--bg-surface));
 }
 
 .outline {
     background: transparent;
-    border-color: color-mix(in srgb, var(--accent) 55%, transparent) !important;
-    color: var(--accent);
+    border-color: color-mix(in srgb, var(--bc-ink) 45%, transparent) !important;
+    color: var(--bc-ink);
 }
 
 .outline:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--accent) 9%, transparent);
-    border-color: var(--accent) !important;
+    background: color-mix(in srgb, var(--warning) 12%, transparent);
+    border-color: var(--bc-ink) !important;
 }
 
 .actions button:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--bc-ink);
     outline-offset: 2px;
 }
 
