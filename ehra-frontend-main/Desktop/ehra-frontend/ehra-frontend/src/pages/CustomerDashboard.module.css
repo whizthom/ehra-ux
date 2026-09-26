@@ -5293,6 +5293,14 @@
   box-shadow: none;
   display: grid;
   gap: 24px;
+  /* Needed because an older .discoveryToolbar rule earlier in this file
+     (a leftover from a previous flex-based layout) still sets
+     justify-content: flex-start, which isn't overwritten by this later
+     rule since they're different properties. On a grid container that
+     leaked value stops the single implicit column from stretching, so
+     the search row/field shrank to its content width instead of
+     spanning full width. Setting it explicitly here fixes that. */
+  justify-content: stretch;
 }
 
 .discoverySearchRow {
