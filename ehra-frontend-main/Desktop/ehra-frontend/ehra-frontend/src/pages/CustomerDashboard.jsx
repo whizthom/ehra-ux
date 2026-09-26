@@ -810,6 +810,34 @@ export default function CustomerDashboard() {
     });
   }, [loadApprovals, loadPosReceipts, load]);
 
+  // Applies a one-time "open on this tab" instruction from the URL (used by
+  // every `/customer-dashboard?tab=...` link across the app - My Accounts,
+  // "Back to Discover", etc). This must consume and clear the `tab` param
+  // once applied, not just read it, and here's why:
+  //
+  // `changeTab` (the sidebar / bottom-nav tab switcher, below) only ever
+  // calls `setTab(id)` - it never touches the URL. So the very first time a
+  // customer arrives via one of those `?tab=...` links and then switches
+  // tabs in-app, the URL keeps showing the OLD tab forever; local state and
+  // the URL just drift apart from that point on.
+  //
+  // That drift used to be harmless because this effect only re-ran when
+  // `searchParams` itself changed. But it also depended on `loadDiscovery`,
+  // a useCallback that gets a NEW identity on every keystroke in the
+  // Discover search box and every business-type filter tap (its deps are
+  // `[discoveryQuery, discoveryType]`). Each of those keystrokes/taps was
+  // therefore re-running this effect, re-reading the STALE `tab` value
+  // still sitting in the URL, and forcing `setTab(requestedTab)` all over
+  // again - which is exactly what made searching or filtering on Discover
+  // suddenly snap the customer back to whatever tab they'd originally been
+  // linked in on (Messages, most commonly, since that's the tab most links
+  // into the dashboard point at).
+  //
+  // FIX: clear `tab` out of the URL the moment it's been applied, the same
+  // way the `chat` deep-link effect just below already does. Once cleared,
+  // `requestedTab` is null on every later run of this effect - regardless
+  // of what keeps re-triggering it - so there's nothing stale left to
+  // reapply.
   useEffect(() => {
     const requestedTab = searchParams.get("tab");
     if (
@@ -827,8 +855,16 @@ export default function CustomerDashboard() {
     ) {
       setTab(requestedTab);
       if (requestedTab === "discover") loadDiscovery();
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.delete("tab");
+          return next;
+        },
+        { replace: true },
+      );
     }
-  }, [searchParams, loadDiscovery]);
+  }, [searchParams, loadDiscovery, setSearchParams]);
 
   useEffect(() => {
     if (tab === "discover" && !discovery.length) loadDiscovery();
