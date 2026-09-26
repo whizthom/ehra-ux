@@ -769,9 +769,27 @@ export default function CustomerDashboard() {
     }
   }, []);
 
+  // Lets loadDiscovery check "is there already something on screen?"
+  // without needing `discovery` in its own dependency array (which would
+  // recreate it - and, transitively, every effect that keys off its
+  // identity - on every single fetch that resolves).
+  const discoveryRef = useRef([]);
+  discoveryRef.current = discovery;
+
   const loadDiscovery = useCallback(
     async (q = discoveryQuery, type = discoveryType) => {
-      setDiscoveryLoading(true);
+      // Stale-while-revalidate, the same pattern useConversations.js uses
+      // for the chat list: only show the "Finding businesses…" spinner when
+      // there's genuinely nothing on screen yet (a first-ever visit, or a
+      // search/filter that currently has zero matches). Every other call
+      // here - opening the Discover tab again after having been there
+      // already, or the debounced refetch while typing/filtering - swaps
+      // the grid in quietly behind whatever results are already showing
+      // instead of blanking the page out first. At scale that's the
+      // difference between Discover feeling instant on every return visit
+      // and flashing a full-page loader for every one of millions of
+      // customers each time they tap back into it.
+      if (discoveryRef.current.length === 0) setDiscoveryLoading(true);
       try {
         const r = await discoverCustomerBusinesses({
           q: q.trim() || undefined,
@@ -871,10 +889,6 @@ export default function CustomerDashboard() {
       );
     }
   }, [searchParams, loadDiscovery, setSearchParams]);
-
-  useEffect(() => {
-    if (tab === "discover" && !discovery.length) loadDiscovery();
-  }, [tab]);
 
   useEffect(() => {
     if (tab !== "account" || profileForm) return undefined;
