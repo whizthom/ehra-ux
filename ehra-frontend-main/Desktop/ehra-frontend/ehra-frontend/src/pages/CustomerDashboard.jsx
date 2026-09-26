@@ -39,8 +39,14 @@ import LogoutConfirmModal from "../components/LogoutConfirmModal";
 import DisconnectConfirmModal from "../components/DisconnectConfirmModal";
 import PremiumReceipt from "../components/PremiumReceipt";
 import styles from "./CustomerDashboard.module.css";
-import NotificationCenter, { NotificationsPageView } from "../components/notifications/NotificationCenter";
-import { getCustomerNotifications, getCustomerUnreadCount, markAllCustomerRead } from "../api/notificationApi";
+import NotificationCenter, {
+  NotificationsPageView,
+} from "../components/notifications/NotificationCenter";
+import {
+  getCustomerNotifications,
+  getCustomerUnreadCount,
+  markAllCustomerRead,
+} from "../api/notificationApi";
 
 // Matches Ehral\'s employer/employee mobile navigation behavior.
 function useScrollThumb(ref) {
@@ -1347,7 +1353,10 @@ export default function CustomerDashboard() {
   }
 
   const navItems = CUSTOMER_NAV_ITEMS;
-  const title = tab === "notifications" ? "Notifications" : (navItems.find((x) => x[0] === tab)?.[1] || "Dashboard");
+  const title =
+    tab === "notifications"
+      ? "Notifications"
+      : navItems.find((x) => x[0] === tab)?.[1] || "Dashboard";
 
   return (
     <>
