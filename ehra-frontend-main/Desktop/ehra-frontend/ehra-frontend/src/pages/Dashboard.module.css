@@ -1987,12 +1987,28 @@
     flex-direction: column;
 }
 
-/* Small phones — a fixed 360px panel can overflow the viewport, so it
-   shrinks to fit with a small margin on each side instead. */
-@media (max-width: 420px) {
+/* Small phones — a fixed 360px panel positioned relative to the bell
+   button (wherever that happens to sit in the header) can overflow the
+   viewport on one side or the other, or get clipped by an ancestor's
+   overflow, depending on how far from the right edge the bell actually
+   is. Switching to position: fixed and anchoring to the viewport itself
+   (not the button) sidesteps both problems and gives the panel proper
+   room to breathe, matching how most apps present notifications on
+   mobile - the header's height plus a small margin below it, with a
+   safe-area allowance for a notch. */
+@media (max-width: 600px) {
     .notifPanel {
-        width: calc(100vw - 24px);
-        right: -12px;
+        position: fixed;
+        top: calc(56px + env(safe-area-inset-top, 0px) + 8px);
+        left: 12px;
+        right: 12px;
+        width: auto;
+        max-height: calc(100vh - 56px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 24px);
+    }
+
+    .notifList {
+        max-height: none;
+        flex: 1 1 auto;
     }
 }
 
@@ -3063,6 +3079,7 @@
         box-shadow: none;
     }
 }
+
 /* Shared notification-center additions used by Retail and Customer surfaces. */
 .notifViewAll {
     width: 100%;
@@ -3076,7 +3093,11 @@
     font-weight: 600;
     cursor: pointer;
 }
-.notifViewAll:hover { background: var(--bg-soft-accent); }
+
+.notifViewAll:hover {
+    background: var(--bg-soft-accent);
+}
+
 .notifUndoStack {
     position: fixed;
     right: 20px;
@@ -3086,6 +3107,7 @@
     flex-direction: column;
     gap: 6px;
 }
+
 .notifUndoStack button {
     border: 0.5px solid var(--border-color);
     border-radius: 10px;
@@ -3097,4 +3119,7 @@
     font: inherit;
     font-size: 12px;
 }
-.notifUndoStack button:hover { background: var(--bg-soft-accent); }
+
+.notifUndoStack button:hover {
+    background: var(--bg-soft-accent);
+}

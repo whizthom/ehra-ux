@@ -39,14 +39,8 @@ import LogoutConfirmModal from "../components/LogoutConfirmModal";
 import DisconnectConfirmModal from "../components/DisconnectConfirmModal";
 import PremiumReceipt from "../components/PremiumReceipt";
 import styles from "./CustomerDashboard.module.css";
-import NotificationCenter, {
-  NotificationsPageView,
-} from "../components/notifications/NotificationCenter";
-import {
-  getCustomerNotifications,
-  getCustomerUnreadCount,
-  markAllCustomerRead,
-} from "../api/notificationApi";
+import NotificationCenter, { NotificationsPageView } from "../components/notifications/NotificationCenter";
+import { getCustomerNotifications, getCustomerUnreadCount, markAllCustomerRead } from "../api/notificationApi";
 
 // Matches Ehral\'s employer/employee mobile navigation behavior.
 function useScrollThumb(ref) {
@@ -1038,10 +1032,16 @@ export default function CustomerDashboard() {
   // Tapping a "New approval slip" bell notification jumps straight to the
   // Approvals tab and outlines the exact slip it was about, instead of just
   // dropping the customer on the tab to hunt for it themselves.
+  // Tapping a "Payment received" bell notification opens that exact POS
+  // receipt directly, once it's loaded - see the effect below.
+  const [pendingReceiptId, setPendingReceiptId] = useState(null);
   const handleNotificationClick = (n) => {
     if (n?.type === "CUSTOMER_SALE_APPROVAL_RECEIVED" && n?.referenceId) {
       setApprovalHighlightId(n.referenceId);
       changeTab("approvals");
+    } else if (n?.type === "CUSTOMER_PAYMENT_RECEIVED") {
+      if (n?.referenceId) setPendingReceiptId(n.referenceId);
+      changeTab("receipts");
     }
   };
 
@@ -1054,6 +1054,19 @@ export default function CustomerDashboard() {
     const timer = setTimeout(() => setApprovalHighlightId(null), 4000);
     return () => clearTimeout(timer);
   }, [tab, approvalHighlightId, approvals]);
+
+  // Opens the exact receipt a "Payment received" notification was about,
+  // once posReceipts has actually loaded (it may still be in flight when
+  // the tab first switches in). A notification from an online order
+  // payment (rather than a POS sale) carries no referenceId, so there's
+  // nothing to open automatically for those - the customer still lands on
+  // the receipts tab either way.
+  useEffect(() => {
+    if (tab !== "receipts" || !pendingReceiptId || !posReceipts.length) return;
+    const match = posReceipts.find((r) => r.saleId === pendingReceiptId);
+    if (match) setSelectedPosReceipt(match);
+    setPendingReceiptId(null);
+  }, [tab, pendingReceiptId, posReceipts]);
 
   const visitBusiness = (business) => {
     // Remember which tab this was opened from, so the profile's back arrow can
@@ -1298,10 +1311,7 @@ export default function CustomerDashboard() {
   }
 
   const navItems = CUSTOMER_NAV_ITEMS;
-  const title =
-    tab === "notifications"
-      ? "Notifications"
-      : navItems.find((x) => x[0] === tab)?.[1] || "Dashboard";
+  const title = tab === "notifications" ? "Notifications" : (navItems.find((x) => x[0] === tab)?.[1] || "Dashboard");
 
   return (
     <>
