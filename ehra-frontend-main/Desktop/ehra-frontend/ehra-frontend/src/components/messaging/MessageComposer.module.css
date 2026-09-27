@@ -1,0 +1,427 @@
+.composerWrap {
+    position: relative;
+    background: var(--bg-surface);
+    padding: 10px 12px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    flex-shrink: 0;
+    /* Elevated above the wallpapered message area (box-shadow, not a
+       flat border) - matches the header's treatment on the opposite
+       edge, so the composer reads as its own floating layer rather than
+       a line drawn under the last message. */
+    box-shadow: 0 -1px 3px var(--shadow-color);
+    z-index: 3;
+}
+
+.replyBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-surface-alt);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 6px 10px;
+    margin-bottom: 6px;
+}
+
+.replyBarInfo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.replyBarLabel {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.replyBarSnippet {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 280px;
+}
+
+.replyBar button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+}
+
+.uploadError {
+    font-size: 12px;
+    color: var(--danger);
+    margin-bottom: 6px;
+}
+
+.inputRow {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    position: relative;
+}
+
+/* Purely a DOM/ref boundary for click-outside detection (see
+   useClickOutside usage in MessageComposer.jsx) - `contents` means these
+   wrappers don't create their own box at all, so the trigger button
+   inside still behaves exactly like a normal direct flex item of
+   .inputRow, and the popup panel inside still anchors against .inputRow
+   (the nearest positioned ancestor) exactly as it did before these
+   wrappers existed. */
+.attachGroup,
+.emojiGroup {
+    display: contents;
+}
+
+.iconBtn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.iconBtn:hover {
+    background: var(--bg-surface-alt);
+    color: var(--accent);
+}
+
+.iconBtn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.iconBtnActive {
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+}
+
+.attachMenuPanel {
+    position: absolute;
+    bottom: 48px;
+    left: 0;
+    display: flex;
+    gap: 6px;
+    background: var(--bg-surface);
+    border: 0.5px solid var(--border-color);
+    border-radius: 16px;
+    padding: 10px;
+    box-shadow: 0 8px 24px var(--shadow-color);
+    z-index: 20;
+    animation: composerPopIn 0.15s cubic-bezier(0.2, 0.8, 0.4, 1);
+    transform-origin: bottom left;
+}
+
+@keyframes composerPopIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.attachMenuPanel button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    width: 64px;
+    padding: 6px 0;
+    transition: background 0.12s ease;
+}
+
+.attachMenuPanel button:hover {
+    background: var(--bg-surface-alt);
+}
+
+.attachIconWrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 2px 6px var(--shadow-color);
+    transition: transform 0.12s ease;
+}
+
+.attachMenuPanel button:hover .attachIconWrap {
+    transform: scale(1.08);
+}
+
+.textareaWrap {
+    flex: 1;
+    position: relative;
+    min-width: 0;
+}
+
+.textarea {
+    width: 100%;
+    max-height: 160px;
+    min-height: 44px;
+    resize: none;
+    border: 1.5px solid transparent;
+    outline: none;
+    background: var(--bg-surface-alt);
+    color: var(--text-primary);
+    border-radius: 20px;
+    padding: 11px 16px;
+    font-size: 15px;
+    line-height: 1.4;
+    box-sizing: border-box;
+    font-family: inherit;
+    transition: border-color 0.12s ease;
+}
+
+.textarea:focus {
+    border-color: var(--accent);
+}
+
+.sendBtn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-size: 17px;
+    box-shadow: 0 1px 3px var(--shadow-color);
+    transition: background 0.12s ease, transform 0.1s ease;
+}
+
+.sendBtn:hover:not(:disabled) {
+    background: var(--accent-hover);
+    transform: scale(1.04);
+}
+
+.sendBtn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.emojiPickerPanel {
+    position: absolute;
+    bottom: 48px;
+    left: 0;
+    background: var(--bg-surface);
+    border: 0.5px solid var(--border-color);
+    border-radius: 14px;
+    box-shadow: 0 8px 24px var(--shadow-color);
+    padding: 8px;
+    z-index: 20;
+    animation: composerPopIn 0.15s cubic-bezier(0.2, 0.8, 0.4, 1);
+    transform-origin: bottom left;
+}
+
+.emojiGrid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 2px;
+}
+
+.emojiGrid button {
+    background: none;
+    border: none;
+    font-size: 21px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: transform 0.1s ease, background 0.1s ease;
+}
+
+.emojiGrid button:hover {
+    background: var(--bg-surface-alt);
+    transform: scale(1.15);
+}
+
+.mentionDropdown {
+    position: absolute;
+    bottom: 50px;
+    left: 0;
+    right: 0;
+    background: var(--bg-surface);
+    border: 0.5px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px var(--shadow-color);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 20;
+    padding: 4px;
+    animation: composerPopIn 0.15s cubic-bezier(0.2, 0.8, 0.4, 1);
+    transform-origin: bottom center;
+}
+
+.mentionDropdown button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.mentionDropdown button::before {
+    content: "@";
+    color: var(--accent);
+    font-weight: 700;
+    margin-right: 2px;
+}
+
+.mentionDropdown button:hover {
+    background: var(--bg-soft-accent);
+}
+
+/* ── Voice recorder bar ── */
+.voiceRecorderBar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+}
+
+.voiceCancelBtn,
+.voiceSendBtn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.voiceCancelBtn {
+    background: var(--bg-surface-alt);
+    color: var(--danger);
+}
+
+.voiceSendBtn {
+    background: var(--accent);
+    color: #fff;
+    margin-left: auto;
+}
+
+.recordingDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--danger);
+    animation: pulse 1.2s infinite;
+    flex-shrink: 0;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+}
+
+.recordingTime {
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.recordingTimeWarning {
+    color: var(--danger);
+}
+
+.recordingHint {
+    color: var(--text-secondary);
+    font-size: 13px;
+    flex: 1;
+}
+
+.voiceError {
+    color: var(--danger);
+    font-size: 13px;
+    flex: 1;
+}
+
+/* ── Mobile: fewer inline icons (attach options moved into the popover
+   above) means the input row has room to give the text field itself more
+   presence - both wider (less competing chrome) and taller (easier to
+   read/type multi-line messages with a thumb) - per the "keep the message
+   text panel wider in both length and height on mobile" requirement. */
+@media (max-width: 640px) {
+    .composerWrap {
+        padding: 10px 8px;
+        padding-bottom: max(10px, env(safe-area-inset-bottom));
+    }
+
+    .textarea {
+        min-height: 48px;
+        max-height: 180px;
+        font-size: 15.5px;
+        padding: 13px 16px;
+    }
+
+    .iconBtn {
+        width: 34px;
+        height: 34px;
+        font-size: 19px;
+    }
+
+    .sendBtn {
+        width: 44px;
+        height: 44px;
+        font-size: 18px;
+    }
+}
+
+/* ── Flat variant ─────────────────────────────────────────────────────── */
+:global([data-flat="true"]) .composerWrap {
+    background: color-mix(in srgb, var(--bg-page) 78%, transparent);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    backdrop-filter: blur(16px) saturate(1.4);
+    box-shadow: none;
+    border-top: 1px solid var(--border-color);
+}

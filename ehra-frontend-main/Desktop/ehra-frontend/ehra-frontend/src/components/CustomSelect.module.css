@@ -1,0 +1,186 @@
+@keyframes panelIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.root {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.trigger {
+    width: 100%;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--text-primary);
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.trigger:hover {
+    border-color: var(--accent);
+}
+
+.triggerOpen {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.1);
+}
+
+.triggerIcon {
+    font-size: 14px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.triggerValue {
+    flex: 1;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.triggerPlaceholder {
+    flex: 1;
+    text-align: left;
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chevron {
+    font-size: 15px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    transition: transform 0.18s ease;
+}
+
+.chevronOpen {
+    transform: rotate(180deg);
+}
+
+.panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 100%;
+    width: max-content;
+    max-width: 320px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+    z-index: 200;
+    overflow: hidden;
+    animation: panelIn 0.14s ease;
+    transform-origin: top left;
+}
+
+.panelRight {
+    left: auto;
+    right: 0;
+    transform-origin: top right;
+}
+
+.searchRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.searchRow i {
+    font-size: 14px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.searchRow input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: none;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text-primary);
+}
+
+.optionsList {
+    max-height: 260px;
+    overflow-y: auto;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.emptyOption {
+    padding: 14px 10px;
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    padding: 9px 10px;
+    border: none;
+    background: none;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-primary);
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: background 0.1s;
+}
+
+.option i:not(.checkIcon) {
+    font-size: 14px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.option span {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.optionHighlight,
+.option:hover {
+    background: var(--bg-surface-alt);
+}
+
+.optionSelected {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.checkIcon {
+    font-size: 15px;
+    color: var(--accent);
+    flex-shrink: 0;
+}

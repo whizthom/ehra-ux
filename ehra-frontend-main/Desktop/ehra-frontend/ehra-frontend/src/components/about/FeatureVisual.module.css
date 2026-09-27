@@ -1,0 +1,86 @@
+.card {
+    position: relative;
+    height: 100%;
+    background: var(--bg-card, #fff);
+    border: 1px solid var(--border, #e1e8e5);
+    border-radius: 16px;
+    padding: 24px 22px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent, #0f6e56);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 32px -14px rgba(11, 31, 26, 0.22);
+    border-color: rgba(15, 110, 86, 0.3);
+}
+
+.card:hover::before {
+    transform: scaleX(1);
+}
+
+.iconWrap {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(155deg, rgba(15, 110, 86, 0.14), rgba(15, 110, 86, 0.06));
+    color: var(--accent, #0f6e56);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    margin-bottom: 6px;
+}
+
+.title {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-size: 16px;
+    line-height: 1.3;
+    color: var(--text-primary, #0b1f1a);
+    margin: 0;
+}
+
+.desc {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text-secondary, #6f8b81);
+    margin: 0;
+    flex: 1;
+}
+
+.tag {
+    align-self: flex-start;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    margin-top: 4px;
+}
+
+.tagToday {
+    color: var(--accent, #0f6e56);
+    background: rgba(15, 110, 86, 0.1);
+}
+
+.tagVision {
+    color: #b8860f;
+    background: rgba(255, 194, 75, 0.14);
+}

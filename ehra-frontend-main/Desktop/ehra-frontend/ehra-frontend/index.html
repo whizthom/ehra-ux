@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+
+  <!-- Icons -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="32x32" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+  <!-- iOS home-screen launch splash screens. Safari doesn't read the
+       manifest's background_color/icons for this the way Android does —
+       it wants an exact bitmap per device size, matched by physical
+       device-width/device-height/pixel-ratio. Without these, launching
+       from the home screen shows a blank white flash before the app's
+       own UI paints. Covers iPhone SE through the current largest
+       Pro Max, plus the three common iPad sizes; a brand-new device
+       released after these were generated will just fall back to a
+       blank flash until a matching size is added here, same as before. -->
+  <link rel="apple-touch-startup-image" href="/splash/splash-640x1136.png"
+    media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="/splash/splash-750x1334.png"
+    media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="/splash/splash-828x1792.png"
+    media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="/splash/splash-1125x2436.png"
+    media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="/splash/splash-1242x2688.png"
+    media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="/splash/splash-1080x2340.png"
+    media="(device-width: 360px) and (device-height: 780px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="/splash/splash-1170x2532.png"
+    media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="/splash/splash-1284x2778.png"
+    media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="/splash/splash-1179x2556.png"
+    media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="/splash/splash-1290x2796.png"
+    media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="/splash/splash-1620x2160.png"
+    media="(device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="/splash/splash-1668x2388.png"
+    media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="/splash/splash-2048x2732.png"
+    media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+
+  <!-- Viewport: viewport-fit=cover lets the app draw under the
+       notch/home-indicator on iOS so the standalone window fills the
+       whole screen like a native app, instead of leaving black bars.
+       Safe-area padding for that is handled in src/index.css.
+       interactive-widget=resizes-content tells supporting browsers
+       (Chrome 108+, Safari 16.4+) to actually shrink the layout
+       viewport when the on-screen keyboard opens, instead of just
+       overlaying/panning it on top of the page. Without this, 100vh/
+       100dvh can silently stop tracking the real visible area the
+       moment someone taps into the message composer, which is what let
+       the chat header get covered or dragged out of view — see also
+       useVisualViewportHeight.js, the JS fallback for browsers that
+       don't support this hint yet. -->
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+
+  <title>Ehral</title>
+  <meta name="description" content="Ehral — workforce, attendance and business management, in your pocket." />
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="theme-color" content="#f0f4f3" />
+  <meta name="background-color" content="#f0f4f3" />
+
+  <!-- Sets the theme-color meta tag (and documentElement[data-theme])
+       to match a saved theme preference BEFORE the page paints, so
+       someone using dark mode doesn't see a flash of the light status
+       bar color while React is still loading. src/theme/ThemeColorSync.jsx
+       takes over from here for every toggle after first load. Reads the
+       same localStorage key ThemeContext.jsx does — keep these in sync
+       if that key or the color values in theme.css ever change. -->
+  <script>
+    (function () {
+      try {
+        var theme = localStorage.getItem("ehra-theme");
+        if (theme !== "dark") theme = "light";
+        document.documentElement.setAttribute("data-theme", theme);
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute("content", theme === "dark" ? "#0b141a" : "#f0f4f3");
+      } catch (e) {
+        // localStorage unavailable (private browsing edge cases, etc.) —
+        // falls back to the light defaults already in the tags above.
+      }
+    })();
+  </script>
+
+  <!-- Standalone/home-screen behavior on iOS (Android reads this from
+       the manifest above instead). apple-mobile-web-app-title keeps the
+       home-screen label short ("Ehral") instead of falling back to the
+       page <title>. -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Ehral" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,450;9..144,550;9..144,650&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
+</html>

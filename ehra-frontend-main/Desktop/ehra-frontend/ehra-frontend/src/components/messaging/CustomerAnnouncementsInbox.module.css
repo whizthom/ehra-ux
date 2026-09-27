@@ -1,0 +1,139 @@
+/* Additions to EmployeeInbox.module.css for the customer announcements
+   inbox (CustomerAnnouncementsInbox.jsx): the business identity chip and
+   the reply box. Colors come from the theme tokens so light/dark both work. */
+
+.bizAvatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--bg-soft-accent);
+  color: var(--accent);
+  font-size: 0.42em;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.bizAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The avatar's font-size scales off its box; keep initials legible at both
+   the 18px list size and the 42px detail size. */
+.bizAvatar {
+  font-size: 11px;
+}
+
+.replyBox {
+  margin-top: 22px;
+  padding: 14px;
+  border: 0.5px solid var(--border-color);
+  border-radius: 14px;
+  background: var(--bg-surface-alt);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.replyLabel {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.replyLabel i {
+  color: var(--accent);
+}
+
+.replyInput {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 70px;
+  max-height: 220px;
+  padding: 10px 12px;
+  border: 0.5px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.replyInput:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.replyError {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 0.5px solid var(--danger-border);
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  font-size: 12.5px;
+}
+
+.replyFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.replyFooter small {
+  color: var(--text-secondary);
+  font-size: 11.5px;
+}
+
+.replySend {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 999px;
+  padding: 9px 18px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.replySend:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.replySend:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.retryBtn {
+  margin-top: 10px;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 16px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}

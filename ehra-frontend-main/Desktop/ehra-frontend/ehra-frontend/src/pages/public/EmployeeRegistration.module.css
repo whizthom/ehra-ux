@@ -1,0 +1,687 @@
+.page {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* ── Left ── */
+.left {
+    position: relative;
+    width: 42%;
+    background: #0b1f1a;
+    background-image: radial-gradient(circle at 12% 8%, rgba(85, 224, 174, 0.16), transparent 42%),
+        radial-gradient(circle at 92% 88%, rgba(198, 161, 91, 0.14), transparent 45%);
+    background-size: 160% 160%;
+    animation: ehraBgDrift 22s ease-in-out infinite;
+    padding: 48px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+@keyframes ehraBgDrift {
+
+    0%,
+    100% {
+        background-position: 0% 0%;
+    }
+
+    50% {
+        background-position: 30% 22%;
+    }
+}
+
+@keyframes ehraDotDrift {
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: 180px 180px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .left,
+    .mobileHero,
+    .mobileDotGrid {
+        animation: none;
+    }
+}
+
+.logoRow {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logoIcon {
+    width: 34px;
+    height: 34px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 0.5px solid rgba(255, 255, 255, 0.14);
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+}
+
+.logoText {
+    color: #fff;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+.leftBody {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    padding: 32px 0;
+}
+
+.tagline {
+    color: #55e0ae;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+}
+
+.headline {
+    font-family: "Fraunces", Georgia, serif;
+    font-optical-sizing: auto;
+    font-weight: 550;
+    color: #fff;
+    font-size: 28px;
+    line-height: 1.28;
+    letter-spacing: -0.2px;
+    margin: 2px 0 0;
+}
+
+.desc {
+    color: #b8ccc5;
+    font-size: 13.5px;
+    line-height: 1.6;
+    margin-top: 4px;
+}
+
+.leftFooter {
+    position: relative;
+    z-index: 1;
+    color: #6f8b81;
+    font-size: 12px;
+}
+
+/* ── Steps ── */
+.steps {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+.step {
+    display: flex;
+    gap: 14px;
+    position: relative;
+}
+
+.stepLine {
+    position: absolute;
+    left: 15px;
+    top: 32px;
+    width: 2px;
+    height: calc(100% - 8px);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.stepDot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 500;
+    flex-shrink: 0;
+    z-index: 1;
+    transition: all 0.2s;
+}
+
+.dotDone {
+    background: #55e0ae;
+    color: #0b1f1a;
+}
+
+.dotActive {
+    background: #fff;
+    color: #0b1f1a;
+}
+
+.dotPending {
+    background: rgba(255, 255, 255, 0.1);
+    border: 0.5px solid rgba(255, 255, 255, 0.14);
+    color: #7f958d;
+}
+
+.stepBody {
+    padding: 4px 0 20px;
+}
+
+.stepLabel {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.stepSub {
+    font-size: 12px;
+    color: #8fa8a0;
+    margin-top: 2px;
+}
+
+/* ── Right ── */
+.right {
+    flex: 1;
+    position: relative;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Duplicate "About Ehral" entry for the mobile layout, where .left (and
+   the AboutEhralLink already inside it) is hidden below 768px in favor
+   of .mobileHero. Hidden by default; the 768px media query below
+   switches it on. */
+.mobileOnlyAboutLink {
+    display: none;
+}
+
+.rightHeader {
+    padding: 20px 44px 12px;
+    border-bottom: 0.5px solid #e2e8f0;
+}
+
+.progressBar {
+    width: 100%;
+    height: 3px;
+    background: #e2e8f0;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 14px;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #0f6e56, #55e0ae);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+}
+
+.headerRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.stepTitle {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-size: 16px;
+    color: #0b1f1a;
+}
+
+.stepCount {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #8a9791;
+}
+
+/* Wraps formBody + formFooter as one unit and centers that unit inside
+   the remaining space below the header - so the footer (Back/Next)
+   always sits directly under whatever content a given step has,
+   instead of being flex-stretched down to the bottom of the page. */
+.formArea {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.formBody {
+    padding: 16px 44px;
+}
+
+/* ── Error ── */
+.errorBox {
+    background: #fcebeb;
+    border: 0.5px solid #f09595;
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: #a32d2d;
+}
+
+/* ── Fields ── */
+.grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.grid1 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.field label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #555;
+}
+
+.optional {
+    color: #aaa;
+    font-weight: 400;
+}
+
+.field input,
+.field select {
+    height: 38px;
+    padding: 0 12px;
+    border: 0.5px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    background: #fff;
+    color: #111;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.field input:focus,
+.field select:focus {
+    border-color: #0f6e56;
+    box-shadow: 0 0 0 3px rgba(15, 110, 86, 0.12);
+}
+
+.field input::placeholder {
+    color: #bbb;
+}
+
+.pwWrap {
+    position: relative;
+}
+
+.pwWrap input {
+    width: 100%;
+    padding-right: 38px;
+}
+
+.pwToggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    opacity: 0.5;
+}
+
+.pwToggle:hover {
+    opacity: 1;
+}
+
+.stepNote {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+/* ── Password rules ── */
+.pwRules {
+    margin-top: 16px;
+    padding: 14px 16px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 0.5px solid #e2e8f0;
+}
+
+.pwRulesTitle {
+    font-size: 12px;
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.pwRule {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #aaa;
+    margin-bottom: 5px;
+    transition: color 0.15s;
+}
+
+.pwRuleOk {
+    color: #0f6e56;
+}
+
+/* ── Footer ── */
+.formFooter {
+    padding: 4px 44px 24px;
+    display: flex;
+    gap: 10px;
+}
+
+.btnBack {
+    height: 40px;
+    padding: 0 20px;
+    background: none;
+    border: 0.5px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    color: #555;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btnBack:hover {
+    background: #f8fafc;
+}
+
+.btnNext {
+    flex: 1;
+    height: 40px;
+    background: #0f6e56;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btnNext:hover:not(:disabled) {
+    background: #085041;
+}
+
+.btnNext:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* ── Mobile hero - replaces the left timeline sidebar below 768px ──────── */
+.mobileHero {
+    display: none;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────
+   Mobile locks to the device's real visible viewport (100dvh) and never
+   scrolls at the page level, in either direction - only the form body
+   (the region between the fixed header and footer) scrolls internally if
+   a given step's content is taller than the available space. The logo
+   sits directly on the white canvas with no background box, left-aligned,
+   matching Login.jsx's mobile treatment exactly. ─────────────────────── */
+@media (max-width: 768px) {
+    .page {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        height: 100dvh;
+        width: 100vw;
+        overflow: hidden;
+    }
+
+    .left {
+        display: none;
+    }
+
+    .right {
+        flex: 1;
+        min-height: 0;
+        width: 100%;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .mobileHero {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex-shrink: 0;
+        padding: 18px 20px 14px;
+        background: transparent;
+    }
+
+    .mobileOnlyAboutLink {
+        display: inline-flex;
+    }
+
+    .mobileLogoRow {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 9px;
+        margin-bottom: 10px;
+        background: transparent;
+    }
+
+    .mobileEyebrow {
+        position: relative;
+        z-index: 1;
+        color: #0f6e56;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+    }
+
+    .mobileHeadline {
+        position: relative;
+        z-index: 1;
+        font-family: "Fraunces", Georgia, serif;
+        font-weight: 550;
+        font-size: 18px;
+        color: #0b1f1a;
+        line-height: 1.3;
+        margin-top: 2px;
+    }
+
+    .mobileSteps {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        gap: 6px;
+        margin-top: 14px;
+    }
+
+    .mobileStepDot {
+        flex: 1;
+        height: 4px;
+        border-radius: 2px;
+        background: #e2e8f0;
+        transition: background 0.2s;
+    }
+
+    .mobileStepDone {
+        background: #55e0ae;
+    }
+
+    .mobileStepActive {
+        background: linear-gradient(90deg, #0f6e56, #55e0ae);
+    }
+
+    .rightHeader {
+        flex-shrink: 0;
+        padding: 0 20px 14px;
+    }
+
+    .formBody {
+        overflow-x: hidden;
+        padding: 16px 20px;
+        box-sizing: border-box;
+    }
+
+    .formFooter {
+        padding: 4px 20px 16px;
+        box-sizing: border-box;
+    }
+}
+
+@media (max-width: 420px) {
+    .grid2 {
+        grid-template-columns: 1fr;
+    }
+
+    .mobileHeadline {
+        font-size: 17px;
+    }
+
+    .mobileHero {
+        padding: 14px 16px 12px;
+    }
+
+    .rightHeader {
+        padding: 0 16px 12px;
+    }
+
+    .formBody {
+        padding: 14px 16px;
+    }
+
+    .formFooter {
+        padding: 4px 16px 14px;
+    }
+}
+
+/* ── Registration policy acknowledgement ─────────────────────────────── */
+.termsCheck {
+    position: relative;
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr);
+    align-items: start;
+    gap: 10px;
+    margin: 18px 0 2px;
+    padding: 12px 13px;
+    border: 1px solid #dce7e2;
+    border-radius: 12px;
+    background: #f8fbfa;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.termsCheck:hover {
+    border-color: #a9c9bd;
+    background: #f5faf8;
+}
+
+.termsCheck input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.termsBox {
+    width: 20px;
+    height: 20px;
+    border: 1.5px solid #aebfb8;
+    border-radius: 6px;
+    background: #fff;
+    color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+}
+
+.termsCheck input:checked + .termsBox {
+    background: #0f6e56;
+    border-color: #0f6e56;
+    color: #fff;
+}
+
+.termsCheck input:focus-visible + .termsBox {
+    outline: 3px solid rgba(15, 110, 86, 0.18);
+    outline-offset: 2px;
+}
+
+.termsBox i {
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.termsText {
+    font-size: 12px;
+    line-height: 1.55;
+    color: #53645e;
+}
+
+.termsText a {
+    color: #0f6e56;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.termsText a:hover {
+    color: #085041;
+}
+
+@media (max-width: 768px) {
+    .termsCheck {
+        margin-top: 16px;
+        padding: 12px;
+    }
+
+    .termsText {
+        font-size: 11.75px;
+    }
+}

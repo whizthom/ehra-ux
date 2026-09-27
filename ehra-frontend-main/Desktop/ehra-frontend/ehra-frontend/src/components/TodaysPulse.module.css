@@ -1,0 +1,279 @@
+/* ── Today's Pulse - mobile-only hero widget ──────────────────────────────
+   Fully theme-responsive - every color comes from the shared variables in
+   theme.css, so it follows light/dark mode the same way the rest of the
+   app does rather than carrying its own fixed palette. A subtle gradient
+   between --bg-surface and --bg-surface-alt (instead of a flat fill) is
+   what keeps it reading as a featured card rather than a plain panel. */
+
+.card {
+    background: linear-gradient(165deg, var(--bg-surface), var(--bg-surface-alt));
+    border: 0.5px solid var(--border-color);
+    border-radius: 18px;
+    padding: 17px 16px 15px;
+    width: 100%;
+    max-width: 560px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 4px 18px var(--shadow-color);
+}
+
+.title {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 2.2px;
+    color: var(--accent);
+    text-transform: uppercase;
+}
+
+.ringWrap {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin-top: 10px;
+}
+
+.ringSvg {
+    width: 100%;
+    height: 100%;
+}
+
+.ticks {
+    fill: none;
+    stroke: var(--border-color);
+    stroke-width: 2;
+    stroke-dasharray: 1 6.6;
+}
+
+.track {
+    fill: none;
+    stroke: var(--border-color);
+}
+
+.progress {
+    fill: none;
+    stroke: var(--accent);
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 100px 100px;
+    transition: stroke-dashoffset 0.7s ease, stroke 0.15s ease;
+}
+
+.ringCenter {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 2px;
+}
+
+.ringNum {
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: clamp(42px, 11vw, 46px);
+    line-height: 1;
+    color: var(--text-primary);
+}
+
+.ringOf {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-top: 6px;
+}
+
+.ringPct {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-top: 2px;
+}
+
+.legend {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px 12px;
+    width: 100%;
+    margin-top: 14px;
+}
+
+.legendItem {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-width: 0;
+    min-height: 34px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+@media (max-width: 390px) {
+    .card {
+        border-radius: 16px;
+        padding: 15px 12px 13px;
+    }
+
+    .ringWrap {
+        width: 184px;
+        height: 184px;
+        margin-top: 8px;
+    }
+
+    .ringCenter {
+        transform: scale(0.94);
+    }
+
+    .legend {
+        gap: 6px 8px;
+        margin-top: 12px;
+    }
+
+    .footer {
+        margin-top: 12px;
+        padding-top: 10px;
+        font-size: 11px;
+    }
+}
+
+/* Very narrow phones (real data can push On time / Late / Absent into
+   double or triple digits) - dropping the label below its number and
+   dot keeps each column readable instead of the row squeezing or
+   wrapping mid-item, while still keeping the colored dot visible so
+   the three states stay easy to tell apart at a glance. */
+@media (max-width: 360px) {
+    .legendItem {
+        flex-direction: column;
+        gap: 3px;
+        font-size: 10.5px;
+    }
+
+    .legendItem .dot {
+        width: 6px;
+        height: 6px;
+    }
+
+    .legendItem b {
+        font-size: 15px;
+    }
+}
+
+.legendItem b {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.dotOnTime {
+    background: var(--accent);
+}
+
+.dotLate {
+    background: var(--danger);
+}
+
+.dotEarlyLeave {
+    background: var(--warning-text);
+}
+
+.dotAbsent {
+    background: var(--warning);
+}
+
+.footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 14px;
+    padding-top: 11px;
+    border-top: 0.5px solid var(--border-color);
+    font-size: 11.5px;
+}
+
+.lastClockIn {
+    color: var(--text-secondary);
+}
+
+.live {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.liveDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulseDot 1.8s ease-in-out infinite;
+}
+
+/* Opacity + scale rather than a colored box-shadow ring - a glow keyed to
+   a specific rgba() couldn't follow --accent across themes, this can. */
+@keyframes pulseDot {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.55;
+        transform: scale(1.35);
+    }
+}
+
+.card {
+    border-radius: 22px;
+    border: 1px solid color-mix(in srgb, var(--border-color) 55%, transparent);
+    /* Plain, not accent-tinted - a green-tinted shadow here read as a
+       coloured halo bleeding onto the page around the card instead of
+       the card just sitting on the plain background. */
+    box-shadow: 0 24px 60px -38px var(--shadow-color);
+    overflow: hidden;
+}
+
+.title {
+    font-weight: 850;
+    letter-spacing: -.035em;
+}
+
+.ringWrap {
+    filter: drop-shadow(0 14px 22px var(--shadow-color));
+}
+
+.ringNum {
+    font-weight: 900;
+    letter-spacing: -.06em;
+}
+
+.legendItem {
+    border-radius: 10px;
+    padding: 5px 7px;
+}
+
+@media (max-width: 560px) {
+    .card {
+        border-radius: 18px;
+    }
+}

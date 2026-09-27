@@ -1,0 +1,507 @@
+.row {
+    display: flex;
+    padding: 3px 16px;
+    animation: messageIn 0.18s ease-out;
+}
+
+/* New messages settle into place instead of just popping in - small
+   touch, but it's the difference between the chat feeling alive and
+   feeling like a static list re-rendering. */
+@keyframes messageIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.row.own {
+    justify-content: flex-end;
+}
+
+.row.other {
+    justify-content: flex-start;
+}
+
+.bubbleWrap {
+    max-width: 68%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.senderName {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    margin: 6px 2px 3px;
+}
+
+.bubble {
+    position: relative;
+    padding: 8px 10px;
+    border-radius: 15px;
+    font-size: 14.5px;
+    line-height: 1.45;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    box-shadow: 0 1px 2px var(--shadow-color);
+}
+
+/* Real bubble colors, not a flat accent fill - --bubble-sent-bg /
+   --bubble-received-bg are the theme's own tokens for exactly this
+   (theme.css marks them "reserved for later passes"; this is that
+   pass). Using them instead of var(--accent) is also what actually
+   fixes the read-tick contrast complaint at the root: a solid saturated
+   accent fill needs a DIFFERENT override color in light mode (pale bg,
+   needs dark content) than in dark mode (deep bg, needs light content),
+   which is exactly the kind of one-color-tries-to-fit-both situation
+   that produces a barely-visible tick. The real bubble tokens are pale
+   in light mode and deep in dark mode on purpose, so plain
+   var(--text-primary)/var(--text-secondary) already contrast correctly
+   against them in BOTH themes without bubble-specific color overrides -
+   see how few of those remain below compared to before.
+*/
+.ownBubble {
+    background: var(--bubble-sent-bg);
+    color: var(--text-primary);
+    border-bottom-right-radius: 4px;
+}
+
+.otherBubble {
+    background: var(--bubble-received-bg);
+    color: var(--text-primary);
+    border: 0.5px solid var(--border-color);
+    border-bottom-left-radius: 4px;
+}
+
+.textContent a {
+    color: var(--accent);
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+.metaRow {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    margin-top: 3px;
+}
+
+.editedTag {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.time {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.tickPending,
+.tickFailed {
+    font-size: 13px;
+}
+
+.tickFailed {
+    color: var(--danger);
+}
+
+.tickSent {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* The one deliberately hardcoded (not theme-token) color in this file -
+   WhatsApp's actual "read" blue reads clearly against BOTH a pale-green
+   AND a deep-green bubble at once (it's a different hue entirely, not
+   just a different shade of the same green), which a single grey/white
+   value never could. transition makes the sent->delivered->read
+   progression feel like a deliberate state change instead of an abrupt
+   flicker the instant the WebSocket event lands. */
+.tickRead {
+    font-size: 14px;
+    color: #34b7f1;
+    transition: color 0.25s ease;
+}
+
+.retryBtn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: var(--danger);
+    font-size: 11px;
+    margin-top: 2px;
+    padding: 0;
+    cursor: pointer;
+}
+
+.tombstone {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+    font-style: italic;
+    border-radius: 14px;
+}
+
+.hoverActions,
+.hoverReact {
+    position: absolute;
+    top: -10px;
+    background: var(--bg-surface);
+    border: 0.5px solid var(--border-color);
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    opacity: 0;
+    transform: scale(0.85);
+    pointer-events: none;
+    transition: opacity 0.12s ease, transform 0.12s ease;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 13px;
+    box-shadow: 0 2px 6px var(--shadow-color);
+}
+
+.bubble:hover .hoverActions,
+.bubble:hover .hoverReact {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+}
+
+.hoverActions:hover,
+.hoverReact:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.hoverActions {
+    right: -9px;
+}
+
+.hoverReact {
+    right: 20px;
+}
+
+.reactionPickerAnchor,
+.menuAnchor {
+    position: absolute;
+    top: -46px;
+    z-index: 15;
+}
+
+.menuAnchor {
+    top: 4px;
+}
+
+/* Own-message bubbles sit near the RIGHT edge of the screen - anchoring
+   the popup's right edge to the bubble's right edge and letting it
+   extend leftward is what stays safely on-screen there. */
+.anchorRight {
+    right: 0;
+}
+
+.menuAnchor.anchorRight {
+    right: -4px;
+}
+
+/* Received-message bubbles sit near the LEFT edge and can be very
+   narrow (a short one-word reply, for instance) - anchoring rightward
+   here is exactly what pushed a ~170px-wide menu off the edge of the
+   viewport before. Anchoring from the bubble's LEFT edge instead makes
+   the popup extend rightward, which stays within the row's available
+   space regardless of how narrow the bubble itself is. */
+.anchorLeft {
+    left: 0;
+}
+
+.menuAnchor.anchorLeft {
+    left: -4px;
+}
+
+.reactionsRow {
+    display: flex;
+    gap: 4px;
+    margin-top: 3px;
+    flex-wrap: wrap;
+}
+
+.reactionChip {
+    background: var(--bg-surface);
+    border: 0.5px solid var(--border-color);
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--text-primary);
+    box-shadow: 0 1px 2px var(--shadow-color);
+    transition: transform 0.1s ease;
+}
+
+.reactionChip:hover {
+    transform: translateY(-1px);
+}
+
+.reactionChipMine {
+    border-color: var(--accent);
+    background: var(--bg-soft-accent);
+}
+
+.replyPreview {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 5px 8px;
+    margin-bottom: 6px;
+    width: 100%;
+    box-sizing: border-box;
+    cursor: pointer;
+    border-top: none;
+    border-right: none;
+    border-bottom: none;
+}
+
+.replyName {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.replySnippet {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 260px;
+}
+
+.imageContent {
+    max-width: 100%;
+    width: 260px;
+    height: auto;
+    max-height: 320px;
+    border-radius: 11px;
+    display: block;
+    cursor: pointer;
+    object-fit: cover;
+    transition: filter 0.15s ease;
+}
+
+.imageContent:hover {
+    filter: brightness(0.94);
+}
+
+.caption {
+    margin-top: 6px;
+}
+
+.documentRow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.documentOpenArea {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px;
+    border: none;
+    background: none;
+    text-align: left;
+    color: var(--text-primary);
+    cursor: pointer;
+    min-width: 0;
+    flex: 1;
+    border-radius: 8px;
+    transition: background 0.12s ease;
+}
+
+.documentOpenArea:hover {
+    background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+}
+
+.documentInfo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.documentName {
+    font-size: 13.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.documentMeta {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.documentDownloadBtn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.documentDownloadBtn:hover {
+    background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+    color: var(--accent);
+}
+
+.documentDownloadBtn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.locationRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-primary);
+    text-decoration: none;
+    padding: 4px;
+}
+
+.voicePlayer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    width: 200px;
+    max-width: 100%;
+}
+
+.voicePlayBtn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-size: 15px;
+    box-shadow: 0 1px 3px var(--shadow-color);
+    transition: transform 0.1s ease;
+}
+
+.voicePlayBtn:hover {
+    transform: scale(1.05);
+}
+
+.voiceWave {
+    flex: 1;
+    height: 4px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--text-primary) 15%, transparent);
+    overflow: hidden;
+}
+
+.voiceWaveFill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.1s linear;
+}
+
+.voiceDuration {
+    font-size: 11px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.systemRow {
+    display: flex;
+    justify-content: center;
+    padding: 8px 16px;
+}
+
+.systemPill {
+    background: var(--bg-surface);
+    border: 0.5px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    text-align: center;
+    box-shadow: 0 1px 2px var(--shadow-color);
+}
+/* "Replying to announcement" chip - shown on a customer's reply to a
+   business announcement. */
+.announcementRef {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  padding: 6px 9px;
+  border-radius: 8px;
+  border-left: 3px solid var(--accent);
+  background: rgba(0, 0, 0, 0.06);
+  font-size: 12px;
+  min-width: 0;
+}
+
+[data-theme="dark"] .announcementRef {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.announcementRef i {
+  color: var(--accent);
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.announcementRefText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.announcementRefText small {
+  font-size: 10.5px;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.announcementRefText strong {
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

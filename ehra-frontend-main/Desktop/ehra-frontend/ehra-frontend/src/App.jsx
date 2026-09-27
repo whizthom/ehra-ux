@@ -1,0 +1,340 @@
+import { lazy, Suspense } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
+import { AuthProvider, useAuth } from "./context/AuthContext";
+
+import ProtectedRoute from "./components/ProtectedRoute";
+import ScrollRestoration from "./components/ScrollRestoration";
+import RouteLoading from "./components/RouteLoading";
+
+import InstallPrompt from "./pwa/InstallPrompt";
+import UpdateToast from "./pwa/UpdateToast";
+import OfflineBanner from "./pwa/OfflineBanner";
+import ThemeColorSync from "./theme/ThemeColorSync";
+import PushNotificationPrompt from "./pwa/PushNotificationPrompt";
+import EmployerFloatingActions from "./components/EmployerFloatingActions";
+
+// Auth/public entry pages stay eagerly bundled - one of these is always
+// the very first thing an unauthenticated visitor paints, so splitting
+// them into their own chunk would just add a network round trip to the
+// critical path for zero benefit.
+import Register from "./pages/Register";
+import CompleteSetup from "./pages/CompleteSetup";
+import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import VerifyEmail from "./pages/VerifyEmail";
+
+import InvitationLanding from "./pages/public/InvitationLanding";
+import EmployeeRegistration from "./pages/public/EmployeeRegistration";
+import CustomerInvitationRegistration from "./pages/public/CustomerInvitationRegistration";
+import RegistrationSubmitted from "./pages/public/RegistrationSubmitted";
+import QrDisplayPage from "./pages/public/QrDisplayPage";
+import Pricing from "./pages/public/Pricing";
+import About from "./pages/public/About";
+import Terms from "./pages/public/Terms";
+import Privacy from "./pages/public/Privacy";
+import Storefront from "./pages/public/Storefront";
+import CustomerDashboard from "./pages/CustomerDashboard";
+
+import NotFound from "./pages/NotFound";
+
+// Everything behind a login stays out of the initial bundle - these are
+// the heaviest pages in the app (Dashboard.jsx and EmployeeDashboard.jsx
+// alone are ~100KB and ~70KB of source each) and are never needed until
+// after authentication succeeds, so there's no reason to ship them to a
+// visitor who's still looking at the login form.
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const SelectWorkspace = lazy(() => import("./pages/SelectWorkspace"));
+const ScanAttendance = lazy(() => import("./pages/ScanAttendance"));
+const EmployeeDashboard = lazy(() => import("./pages/EmployeeDashboard"));
+const EmployeeProfilePage = lazy(() => import("./pages/EmployeeProfilePage"));
+const MyAccountsPage = lazy(() => import("./pages/MyAccountsPage"));
+const CustomerBusinessView = lazy(() => import("./pages/CustomerBusinessView"));
+const CustomerStore = lazy(() => import("./pages/CustomerStore"));
+const CustomerStoreProduct = lazy(() => import("./pages/CustomerStoreProduct"));
+const Support = lazy(() => import("./pages/Support"));
+const BusinessSetup = lazy(() => import("./pages/BusinessSetup"));
+const RetailWorkspace = lazy(() => import("./pages/RetailWorkspace"));
+
+function RootEntry() {
+  const { user } = useAuth();
+
+  if (!user) return <Register />;
+  if (user.role === "ROLE_CUSTOMER")
+    return <Navigate to="/customer-dashboard" replace />;
+  if (user.needsContextSelection)
+    return <Navigate to="/select-workspace" replace />;
+  if (user.role === "ROLE_ADMIN") return <Navigate to="/dashboard" replace />;
+  if (user.role === "ROLE_EMPLOYEE")
+    return <Navigate to="/my-dashboard" replace />;
+  return <Register />;
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <ScrollRestoration />
+        <ThemeColorSync />
+        <OfflineBanner />
+        <UpdateToast />
+        <PushNotificationPrompt />
+
+        <Suspense fallback={<RouteLoading />}>
+          <Routes>
+            {/* PUBLIC ROUTES */}
+
+            <Route path="/" element={<RootEntry />} />
+
+            <Route path="/complete-setup" element={<CompleteSetup />} />
+
+            <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+
+            {/* Public "About Ehral" story page - linked to only from
+                Login, Register and EmployeeRegistration (see
+                <AboutEhralLink /> on each). Not part of any app-shell
+                nav, so it's safe to keep here alongside the other
+                pre-auth public routes. */}
+            <Route path="/about" element={<About />} />
+
+            {/* Standalone legal documents - linked from About.jsx's and
+                SiteFooter's footer ("Legal" column). Public, no auth. */}
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/store/:slug" element={<Storefront />} />
+
+            {/* Reached from the link in the verification email - works
+                whether or not the browser tab is logged in, since the
+                token itself is the credential (see
+                EmailVerificationController#verifyEmail, public). */}
+            <Route path="/verify-email" element={<VerifyEmail />} />
+
+            {/* Shown after login when the Identity holds more than one
+                membership and hasn't picked an active workspace yet.
+                Protected only by "is logged in" - ProtectedRoute's
+                needsContextSelection redirect deliberately leaves this path
+                alone (see ProtectedRoute.jsx) so it doesn't loop. */}
+            <Route
+              path="/select-workspace"
+              element={
+                <ProtectedRoute>
+                  <SelectWorkspace />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/unauthorized"
+              element={
+                <div style={{ padding: 40, textAlign: "center" }}>
+                  <h2>You don't have access to this page.</h2>
+                </div>
+              }
+            />
+
+            {/* EMPLOYEE / CUSTOMER INVITATION FLOW - InvitationLanding
+                (/invite/:token) is shared by both invitation types and
+                routes an anonymous invitee to the matching registration
+                form below based on the invitation's type (see
+                InvitationLanding.jsx / InvitationType on the backend). */}
+
+            <Route path="/invite/:token" element={<InvitationLanding />} />
+
+            <Route path="/register/:token" element={<EmployeeRegistration />} />
+
+            <Route
+              path="/register-customer/:token"
+              element={<CustomerInvitationRegistration />}
+            />
+
+            <Route
+              path="/registration-submitted"
+              element={<RegistrationSubmitted />}
+            />
+
+            {/* PUBLIC QR DISPLAY - the "share a link instead of admin access"
+                feature. Reachable at /qr-display/:token with no login at
+                all; the token is the QrDisplayLink's opaque share token
+                (see AttendanceController's public /qr/display/{token}
+                endpoint), not a JWT or any kind of session credential. */}
+            <Route path="/qr-display/:token" element={<QrDisplayPage />} />
+
+            {/* PRICING - public, reachable signed-in or signed-out (see
+                Pricing.jsx's docstring for the signed-in-admin checkout
+                path vs. the signed-out "go sign up first" path). */}
+            <Route
+              path="/pricing"
+              element={
+                <ProtectedRoute>
+                  <Pricing />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* BUSINESS SETUP / SPECIALIZED WORKSPACE */}
+            <Route
+              path="/business-setup"
+              element={
+                <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                  <BusinessSetup />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/retail"
+              element={
+                <ProtectedRoute roles={["ROLE_ADMIN", "ROLE_EMPLOYEE"]}>
+                  <RetailWorkspace />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Ehral Credits belongs to the active business-type workspace.
+                Keep this legacy path only as a compatibility redirect for old bookmarks. */}
+            <Route
+              path="/ehral-credits"
+              element={
+                <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                  <Navigate to="/retail" replace />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* EMPLOYER DASHBOARD */}
+
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* EMPLOYEE DASHBOARD */}
+
+            <Route
+              path="/customer-dashboard"
+              element={
+                <ProtectedRoute roles={["ROLE_CUSTOMER"]}>
+                  <CustomerDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/customer/business/:businessId"
+              element={
+                <ProtectedRoute roles={["ROLE_CUSTOMER"]}>
+                  <CustomerBusinessView />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* The business's store, inside My Ehral (opened from the business profile's "Visit store"). */}
+            <Route
+              path="/customer/business/:businessId/store"
+              element={
+                <ProtectedRoute roles={["ROLE_CUSTOMER"]}>
+                  <CustomerStore />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* A single product's dedicated full page, reached from the "View
+                full page" button in the store's product sheet. */}
+            <Route
+              path="/customer/business/:businessId/store/product/:productId"
+              element={
+                <ProtectedRoute roles={["ROLE_CUSTOMER"]}>
+                  <CustomerStoreProduct />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/my-dashboard"
+              element={
+                <ProtectedRoute roles={["ROLE_EMPLOYEE"]}>
+                  <EmployeeDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* EMPLOYEE ATTENDANCE (standalone deep links, still supported).
+                ROLE_ADMIN is included because an employer who has turned on
+                "Personal attendance profile" (Settings) clocks in/out here
+                exactly like any employee - the backend rejects the scan if
+                that setting is off. */}
+
+            <Route
+              path="/my-attendance"
+              element={
+                <ProtectedRoute roles={["ROLE_EMPLOYEE", "ROLE_ADMIN"]}>
+                  <ScanAttendance />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Numeric today, kept as a single dynamic segment on purpose -
+                react-router treats `:id` as an opaque string regardless of
+                what's in it, so the route itself needs zero changes to
+                accept UUIDs later. The one thing that WOULD need a
+                one-line update at that point is EmployeeProfilePage's
+                `Number(id)` call (used when messaging a coworker from
+                their profile) - everywhere else `id` already flows
+                through untouched as a string. */}
+            <Route
+              path="/employees/:id"
+              element={
+                <ProtectedRoute roles={["ROLE_ADMIN", "ROLE_EMPLOYEE"]}>
+                  <EmployeeProfilePage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* MY ACCOUNTS - full-page Employer/Employee workspace switcher,
+                reachable from the "My Accounts" nav item on either dashboard. */}
+
+            <Route
+              path="/my-accounts"
+              element={
+                <ProtectedRoute>
+                  <MyAccountsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* SUPPORT - customer-facing half of the Ehral Operations
+                Console's Support Inbox. Reachable from the "Help &
+                Support" nav item on either dashboard. No roles=
+                restriction: any authenticated identity (admin or
+                employee) can contact support. */}
+            <Route
+              path="/support"
+              element={
+                <ProtectedRoute>
+                  <Support />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Catch-all - anything that doesn't match a route above
+                (typo'd URL, stale bookmark, removed page) gets a friendly
+                404 screen instead of react-router silently rendering
+                nothing. Must stay LAST. */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+
+        <EmployerFloatingActions />
+
+        <InstallPrompt />
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}
+
+export default App;

@@ -1,0 +1,106 @@
+/* ── Browser chrome ── */
+.browser {
+    width: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--bg-card, #fff);
+    border: 1px solid var(--border, #e1e8e5);
+    box-shadow: 0 30px 70px -20px rgba(11, 31, 26, 0.35), 0 4px 14px rgba(11, 31, 26, 0.08);
+}
+
+.browserBar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    background: var(--bg-page, #f0f4f3);
+    border-bottom: 1px solid var(--border, #e1e8e5);
+}
+
+.dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.urlPill {
+    margin-left: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-secondary, #6f8b81);
+    background: var(--bg-card, #fff);
+    border: 1px solid var(--border, #e1e8e5);
+    border-radius: 999px;
+    padding: 3px 10px;
+}
+
+.urlPill i {
+    font-size: 11px;
+}
+
+.browserScreen {
+    background: var(--bg-page, #f0f4f3);
+    min-height: 100px;
+}
+
+/* ── Phone chrome ── */
+.phone {
+    position: relative;
+    width: 260px;
+    aspect-ratio: 260 / 534;
+    background: #0b1f1a;
+    border-radius: 42px;
+    padding: 12px;
+    box-shadow: 0 40px 90px -20px rgba(11, 31, 26, 0.45), 0 6px 20px rgba(11, 31, 26, 0.15),
+        inset 0 0 0 2px rgba(255, 255, 255, 0.06);
+}
+
+.phoneNotch {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 84px;
+    height: 20px;
+    background: #0b1f1a;
+    border-radius: 0 0 14px 14px;
+    z-index: 2;
+}
+
+.phoneScreen {
+    width: 100%;
+    height: 100%;
+    border-radius: 30px;
+    overflow: hidden;
+    background: var(--bg-page, #f0f4f3);
+    position: relative;
+}
+
+.phoneHomeBar {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90px;
+    height: 4px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ── Bare ── */
+.bare {
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--bg-card, #fff);
+    border: 1px solid var(--border, #e1e8e5);
+    box-shadow: 0 20px 50px -18px rgba(11, 31, 26, 0.28);
+}
+
+@media (max-width: 640px) {
+    .phone {
+        width: 210px;
+    }
+}

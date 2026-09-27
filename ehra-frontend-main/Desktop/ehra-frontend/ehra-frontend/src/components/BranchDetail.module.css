@@ -1,0 +1,942 @@
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+    animation: fadeSlideIn 0.2s ease;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.backBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 6px 8px 6px 4px;
+    border-radius: 8px;
+    transition: color 0.15s, background 0.15s;
+}
+
+.backBtn:hover {
+    color: var(--text-primary);
+    background: var(--bg-surface-alt);
+}
+
+.backBtn i {
+    font-size: 15px;
+}
+
+.headerRow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.headerLeft {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    min-width: 0;
+}
+
+.headerIcon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: rgba(29, 158, 117, 0.12);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.headerNameRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.headerName {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+}
+
+.codeBadge {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--bg-surface-alt);
+    border: 1px solid var(--border-color);
+    padding: 2px 7px;
+    border-radius: 6px;
+}
+
+.statusBadge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+}
+
+.statusActive {
+    background: rgba(29, 158, 117, 0.12);
+    color: var(--accent);
+}
+
+.statusInactive {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.managerLine {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.noManagerLine {
+    font-style: italic;
+}
+
+.editBtn {
+    height: 38px;
+    padding: 0 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+    flex-shrink: 0;
+}
+
+.editBtn:hover {
+    background: var(--bg-surface-alt);
+}
+
+/* ── Tabs ── */
+.tabBar {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border-color);
+    overflow-x: auto;
+}
+
+.tabBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.tabBtn:hover {
+    color: var(--text-primary);
+}
+
+.tabBtnActive {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+.tabContent {
+    min-height: 200px;
+}
+
+.qrTabStack {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 420px;
+}
+
+/* ── Attendance sub-tabs (Today / History / Schedule) ── */
+.subTabBar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+    overflow-x: auto;
+    /* Same treatment as the page-level .tabBar above - "Schedule
+       settings" is the longest label of the three, so on a narrow phone
+       this scrolls horizontally instead of wrapping mid-label or forcing
+       the page itself wider than the viewport. */
+}
+
+.subTabBtn {
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.subTabBtn:hover {
+    color: var(--text-primary);
+}
+
+.subTabBtnActive {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+/* ── Branch full-time schedule ── */
+.scheduleWrap {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.scheduleDesc {
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.errorBoxInline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border-radius: 10px;
+    font-size: 12.5px;
+}
+
+.scheduleDayRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-surface);
+    flex-wrap: wrap;
+    /* Was a hard, unwrapped row before - switch + 84px label + two time
+       boxes all fighting for space on one line, with the clock-out box
+       specifically the first thing to get squeezed off-screen on a
+       narrow phone since it's last in source order. Wrapping lets the
+       time fields drop to their own line instead of overflowing. */
+}
+
+.scheduleSwitch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.scheduleSwitch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.scheduleSlider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: var(--border-color);
+    border-radius: 20px;
+    transition: 0.15s;
+}
+
+.scheduleSlider::before {
+    content: "";
+    position: absolute;
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background: #fff;
+    border-radius: 50%;
+    transition: 0.15s;
+}
+
+.scheduleSwitch input:checked+.scheduleSlider {
+    background: var(--accent);
+}
+
+.scheduleSwitch input:checked+.scheduleSlider::before {
+    transform: translateX(16px);
+}
+
+.scheduleDayLabel {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    width: 84px;
+    flex-shrink: 0;
+}
+
+.scheduleTimeFields {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 180px;
+    /* min-width forces this whole group onto its own wrapped line as a
+       unit on narrow screens, rather than letting the two boxes get
+       squeezed down individually below a usable size. */
+}
+
+.scheduleTimeFields input {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 7px;
+    font-size: 12.5px;
+    font-family: inherit;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    box-sizing: border-box;
+    /* iOS Safari otherwise renders <input type="time"> narrower than its
+       box regardless of width/flex - this keeps clock-out from silently
+       shrinking to an unusable sliver on iPhone specifically. */
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.scheduleTimeFields input:disabled {
+    opacity: 0.5;
+    background: var(--bg-surface-alt);
+}
+
+.scheduleTimeSep {
+    color: var(--text-secondary);
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.savingTag {
+    font-size: 11px;
+    color: var(--accent);
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* On very narrow phones, drop the switch+label onto their own line too,
+   so the clock in/out pair always gets the full row width to work with
+   instead of splitting it with the label. */
+@media (max-width: 480px) {
+    .scheduleDayRow {
+        align-items: stretch;
+    }
+
+    .scheduleDayLabel {
+        width: auto;
+    }
+
+    .scheduleTimeFields {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+.tabLoading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 0;
+}
+
+.spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.tabError {
+    padding: 40px 0;
+    text-align: center;
+    font-size: 13px;
+    color: var(--danger-text);
+}
+
+/* ── Overview ── */
+.overviewGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.overviewSection {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sectionTitle {
+    margin: 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.statBlockRow {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.statBlock {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 12px 14px;
+}
+
+.statBlockIcon {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+.colorIndigo {
+    background: rgba(99, 102, 241, 0.12);
+    color: #6366f1;
+}
+
+.colorGreen {
+    background: rgba(29, 158, 117, 0.12);
+    color: var(--accent);
+}
+
+.colorAmber {
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
+}
+
+.colorRed {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.colorGray {
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+}
+
+.statBlockValue {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.statBlockLabel {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+/* ── Employees tab ── */
+.employeesWrap {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.employeeTable {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.employeeRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-surface);
+    width: 100%;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    transition: background 0.15s;
+}
+
+.employeeRow:hover {
+    background: var(--bg-surface-alt);
+}
+
+.employeeRowWrap {
+    display: flex;
+    flex-direction: column;
+}
+
+.employeeRowWrap:has(.historyPanel) .employeeRow {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.employeeChevron {
+    font-size: 15px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+    transition: transform 0.18s ease;
+}
+
+.employeeChevronOpen {
+    transform: rotate(180deg);
+}
+
+/* ── Transfer history panel (inline accordion, not a popup) ── */
+.historyPanel {
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    background: var(--bg-surface-alt);
+    padding: 12px 14px;
+    animation: fadeSlideIn 0.15s ease;
+}
+
+.historyLoading,
+.historyError,
+.historyEmpty {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    padding: 4px 2px;
+}
+
+.historyError {
+    color: var(--danger-text);
+}
+
+.historyList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.historyItem {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.historyIcon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(29, 158, 117, 0.12);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.historyText {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.historyLine {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex-wrap: wrap;
+}
+
+.historyLine i {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.historyMuted {
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-style: italic;
+}
+
+.historyMeta {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+}
+
+.employeeAvatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.employeeInfo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+}
+
+.employeeName {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.employeeMeta {
+    font-size: 12px;
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.employeePosition {
+    font-size: 12px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+/* ── Leave tab ── */
+.leaveRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-surface);
+}
+
+.leaveStatusBadge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.leaveStatusApproved {
+    background: rgba(29, 158, 117, 0.12);
+    color: var(--accent);
+}
+
+.leaveStatusRejected {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+.leaveStatusPending {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+/* ── Payroll tab ── */
+.payrollRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-surface);
+}
+
+.payrollFigures {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.payrollNet {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.payrollDeduction {
+    font-size: 11px;
+    color: var(--danger-text);
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding-top: 4px;
+}
+
+.pageBtn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pageBtn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.pageBtn:hover:not(:disabled) {
+    background: var(--bg-surface-alt);
+}
+
+.pageInfo {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+}
+
+.emptyMini {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 50px 20px;
+    text-align: center;
+    color: var(--text-secondary);
+    border: 1px dashed var(--border-color);
+    border-radius: 12px;
+}
+
+.emptyMini i {
+    font-size: 24px;
+    opacity: 0.6;
+}
+
+.emptyMini p {
+    margin: 0;
+    font-size: 13px;
+}
+
+/* ── Add employee to branch ── */
+.tabToolbar {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.addEmployeeBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 14px;
+    background: var(--accent);
+    border: none;
+    border-radius: 9px;
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+}
+
+.addEmployeeBtn:hover {
+    background: var(--accent-hover);
+}
+
+.addEmployeeWidget {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.addEmployeeSelectWrap {
+    flex: 1;
+    min-width: 220px;
+}
+
+.addEmployeeLoading {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+}
+
+.addEmployeeError {
+    width: 100%;
+    font-size: 12px;
+    color: var(--danger-text);
+}
+
+.addEmployeeCurrentBranch {
+    margin-left: auto;
+    font-size: 10.5px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.optionAvatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 9.5px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.primaryMiniBtn {
+    height: 34px;
+    padding: 0 14px;
+    background: var(--accent);
+    border: none;
+    border-radius: 9px;
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.primaryMiniBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.primaryMiniBtn:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+
+.cancelMiniBtn {
+    height: 34px;
+    padding: 0 12px;
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 9px;
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.cancelMiniBtn:hover:not(:disabled) {
+    background: var(--bg-surface-alt);
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+    .headerRow {
+        flex-direction: column;
+    }
+
+    .editBtn {
+        align-self: stretch;
+        justify-content: center;
+    }
+
+    .statBlockRow {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

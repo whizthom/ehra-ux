@@ -1,0 +1,539 @@
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
+import { useAuth } from "../context/AuthContext";
+import {
+  sendPhoneOtp,
+  confirmPhoneOtp,
+  resetRecaptcha,
+} from "../firebase-lazy";
+import {
+  verifyTwoFactorLogin,
+  verifyEmailTwoFactorLogin,
+  resendEmailTwoFactorCode,
+} from "../api/phoneAuthApi";
+import DevOtpCard from "../components/DevOtpCard";
+import { describeApiError } from "../utils/apiErrors";
+import styles from "./Login.module.css";
+import phoneStyles from "./PhoneAuth.module.css";
+import Logo from "../components/Logo";
+import AboutEhralLink from "../components/nav/AboutEhralLink";
+
+// A believable, static glimpse of what's happening inside a live workspace -
+// the same kind of event this app already surfaces as real notifications.
+// Doubled below so the marquee loops seamlessly.
+const TICKER_ITEMS = [
+  {
+    icon: "ti-fingerprint",
+    text: "Amaka O. clocked in",
+    meta: "Engineering · 9:02 AM",
+  },
+  {
+    icon: "ti-calendar-check",
+    text: "Leave approved for Tunde B.",
+    meta: "Operations · Just now",
+  },
+  { icon: "ti-user-plus", text: "New hire onboarded", meta: "Design · Today" },
+  {
+    icon: "ti-cash-banknote",
+    text: "Payroll run completed",
+    meta: "42 employees · 2h ago",
+  },
+  {
+    icon: "ti-user-check",
+    text: "Profile update approved",
+    meta: "HR · 4h ago",
+  },
+];
+
+function Ticker() {
+  const items = [...TICKER_ITEMS, ...TICKER_ITEMS];
+  return (
+    <div className={styles.ticker} aria-hidden="true">
+      <div className={styles.tickerTrack}>
+        {items.map((item, i) => (
+          <div className={styles.tickerCard} key={i}>
+            <span className={styles.tickerIcon}>
+              <i className={`ti ${item.icon}`} />
+            </span>
+            <span className={styles.tickerBody}>
+              <span className={styles.tickerText}>{item.text}</span>
+              <span className={styles.tickerMeta}>{item.meta}</span>
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function Login() {
+  const { login, refreshSession } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Phone is the login identifier now (same as the create-business flow) -
+  // the backend's dual-identifier support still accepts email underneath,
+  // but the UI only ever collects a phone number here.
+  const [form, setForm] = useState({
+    phone: location.state?.phone || "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState(location.state?.message || "");
+  const [loading, setLoading] = useState(false);
+  const [showPw, setShowPw] = useState(false);
+
+  // 2FA step - null until /auth/login comes back with requiresTwoFactor.
+  // method is "PHONE" or "EMAIL" (see AuthResponseDTO#twoFactorMethod);
+  // maskedEmail is only present for the EMAIL method.
+  const [twoFactor, setTwoFactor] = useState(null); // { pendingToken, method, phoneNumber, maskedEmail }
+  const [otp, setOtp] = useState("");
+  const [confirmationResult, setConfirmationResult] = useState(null);
+  const [resendIn, setResendIn] = useState(0);
+
+  const otpInputRef = useRef(null);
+
+  useEffect(() => {
+    if (twoFactor) otpInputRef.current?.focus();
+  }, [twoFactor]);
+
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const t = setInterval(() => setResendIn((s) => Math.max(0, s - 1)), 1000);
+    return () => clearInterval(t);
+  }, [resendIn]);
+
+  const handleChange = (e) =>
+    setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
+
+  const handlePhoneChange = (value) =>
+    setForm((p) => ({ ...p, phone: value || "" }));
+
+  const routeAfterLogin = (data) => {
+    // Someone else may have sent an invite link while this person was
+    // logged out - InvitationLanding stashes the token here before
+    // bouncing them to /login. Finish that trip now that they're signed
+    // in, instead of dropping them on a generic dashboard.
+    const pendingInvite = sessionStorage.getItem("ehra_pending_invite");
+    if (pendingInvite) {
+      sessionStorage.removeItem("ehra_pending_invite");
+      navigate(`/invite/${pendingInvite}`);
+      return;
+    }
+
+    // An Identity holding more than one membership hasn't picked a
+    // workspace for this session yet - show the switcher instead of
+    // guessing which dashboard to land on.
+    if (data.needsContextSelection) {
+      navigate("/select-workspace");
+      return;
+    }
+
+    if (data.contextType === "CUSTOMER") {
+      navigate("/customer-dashboard");
+      return;
+    }
+    navigate(data.contextType === "EMPLOYEE" ? "/my-dashboard" : "/dashboard");
+  };
+
+  const handleSubmit = async () => {
+    setError("");
+    setNotice("");
+    if (!form.phone || !form.password) {
+      setError("Please enter your phone number and password.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const data = await login(form.phone, form.password);
+
+      if (data.requiresTwoFactor) {
+        if (data.twoFactorMethod === "EMAIL") {
+          // Backend already sent the code (see AuthController#login) -
+          // no client-side send step needed here, unlike the PHONE path.
+          setTwoFactor({
+            pendingToken: data.twoFactorToken,
+            method: "EMAIL",
+            maskedEmail: data.maskedEmail,
+          });
+          setResendIn(30);
+          return;
+        }
+
+        // Kick off the OTP challenge immediately so the person doesn't
+        // have to press an extra "send code" button on top of "sign in".
+        const result = await sendPhoneOtp(data.phoneNumber);
+        setConfirmationResult(result);
+        setTwoFactor({
+          pendingToken: data.twoFactorToken,
+          method: "PHONE",
+          phoneNumber: data.phoneNumber,
+        });
+        setResendIn(30);
+        return;
+      }
+
+      routeAfterLogin(data);
+    } catch (err) {
+      // describeApiError distinguishes offline / timeout / unreachable
+      // server from an actual credentials error, and - for a real
+      // err.response - trusts the backend's specific message (now
+      // "Incorrect password" vs "We couldn't find an account with that
+      // phone number" as of the hideUserNotFoundExceptions change in
+      // SecurityConfig) rather than assuming any response at all means
+      // bad credentials. See apiErrors.js for the full reasoning.
+      const message = describeApiError(
+        err,
+        "Invalid phone number or password. Please try again.",
+      );
+      if (message) setError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (resendIn > 0 || !twoFactor) return;
+    setError("");
+    setLoading(true);
+    try {
+      if (twoFactor.method === "EMAIL") {
+        await resendEmailTwoFactorCode(twoFactor.pendingToken);
+        setOtp("");
+        setResendIn(30);
+        return;
+      }
+      resetRecaptcha();
+      const result = await sendPhoneOtp(twoFactor.phoneNumber);
+      setConfirmationResult(result);
+      setOtp("");
+      setResendIn(30);
+    } catch (err) {
+      setError(
+        twoFactor.method === "EMAIL"
+          ? describeApiError(err, "Couldn't resend the code. Please try again.")
+          : friendlyFirebaseError(err),
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyTwoFactor = async () => {
+    setError("");
+    if (otp.trim().length < 6) {
+      setError("Enter the 6-digit code we sent you.");
+      return;
+    }
+    setLoading(true);
+    try {
+      let data;
+      if (twoFactor.method === "EMAIL") {
+        data = await verifyEmailTwoFactorLogin(
+          twoFactor.pendingToken,
+          otp.trim(),
+        );
+      } else {
+        const idToken = await confirmPhoneOtp(confirmationResult, otp.trim());
+        data = await verifyTwoFactorLogin(twoFactor.pendingToken, idToken);
+      }
+      await refreshSession?.();
+      routeAfterLogin(data);
+    } catch (err) {
+      // Both branches can throw either an axios error (verifyEmailTwoFactorLogin /
+      // verifyTwoFactorLogin) or, on the PHONE path, a Firebase SDK error
+      // (confirmPhoneOtp) - isAxiosError reliably tells them apart
+      // regardless of which method is active, so a dropped connection on
+      // the axios call never gets run through friendlyFirebaseError,
+      // which isn't built to interpret axios error shapes.
+      if (err?.isAxiosError) {
+        setError(
+          describeApiError(
+            err,
+            twoFactor.method === "EMAIL"
+              ? "That code is incorrect or has expired."
+              : "Something went wrong. Please try again.",
+          ),
+        );
+      } else {
+        setError(friendlyFirebaseError(err));
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className={styles.wrap}>
+      {/* ── Left panel - brand + live product moment ── */}
+      <div className={styles.left}>
+        <div className={styles.dotGrid} aria-hidden="true" />
+        <AboutEhralLink tone="dark" />
+
+        <div className={styles.logoRow} style={{ "--text-primary": "#ffffff" }}>
+          <Logo variant="horizontal" size={80} />
+        </div>
+
+        <div className={styles.leftBody}>
+          <span className={styles.eyebrow}>Workforce operating system</span>
+          <h1 className={styles.headline}>
+            Run your whole workforce from one screen.
+          </h1>
+          <p className={styles.desc}>
+            Attendance, leave, payroll and performance - synced in real time,
+            not spreadsheets.
+          </p>
+
+          <div className={styles.tickerBlock}>
+            <span className={styles.tickerCaption}>
+              A normal Tuesday inside Ehra
+            </span>
+            <Ticker />
+          </div>
+        </div>
+
+        <p className={styles.leftFooter}>© 2026 Ehra. All rights reserved.</p>
+      </div>
+
+      {/* ── Right panel - sign in ── */}
+      <div className={styles.right}>
+        <AboutEhralLink tone="light" className={styles.mobileOnlyAboutLink} />
+        <div
+          className={styles.mobileLogoRow}
+          style={{ "--text-primary": "#0b1f1a" }}
+        >
+          <Logo variant="horizontal" size={56} />
+        </div>
+        <div className={styles.card}>
+          {!twoFactor ? (
+            <>
+              <div className={styles.rightHeader}>
+                <h2 className={styles.h1}>
+                  Welcome back
+                  <span className={styles.h1Accent} aria-hidden="true" />
+                </h2>
+                <p className={styles.subtitle}>
+                  Sign in to keep things running.
+                </p>
+              </div>
+
+              {notice && (
+                <div className={styles.errorBox} role="status">
+                  <i className="ti ti-info-circle" />
+                  <span>{notice}</span>
+                </div>
+              )}
+              {error && (
+                <div className={styles.errorBox} role="alert">
+                  <i className="ti ti-alert-circle" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <div className={styles.field}>
+                <label className={styles.label} htmlFor="phone">
+                  Phone number
+                </label>
+                <div className={phoneStyles.phoneInputWrap}>
+                  <PhoneInput
+                    id="phone"
+                    international
+                    defaultCountry="NG"
+                    countryCallingCodeEditable={false}
+                    placeholder="Enter your phone number"
+                    value={form.phone}
+                    onChange={handlePhoneChange}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" &&
+                      document.getElementById("password").focus()
+                    }
+                    className={`${phoneStyles.phoneInput} ${styles.phoneOverride}`}
+                  />
+                </div>
+              </div>
+
+              <div className={styles.field}>
+                <div className={styles.labelRow}>
+                  <label className={styles.label} htmlFor="password">
+                    Password
+                  </label>
+                  <a
+                    className={styles.forgot}
+                    onClick={() => navigate("/forgot-password")}
+                  >
+                    Forgot password?
+                  </a>
+                </div>
+                <div className={styles.inputWrap}>
+                  <i className={`ti ti-lock ${styles.prefix}`} />
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPw ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={form.password}
+                    onChange={handleChange}
+                    onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                    className={styles.input}
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    className={styles.eyeBtn}
+                    onClick={() => setShowPw((v) => !v)}
+                    aria-label={showPw ? "Hide password" : "Show password"}
+                  >
+                    <i className={`ti ${showPw ? "ti-eye-off" : "ti-eye"}`} />
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className={styles.submitBtn}
+                onClick={handleSubmit}
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <span className={styles.spinner} />
+                    <span>Signing in…</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Sign in</span>
+                    <i className="ti ti-arrow-right" />
+                  </>
+                )}
+              </button>
+
+              <p className={styles.registerLink}>
+                New to Ehra?{" "}
+                <a href="/" className={styles.registerLinkAnchor}>
+                  Create your workspace →
+                </a>
+              </p>
+            </>
+          ) : (
+            <>
+              <div className={styles.rightHeader}>
+                <h2 className={styles.h1}>
+                  Two-step verification
+                  <span className={styles.h1Accent} aria-hidden="true" />
+                </h2>
+                <p className={styles.subtitle}>
+                  Enter the code we just sent to confirm it's you.
+                </p>
+              </div>
+
+              {error && (
+                <div className={styles.errorBox} role="alert">
+                  <i className="ti ti-alert-circle" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <div className={phoneStyles.otpHeadline}>
+                <p>
+                  Code sent to{" "}
+                  <strong>
+                    {twoFactor.method === "EMAIL"
+                      ? twoFactor.maskedEmail
+                      : twoFactor.phoneNumber}
+                  </strong>
+                </p>
+                <button
+                  type="button"
+                  className={phoneStyles.changeNumberBtn}
+                  onClick={() => {
+                    setTwoFactor(null);
+                    setOtp("");
+                    setError("");
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+
+              {twoFactor.method !== "EMAIL" && (
+                <DevOtpCard code={confirmationResult?.developmentOtp} />
+              )}
+
+              <div className={styles.field}>
+                <label className={styles.label}>Verification code</label>
+                <div className={styles.inputWrap}>
+                  <i className={`ti ti-shield-check ${styles.prefix}`} />
+                  <input
+                    ref={otpInputRef}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    placeholder="000000"
+                    value={otp}
+                    onChange={(e) =>
+                      setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                    }
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && handleVerifyTwoFactor()
+                    }
+                    className={`${styles.input} ${phoneStyles.otpInput}`}
+                  />
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className={phoneStyles.resendBtn}
+                onClick={handleResendOtp}
+                disabled={resendIn > 0 || loading}
+              >
+                {resendIn > 0 ? `Resend code in ${resendIn}s` : "Resend code"}
+              </button>
+
+              <button
+                type="button"
+                className={styles.submitBtn}
+                onClick={handleVerifyTwoFactor}
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <span className={styles.spinner} />
+                    <span>Verifying…</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Verify & sign in</span>
+                    <i className="ti ti-arrow-right" />
+                  </>
+                )}
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div id="recaptcha-container" />
+    </div>
+  );
+}
+
+function friendlyFirebaseError(err) {
+  const code = err?.code || "";
+  if (code.includes("too-many-requests")) {
+    return "Too many attempts. Please wait a moment before trying again.";
+  }
+  if (
+    code.includes("invalid-verification-code") ||
+    code.includes("code-expired")
+  ) {
+    return "That code is incorrect or has expired. Please try again.";
+  }
+  if (code.includes("network-request-failed")) {
+    return "Network error - please check your connection and try again.";
+  }
+  return err?.message || "Something went wrong. Please try again.";
+}

@@ -1,0 +1,341 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: radial-gradient(120% 120% at 50% 0%, rgba(6, 30, 24, 0.72), rgba(3, 10, 8, 0.92));
+  backdrop-filter: blur(10px);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  overflow: auto;
+}
+
+.stage {
+  width: min(440px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.receipt {
+  position: relative;
+  width: 100%;
+  background: linear-gradient(180deg, #0b1f1a 0%, #0e2b22 42%, #0f3a2c 100%);
+  border-radius: 22px;
+  padding: 30px 26px 22px;
+  color: #eafff4;
+  box-shadow:
+    0 40px 90px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(85, 224, 174, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.glow {
+  position: absolute;
+  top: -120px;
+  right: -100px;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(85, 224, 174, 0.35), transparent 70%);
+  pointer-events: none;
+}
+
+.header {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brandRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.logoWrap {
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  flex: none;
+}
+
+.logoWrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.logoWrap span {
+  font-weight: 900;
+  font-size: 15px;
+  color: #55e0ae;
+  letter-spacing: -0.02em;
+}
+
+.brandText {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.brandText strong {
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brandText small {
+  color: rgba(234, 255, 244, 0.55);
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.paidBadge {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 99px;
+  background: rgba(85, 224, 174, 0.14);
+  border: 1px solid rgba(85, 224, 174, 0.35);
+  color: #7cf2c4;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.paidDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #55e0ae;
+  box-shadow: 0 0 0 3px rgba(85, 224, 174, 0.22);
+}
+
+.ticketDivider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 22px 0 18px;
+}
+
+.ticketDivider span {
+  flex: 1;
+  height: 1px;
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.22) 0 6px, transparent 6px 12px);
+}
+
+.ticketDivider em {
+  font-style: normal;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: rgba(234, 255, 244, 0.5);
+}
+
+.metaGrid {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 10px;
+  margin-bottom: 20px;
+}
+
+.metaGrid small {
+  display: block;
+  color: rgba(234, 255, 244, 0.45);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+
+.metaGrid strong {
+  font-size: 12px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.items {
+  position: relative;
+  border-top: 1px dashed rgba(255, 255, 255, 0.18);
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.18);
+  padding: 14px 0;
+  margin-bottom: 16px;
+}
+
+.itemsHead {
+  display: grid;
+  grid-template-columns: 1fr 54px 90px;
+  gap: 8px;
+  font-size: 9px;
+  color: rgba(234, 255, 244, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding-bottom: 8px;
+}
+
+.itemRow {
+  display: grid;
+  grid-template-columns: 1fr 54px 90px;
+  gap: 8px;
+  padding: 7px 0;
+  font-size: 12px;
+}
+
+.itemName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 6px;
+}
+
+.itemQty {
+  color: rgba(234, 255, 244, 0.6);
+}
+
+.itemAmount {
+  text-align: right;
+  font-weight: 700;
+}
+
+.totals {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.totals > div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.rowMuted {
+  color: rgba(234, 255, 244, 0.55);
+  font-size: 11px !important;
+}
+
+.totalRow {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  font-size: 16px !important;
+  font-weight: 900;
+}
+
+.totalRow span:last-child {
+  background: linear-gradient(90deg, #55e0ae, #a5ffdd);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.footer {
+  position: relative;
+  text-align: center;
+}
+
+.footer p {
+  margin: 0 0 6px;
+  font-size: 10px;
+  line-height: 1.6;
+  color: rgba(234, 255, 244, 0.5);
+}
+
+.footer small {
+  color: rgba(234, 255, 244, 0.35);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+}
+
+.stub {
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  bottom: -1px;
+  height: 12px;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px;
+}
+
+.stub i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(4, 12, 10, 0.9), rgba(4, 12, 10, 0.9)) center/cover;
+  background-color: #050f0c;
+  box-shadow: 0 0 0 9999px transparent;
+  transform: translateY(6px);
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.actions button {
+  flex: 1;
+  height: 46px;
+  border-radius: 13px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+}
+
+.ghost {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.06);
+  color: #eafff4;
+}
+
+.solid {
+  border: 0;
+  background: linear-gradient(90deg, #0f6e56, #06cf9c);
+  color: #04140f;
+  box-shadow: 0 14px 30px rgba(6, 207, 156, 0.28);
+}
+
+@media print {
+  .overlay {
+    position: static;
+    background: none;
+    backdrop-filter: none;
+    padding: 0;
+  }
+  .actions {
+    display: none;
+  }
+  .stage {
+    width: 100%;
+  }
+}

@@ -1,0 +1,458 @@
+/* ── Page ── */
+.page {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* ── Left panel ── */
+.left {
+    position: relative;
+    width: 45%;
+    background: #0b1f1a;
+    background-image: radial-gradient(circle at 12% 8%, rgba(85, 224, 174, 0.16), transparent 42%),
+        radial-gradient(circle at 92% 88%, rgba(198, 161, 91, 0.14), transparent 45%);
+    background-size: 160% 160%;
+    animation: ehraBgDrift 22s ease-in-out infinite;
+    padding: 48px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+}
+
+@keyframes ehraBgDrift {
+
+    0%,
+    100% {
+        background-position: 0% 0%;
+    }
+
+    50% {
+        background-position: 30% 22%;
+    }
+}
+
+@keyframes ehraDotDrift {
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: 180px 180px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .left {
+        animation: none;
+    }
+}
+
+.logoRow {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logoIcon {
+    width: 34px;
+    height: 34px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 0.5px solid rgba(255, 255, 255, 0.14);
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+}
+
+.logoText {
+    color: #fff;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+.leftBody {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+    padding: 32px 0;
+}
+
+.tagline {
+    color: #55e0ae;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+}
+
+.headline {
+    font-family: "Fraunces", Georgia, serif;
+    font-optical-sizing: auto;
+    font-weight: 550;
+    color: #fff;
+    font-size: 30px;
+    line-height: 1.28;
+    letter-spacing: -0.2px;
+}
+
+.desc {
+    color: #b8ccc5;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-top: 4px;
+}
+
+.pills {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 0.5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 9px;
+    padding: 10px 14px;
+    color: #eef6f2;
+    font-size: 13px;
+}
+
+.leftFooter {
+    position: relative;
+    z-index: 1;
+    color: #6f8b81;
+    font-size: 12px;
+}
+
+/* ── Mobile logo row - hidden on desktop; on mobile this sits directly on
+   the page's white canvas with no background box, left-aligned, exactly
+   like Login.jsx's mobile logo treatment. ── */
+.mobileLogoRow {
+    display: none;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 22px;
+}
+
+/* ── Right panel ── */
+.right {
+    flex: 1;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 48px 52px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+/* ── Shared state container ── */
+.state {
+    width: 100%;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+}
+
+.stateTitle {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-size: 22px;
+    color: #0b1f1a;
+    margin-bottom: 9px;
+    display: inline-flex;
+    flex-direction: column;
+}
+
+.stateTitleAccent {
+    width: 34px;
+    height: 3px;
+    margin-top: 9px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #c6a15b, #55e0ae, #c6a15b);
+    background-size: 200% 100%;
+    animation: shimmer 3.5s linear infinite;
+}
+
+@keyframes shimmer {
+    to {
+        background-position: -200% 0;
+    }
+}
+
+.stateSub {
+    font-size: 13.5px;
+    color: #66766f;
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+/* ── Loading spinner ── */
+.spinnerWrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.spinner {
+    display: block;
+    width: 22px;
+    height: 22px;
+    border: 2px solid #e2e8f0;
+    border-top-color: #0f6e56;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Icon states ── */
+.iconWrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    font-size: 22px;
+}
+
+.iconDanger {
+    background: #fcebeb;
+}
+
+.iconSuccess {
+    background: #e1f5ee;
+}
+
+/* ── Org card ── */
+.orgCard {
+    width: 100%;
+    background: #f3f8f6;
+    border: 0.5px solid #e1e8e5;
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 20px 0 24px;
+    text-align: left;
+}
+
+.orgAvatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: #0f6e56;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    flex-shrink: 0;
+    letter-spacing: -0.5px;
+}
+
+.orgName {
+    font-size: 15px;
+    font-weight: 600;
+    color: #0b1f1a;
+}
+
+.orgLabel {
+    font-size: 12px;
+    color: #8a9791;
+    margin-top: 2px;
+}
+
+/* ── Notice ── */
+.notice {
+    width: 100%;
+    background: #eaf6f1;
+    border: 0.5px solid #bfe4d5;
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 24px;
+    text-align: left;
+}
+
+.notice span {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.notice p {
+    font-size: 13px;
+    color: #085041;
+    line-height: 1.55;
+}
+
+/* ── Accept button ── */
+.acceptBtn {
+    width: 100%;
+    height: 44px;
+    background: #0f6e56;
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: inherit;
+    box-shadow: 0 14px 28px -14px rgba(15, 110, 86, 0.5);
+    transition: background 0.15s, box-shadow 0.15s;
+}
+
+.acceptBtn:hover {
+    background: #085041;
+    box-shadow: 0 16px 32px -12px rgba(15, 110, 86, 0.55);
+}
+
+/* ── Divider between primary and secondary actions ── */
+.orDivider {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 16px 0;
+    color: #9fada6;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.orDivider::before,
+.orDivider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #e1e8e5;
+}
+
+/* ── "Already have an account?" - a real secondary action, not an
+   afterthought: same size/shape as the primary button so it's impossible
+   to miss, an outlined (not filled) treatment keeps it clearly secondary. ── */
+.secondaryBtn {
+    width: 100%;
+    height: 44px;
+    background: #fff;
+    border: 1.5px solid #0f6e56;
+    border-radius: 10px;
+    color: #0f6e56;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: inherit;
+    transition: background 0.15s, box-shadow 0.15s;
+}
+
+.secondaryBtn:hover {
+    background: #eaf6f1;
+    box-shadow: 0 10px 22px -14px rgba(15, 110, 86, 0.4);
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────
+   Mobile gets a fixed viewport shell (height locked to the device's real
+   visible area via 100dvh) with the scroll living inside .right only -
+   the page itself never scrolls, in either direction. The logo sits
+   directly on the white canvas, transparent and left-aligned, matching
+   Login.jsx's mobile treatment exactly. ─────────────────────────────── */
+@media (max-width: 768px) {
+    .page {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        height: 100dvh;
+        width: 100vw;
+        overflow: hidden;
+    }
+
+    .left {
+        display: none;
+    }
+
+    .right {
+        flex: 1;
+        min-height: 0;
+        width: 100%;
+        padding: 20px 20px 18px;
+        align-items: flex-start;
+        justify-content: flex-start;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .mobileLogoRow {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+        gap: 9px;
+        flex-shrink: 0;
+        width: 100%;
+        margin: 0 0 20px;
+        background: transparent;
+    }
+
+    .state {
+        max-width: 420px;
+        width: 100%;
+        margin: auto 0;
+    }
+}
+
+@media (max-width: 420px) {
+    .mobileLogoRow {
+        margin: 0 0 16px;
+    }
+
+    .right {
+        padding: 16px 16px 16px;
+    }
+}

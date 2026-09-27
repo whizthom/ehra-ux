@@ -1,0 +1,92 @@
+.fieldRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.fieldMeta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.fieldLabel {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.fieldHint {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+}
+
+.positionEditRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.positionInput {
+    height: 32px;
+    padding: 0 10px;
+    border: 0.5px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-family: inherit;
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    outline: none;
+    min-width: 180px;
+}
+
+.positionInput:focus {
+    border-color: var(--accent);
+}
+
+.positionInput:disabled {
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+}
+
+.iconBtn {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 0.5px solid var(--border-color);
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.iconBtn:hover:not(:disabled) {
+    background: var(--bg-surface-alt);
+}
+
+.iconBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.saveBtn {
+    composes: iconBtn;
+    color: var(--accent);
+    border-color: var(--bg-soft-accent);
+}
+
+.savedTag {
+    font-size: 11px;
+    color: var(--accent);
+}
+
+.currentValue {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+}

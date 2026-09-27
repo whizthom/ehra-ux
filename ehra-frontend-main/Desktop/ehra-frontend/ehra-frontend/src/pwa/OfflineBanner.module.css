@@ -1,0 +1,35 @@
+.banner {
+    position: fixed;
+    top: env(safe-area-inset-top, 0px);
+    left: 0;
+    right: 0;
+    z-index: 1200;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    padding: 8px 16px;
+    background: var(--warning);
+    color: #4a2e05;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-align: center;
+
+    animation: dropIn 0.18s ease;
+}
+
+.banner i {
+    font-size: 15px;
+}
+
+@keyframes dropIn {
+    from {
+        transform: translateY(-100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}

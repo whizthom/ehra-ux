@@ -1,0 +1,607 @@
+/* =========================================================================
+   Business card - shared by Discover, "Your businesses" and the home strip.
+   -------------------------------------------------------------------------
+   Premium-card pass: three accessories carry the whole upgrade, nothing
+   else. (1) The textured brand-gradient strip up top, with a logo that
+   floats half over its lower edge, real shadow underneath - not flat.
+   (2) A gilt foil trim across the card's very top edge - not just
+   decoration, its brightness is tied to whether the customer is actually
+   connected, so it's a structural signal wearing a nice coat. (3) The
+   business name set in Fraunces (the app's own premium display face,
+   already used on Login/Register/About) instead of Inter, so the one
+   thing every card exists to say - whose business this is - gets the
+   one deliberately different typographic voice on the card.
+   Everything else - numbers, facts, dividers, the quiet secondary
+   button - stays exactly as disciplined and monochrome (--bc-ink) as
+   before, so a feed of these doesn't compete with itself. Dividers fade
+   at their edges rather than hard-stopping, and the card carries real
+   resting weight (a warm-tinted shadow, not flat grey) rather than
+   picking up presence only on hover.
+
+   Opts into Inter (already loaded app-wide for CustomerBusinessView, the
+   page "View business" actually opens) for everything but the name, so
+   the card and the page it leads to still feel like one typographic
+   system - Fraunces is the exception that marks the one important word.
+========================================================================= */
+
+.card {
+    --bc-ink: var(--text-primary);
+    --bc-muted: color-mix(in srgb, var(--text-primary) 62%, transparent);
+    --bc-faint: color-mix(in srgb, var(--text-primary) 42%, transparent);
+    --bc-line: color-mix(in srgb, var(--text-primary) 14%, transparent);
+
+    /* The one new accessory this pass adds: a brass/foil trio, used only
+       for the hairline trim across the card's top edge below. Everything
+       else stays exactly as disciplined as it already was - one accent,
+       not a new palette. Fixed rather than theme-swapped (like the strip's
+       own --cust-grad tokens already are) because foil reads as the
+       card's material, not as UI chrome that should recolour with the
+       theme. */
+    --bc-foil-1: #b8853a;
+    --bc-foil-2: #f0d48f;
+    --bc-foil-3: #9c6f2e;
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    height: 100%;
+    overflow: hidden;
+    /* A real card has a cut edge, not a hover-only shadow - a crisp
+       hairline border plus a resting shadow with actual presence, like
+       cardstock sitting on a table rather than a flat web tile. */
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    background: var(--bg-surface);
+    color: var(--bc-ink);
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    /* A faint warm cast (mixed from the foil, not flat grey) so the card
+       reads as sitting on something rather than just clipped from the
+       page background. */
+    box-shadow:
+        0 2px 10px -4px color-mix(in srgb, var(--shadow-color) 60%, transparent),
+        0 14px 28px -20px color-mix(in srgb, var(--bc-foil-1) 35%, var(--shadow-color));
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+/* ── Foil trim ─────────────────────────────────────────────────────────── */
+/* A gilt-edge line across the card's top, the way a presentation card or
+   a certificate carries a trim rather than a flat cut edge. It isn't pure
+   decoration: its strength is tied to whether the customer is actually
+   connected - bright for a business they hold, dimmed for one they don't
+   - so the one gold accent on the card also tells you something, the
+   same way the fading hairlines further down encode a boundary rather
+   than just drawing one. */
+.card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    z-index: 2;
+    background: linear-gradient(90deg, var(--bc-foil-1), var(--bc-foil-2) 50%, var(--bc-foil-3));
+    opacity: 0.45;
+    transition: opacity 0.22s ease;
+}
+
+.linked::before {
+    height: 4px;
+    opacity: 1;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--bc-ink) 22%, var(--border-color));
+    box-shadow: 0 22px 38px -18px var(--shadow-color);
+}
+
+.card:hover::before {
+    opacity: 0.7;
+}
+
+.linked:hover::before {
+    opacity: 1;
+}
+
+/* Connected cards carry the brand glow on the edge itself, not a duller
+   gray line - the same colour that lights up the badge and the button,
+   so a glance down a feed tells you which ones are already yours. */
+.linked {
+    border-color: color-mix(in srgb, var(--cust-glow) 45%, var(--border-color));
+    box-shadow:
+        0 2px 10px -4px color-mix(in srgb, var(--shadow-color) 60%, transparent),
+        0 0 0 1px color-mix(in srgb, var(--cust-glow) 35%, transparent) inset;
+}
+
+.linked:hover {
+    border-color: color-mix(in srgb, var(--cust-glow) 60%, var(--border-color));
+    box-shadow:
+        0 22px 38px -18px var(--shadow-color),
+        0 0 0 1px color-mix(in srgb, var(--cust-glow) 45%, transparent) inset;
+}
+
+/* ── Strip ─────────────────────────────────────────────────────────────── */
+/* The one place the card is unapologetically green - a textured gradient,
+   not a flat wash, so it reads as material rather than a colour swatch. */
+
+.strip {
+    position: relative;
+    flex: 0 0 auto;
+    height: 68px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 12px 14px 0 0;
+    background:
+        radial-gradient(circle at 18% 130%, color-mix(in srgb, var(--cust-glow) 40%, transparent), transparent 60%),
+        repeating-radial-gradient(circle at 94% -40%, transparent 0 24px, rgba(255, 255, 255, 0.07) 24px 25px),
+        linear-gradient(125deg, var(--cust-grad-1) 0%, var(--cust-grad-2) 55%, var(--cust-grad-3) 100%);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.badge i {
+    font-size: 11px;
+}
+
+/* ── Body ──────────────────────────────────────────────────────────────── */
+
+.body {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0 20px;
+}
+
+.identity {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.logo {
+    position: relative;
+    flex: 0 0 auto;
+    width: 56px;
+    height: 56px;
+    margin-top: -30px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 16px;
+    border: 3px solid var(--bg-surface);
+    background: color-mix(in srgb, var(--bc-ink) 6%, var(--bg-surface));
+    color: var(--bc-ink);
+    font-size: 16px;
+    font-weight: 700;
+    box-shadow: 0 10px 18px -10px color-mix(in srgb, var(--shadow-color) 70%, transparent);
+}
+
+.logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.identityText {
+    min-width: 0;
+    flex: 1 1 auto;
+    padding-bottom: 2px;
+}
+
+.name {
+    margin: 0;
+    /* The app's own premium display face (loaded app-wide, index.html) -
+       used on Login/Register/About for exactly this "this is the
+       considered, high-end version of the app" register. Everywhere else
+       on the card stays Inter, so the name alone carries the personality
+       rather than the whole card shouting at once. */
+    font-family: "Fraunces", Georgia, "Times New Roman", serif;
+    font-optical-sizing: auto;
+    font-size: 19px;
+    font-weight: 550;
+    line-height: 1.28;
+    letter-spacing: -0.006em;
+    color: var(--bc-ink);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+}
+
+.subtitle {
+    margin: 3px 0 0;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--bc-muted);
+    overflow-wrap: anywhere;
+}
+
+.about {
+    margin: 14px 0 0;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--bc-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ── Fading dividers ───────────────────────────────────────────────────── */
+/* A hairline that dissolves at both margins instead of hard-stopping at
+   the card edge - reads considered rather than a default <hr>. */
+
+.stats,
+.facts {
+    position: relative;
+}
+
+.stats::before,
+.facts::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--bc-line) 15%, var(--bc-line) 85%, transparent);
+}
+
+/* ── Stats ─────────────────────────────────────────────────────────────── */
+/* A ledger line, not a filled box - value first, label underneath. */
+
+.stats {
+    margin: 18px 0 0;
+    padding-top: 16px;
+    display: flex;
+    gap: 28px;
+}
+
+.stats>div {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.stats dd {
+    margin: 0;
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+    color: var(--bc-ink);
+    overflow-wrap: anywhere;
+}
+
+.stats dt {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--bc-faint);
+}
+
+/* ── Facts ─────────────────────────────────────────────────────────────── */
+/* Plain detail lines, not chips - the fading hairline above does the
+   separating. */
+
+.facts {
+    list-style: none;
+    margin: 16px 0 0;
+    padding: 14px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.facts li {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    color: var(--bc-muted);
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.facts li i {
+    flex: 0 0 auto;
+    width: 15px;
+    text-align: center;
+    font-size: 14.5px;
+    color: var(--bc-faint);
+}
+
+.facts li span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.facts .factAccent {
+    color: var(--bc-ink);
+    font-weight: 700;
+}
+
+.facts .factAccent i {
+    color: var(--bc-ink);
+}
+
+/* ── Actions ───────────────────────────────────────────────────────────── */
+/* One branded button, one quiet text link - not two identical pills. */
+
+.actions {
+    position: relative;
+    margin-top: 18px;
+    padding: 16px 20px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.actions::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--bc-line) 15%, var(--bc-line) 85%, transparent);
+}
+
+.actions button {
+    flex: 0 0 auto;
+    min-height: 42px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 16px;
+    border-radius: 11px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: opacity 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.actions button i {
+    font-size: 16px;
+}
+
+.actions button:active:not(:disabled) {
+    opacity: 0.75;
+}
+
+.actions button:disabled {
+    opacity: 0.5;
+    cursor: progress;
+}
+
+.primary {
+    border: 1px solid transparent;
+    border-radius: 999px;
+    color: #fff;
+    background: linear-gradient(125deg, var(--cust-grad-1) 0%, var(--cust-grad-2) 55%, var(--cust-grad-3) 100%);
+    /* A thin inner highlight along the top, the way a struck medallion or
+       pressed-metal button catches light along one edge - the difference
+       between a flat gradient fill and something with actual relief. */
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.22),
+        0 10px 20px -10px color-mix(in srgb, var(--cust-glow) 55%, transparent);
+    transition: box-shadow 0.15s ease, transform 0.15s ease, filter 0.15s ease;
+}
+
+.primary:hover:not(:disabled) {
+    filter: brightness(1.07);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 14px 26px -10px color-mix(in srgb, var(--cust-glow) 70%, transparent);
+    transform: translateY(-1px);
+}
+
+/* Secondary actions are real bordered buttons, not naked text - "View
+   business" is core navigation on the Discover tab, not a throwaway
+   link, and needs to be found at a glance as reliably as the filled one. */
+.soft,
+.outline {
+    border: 1.5px solid color-mix(in srgb, var(--bc-ink) 20%, transparent);
+    background: transparent;
+    color: var(--bc-ink);
+}
+
+.soft:hover:not(:disabled),
+.outline:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--bc-ink) 6%, transparent);
+    border-color: color-mix(in srgb, var(--bc-ink) 38%, transparent);
+}
+
+/* Outline (e.g. "Disconnect") gets a slightly stronger edge - it's still
+   the card's first/primary-slot action, just deliberately calmer than a
+   gradient fill for a rarer, semi-destructive toggle. */
+.outline {
+    border-color: color-mix(in srgb, var(--bc-ink) 32%, transparent);
+}
+
+.outline:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--bc-ink) 48%, transparent);
+}
+
+.actions button:focus-visible {
+    outline: 2px solid var(--bc-ink);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+.spinner {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    animation: bcSpin 0.7s linear infinite;
+}
+
+@keyframes bcSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .card,
+    .card::before,
+    .actions button {
+        transition: none;
+    }
+
+    .card:hover,
+    .primary:hover:not(:disabled) {
+        transform: none;
+    }
+
+    .spinner {
+        animation-duration: 1.6s;
+    }
+}
+
+/* ========================================================================
+   Responsive hardening
+   ======================================================================== */
+
+.card,
+.body,
+.identity,
+.actions,
+.stats,
+.stats>div {
+    box-sizing: border-box;
+}
+
+.card {
+    width: 100%;
+    min-height: 0;
+}
+
+.body,
+.identity,
+.identityText,
+.actions {
+    min-width: 0;
+}
+
+.name,
+.subtitle,
+.about,
+.stats dt,
+.stats dd,
+.facts li,
+.actions button {
+    min-width: 0;
+}
+
+@media (max-width: 640px) {
+    .card {
+        border-radius: 20px;
+    }
+
+    .strip {
+        height: 56px;
+        padding: 10px 12px 0 0;
+    }
+
+    .body {
+        padding: 0 16px;
+    }
+
+    .logo {
+        width: 48px;
+        height: 48px;
+        margin-top: -24px;
+        border-radius: 14px;
+        border-width: 2.5px;
+    }
+
+    .name {
+        font-size: 16.5px;
+    }
+
+    .subtitle {
+        font-size: 11.5px;
+    }
+
+    .about {
+        margin-top: 12px;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .stats {
+        margin-top: 15px;
+        padding-top: 13px;
+        gap: 22px;
+    }
+
+    .stats dd {
+        font-size: 18px;
+    }
+
+    .stats dt {
+        font-size: 10px;
+    }
+
+    .facts {
+        margin-top: 13px;
+        padding-top: 12px;
+        gap: 6px;
+    }
+
+    .facts li {
+        font-size: 12px;
+    }
+
+    .actions {
+        margin-top: 15px;
+        padding: 13px 16px 17px;
+    }
+
+    .actions button {
+        min-height: 38px;
+        font-size: 12.5px;
+    }
+
+    .primary {
+        padding: 0 15px;
+    }
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .card:hover {
+        transform: none;
+    }
+
+    .primary:hover:not(:disabled) {
+        transform: none;
+        filter: none;
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.22),
+            0 10px 20px -10px color-mix(in srgb, var(--cust-glow) 55%, transparent);
+    }
+}

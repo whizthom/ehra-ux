@@ -1,0 +1,713 @@
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
+import "react-phone-number-input/style.css";
+import {
+  sendPhoneOtp,
+  confirmPhoneOtp,
+  resetRecaptcha,
+} from "../firebase-lazy";
+import { checkPhone, registerWithPhone } from "../api/phoneAuthApi";
+import DevOtpCard from "../components/DevOtpCard";
+import styles from "./Register.module.css";
+import phoneStyles from "./PhoneAuth.module.css";
+import Logo from "../components/Logo";
+import AboutEhralLink from "../components/nav/AboutEhralLink";
+
+// Draft is kept in sessionStorage (not localStorage) so it survives a trip
+// between steps or an accidental refresh, but doesn't linger forever on a
+// shared machine - it's cleared the moment registration fully completes.
+const DRAFT_KEY = "ehra_signup_phone_draft";
+
+function loadDraft() {
+  try {
+    const raw = sessionStorage.getItem(DRAFT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveDraft(partial) {
+  try {
+    sessionStorage.setItem(DRAFT_KEY, JSON.stringify(partial));
+  } catch {
+    // sessionStorage unavailable (private mode etc.) - fail silently.
+  }
+}
+
+function clearDraft() {
+  try {
+    sessionStorage.removeItem(DRAFT_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+const RESEND_COOLDOWN_SECONDS = 30;
+
+export default function Register() {
+  const navigate = useNavigate();
+
+  // step: "phone" -> "otp" -> "business" -> "personal"
+  const [step, setStep] = useState("phone");
+  const [phone, setPhone] = useState(() => loadDraft()?.phone || "");
+  const [otp, setOtp] = useState("");
+  const [confirmationResult, setConfirmationResult] = useState(null);
+  const [idToken, setIdToken] = useState("");
+
+  const [businessName, setBusinessName] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+
+  // ── STEP 4: Personal Information ────────────────────────────────────────
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [resendIn, setResendIn] = useState(0);
+
+  const otpInputRef = useRef(null);
+
+  useEffect(() => {
+    if (step === "otp") otpInputRef.current?.focus();
+  }, [step]);
+
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const t = setInterval(() => setResendIn((s) => Math.max(0, s - 1)), 1000);
+    return () => clearInterval(t);
+  }, [resendIn]);
+
+  // ── STEP 1 -> 2: send the OTP ──────────────────────────────────────────
+  const handleSendOtp = async () => {
+    setError("");
+    if (!phone || !isValidPhoneNumber(phone)) {
+      setError("Enter a valid phone number, including country code.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await sendPhoneOtp(phone);
+      setConfirmationResult(result);
+      saveDraft({ phone });
+      setStep("otp");
+      setResendIn(RESEND_COOLDOWN_SECONDS);
+    } catch (err) {
+      resetRecaptcha();
+      setError(friendlyFirebaseError(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (resendIn > 0) return;
+    setError("");
+    setLoading(true);
+    try {
+      resetRecaptcha();
+      const result = await sendPhoneOtp(phone);
+      setConfirmationResult(result);
+      setOtp("");
+      setResendIn(RESEND_COOLDOWN_SECONDS);
+    } catch (err) {
+      setError(friendlyFirebaseError(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── STEP 2 -> 3: verify the OTP, then check if this phone already has
+  //    an account (STEP 6-7 of the spec) ─────────────────────────────────
+  const handleVerifyOtp = async () => {
+    setError("");
+    if (otp.trim().length < 6) {
+      setError("Enter the 6-digit code we sent you.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const token = await confirmPhoneOtp(confirmationResult, otp.trim());
+      setIdToken(token);
+
+      const check = await checkPhone(token);
+      if (check.exists) {
+        // STEP 7: never continue into registration for a phone that
+        // already has an account - send them to log in instead.
+        clearDraft();
+        navigate("/login", {
+          state: {
+            message:
+              "This phone number already has an Ehra account. Please log in.",
+            phone,
+          },
+        });
+        return;
+      }
+
+      setStep("business");
+    } catch (err) {
+      setError(friendlyFirebaseError(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── STEP 3: business name + password - just advances to Personal Info,
+  //    nothing is submitted to the backend yet (that happens together, in
+  //    one call, once Personal Information is complete too - see
+  //    PhoneRegisterRequestDTO). ─────────────────────────────────────────
+  const handleContinueToPersonal = () => {
+    setError("");
+    if (!businessName.trim()) {
+      setError("Business name is required.");
+      return;
+    }
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    setStep("personal");
+  };
+
+  // ── STEP 4: first name, last name, email - creates the account ─────────
+  const handleCreateAccount = async () => {
+    setError("");
+    if (!termsAccepted) {
+      setError("Please agree to the Terms of Service and Privacy Policy before creating your account.");
+      return;
+    }
+    if (!firstName.trim() || !lastName.trim()) {
+      setError("First and last name are required.");
+      return;
+    }
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email.trim())) {
+      setError("Enter a valid email address.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const data = await registerWithPhone(idToken, {
+        businessName: businessName.trim(),
+        password,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim().toLowerCase(),
+      });
+      clearDraft();
+      // STEP 9-10: auto-logged in - redirect exactly as a normal login
+      // would, straight into the dashboard (never a needsContextSelection
+      // case for a brand-new business, but handled the same way for
+      // consistency with every other entry point).
+      navigate(
+        data.needsContextSelection ? "/select-workspace" : "/dashboard",
+        {
+          // Lets the Dashboard show a one-time, dismissible Welcome card
+          // ("We've sent a verification email to ...") right after
+          // registration without an extra round trip - see Dashboard's
+          // WelcomeCard. Purely a UI hint; the source of truth for
+          // verification status is always GET /api/auth/email/status.
+          state: {
+            justRegistered: true,
+            firstName: firstName.trim(),
+            email: email.trim(),
+          },
+        },
+      );
+    } catch (err) {
+      const data = err.response?.data;
+      if (err.response?.status === 409) {
+        // STEP 7 defense in depth - the /register call itself re-checks
+        // both phone AND (now) email uniqueness.
+        navigate("/login", {
+          state: { message: data?.message, phone },
+        });
+        return;
+      }
+      if (data?.errors) {
+        setError(Object.values(data.errors)[0]);
+      } else {
+        setError(data?.message || "Something went wrong. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const stepIndex = { phone: 1, otp: 1, business: 2, personal: 3 }[step];
+  const progressPct = { phone: 12, otp: 35, business: 62, personal: 90 }[step];
+
+  return (
+    <div className={styles.page}>
+      {/* ── Left ── */}
+      <div className={styles.left}>
+        <div className={styles.dotGrid} aria-hidden="true" />
+        <AboutEhralLink tone="dark" />
+
+        <div className={styles.logoRow} style={{ "--text-primary": "#ffffff" }}>
+          <Logo variant="horizontal" size={80} />
+        </div>
+
+        <div className={styles.leftBody}>
+          <span className={styles.eyebrow}>Get started</span>
+          <h1 className={styles.headline}>Set up your workspace in minutes</h1>
+          <p className={styles.desc}>
+            Your phone number is your Ehra identity - verify it once, and you're
+            in.
+          </p>
+
+          <div className={styles.steps}>
+            <div className={styles.step}>
+              <div className={styles.stepLine} />
+              <div
+                className={`${styles.stepDot} ${stepIndex >= 1 ? styles.dotActive : styles.dotPending}`}
+              >
+                {step === "business" ? <i className="ti ti-check" /> : 1}
+              </div>
+              <div className={styles.stepBody}>
+                <p className={styles.stepLabel}>Verify your phone number</p>
+                <p className={styles.stepSub}>We'll text you a one-time code</p>
+              </div>
+            </div>
+            <div className={styles.step}>
+              <div
+                className={`${styles.stepDot} ${stepIndex >= 2 ? styles.dotActive : styles.dotPending}`}
+              >
+                {stepIndex > 2 ? <i className="ti ti-check" /> : 2}
+              </div>
+              <div className={styles.stepBody}>
+                <p className={styles.stepLabel}>Name your business</p>
+                <p className={styles.stepSub}>Business name & password</p>
+              </div>
+            </div>
+            <div className={styles.step}>
+              <div
+                className={`${styles.stepDot} ${stepIndex >= 3 ? styles.dotActive : styles.dotPending}`}
+              >
+                3
+              </div>
+              <div className={styles.stepBody}>
+                <p className={styles.stepLabel}>Tell us about you</p>
+                <p className={styles.stepSub}>Name & email address</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p className={styles.leftFooter}>© 2026 Ehral. All rights reserved.</p>
+      </div>
+
+      {/* ── Right ── */}
+      <div className={styles.right}>
+        <AboutEhralLink tone="light" className={styles.mobileOnlyAboutLink} />
+        <div className={styles.mobileHero}>
+          <div className={styles.mobileDotGrid} aria-hidden="true" />
+          <div
+            className={styles.mobileLogoRow}
+            style={{ "--text-primary": "#0b1f1a" }}
+          >
+            <Logo variant="horizontal" size={56} />
+          </div>
+          <p className={styles.mobileEyebrow}>Get started</p>
+          <h1 className={styles.mobileHeadline}>Set up your workspace</h1>
+        </div>
+
+        <div className={styles.rightHeader}>
+          <div className={styles.progressBar}>
+            <div
+              className={styles.progressFill}
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+          <div className={styles.headerRow}>
+            <span className={styles.stepTitle}>
+              {step === "phone" && "Verify your phone number"}
+              {step === "otp" && "Enter the verification code"}
+              {step === "business" && "Name your business"}
+              {step === "personal" && "Tell us about you"}
+            </span>
+            <span className={styles.stepCount}>Step {stepIndex} of 3</span>
+          </div>
+        </div>
+
+        <div className={styles.formBody}>
+          {error && (
+            <div className={styles.errorBox} role="alert">
+              <i className="ti ti-alert-circle" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* ══ STEP 1: PHONE ══ */}
+          {step === "phone" && (
+            <>
+              <div className={styles.field}>
+                <label>Phone number</label>
+                <div className={phoneStyles.phoneInputWrap}>
+                  <PhoneInput
+                    international
+                    defaultCountry="NG"
+                    countryCallingCodeEditable={false}
+                    placeholder="Enter your phone number"
+                    value={phone}
+                    onChange={setPhone}
+                    onKeyDown={(e) => e.key === "Enter" && handleSendOtp()}
+                    className={phoneStyles.phoneInput}
+                  />
+                </div>
+                <span className={phoneStyles.hint}>
+                  This becomes your permanent Ehral login identity.
+                </span>
+              </div>
+
+              <div className={styles.infoBox}>
+                <i className="ti ti-shield-lock" />
+                <p>
+                  We'll send a one-time code via SMS to verify this number.
+                  Standard messaging rates may apply.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className={styles.submitBtn}
+                onClick={handleSendOtp}
+                disabled={loading}
+              >
+                {loading ? "Sending code…" : "Send verification code"}
+                {!loading && <i className="ti ti-arrow-right" />}
+              </button>
+              {/* Moved up from the page footer - users were missing the
+                  sign-in link buried at the very bottom of the page.
+                  Only shown on this first step: by the time someone's
+                  verified their phone (step 2+), handleVerifyOtp has
+                  already redirected any existing account straight to
+                  /login, so nobody past this point actually needs it. */}
+              <a
+                className={styles.signinPrompt}
+                onClick={() => navigate("/login")}
+              >
+                <span className={styles.signinPromptIcon}>
+                  <i className="ti ti-login-2" />
+                </span>
+                <span className={styles.signinPromptText}>
+                  Already have an account? <strong>Sign in instead</strong>
+                </span>
+                <i
+                  className={`ti ti-arrow-right ${styles.signinPromptArrow}`}
+                />
+              </a>
+            </>
+          )}
+
+          {/* ══ STEP 2: OTP ══ */}
+          {step === "otp" && (
+            <>
+              <div className={phoneStyles.otpHeadline}>
+                <p>
+                  We sent a 6-digit code to <strong>{phone}</strong>
+                </p>
+                <button
+                  type="button"
+                  className={phoneStyles.changeNumberBtn}
+                  onClick={() => {
+                    setStep("phone");
+                    setOtp("");
+                    setError("");
+                  }}
+                >
+                  Change number
+                </button>
+              </div>
+
+              <DevOtpCard code={confirmationResult?.developmentOtp} />
+
+              <div className={styles.field}>
+                <label>Verification code</label>
+                <div className={styles.inputWrap}>
+                  <i className={`ti ti-shield-check ${styles.prefix}`} />
+                  <input
+                    ref={otpInputRef}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    placeholder="000000"
+                    value={otp}
+                    onChange={(e) =>
+                      setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                    }
+                    onKeyDown={(e) => e.key === "Enter" && handleVerifyOtp()}
+                    className={phoneStyles.otpInput}
+                  />
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className={phoneStyles.resendBtn}
+                onClick={handleResendOtp}
+                disabled={resendIn > 0 || loading}
+              >
+                {resendIn > 0 ? `Resend code in ${resendIn}s` : "Resend code"}
+              </button>
+
+              <button
+                type="button"
+                className={styles.submitBtn}
+                onClick={handleVerifyOtp}
+                disabled={loading}
+              >
+                {loading ? "Verifying…" : "Verify code"}
+                {!loading && <i className="ti ti-arrow-right" />}
+              </button>
+            </>
+          )}
+
+          {/* ══ STEP 3: BUSINESS NAME + PASSWORD ══ */}
+          {step === "business" && (
+            <>
+              <div className={styles.field}>
+                <label>Business name</label>
+                <div className={styles.inputWrap}>
+                  <i className={`ti ti-building ${styles.prefix}`} />
+                  <input
+                    type="text"
+                    placeholder="Acme Corporation"
+                    value={businessName}
+                    onChange={(e) => setBusinessName(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" &&
+                      document.getElementById("phone-signup-password").focus()
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className={styles.field}>
+                <label>Password</label>
+                <div className={styles.inputWrap}>
+                  <i className={`ti ti-lock ${styles.prefix}`} />
+                  <input
+                    id="phone-signup-password"
+                    type={showPw ? "text" : "password"}
+                    placeholder="Min. 8 characters"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" &&
+                      document
+                        .getElementById("phone-signup-confirm-password")
+                        .focus()
+                    }
+                  />
+                  <button
+                    type="button"
+                    className={styles.pwToggle}
+                    onClick={() => setShowPw((v) => !v)}
+                    aria-label={showPw ? "Hide password" : "Show password"}
+                  >
+                    <i className={`ti ${showPw ? "ti-eye-off" : "ti-eye"}`} />
+                  </button>
+                </div>
+              </div>
+
+              <div className={styles.field}>
+                <label>Confirm password</label>
+                <div className={styles.inputWrap}>
+                  <i className={`ti ti-lock ${styles.prefix}`} />
+                  <input
+                    id="phone-signup-confirm-password"
+                    type={showConfirmPw ? "text" : "password"}
+                    placeholder="Re-enter your password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && handleContinueToPersonal()
+                    }
+                  />
+                  <button
+                    type="button"
+                    className={styles.pwToggle}
+                    onClick={() => setShowConfirmPw((v) => !v)}
+                    aria-label={
+                      showConfirmPw ? "Hide password" : "Show password"
+                    }
+                  >
+                    <i
+                      className={`ti ${showConfirmPw ? "ti-eye-off" : "ti-eye"}`}
+                    />
+                  </button>
+                </div>
+                {confirmPassword && (
+                  <span
+                    className={
+                      password === confirmPassword
+                        ? styles.matchOk
+                        : styles.matchBad
+                    }
+                  >
+                    <i
+                      className={`ti ${password === confirmPassword ? "ti-check" : "ti-x"}`}
+                    />
+                    {password === confirmPassword
+                      ? "Passwords match"
+                      : "Passwords don't match"}
+                  </span>
+                )}
+              </div>
+
+              <div className={styles.infoBox}>
+                <i className="ti ti-shield-lock" />
+                <p>
+                  Your phone number is verified - this password is all you need
+                  going forward.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className={styles.submitBtn}
+                onClick={handleContinueToPersonal}
+                disabled={loading}
+              >
+                Continue
+                <i className="ti ti-arrow-right" />
+              </button>
+            </>
+          )}
+
+          {/* ══ STEP 4: PERSONAL INFORMATION ══ */}
+          {step === "personal" && (
+            <>
+              <div className={styles.field}>
+                <label>First name</label>
+                <div className={styles.inputWrap}>
+                  <i className={`ti ti-user ${styles.prefix}`} />
+                  <input
+                    type="text"
+                    placeholder="Emmanuel"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" &&
+                      document.getElementById("phone-signup-last-name").focus()
+                    }
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div className={styles.field}>
+                <label>Last name</label>
+                <div className={styles.inputWrap}>
+                  <i className={`ti ti-user ${styles.prefix}`} />
+                  <input
+                    id="phone-signup-last-name"
+                    type="text"
+                    placeholder="Okafor"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" &&
+                      document.getElementById("phone-signup-email").focus()
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className={styles.field}>
+                <label>Email address</label>
+                <div className={styles.inputWrap}>
+                  <i className={`ti ti-mail ${styles.prefix}`} />
+                  <input
+                    id="phone-signup-email"
+                    type="email"
+                    placeholder="emmanuel@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && handleCreateAccount()
+                    }
+                  />
+                </div>
+                <span className={phoneStyles.hint}>
+                  We'll send a verification link here - you can start using Ehra
+                  right away and verify whenever suits you.
+                </span>
+              </div>
+
+              <label className={styles.termsCheck}>
+                <input
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={(e) => {
+                    setTermsAccepted(e.target.checked);
+                    if (e.target.checked) setError("");
+                  }}
+                />
+                <span className={styles.termsBox} aria-hidden="true">
+                  <i className="ti ti-check" />
+                </span>
+                <span className={styles.termsText}>
+                  I agree to Ehral's <a href="/terms" target="_blank" rel="noreferrer">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.
+                </span>
+              </label>
+
+              <button
+                type="button"
+                className={styles.submitBtn}
+                onClick={handleCreateAccount}
+                disabled={loading}
+              >
+                {loading ? "Creating account…" : "Create account"}
+                {!loading && <i className="ti ti-arrow-right" />}
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Invisible reCAPTCHA host - Firebase only renders a visible
+          challenge into this if it decides the traffic looks risky, per
+          sendPhoneOtp()'s "invisible" verifier config. */}
+      <div id="recaptcha-container" />
+    </div>
+  );
+}
+
+// Turns Firebase's auth/... error codes into copy a non-technical person
+// can act on, instead of surfacing the raw SDK message.
+function friendlyFirebaseError(err) {
+  const code = err?.code || "";
+  if (code.includes("invalid-phone-number")) {
+    return "That phone number doesn't look valid. Please check it and try again.";
+  }
+  if (code.includes("too-many-requests")) {
+    return "Too many attempts. Please wait a moment before trying again.";
+  }
+  if (
+    code.includes("invalid-verification-code") ||
+    code.includes("code-expired")
+  ) {
+    return "That code is incorrect or has expired. Please try again.";
+  }
+  if (code.includes("network-request-failed")) {
+    return "Network error - please check your connection and try again.";
+  }
+  return err?.message || "Something went wrong. Please try again.";
+}

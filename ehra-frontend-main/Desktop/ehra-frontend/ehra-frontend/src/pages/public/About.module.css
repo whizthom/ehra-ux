@@ -1,0 +1,2225 @@
+.page {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg-page, #f0f4f3);
+    color: var(--text-primary, #0b1f1a);
+    --gold: var(--accent, #0f6e56);
+    --gold-deep: var(--accent, #0f6e56);
+    /* lighter accent variant (green/lemon) used instead of gold */
+    --accent-light: #f3f9d6;
+    overflow-x: hidden;
+}
+
+/* ── Scroll-triggered heading motion ──
+   Plain global classes (not CSS-module scoped) so About.jsx can toggle
+   them with a single querySelectorAll(".js-reveal") + IntersectionObserver,
+   without importing a class name per element. Headings/eyebrows start
+   faded + offset and settle into place the first time they cross into
+   view; prefers-reduced-motion short-circuits this in JS by adding
+   .js-inview immediately instead of observing. */
+:global(.js-reveal) {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.7s cubic-bezier(0.16, 0.8, 0.24, 1), transform 0.7s cubic-bezier(0.16, 0.8, 0.24, 1);
+    will-change: opacity, transform;
+}
+
+:global(.js-reveal.js-inview) {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── Nav ──
+   Fixed (not sticky-in-flow) so it floats directly over the hero,
+   starting transparent and turning solid/blurred once the page has
+   scrolled past the hero - see .navTransparent / .navScrolled below.
+   Because it's taken out of flow, nothing needs top padding to
+   compensate: the hero is meant to sit flush behind it. Anchor targets
+   further down the page get scroll-margin-top (see .section) so they
+   don't land underneath it. */
+.nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 48px;
+    transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.navTransparent {
+    background: transparent;
+    border-bottom: 1px solid transparent;
+    box-shadow: none;
+}
+
+.navScrolled {
+    background: rgba(240, 244, 243, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border, #e1e8e5);
+    box-shadow: 0 4px 24px rgba(11, 31, 26, 0.1);
+}
+
+.navLogo {
+    display: flex;
+}
+
+.navLinks {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.navLink {
+    position: relative;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.navLink::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 100%;
+    bottom: -4px;
+    height: 1.5px;
+    background: currentColor;
+    opacity: 0.7;
+    transition: right 0.25s cubic-bezier(0.16, 0.8, 0.24, 1);
+}
+
+.navLink:hover::after {
+    right: 0;
+}
+
+.navTransparent .navLink {
+    color: #cfe3dd;
+}
+
+.navScrolled .navLink {
+    color: var(--text-secondary, #4d635c);
+}
+
+.navLink:hover {
+    /* use a lighter accent for the pull-quote for a softer visual */
+    color: var(--accent-light, #f3f9d6);
+}
+
+.navTransparent .navLink:hover {
+    color: #fff;
+}
+
+.navActions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.navGhost {
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 9px 14px;
+    transition: color 0.2s ease;
+}
+
+.navTransparent .navGhost {
+    color: #eaf5f0;
+}
+
+.navScrolled .navGhost {
+    color: var(--text-primary, #0b1f1a);
+}
+
+.navCta {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--accent, #0f6e56);
+    text-decoration: none;
+    padding: 9px 18px;
+    border-radius: 999px;
+    transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.navCta:hover {
+    background: var(--accent-hover, #06cf9c);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px -8px rgba(15, 110, 86, 0.55);
+}
+
+
+
+/* ── Mobile navigation ──────────────────────────────────────────────── */
+.mobileMenuButton {
+    display: none;
+    width: 42px;
+    height: 42px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+    font: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.navScrolled .mobileMenuButton {
+    border-color: var(--border, #dfe7e3);
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--text-primary, #0b1f1a);
+}
+
+.mobileMenu {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    .nav {
+        flex-wrap: wrap;
+    }
+
+    .mobileMenuButton {
+        display: inline-flex;
+    }
+
+    .mobileMenu {
+        display: block;
+        order: 5;
+        flex-basis: 100%;
+        margin-top: 10px;
+        padding: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 18px;
+        background: rgba(11, 31, 26, 0.96);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(18px);
+    }
+
+    .navScrolled .mobileMenu {
+        background: rgba(255, 255, 255, 0.98);
+        border-color: var(--border, #e1e8e5);
+        box-shadow: 0 18px 40px rgba(11, 31, 26, 0.12);
+    }
+
+    .mobileMenuLinks {
+        display: grid;
+        gap: 2px;
+    }
+
+    .mobileMenuLink {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 48px;
+        padding: 0 12px;
+        border-radius: 11px;
+        color: #eaf5f0;
+        font-size: 14px;
+        font-weight: 650;
+        text-decoration: none;
+    }
+
+    .navScrolled .mobileMenuLink {
+        color: var(--text-primary, #0b1f1a);
+    }
+
+    .mobileMenuLink:hover {
+        background: rgba(85, 224, 174, 0.1);
+    }
+
+    .mobileMenuLink i {
+        font-size: 15px;
+        opacity: 0.55;
+    }
+
+    .mobileMenuActions {
+        display: grid;
+        grid-template-columns: 1fr 1.25fr;
+        gap: 8px;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .navScrolled .mobileMenuActions {
+        border-top-color: var(--border, #e1e8e5);
+    }
+
+    .mobileMenuSignIn,
+    .mobileMenuCta {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .mobileMenuSignIn {
+        color: #eaf5f0;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+
+    .navScrolled .mobileMenuSignIn {
+        color: var(--text-primary, #0b1f1a);
+        border-color: var(--border, #dfe7e3);
+    }
+
+    .mobileMenuCta {
+        color: #083826;
+        background: var(--accent-light, #9beec1);
+    }
+}
+
+/* ── Shared typography ── */
+.eyebrow,
+.eyebrowDark,
+.eyebrowLight {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+}
+
+.eyebrow {
+    color: #55e0ae;
+}
+
+.eyebrowDark {
+    color: var(--accent, #0f6e56);
+}
+
+.eyebrowLight {
+    color: #55e0ae;
+}
+
+.tagVisionLight {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: #ffe2a6;
+    background: rgba(255, 194, 75, 0.16);
+    border: 1px solid rgba(255, 194, 75, 0.3);
+    border-radius: 999px;
+    padding: 5px 14px;
+    margin-bottom: 18px;
+}
+
+.h1 {
+    font-family: "Fraunces", Georgia, serif;
+    font-optical-sizing: auto;
+    font-weight: 550;
+    font-size: clamp(32px, 5vw, 54px);
+    line-height: 1.12;
+    letter-spacing: -0.5px;
+    color: #fff;
+    max-width: 640px;
+    margin: 0;
+    text-align: left;
+}
+
+.h1Accent {
+    color: var(--accent-light, #9beec1);
+}
+
+.h2,
+.h2Light {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-size: clamp(24px, 3.4vw, 36px);
+    line-height: 1.2;
+    letter-spacing: -0.3px;
+    margin: 0 0 14px;
+    max-width: 720px;
+}
+
+.h2 {
+    color: var(--text-primary, #0b1f1a);
+}
+
+.h2Light {
+    color: #fff;
+}
+
+.lead,
+.leadLight {
+    font-size: 16px;
+    line-height: 1.65;
+    max-width: 640px;
+    margin: 0 0 32px;
+}
+
+.lead {
+    color: var(--text-secondary, #4d635c);
+}
+
+.leadLight {
+    color: #b8ccc5;
+}
+
+.leadStrong {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-size: clamp(19px, 2.4vw, 24px);
+    line-height: 1.45;
+    color: var(--text-primary, #0b1f1a);
+    max-width: 620px;
+    margin: 0 0 32px;
+}
+
+/* ── Hero ── */
+.hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 110px 48px 54px;
+    background: #0b1f1a;
+    background-image: radial-gradient(circle at 15% 10%, rgba(85, 224, 174, 0.16), transparent 45%),
+        radial-gradient(circle at 90% 85%, rgba(198, 161, 91, 0.14), transparent 45%);
+    overflow: hidden;
+}
+
+/* Small pill above the eyebrow - a concrete, clickable trust signal
+   sitting right at the top of the hero, the way a product-grade SaaS
+   hero opens with a stat or headline chip before the H1. */
+.heroChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #dff3ec;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+    padding: 7px 14px 7px 12px;
+    text-decoration: none;
+    margin-bottom: 22px;
+    transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.heroChip:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.24);
+    transform: translateY(-1px);
+}
+
+.heroChip i {
+    font-size: 13px;
+    color: #55e0ae;
+}
+
+.heroChipDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #55e0ae;
+    box-shadow: 0 0 0 3px rgba(85, 224, 174, 0.18);
+}
+
+/* ── Capability ticker - infinite horizontal scroll strip, directly
+   under the hero. Mirrors the "stat belt" pattern of clean product
+   marketing sites: a thin, dark, always-moving strip of concrete
+   proof points before the page settles into its editorial sections. ── */
+.tickerWrap {
+    background: #081713;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid var(--border, #e1e8e5);
+    overflow: hidden;
+    padding: 14px 0;
+}
+
+.ticker {
+    display: flex;
+    align-items: center;
+    width: max-content;
+    animation: tickerScroll 28s linear infinite;
+}
+
+.tickerWrap:hover .ticker {
+    animation-play-state: paused;
+}
+
+.tickerItem {
+    display: inline-flex;
+    align-items: center;
+    gap: 28px;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    color: #9fc2b8;
+    white-space: nowrap;
+    padding: 0 28px;
+}
+
+.tickerDot {
+    color: #3f5c53;
+    font-size: 10px;
+}
+
+@keyframes tickerScroll {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ticker {
+        animation: none;
+    }
+}
+
+.heroDesc {
+    color: #b8ccc5;
+    font-size: 17px;
+    line-height: 1.6;
+    max-width: 640px;
+    margin: 18px 0 0;
+    text-align: left;
+}
+
+.heroCtas {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+.btnPrimary {
+    background: var(--accent, #0f6e56);
+    color: #fff;
+    font-weight: 600;
+    font-size: 14.5px;
+    text-decoration: none;
+    padding: 13px 26px;
+    border-radius: 10px;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.btnPrimary:hover {
+    background: var(--accent-hover, #06cf9c);
+    transform: translateY(-1px);
+}
+
+.btnGold {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent-light, #9beec1);
+    color: #083826;
+    font-weight: 600;
+    font-size: 14.5px;
+    text-decoration: none;
+    padding: 13px 22px;
+    border-radius: 999px;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.btnGold i {
+    font-size: 15px;
+}
+
+.btnGold:hover {
+    background: #7ad9a7;
+    transform: translateY(-1px);
+}
+
+/* Two-column hero layout */
+.heroInner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(420px, 520px);
+    gap: 42px;
+    align-items: center;
+    width: 100%;
+    margin: 0;
+}
+
+.heroContent {
+    text-align: left;
+    width: 100%;
+    max-width: 620px;
+    justify-self: start;
+}
+
+.heroVisual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 520px;
+    justify-self: end;
+    animation: heroFloat 7s ease-in-out infinite;
+}
+
+@keyframes heroFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.heroFooter {
+    text-align: left;
+    margin: 24px 0 0;
+    max-width: none;
+    width: 100%;
+    padding-top: 26px;
+    color: #6f8b81;
+    font-size: 13px;
+}
+
+/* Larger screens: stretch hero to match nav gutters and expand visual */
+@media (min-width: 1200px) {
+    .heroInner {
+        width: 100%;
+        grid-template-columns: minmax(0, 1.15fr) minmax(420px, 560px);
+        gap: 48px;
+    }
+
+    .heroContent {
+        max-width: 640px;
+    }
+
+    .heroFooter {
+        width: 100%;
+        max-width: none;
+        padding-top: 34px;
+    }
+}
+
+@media (max-width: 980px) {
+    .hero {
+        padding-top: 96px;
+        padding-bottom: 80px;
+    }
+
+    .heroInner {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        width: 100%;
+    }
+
+    .heroContent,
+    .heroVisual {
+        max-width: 100%;
+        justify-self: stretch;
+    }
+
+    .heroCtas {
+        justify-content: flex-start;
+    }
+
+    .heroFooter {
+        width: 100%;
+        padding-top: 20px;
+        text-align: left;
+    }
+}
+
+/* Avoid visual overlap on small screens by increasing bottom spacing */
+@media (max-width: 640px) {
+    .hero {
+        padding: 92px 18px 86px;
+    }
+
+    .heroInner {
+        width: 100%;
+        gap: 20px;
+    }
+
+    .heroContent {
+        text-align: left;
+    }
+
+    .heroDesc {
+        font-size: 15px;
+    }
+
+    .heroCtas {
+        justify-content: flex-start;
+    }
+
+    .heroFooter {
+        width: 100%;
+        padding-top: 18px;
+        text-align: left;
+    }
+
+    .heroVisual {
+        margin-top: 8px;
+    }
+}
+
+.btnGhost {
+    color: #eaf5f0;
+    font-weight: 600;
+    font-size: 14.5px;
+    text-decoration: none;
+    padding: 13px 22px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    transition: background-color 0.15s ease;
+}
+
+.btnGhost:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.heroFooter {
+    color: #6f8b81;
+    font-size: 13px;
+    margin-top: 8px;
+}
+
+/* ── Generic sections ── */
+.section {
+    padding: 88px 48px;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    scroll-margin-top: 96px;
+}
+
+/* ── Story behind Ehral - stacked editorial layout, right after hero.
+   Header centered on top; body reads as a single "spine-railed" column
+   with the two key lines pulled out as standalone statements; visual
+   sits full-width underneath. Same treatment at every breakpoint, so
+   there's nothing extra to override in the responsive blocks below. ── */
+.storySection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    /* Same 48px side padding as .nav, so the story content's left edge
+       lines up with the logo instead of being centered in a narrower
+       1280px box. */
+    padding: 96px 48px 100px;
+    scroll-margin-top: 96px;
+}
+
+/* Give .storyLeft a DEFINITE width (not just a max-width) at every
+   breakpoint, so the "100%" widths on its children below resolve
+   reliably against it. Without this, .storyLeft is sized by flex
+   fit-content (because .storySection uses align-items: center), which
+   is not a definite width - and percentage children resolving against
+   an indefinite container is what was causing .storyHeader (short
+   content) to shrink to its own content and then get centered by its
+   `margin: auto`, while .storyText (long paragraphs) stayed full width
+   - a misaligned heading, on mobile as much as desktop. */
+.storyLeft {
+    width: 100%;
+}
+
+.storyHeader {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    width: 100%;
+    max-width: none;
+    margin: 0 0 12px;
+}
+
+.storyHeader .h2 {
+    max-width: none;
+}
+
+.storyText {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding-left: 0;
+    border-left: none;
+}
+
+/* Animation section that sits below the story text */
+.storyAnimationSection {
+    width: min(1280px, calc(100% - 48px));
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.storyAnimationSection .storyVisual {
+    width: 100%;
+    max-width: 720px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+}
+
+/* ── Grow your business with Ehral - two-column section directly below
+   the story: a confident, minimal invitation (headline + CTA) on the
+   left, the orbit animation on the right. Mirrors the hero's two-column
+   proportions for visual consistency with the rest of the page. ── */
+.growSection {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 60px 48px 120px;
+}
+
+.growInner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 480px);
+    gap: 56px;
+    align-items: center;
+    width: min(1180px, 100%);
+}
+
+.growContent {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+}
+
+.growHeadline {
+    font-family: "Fraunces", Georgia, serif;
+    font-optical-sizing: auto;
+    font-weight: 550;
+    font-size: clamp(30px, 3.6vw, 44px);
+    line-height: 1.18;
+    letter-spacing: -0.4px;
+    color: var(--text-primary, #0b1f1a);
+    max-width: 420px;
+    margin: 0 0 34px;
+}
+
+.growCta {
+    /* .btnGold already supplies color/shape; this just gives it room
+       to breathe under the headline without affecting other buttons
+       that reuse .btnGold elsewhere on the page. */
+    margin: 0;
+}
+
+.growVisual {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+@media (max-width: 900px) {
+    .growSection {
+        padding: 12px 28px 88px;
+    }
+
+    .growInner {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        text-align: center;
+    }
+
+    .growContent {
+        align-items: center;
+        text-align: center;
+    }
+
+    .growHeadline {
+        max-width: 480px;
+    }
+
+    .growVisual {
+        order: -1;
+    }
+}
+
+@media (max-width: 640px) {
+    .growSection {
+        padding: 8px 18px 72px;
+    }
+
+    .growInner {
+        gap: 32px;
+    }
+}
+
+.storyText .lead {
+    max-width: none;
+}
+
+/* The two lines that carry the section's real weight - broken out of
+   the paragraph rail entirely so they land as their own beat rather
+   than blending into the surrounding prose. */
+.storyPullQuote {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-style: italic;
+    font-size: clamp(19px, 2.6vw, 23px);
+    line-height: 1.5;
+    color: var(--accent, #0f6e56);
+    text-align: left;
+    max-width: none;
+    margin: 8px 0 32px 0;
+    padding: 0;
+    border: none;
+}
+
+.storyVisual {
+    width: 100%;
+    max-width: 720px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    margin: 30px auto 0;
+}
+
+@media (max-width: 980px) {
+    .storySection {
+        width: min(100%, calc(100% - 28px));
+        padding: 80px 16px 88px;
+    }
+
+    .storyHeader {
+        align-items: flex-start;
+        text-align: left;
+        margin-bottom: 28px;
+    }
+
+    .storyText {
+        max-width: 100%;
+        padding-left: 0;
+        border-left: none;
+    }
+
+    .storyVisual {
+        padding: 24px 18px;
+    }
+}
+
+@media (max-width: 640px) {
+    .storySection {
+        width: 100%;
+        padding: 72px 18px 80px;
+    }
+
+    .storyHeader {
+        margin-bottom: 24px;
+    }
+
+    .storyText {
+        max-width: 100%;
+        gap: 8px;
+    }
+
+    .storyPullQuote {
+        margin: 8px 0 20px;
+    }
+}
+
+/* ── The real problem - a magazine-spread layout. Deliberately
+   different from the hero/grow section's plain left-right split used
+   elsewhere on the page: newspaper-style two-column body copy builds
+   up to one oversized pull-statement as the section's visual climax,
+   then closes with a compact, quiet echo of the "scattered tools →
+   Ehral" idea instead of a full diagram or card. Edge-aligned with the
+   nav gutter, like every other section on this page. ── */
+.problemSection {
+    width: 100%;
+    padding: 40px 48px 140px;
+}
+
+.problemInner {
+    width: 100%;
+}
+
+.problemHeaderRow {
+    margin-bottom: 56px;
+}
+
+.problemHeadline {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-size: clamp(26px, 3.4vw, 38px);
+    line-height: 1.2;
+    letter-spacing: -0.3px;
+    color: var(--text-primary, #0b1f1a);
+    max-width: 760px;
+    margin: 0;
+}
+
+/* Newspaper-style body copy - a technique used nowhere else on this
+   page, giving the section its own distinct texture. Caps at a
+   comfortable max-width so columns don't stretch edge-to-edge and
+   become unreadable on ultra-wide screens. */
+.problemColumns {
+    column-count: 2;
+    column-gap: 56px;
+    column-rule: 1px solid var(--border, #e1e8e5);
+    max-width: 1040px;
+}
+
+.problemColumns .lead {
+    max-width: none;
+    break-inside: avoid;
+}
+
+/* The dramatic climax of the section - the point the whole layout is
+   building toward, so it gets real scale instead of blending in with
+   the surrounding paragraphs. */
+.problemBigStatement {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-style: italic;
+    font-size: clamp(34px, 6vw, 64px);
+    line-height: 1.14;
+    letter-spacing: -0.5px;
+    color: var(--accent, #0f6e56);
+    text-align: center;
+    max-width: 900px;
+    margin: 88px auto 0;
+}
+
+.problemTransition {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 500;
+    font-style: italic;
+    font-size: clamp(18px, 2vw, 21px);
+    line-height: 1.55;
+    color: var(--text-primary, #0b1f1a);
+    text-align: center;
+    max-width: 640px;
+    margin: 30px auto 0;
+    padding-top: 30px;
+    position: relative;
+}
+
+.problemTransition::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 44px;
+    height: 1px;
+    background: var(--accent, #0f6e56);
+    opacity: 0.4;
+}
+
+.problemClosing {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--text-secondary, #4d635c);
+    text-align: center;
+    max-width: 580px;
+    margin: 40px auto 0;
+}
+
+/* A quiet, compact echo of the old tools-to-Ehral idea - a supporting
+   detail now, not the section's main visual. */
+.problemTrail {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 56px auto 0;
+}
+
+.problemTrailChip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--bg-card, #fff);
+    border: 1px solid var(--border, #e1e8e5);
+}
+
+.problemTrailChip i {
+    font-size: 16px;
+    color: var(--text-secondary, #6f8b81);
+}
+
+.problemTrailArrow {
+    font-size: 16px;
+    color: var(--border, #d7e0dc);
+    margin: 0 2px;
+}
+
+.problemTrailEhral {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent, #0f6e56);
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    border-radius: 999px;
+    padding: 9px 16px 9px 12px;
+}
+
+.problemTrailEhral i {
+    font-size: 15px;
+}
+
+@media (max-width: 980px) {
+    .problemSection {
+        padding: 8px 28px 96px;
+    }
+
+    .problemHeaderRow {
+        margin-bottom: 36px;
+    }
+
+    .problemColumns {
+        column-count: 1;
+    }
+
+    .problemBigStatement {
+        margin-top: 56px;
+    }
+
+    .problemTrail {
+        margin-top: 44px;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 640px) {
+    .problemSection {
+        padding: 4px 18px 76px;
+    }
+
+    .problemHeaderRow {
+        margin-bottom: 28px;
+    }
+
+    .problemBigStatement {
+        margin-top: 44px;
+    }
+
+    .problemTransition {
+        margin-top: 24px;
+        padding-top: 24px;
+    }
+}
+
+
+.sectionCard {
+    background: var(--bg-card, #fff);
+    border: 1px solid var(--border, #e1e8e5);
+    border-radius: 28px;
+    max-width: 1080px;
+    box-shadow: 0 24px 60px -36px rgba(11, 31, 26, 0.16);
+}
+
+.sectionDark {
+    max-width: none;
+    background: #0b1f1a;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    scroll-margin-top: 96px;
+}
+
+.sectionDark .lead,
+.sectionDark .leadLight {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ── Belief section ── */
+.beliefLine {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-size: clamp(26px, 4vw, 40px);
+    line-height: 1.3;
+    letter-spacing: -0.3px;
+    color: #fff;
+    max-width: 760px;
+    margin: 0 0 26px;
+}
+
+.beliefSmall {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 500;
+    font-style: italic;
+    font-size: 18px;
+    line-height: 1.6;
+    color: #55e0ae;
+    margin-top: 8px;
+}
+
+.beliefPills {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+.beliefPill {
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: #eaf5f0;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    padding: 12px 22px;
+}
+
+/* ── Vision note / roadmap lines ── */
+.visionNote {
+    font-size: 13px;
+    color: #7f9a92;
+    margin-top: 28px;
+    max-width: 520px;
+}
+
+.roadmapLine {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-size: clamp(20px, 2.8vw, 27px);
+    line-height: 1.5;
+    color: #fff;
+    max-width: 680px;
+    margin: 0 0 10px;
+}
+
+.centerFrame {
+    max-width: 880px;
+    margin: 0;
+}
+
+/* ── Grids ── */
+.grid3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: stretch;
+    gap: 18px;
+}
+
+.grid3>*:nth-child(1) {
+    transition-delay: 0ms;
+}
+
+.grid3>*:nth-child(2) {
+    transition-delay: 70ms;
+}
+
+.grid3>*:nth-child(3) {
+    transition-delay: 140ms;
+}
+
+.grid3>*:nth-child(4) {
+    transition-delay: 210ms;
+}
+
+.grid3>*:nth-child(5) {
+    transition-delay: 280ms;
+}
+
+.grid3>*:nth-child(6) {
+    transition-delay: 350ms;
+}
+
+.phoneRow {
+    display: flex;
+    justify-content: flex-start;
+    gap: 28px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.phoneRow>*:nth-child(1) {
+    transition-delay: 0ms;
+}
+
+.phoneRow>*:nth-child(2) {
+    transition-delay: 120ms;
+}
+
+.phoneRow>*:nth-child(3) {
+    transition-delay: 240ms;
+}
+
+.typeGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.typeChip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-card, #fff);
+    border: 1px solid var(--border, #e1e8e5);
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-primary, #0b1f1a);
+}
+
+.typeChip i {
+    color: var(--accent, #0f6e56);
+    font-size: 16px;
+}
+
+.transformCard {
+    background: var(--bg-card, #fff);
+    border-radius: 20px;
+    padding: 40px 28px;
+    border: 1px solid var(--border, #e1e8e5);
+}
+
+/* ── "Every business starts somewhere" - a quiet, premium editorial
+   panel in a deep green (distinct from both the light story section
+   above it and the near-black sections used elsewhere on the page),
+   built for one idea to land: a business can start small without
+   thinking small. No cards, no icons, generous vertical rhythm. The
+   emphasized line gets its own visual beat via .originStatement. ── */
+.originSection {
+    background: #0e3626;
+    background-image: radial-gradient(circle at 20% 15%, rgba(85, 224, 174, 0.1), transparent 50%),
+        radial-gradient(circle at 85% 90%, rgba(155, 238, 193, 0.08), transparent 50%);
+    display: flex;
+    justify-content: center;
+    padding: 140px 32px;
+}
+
+.originInner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    max-width: 760px;
+}
+
+.originEyebrow {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #7fd9ae;
+    margin-bottom: 26px;
+}
+
+.originHeadline {
+    font-family: "Fraunces", Georgia, serif;
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-size: clamp(30px, 4.4vw, 46px);
+    line-height: 1.18;
+    letter-spacing: -0.4px;
+    color: #f4f9f6;
+    margin: 0 0 30px;
+}
+
+.originLead {
+    font-size: 17px;
+    line-height: 1.75;
+    color: #a9c4b8;
+    max-width: 560px;
+    margin: 0 auto;
+}
+
+/* The emotional core of the section - set apart from the surrounding
+   prose with its own spacing, a much larger italic serif setting and
+   the brand's light accent color, so it reads as a standalone beat
+   rather than another sentence in the paragraph flow. */
+.originStatement {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 500;
+    font-style: italic;
+    font-size: clamp(24px, 3.4vw, 34px);
+    line-height: 1.4;
+    letter-spacing: -0.2px;
+    color: #9beec1;
+    max-width: 620px;
+    margin: 56px auto 0;
+    padding-top: 40px;
+    position: relative;
+}
+
+.originStatement::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 44px;
+    height: 1px;
+    background: rgba(155, 238, 193, 0.4);
+}
+
+.originVisual {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 84px;
+}
+
+@media (max-width: 900px) {
+    .originSection {
+        padding: 96px 24px;
+    }
+
+    .originHeadline {
+        margin-bottom: 22px;
+    }
+
+    .originStatement {
+        margin-top: 44px;
+        padding-top: 32px;
+    }
+
+    .originVisual {
+        margin-top: 56px;
+    }
+}
+
+@media (max-width: 640px) {
+    .originSection {
+        padding: 80px 18px;
+    }
+
+    .originLead {
+        font-size: 15.5px;
+    }
+
+    .originStatement {
+        margin-top: 36px;
+        padding-top: 28px;
+    }
+
+    .originVisual {
+        margin-top: 44px;
+    }
+}
+
+.visionGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: stretch;
+    gap: 16px;
+    max-width: 900px;
+    margin-top: 40px;
+    text-align: left;
+}
+
+.visionGrid>*:nth-child(1) {
+    transition-delay: 0ms;
+}
+
+.visionGrid>*:nth-child(2) {
+    transition-delay: 90ms;
+}
+
+.visionGrid>*:nth-child(3) {
+    transition-delay: 180ms;
+}
+
+/* ── One identity ── */
+.identityWrap {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.identityRoles {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.identityRole {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-page, #f0f4f3);
+    border: 1px solid var(--border, #e1e8e5);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 13.5px;
+    font-weight: 600;
+}
+
+.identityRole i {
+    color: var(--accent, #0f6e56);
+    font-size: 16px;
+}
+
+.identityArrow {
+    font-size: 26px;
+    color: var(--border, #d7e0dc);
+}
+
+.identityOne {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--accent, #0f6e56);
+    color: #fff;
+    border-radius: 16px;
+    padding: 24px 30px;
+    font-weight: 700;
+    font-size: 14px;
+    text-align: center;
+}
+
+.identityOne i {
+    font-size: 26px;
+}
+
+/* ── "Built for this environment" card - bordered white container,
+   text on the left and the reality checklist as chips on the right. ── */
+.envCard {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+    background: var(--bg-card, #fff);
+    border: 1px solid var(--border, #e1e8e5);
+    border-radius: 24px;
+    padding: 44px 40px;
+}
+
+.envText .h2,
+.envText .lead {
+    max-width: none;
+}
+
+.envText .lead {
+    margin-bottom: 0;
+}
+
+/* ── Nigerian/regional list - bordered chip boxes ── */
+.ngList {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 0;
+    max-width: none;
+}
+
+.ngList li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-primary, #0b1f1a);
+    background: var(--bg-page, #f0f4f3);
+    border: 1px solid var(--border, #e1e8e5);
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+
+.ngList i {
+    color: var(--accent, #0f6e56);
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+/* ── Dotted-pattern section background - a faint dot grid that fades
+   out toward the top/bottom edges via a mask, used behind sections
+   that want a bit of texture without competing with the content. ── */
+.sectionDotted {
+    position: relative;
+}
+
+.sectionDotted::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(11, 31, 26, 0.12) 1px, transparent 1px);
+    background-size: 20px 20px;
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 40%, transparent 85%);
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 40%, transparent 85%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.sectionDotted>* {
+    position: relative;
+    z-index: 1;
+}
+
+/* ── Why Ehral - single bordered container, six cells sharing internal
+   dividers instead of six floating cards. Numbered 01–06 like a spec
+   sheet rather than a marketing grid. ── */
+.whyGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border: 1px solid var(--border, #e1e8e5);
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--bg-card, #fff);
+}
+
+.whyGrid>*:nth-child(1) {
+    transition-delay: 0ms;
+}
+
+.whyGrid>*:nth-child(2) {
+    transition-delay: 70ms;
+}
+
+.whyGrid>*:nth-child(3) {
+    transition-delay: 140ms;
+}
+
+.whyGrid>*:nth-child(4) {
+    transition-delay: 210ms;
+}
+
+.whyGrid>*:nth-child(5) {
+    transition-delay: 280ms;
+}
+
+.whyGrid>*:nth-child(6) {
+    transition-delay: 350ms;
+}
+
+.whyCell {
+    position: relative;
+    padding: 36px 30px;
+    border-right: 1px solid var(--border, #e1e8e5);
+    border-bottom: 1px solid var(--border, #e1e8e5);
+    transition: background-color 0.2s ease;
+}
+
+.whyCell:hover {
+    background: var(--accent-light, #f3f9d6);
+}
+
+.whyCell::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: var(--accent, #0f6e56);
+    transition: width 0.25s ease;
+}
+
+.whyCell:hover::before {
+    width: 100%;
+}
+
+.whyCell:nth-child(3n) {
+    border-right: none;
+}
+
+.whyCell:nth-child(n+4) {
+    border-bottom: none;
+}
+
+.whyCellTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.whyIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--accent-light, #f3f9d6);
+    color: var(--accent, #0f6e56);
+    font-size: 19px;
+    transition: transform 0.2s ease;
+}
+
+.whyCell:hover .whyIcon {
+    background: var(--bg-card, #fff);
+    transform: scale(1.06) rotate(-4deg);
+}
+
+.whyNum {
+    display: block;
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-size: 14px;
+    color: var(--gold-deep, #a97a1c);
+}
+
+.whyTitle {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-size: 17px;
+    line-height: 1.3;
+    color: var(--text-primary, #0b1f1a);
+    margin: 0 0 8px;
+}
+
+.whyDesc {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text-secondary, #6f8b81);
+    margin: 0;
+}
+
+/* ── Founder credit - a small, quiet coda at the end of the Story
+   section rather than a full standalone section: the origin story is
+   already told in full above, so this is just a face and a name
+   attached to it, not a second retelling. ── */
+.founderCredit {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    max-width: 640px;
+    margin-top: 8px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border, #e1e8e5);
+}
+
+.founderCreditPhoto {
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: 50% 20%;
+    box-shadow: 0 10px 24px -12px rgba(11, 31, 26, 0.35);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.founderCredit:hover .founderCreditPhoto {
+    transform: scale(1.06);
+    box-shadow: 0 14px 28px -12px rgba(11, 31, 26, 0.45);
+}
+
+.founderCreditText {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.founderCreditQuote {
+    font-family: "Fraunces", Georgia, serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--text-primary, #0b1f1a);
+    margin: 0;
+}
+
+.founderCreditName {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary, #0b1f1a);
+}
+
+.founderCreditRole {
+    font-weight: 500;
+    color: var(--text-secondary, #6f8b81);
+}
+
+.founderCreditRole::before {
+    content: "- ";
+}
+
+/* ── Final CTA banner - a rounded, contained dark card (not full-bleed)
+   with a soft radial glow, echoing the reference design's closing
+   banner rather than another full-width dark section. ── */
+.ctaBanner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: #0b1f1a;
+    background-image: radial-gradient(circle at 50% 30%, rgba(85, 224, 174, 0.16), transparent 60%);
+    border-radius: 28px;
+    padding: 72px 32px;
+}
+
+/* Tag + button-row modifiers for the final CTA banner specifically -
+   scoped so they don't affect the shared .tagVisionLight / .heroCtas
+   styling used elsewhere (Vision section, hero). Desktop keeps the
+   original gold tag and left-set button row; tablet/mobile switch the
+   tag to the site's primary green (matching eyebrows, chip dot, and
+   accent color used everywhere else) and force the buttons to stay
+   centered under the centered headline above them. */
+@media (max-width: 900px) {
+    .ctaTag {
+        color: #9beec1;
+        background: rgba(85, 224, 174, 0.14);
+        border-color: rgba(85, 224, 174, 0.3);
+    }
+
+    .ctaBannerCtas {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+.h2LightMuted {
+    color: #7f9a92;
+}
+
+.finalStatement {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    text-align: center;
+    padding: 110px 24px;
+    background: #0b1f1a;
+}
+
+.stackedLines {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.stackedLine {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 450;
+    font-size: clamp(16px, 2vw, 20px);
+    color: #7f9a92;
+    opacity: 0;
+    animation: stackedLineIn 0.6s ease forwards;
+}
+
+.stackedLine:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.stackedLine:nth-child(2) {
+    animation-delay: 0.18s;
+}
+
+.stackedLine:nth-child(3) {
+    animation-delay: 0.31s;
+}
+
+.stackedLine:nth-child(4) {
+    animation-delay: 0.44s;
+}
+
+.stackedLine:nth-child(5) {
+    animation-delay: 0.57s;
+}
+
+.stackedLine:nth-child(6) {
+    animation-delay: 0.7s;
+}
+
+.stackedLine:nth-child(7) {
+    animation-delay: 0.83s;
+    color: #eaf5f0;
+    font-weight: 550;
+}
+
+@keyframes stackedLineIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.finalLine {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 450;
+    font-size: clamp(19px, 2.6vw, 26px);
+    line-height: 1.6;
+    color: #eaf5f0;
+    max-width: 620px;
+}
+
+/* ── Final CTA ── */
+.cta {
+    text-align: center;
+    padding: 96px 24px 110px;
+}
+
+.cta .h2,
+.cta .lead {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.finalInvitation {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 550;
+    font-size: clamp(20px, 2.8vw, 26px);
+    line-height: 1.5;
+    color: var(--text-primary, #0b1f1a);
+    margin-top: 44px;
+}
+
+/* ── Footer ── */
+.footer {
+    background: #0b1f1a;
+    color: #b8ccc5;
+    padding: 64px 48px 28px;
+}
+
+.footerTop {
+    display: flex;
+    justify-content: space-between;
+    gap: 48px;
+    width: 100%;
+    padding-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.footerBrand {
+    max-width: 320px;
+}
+
+.footerBrand p {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #7f9a92;
+    margin-top: 14px;
+}
+
+.footerCols {
+    display: flex;
+    gap: 56px;
+    flex-wrap: wrap;
+}
+
+.footerCol {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.footerColHeading {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #55e0ae;
+    margin-bottom: 4px;
+}
+
+.footerCol a {
+    font-size: 13.5px;
+    color: #b8ccc5;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.footerCol a:hover {
+    color: #fff;
+}
+
+.footerContactLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.footerContactLink i {
+    font-size: 15px;
+    color: #55e0ae;
+}
+
+.footerBottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 12.5px;
+    color: #6f8b81;
+    flex-wrap: wrap;
+}
+
+.footerTagline {
+    font-family: "Fraunces", Georgia, serif;
+    color: #b8ccc5;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+    .grid3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .visionGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .section {
+        padding: 64px 28px;
+    }
+
+    .storySection {
+        padding: 64px 28px;
+    }
+
+    .storyText {
+        padding-left: 0;
+    }
+
+    .founderCredit {
+        max-width: 100%;
+    }
+
+    .nav {
+        padding: 14px 20px;
+    }
+
+    .navLinks {
+        display: none;
+    }
+
+    .heroInner {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .heroContent {
+        text-align: left;
+    }
+
+    .heroVisual {
+        margin-top: 8px;
+    }
+
+    .envCard {
+        grid-template-columns: 1fr;
+        gap: 28px;
+        padding: 32px 28px;
+    }
+
+    .whyGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .whyCell:nth-child(3n) {
+        border-right: 1px solid var(--border, #e1e8e5);
+    }
+
+    .whyCell:nth-child(2n) {
+        border-right: none;
+    }
+
+    .whyCell:nth-child(n+4) {
+        border-bottom: 1px solid var(--border, #e1e8e5);
+    }
+
+    .whyCell:nth-child(n+5) {
+        border-bottom: none;
+    }
+
+    .footerTop {
+        flex-direction: column;
+        gap: 32px;
+    }
+}
+
+@media (max-width: 640px) {
+
+    .grid3,
+    .visionGrid,
+    .ngList,
+    .whyGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .whyCell {
+        border-right: none !important;
+        border-bottom: 1px solid var(--border, #e1e8e5) !important;
+    }
+
+    .whyCell:last-child {
+        border-bottom: none !important;
+    }
+
+    .ctaBanner {
+        padding: 48px 22px;
+        border-radius: 20px;
+    }
+
+    .footerCols {
+        gap: 32px;
+    }
+
+    .hero {
+        padding: 84px 18px 32px;
+    }
+
+    .section {
+        padding: 52px 18px;
+    }
+
+    .storySection {
+        padding: 52px 18px;
+    }
+
+    .storyText {
+        padding-left: 0;
+    }
+
+    .nav {
+        padding: 10px 16px;
+    }
+
+    .founderCredit {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .phoneRow {
+        justify-content: center;
+    }
+
+    .identityWrap {
+        flex-direction: column;
+    }
+
+    .identityArrow {
+        transform: rotate(90deg);
+    }
+
+    .navGhost {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .h1 {
+        font-size: clamp(30px, 9vw, 40px);
+        line-height: 1.08;
+        letter-spacing: -0.65px;
+    }
+
+    .heroDesc {
+        max-width: 34rem;
+        line-height: 1.65;
+    }
+
+    .heroCtas {
+        display: grid;
+        grid-template-columns: 1fr;
+        width: 100%;
+        gap: 9px;
+    }
+
+    .heroCtas .btnGold,
+    .heroCtas .btnGhost {
+        width: 100%;
+        justify-content: center;
+        min-height: 46px;
+        box-sizing: border-box;
+    }
+
+    .tickerWrap {
+        padding: 12px 0;
+    }
+
+    .tickerItem {
+        font-size: 11.5px;
+        padding: 0 20px;
+        gap: 20px;
+    }
+
+    .section,
+    .storySection {
+        scroll-margin-top: 82px;
+    }
+
+    .h2,
+    .h2Light {
+        font-size: clamp(25px, 7.5vw, 32px);
+    }
+
+    .lead,
+    .leadLight {
+        font-size: 15px;
+        line-height: 1.68;
+    }
+
+    .whyCell {
+        padding: 28px 22px;
+    }
+
+    .envCard {
+        border-radius: 18px;
+        padding: 26px 20px;
+    }
+}

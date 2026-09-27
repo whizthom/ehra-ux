@@ -1,0 +1,265 @@
+.hubOuter {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    background: var(--bg-surface);
+}
+
+.tabRow {
+    display: flex;
+    gap: 6px;
+    padding: 10px 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex-shrink: 0;
+    border-bottom: 0.5px solid var(--border-color);
+    background: var(--bg-surface);
+}
+
+.tabRow::-webkit-scrollbar {
+    display: none;
+}
+
+.tabBtn {
+    border: none;
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.tabBtnActive {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* Hidden once something's full-screen on mobile - a chat thread, or one
+   open announcement - same as the old MessagesHub's switcher pills did
+   via its own `detailOpen` mirror. Has no effect on desktop, where
+   there's always room for the tab row alongside whatever's below it. */
+@media (max-width: 860px) {
+    .tabRowHiddenMobile {
+        display: none;
+    }
+}
+
+.announcementsPane {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.hub {
+    display: flex;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    background: var(--bg-surface);
+}
+
+.listCol {
+    display: flex;
+    min-height: 0;
+}
+
+.windowCol {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+    min-width: 0;
+}
+
+.emptyPane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 32px;
+    background: var(--bg-page);
+    color: var(--text-secondary);
+}
+
+.emptyIcon {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+    font-size: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+}
+
+.emptyPane h2 {
+    color: var(--text-primary);
+    margin: 4px 0;
+}
+
+.emptyPane p {
+    max-width: 320px;
+    margin: 0;
+    font-size: 14px;
+}
+
+@media (max-width: 860px) {
+    .hubOuter {
+        background: var(--bg-page);
+    }
+
+    .hub {
+        background: var(--bg-page);
+    }
+
+    /* .windowCol already has flex:1 unconditionally above, which is why
+       an OPEN chat correctly fills the screen on mobile. .listCol never
+       had that - as a bare flex item with no flex-grow, it just shrinks
+       to fit its content's intrinsic width instead of stretching to fill
+       .hub, which is what was actually causing the chat list to look
+       narrower than full-width (ChatList.module.css's own width:100%
+       rule on .listPanel was resolving relative to that too-narrow box).
+       Only scoped to mobile - on desktop .listCol is deliberately its
+       content's ~340px width, sitting beside .windowCol. */
+    .listCol {
+        flex: 1;
+        width: 100%;
+    }
+
+    .listColHiddenMobile {
+        display: none;
+    }
+
+    .windowColHiddenMobile {
+        display: none;
+    }
+}
+
+/* Count pill on a tab (unread chats / unread announcements). */
+.tabCount {
+    margin-left: 7px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.tabBtnActive .tabCount {
+    background: #fff;
+    color: var(--accent);
+}
+
+/* ── Flat variant (data-flat="true") ─────────────────────────────────────
+   Used where the inbox sits straight on the page background instead of
+   inside a card - the customer's own account. Tabs become quiet text tabs
+   with an animated underline; every surface goes transparent and only
+   hairlines separate the regions. Child components (ChatList, ChatWindow,
+   MessageComposer) carry their own matching [data-flat] rules. */
+.hubOuter[data-flat="true"],
+.hubOuter[data-flat="true"] .hub,
+.hubOuter[data-flat="true"] .emptyPane {
+    background: transparent;
+}
+
+.hubOuter[data-flat="true"] .tabRow {
+    background: transparent;
+    padding: 0 4px;
+    gap: clamp(16px, 3.4vw, 34px);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.hubOuter[data-flat="true"] .tabBtn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    padding: 15px 2px 14px;
+    border-radius: 0;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.005em;
+    transition: color 0.2s ease;
+}
+
+.hubOuter[data-flat="true"] .tabBtn:hover {
+    color: var(--text-primary);
+}
+
+.hubOuter[data-flat="true"] .tabBtn::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    background: var(--accent);
+    transform: scaleX(0);
+    transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.hubOuter[data-flat="true"] .tabBtnActive {
+    background: transparent;
+    color: var(--text-primary);
+}
+
+.hubOuter[data-flat="true"] .tabBtnActive::after {
+    transform: scaleX(1);
+}
+
+.hubOuter[data-flat="true"] .tabBtnActive .tabCount {
+    background: var(--accent);
+    color: #fff;
+}
+
+.hubOuter[data-flat="true"] .emptyIcon {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+/* Employer messaging receives the same premium workspace shell while
+   preserving its existing conversation mechanics. */
+.root,
+.hub,
+.container {
+    border-radius: 18px;
+}
+
+.sidebar,
+.chatPane,
+.listPane {
+    border-color: color-mix(in srgb, var(--border-color) 78%, transparent);
+}
+
+.conversation,
+.chatHeader,
+.composer {
+    box-shadow: 0 16px 42px -34px rgba(0, 0, 0, .42);
+}
+
+@media (max-width: 640px) {
+
+    .root,
+    .hub,
+    .container {
+        border-radius: 0;
+    }
+}

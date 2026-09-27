@@ -1,0 +1,179 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1300;
+    padding: 20px;
+}
+
+.card {
+    width: 100%;
+    max-width: 460px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 32px 30px;
+    text-align: center;
+    box-shadow: 0 20px 60px var(--shadow-color);
+}
+
+.iconWrap {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--info-bg);
+    color: var(--info-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin: 0 auto 16px;
+}
+
+.title {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 10px;
+}
+
+.desc {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin: 0 0 20px;
+}
+
+.emailEditRow {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    text-align: left;
+}
+
+.emailInput {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 12px;
+    font-size: 13.5px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    background: var(--bg-surface-alt);
+}
+
+.emailInput::placeholder {
+    color: var(--text-secondary);
+}
+
+.emailInput:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.primaryBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff;
+    background: var(--accent);
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.primaryBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.sentNote {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+    font-size: 12.5px;
+    color: var(--accent);
+    margin: 14px 0 0;
+    text-align: left;
+}
+
+.errorBox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border: 1px solid var(--danger-border);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    margin-top: 14px;
+    text-align: left;
+}
+
+.devLinkBox {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: var(--warning-bg);
+    border: 1px dashed var(--warning-border);
+    border-radius: 10px;
+    font-size: 12.5px;
+    color: var(--warning-text);
+    text-align: left;
+}
+
+.devLinkBox p {
+    margin: 0 0 6px;
+    font-weight: 600;
+}
+
+.devLinkBox a {
+    color: var(--accent);
+    font-weight: 600;
+    word-break: break-all;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.cancelBtn {
+    flex: 1;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.secondaryBtn {
+    flex: 1;
+    background: var(--accent);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.secondaryBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

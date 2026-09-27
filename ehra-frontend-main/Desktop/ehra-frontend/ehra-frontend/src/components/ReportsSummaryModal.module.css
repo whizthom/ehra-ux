@@ -1,0 +1,189 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal {
+    background: var(--bg-surface);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 720px;
+    max-height: 85vh;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* ── Header ── */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.headerIcon {
+    width: 38px;
+    height: 38px;
+    background: var(--bg-soft-accent);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+.headerTitle {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.headerSub {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 2px 0 0;
+}
+
+.closeBtn {
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    border: none;
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    transition: background 0.12s, color 0.12s;
+    flex-shrink: 0;
+}
+
+.closeBtn:hover {
+    background: var(--border-color);
+    color: var(--text-primary);
+}
+
+/* ── Body ── */
+.body {
+    padding: 16px 20px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+.errorBox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--danger-bg);
+    border: 1px solid var(--danger-border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--danger-text);
+}
+
+.summaryPre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text-primary);
+}
+
+.loadingWrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 0;
+}
+
+.spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--border-color);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Footer ── */
+.footer {
+    display: flex;
+    gap: 10px;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border-color);
+    justify-content: flex-end;
+    flex-shrink: 0;
+}
+
+.cancelBtn {
+    border: 1.5px solid var(--border-color);
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.12s;
+    font-family: inherit;
+}
+
+.cancelBtn:hover {
+    background: var(--bg-surface-alt);
+}
+
+.copyBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: inherit;
+}
+
+.copyBtn:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+
+.copyBtn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}

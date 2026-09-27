@@ -1,0 +1,387 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1300;
+    padding: 20px;
+}
+
+.card {
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px var(--shadow-color);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* ── Mobile: full-screen sheet, same convention as BusinessReportModal ──
+   so the invite popup gets a real, comfortable mobile layout instead of
+   a shrunk-down desktop card - fixed header, independently scrolling
+   body, no wasted overlay padding, and safe-area-aware bottom spacing
+   for devices with a home indicator. */
+@media (max-width: 640px) {
+    .overlay {
+        padding: 0;
+    }
+
+    .card {
+        max-width: 100%;
+        max-height: 100vh;
+        height: 100%;
+        border-radius: 0;
+    }
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 26px 16px;
+    flex-shrink: 0;
+}
+
+.header h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.closeBtn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 4px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+    .header {
+        padding: 16px 16px 12px;
+    }
+
+    /* Bigger tap target - comfortably inside the 44px minimum for a
+       reliable thumb tap on a phone. */
+    .closeBtn {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+        background: var(--bg-surface-alt);
+    }
+}
+
+.body {
+    padding: 0 26px 28px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+@media (max-width: 640px) {
+    .body {
+        padding: 0 16px calc(20px + env(safe-area-inset-bottom, 0px));
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+.tabs {
+    display: flex;
+    gap: 6px;
+    background: var(--bg-surface-alt);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 20px;
+}
+
+.tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    .tabs {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        overflow-x: auto;
+        scrollbar-width: none;
+        margin: 0 -16px 18px;
+        padding: 10px 16px;
+        border-radius: 0;
+        background: var(--bg-surface-alt);
+    }
+
+    .tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Let each tab size to its label instead of squeezing three tabs
+       into equal thirds - "Reusable link" and "Invite by email" no
+       longer wrap or truncate on a narrow phone screen. */
+    .tab {
+        flex: none;
+        padding: 10px 14px;
+        font-size: 13px;
+        min-height: 40px;
+    }
+}
+
+.tabActive {
+    background: var(--bg-surface);
+    color: var(--accent);
+    box-shadow: 0 1px 3px var(--shadow-color);
+}
+
+.tabBody {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.desc {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+.linkRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--bg-surface-alt);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+}
+
+.linkInput {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    font-size: 12.5px;
+    color: var(--text-primary);
+    outline: none;
+}
+
+.linkActions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.actionBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 9px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+}
+
+.copyBtn {
+    background: var(--accent);
+    color: #ffffff;
+}
+
+.waBtn {
+    background: #25d366;
+    color: #ffffff;
+}
+
+.regenBtn {
+    margin-left: auto;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 9px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.generateBtn {
+    align-self: flex-start;
+    background: var(--accent);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 20px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.generateBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.emailsTextarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--bg-surface-alt);
+    resize: vertical;
+}
+
+@media (max-width: 640px) {
+    .linkRow {
+        padding: 12px 14px;
+    }
+
+    /* 16px is the iOS Safari threshold below which focusing an input
+       triggers an automatic viewport zoom - bumping these up keeps the
+       layout from jumping the moment someone taps in. */
+    .linkInput {
+        font-size: 16px;
+    }
+
+    .linkActions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .actionBtn,
+    .regenBtn {
+        width: 100%;
+        margin-left: 0;
+        padding: 13px 14px;
+        font-size: 14px;
+        min-height: 46px;
+    }
+
+    .regenBtn {
+        order: 3;
+    }
+
+    .generateBtn {
+        align-self: stretch;
+        width: 100%;
+        padding: 14px 20px;
+        font-size: 15px;
+        min-height: 48px;
+    }
+
+    .emailsTextarea {
+        font-size: 16px;
+        padding: 14px;
+        min-height: 120px;
+    }
+}
+
+.emailsTextarea::placeholder {
+    color: var(--text-secondary);
+}
+
+.emailsTextarea:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.errorBox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border: 1px solid var(--danger-border);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 12.5px;
+}
+
+.bulkResult {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 14px;
+    background: var(--bg-surface-alt);
+    border-radius: 10px;
+}
+
+.bulkSentNote {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+.skippedList ul {
+    margin: 4px 0 0;
+    padding-left: 18px;
+}
+
+.skippedList li {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+.skippedHeading {
+    margin: 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+@media (max-width: 640px) {
+    .desc {
+        font-size: 13.5px;
+    }
+
+    .errorBox,
+    .bulkResult {
+        font-size: 13px;
+        padding: 12px 14px;
+    }
+
+    .bulkSentNote,
+    .skippedList li {
+        font-size: 13px;
+    }
+}

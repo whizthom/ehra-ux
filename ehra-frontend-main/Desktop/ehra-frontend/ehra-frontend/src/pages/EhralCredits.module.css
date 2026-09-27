@@ -1,0 +1,968 @@
+/* =========================================================================
+   EHRAL CREDITS
+   -------------------------------------------------------------------------
+   Rebuilt on the app-wide theme system (see src/theme/theme.css) so this
+   page repaints correctly in dark mode and matches the rest of the
+   product, instead of the previous hardcoded light-only fallback colors.
+   The page no longer paints its own background - it sits directly on
+   the workspace's page background (.main already sets --bg-page), the
+   same way the customer hub's tabs sit on --bg-page rather than being a
+   separate panel dropped on top of it. Cards use the same hairline
+   border + var(--bg-surface) + theme-aware shadow treatment as the
+   customer hub's stat/section cards, so nothing here reads as a
+   disconnected white box.
+========================================================================= */
+
+:root {
+    /* Decorative accent token for the balance hero's live dot and corner
+     glow - the hero itself is now the same "glass" panel as the customer
+     hub's welcome panel (see .ghHero in CustomerDashboard.module.css) and
+     the retail dashboard's visibility panel (see .hero in
+     RetailWorkspace.module.css), scoped locally rather than in theme.css
+     since it's a one-off "hero" accent, not an app-wide semantic color. */
+    --cred-glow: #55e0ae;
+}
+
+[data-theme="dark"] {
+    --cred-glow: #06cf9c;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* ── Page ─────────────────────────────────────────────────────────── */
+/* No background, no max-width, no card chrome here - the parent
+   workspace content area already provides page padding and width
+   constraints. This block only lays out the vertical rhythm between
+   sections. */
+
+.page {
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.topRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.eyebrow,
+.kicker {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    font-weight: 800;
+    color: var(--accent);
+    margin: 0 0 8px;
+    text-transform: uppercase;
+}
+
+.topRow h1 {
+    font-size: clamp(24px, 3.6vw, 36px);
+    letter-spacing: -0.03em;
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    margin: 8px 0 0;
+    font-size: 14px;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────── */
+
+.buyTop,
+.primary,
+.secondary,
+.payButton {
+    border: 0;
+    border-radius: 13px;
+    font-weight: 800;
+    font-size: 13px;
+    cursor: pointer;
+    min-height: 46px;
+    padding: 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: inherit;
+    transition: background 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+}
+
+.buyTop,
+.payButton {
+    background: var(--accent);
+    color: #fff;
+}
+
+.buyTop:hover,
+.payButton:hover:not(:disabled) {
+    background: var(--accent-hover);
+}
+
+.secondary {
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+}
+
+.secondary:hover {
+    background: color-mix(in srgb, var(--accent) 16%, var(--bg-soft-accent));
+}
+
+/* ── Hero (glass) ─────────────────────────────────────────────────────────
+   Same "frosted glass" welcome-panel treatment used by the customer
+   dashboard's .ghHero and the retail dashboard's .hero (see
+   CustomerDashboard.module.css / RetailWorkspace.module.css): a panel of
+   translucent white glass with soft mint / sky / gold light glows under
+   a bright edge and a top highlight, instead of the previous solid dark
+   gradient. Text uses the theme ink so the balance stays legible and
+   consistent in both light and dark mode.
+   ============================================================================ */
+
+.hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border-radius: 24px;
+    padding: clamp(20px, 2.6vw, 30px) clamp(22px, 3.4vw, 34px);
+    border: 1px solid rgba(255, 255, 255, .9);
+    color: var(--text-primary);
+    background:
+        radial-gradient(55% 130% at 4% -10%, rgba(85, 224, 174, .5), transparent 62%),
+        radial-gradient(45% 120% at 100% 110%, rgba(74, 163, 223, .3), transparent 62%),
+        radial-gradient(38% 100% at 58% -20%, rgba(255, 214, 102, .34), transparent 66%),
+        linear-gradient(135deg, rgba(255, 255, 255, .78), rgba(255, 255, 255, .5));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 1),
+        inset 0 -1px 0 rgba(255, 255, 255, .5),
+        0 18px 40px -24px rgba(15, 110, 86, .4),
+        0 2px 8px rgba(15, 23, 22, .04);
+    -webkit-backdrop-filter: blur(18px) saturate(1.5);
+    backdrop-filter: blur(18px) saturate(1.5);
+}
+
+/* Faint diagonal specular highlight, like light on glass. */
+.hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(115deg, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, 0) 38%);
+}
+
+[data-theme="dark"] .hero {
+    border-color: rgba(255, 255, 255, .16);
+    background:
+        radial-gradient(55% 130% at 4% -10%, rgba(6, 207, 156, .3), transparent 62%),
+        radial-gradient(45% 120% at 100% 110%, rgba(74, 163, 223, .2), transparent 62%),
+        radial-gradient(38% 100% at 58% -20%, rgba(255, 214, 102, .14), transparent 66%),
+        linear-gradient(135deg, rgba(255, 255, 255, .1), rgba(255, 255, 255, .04));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .22),
+        0 18px 40px -24px rgba(0, 0, 0, .7);
+}
+
+[data-theme="dark"] .hero::before {
+    background: linear-gradient(115deg, rgba(255, 255, 255, .1) 0%, rgba(255, 255, 255, 0) 38%);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .hero {
+        background:
+            radial-gradient(55% 130% at 4% -10%, rgba(85, 224, 174, .45), transparent 62%),
+            linear-gradient(135deg, #ffffff, #f4faf8);
+    }
+}
+
+/* Kept as a subtle extra accent blob in the corner - most of the glass
+   glow now comes from .hero's own background above. */
+.heroGlow {
+    position: absolute;
+    width: 380px;
+    height: 380px;
+    border-radius: 50%;
+    right: -160px;
+    top: -180px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--cred-glow) 16%, transparent), transparent 65%);
+    pointer-events: none;
+}
+
+.heroContent {
+    position: relative;
+    z-index: 1;
+}
+
+.heroLabel {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0.85;
+}
+
+.liveDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--cred-glow);
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--cred-glow) 20%, transparent);
+}
+
+.balance {
+    font-size: clamp(34px, 5vw, 52px);
+    font-weight: 850;
+    letter-spacing: -0.05em;
+    line-height: 1.05;
+    margin: 12px 0 10px;
+}
+
+.breakdownInline {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 12.5px;
+    opacity: 0.8;
+    margin-bottom: 18px;
+}
+
+.breakdownSep {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.6;
+}
+
+.heroActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.hero .primary {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 10px 22px -10px color-mix(in srgb, var(--accent) 85%, transparent);
+}
+
+.hero .primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+}
+
+/* "View all usage" - same pill as .primary but a quieter, glass-style
+   treatment so it reads as the secondary action beside "Add Credits",
+   matching the customer hub hero's .ghGlassBtn. */
+.heroSecondary {
+    border: 1px solid rgba(255, 255, 255, .95);
+    border-radius: 13px;
+    background: rgba(255, 255, 255, .6);
+    color: var(--text-primary);
+    box-shadow: 0 6px 16px -10px rgba(15, 110, 86, .35);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    font-weight: 800;
+    font-size: 13px;
+    cursor: pointer;
+    min-height: 46px;
+    padding: 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: inherit;
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.heroSecondary:hover {
+    background: rgba(255, 255, 255, .85);
+    transform: translateY(-1px);
+}
+
+[data-theme="dark"] .heroSecondary {
+    border-color: rgba(255, 255, 255, .18);
+    background: rgba(255, 255, 255, .08);
+}
+
+[data-theme="dark"] .heroSecondary:hover {
+    background: rgba(255, 255, 255, .14);
+}
+
+/* ── Cards ────────────────────────────────────────────────────────── */
+/* Same hairline-border + surface + theme-shadow treatment as the
+   customer hub's cards - not a heavier, differently-colored panel. */
+
+.grid2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.card,
+.section {
+    background: var(--bg-surface);
+    border: 0.5px solid var(--border-color);
+    border-radius: 20px;
+    box-shadow: 0 12px 35px var(--shadow-color);
+}
+
+.card {
+    padding: 22px;
+}
+
+.cardHead,
+.sectionHead {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    align-items: flex-start;
+}
+
+.card h2,
+.section h2 {
+    margin: 4px 0 0;
+    font-size: 19px;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+}
+
+.card p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    font-size: 13.5px;
+}
+
+.healthIcon,
+.typeIcon,
+.serviceIcon,
+.activityIcon {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    font-size: 18px;
+}
+
+.progress {
+    height: 8px;
+    background: var(--bg-surface-alt);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 18px;
+}
+
+.progress span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    border-radius: inherit;
+}
+
+.textButton {
+    background: none;
+    border: 0;
+    color: var(--accent);
+    font-weight: 800;
+    font-size: 13px;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.textButton:hover {
+    color: var(--accent-hover);
+}
+
+.section {
+    padding: 22px;
+}
+
+.sectionHint {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+/* ── Services ─────────────────────────────────────────────────────── */
+/* Each service gets its own meaningful icon (mapped in the component by
+   serviceCode) instead of a single repeated "AI sparkle" glyph, so the
+   grid actually communicates what each service is at a glance. */
+
+.serviceGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.serviceCard {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 16px;
+    border: 0.5px solid var(--border-color);
+    border-radius: 16px;
+    background: var(--bg-surface-alt);
+    transition: border-color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.serviceCard:hover {
+    border-color: color-mix(in srgb, var(--accent) 40%, var(--border-color));
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px var(--shadow-color);
+}
+
+.serviceMain {
+    min-width: 0;
+    flex: 1;
+}
+
+.serviceMain h3 {
+    font-size: 14px;
+    margin: 0 0 4px;
+    color: var(--text-primary);
+}
+
+.serviceMain p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.serviceArrow {
+    color: var(--text-secondary);
+    flex: 0 0 auto;
+}
+
+/* ── Activity ─────────────────────────────────────────────────────── */
+
+.activity {
+    margin-top: 12px;
+}
+
+.activityRow {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 14px 0;
+    border-bottom: 0.5px solid var(--border-color);
+}
+
+.activityRow:last-child {
+    border-bottom: 0;
+}
+
+.activityIcon {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    font-size: 16px;
+}
+
+.minus {
+    background: var(--bg-soft-accent);
+    color: var(--accent);
+}
+
+.plus {
+    background: color-mix(in srgb, var(--accent) 20%, var(--bg-soft-accent));
+    color: var(--accent);
+}
+
+.activityInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+.activityInfo strong,
+.activityInfo span {
+    display: block;
+}
+
+.activityInfo strong {
+    font-size: 13.5px;
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.activityInfo span {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.activityAmount {
+    font-weight: 850;
+    color: var(--text-secondary);
+    font-size: 14px;
+    flex: 0 0 auto;
+}
+
+.positive {
+    color: var(--accent);
+}
+
+.empty {
+    text-align: center;
+    padding: 44px 20px;
+    color: var(--text-secondary);
+}
+
+.empty i {
+    font-size: 26px;
+    color: var(--accent);
+}
+
+.empty h3 {
+    color: var(--text-primary);
+    margin: 10px 0 5px;
+    font-size: 15px;
+}
+
+.empty p {
+    font-size: 13px;
+    margin: 0;
+}
+
+/* ── Banners ──────────────────────────────────────────────────────── */
+
+.error,
+.notice {
+    padding: 13px 16px;
+    border-radius: 14px;
+    background: var(--bg-surface);
+    border: 0.5px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+}
+
+.error {
+    color: var(--danger-text);
+    background: var(--danger-bg);
+    border-color: var(--danger-border);
+}
+
+.notice {
+    color: var(--text-primary);
+}
+
+.error button,
+.notice button {
+    border: 0;
+    background: none;
+    cursor: pointer;
+    color: inherit;
+    font-weight: 700;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+}
+
+/* ── Loading state ────────────────────────────────────────────────── */
+
+.loadingLine {
+    padding: 30px 4px;
+    color: var(--text-secondary);
+    font-size: 13.5px;
+}
+
+.skeletonHero {
+    height: 300px;
+    border-radius: 26px;
+    background: linear-gradient(90deg, var(--bg-surface-alt), var(--bg-surface), var(--bg-surface-alt));
+    background-size: 200% 100%;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        background-position: 0% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ── Modals ───────────────────────────────────────────────────────── */
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 20, 16, 0.58);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.sheet {
+    position: relative;
+    width: min(560px, 100%);
+    background: var(--bg-surface);
+    border: 0.5px solid var(--border-color);
+    border-radius: 26px;
+    padding: 28px;
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.35);
+    max-height: min(90vh, 760px);
+    overflow: auto;
+    color: var(--text-primary);
+}
+
+.close {
+    position: absolute;
+    right: 16px;
+    top: 16px;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+}
+
+.sheet h2 {
+    font-size: 25px;
+    letter-spacing: -0.03em;
+    margin: 4px 40px 6px 0;
+    color: var(--text-primary);
+}
+
+.sheetSub {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    font-size: 13.5px;
+    margin: 0 0 4px;
+}
+
+.amountGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 9px;
+    margin: 20px 0;
+}
+
+.amount,
+.amountActive {
+    border: 0.5px solid var(--border-color);
+    background: var(--bg-surface-alt);
+    border-radius: 14px;
+    padding: 12px 8px;
+    font-weight: 850;
+    font-size: 14px;
+    color: var(--text-primary);
+    cursor: pointer;
+    min-height: 58px;
+    font-family: inherit;
+}
+
+.amountActive {
+    background: var(--bg-soft-accent);
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.amount small {
+    display: block;
+    font-size: 9px;
+    color: var(--accent);
+    margin-top: 3px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.customWrap>span {
+    display: block;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    margin-bottom: 7px;
+}
+
+.customWrap>div {
+    display: flex;
+    border: 0.5px solid var(--border-color);
+    border-radius: 13px;
+    overflow: hidden;
+    height: 48px;
+    background: var(--bg-surface);
+}
+
+.customWrap b {
+    display: grid;
+    place-items: center;
+    padding: 0 14px;
+    background: var(--bg-surface-alt);
+    color: var(--text-secondary);
+}
+
+.customWrap input {
+    border: 0;
+    outline: 0;
+    flex: 1;
+    padding: 0 14px;
+    font-size: 15px;
+    background: transparent;
+    color: var(--text-primary);
+    font-family: inherit;
+    min-width: 0;
+}
+
+.purchaseSummary {
+    margin: 18px 0;
+    background: var(--bg-surface-alt);
+    border-radius: 16px;
+    padding: 14px 15px;
+}
+
+.purchaseSummary div {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.purchaseSummary strong {
+    font-weight: 850;
+    color: var(--text-primary);
+}
+
+.purchaseSummary .total {
+    border-top: 0.5px solid var(--border-color);
+    margin-top: 6px;
+    padding-top: 11px;
+    font-size: 14px;
+}
+
+.payButton {
+    width: 100%;
+    min-height: 52px;
+    font-size: 14px;
+}
+
+.payButton:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.termsMini {
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    text-align: center;
+    margin: 12px 0 0;
+}
+
+.termsList {
+    margin: 18px 0;
+}
+
+.termsList div {
+    display: flex;
+    gap: 11px;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 0.5px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.termsList div:last-child {
+    border-bottom: 0;
+}
+
+.termsList i {
+    color: var(--accent);
+    font-size: 17px;
+    margin-top: 1px;
+}
+
+.agreementBody {
+    margin: 16px 0 4px;
+    max-height: 46vh;
+    overflow-y: auto;
+    padding-right: 6px;
+    border: 0.5px solid var(--border-color);
+    border-radius: 14px;
+    padding: 14px 16px;
+    background: var(--bg-surface-alt);
+}
+
+.agreementBody h4 {
+    font-size: 13px;
+    font-weight: 850;
+    color: var(--text-primary);
+    margin: 16px 0 6px;
+}
+
+.agreementBody h4:first-child {
+    margin-top: 0;
+}
+
+.agreementBody p {
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin: 0 0 6px;
+}
+
+.agreementBody ul {
+    margin: 0 0 6px;
+    padding-left: 18px;
+}
+
+.agreementBody li {
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin: 0 0 5px;
+}
+
+.agreementFooter {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-align: center;
+    margin: 12px 0 0;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+    .breakdownInline {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 640px) {
+    .page {
+        gap: 18px;
+    }
+
+    .topRow {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    /* The hero panel below carries its own "Add Credits" button on
+       mobile, so this top one would just be a redundant duplicate
+       taking up extra height above the fold. */
+    .buyTop {
+        display: none;
+    }
+
+    .hero {
+        border-radius: 20px;
+        padding: 18px 20px;
+    }
+
+    .heroActions {
+        flex-direction: column;
+    }
+
+    .hero .primary,
+    .heroSecondary {
+        width: 100%;
+    }
+
+    .balance {
+        font-size: 38px;
+        margin: 10px 0 8px;
+    }
+
+    .grid2 {
+        grid-template-columns: 1fr;
+    }
+
+    .card,
+    .section {
+        border-radius: 18px;
+        padding: 18px;
+    }
+
+    .sectionHead {
+        align-items: center;
+    }
+
+    .serviceGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .activityRow {
+        align-items: flex-start;
+    }
+
+    .activityAmount {
+        font-size: 13px;
+    }
+
+    .sheet {
+        padding: 22px 16px;
+        border-radius: 22px;
+        align-self: flex-end;
+        max-height: 92vh;
+    }
+
+    .overlay {
+        padding: 0;
+    }
+
+    .amountGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .sheet h2 {
+        font-size: 22px;
+    }
+
+    .close {
+        right: 12px;
+        top: 12px;
+    }
+}
+
+@media (max-width: 380px) {
+    .balance {
+        font-size: 32px;
+    }
+
+    .amountGrid {
+        gap: 7px;
+    }
+
+    .amount,
+    .amountActive {
+        font-size: 13px;
+    }
+}
