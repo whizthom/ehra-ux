@@ -2626,10 +2626,12 @@
     --emp-shadow-soft: 0 18px 50px -34px rgba(15, 23, 42, .32);
     --emp-shadow-card: 0 10px 34px -28px rgba(15, 23, 42, .42);
     --emp-line: color-mix(in srgb, var(--border-color) 82%, transparent);
-    background:
-        radial-gradient(circle at 88% -8%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 32%),
-        radial-gradient(circle at 35% 0%, color-mix(in srgb, var(--accent) 4%, transparent), transparent 30%),
-        var(--bg-page);
+    /* Plain page background - no accent-tinted wash. This sits behind
+       every panel on the dashboard (Quick actions, Pending approvals,
+       Leave requests, Latest attendance, etc.), so a green-tinted radial
+       glow here read as a coloured cast on the background around all of
+       them, not any one panel's own shadow. */
+    background: var(--bg-page);
 }
 
 .sidebar {
@@ -2873,7 +2875,7 @@
 .qaBtn:hover {
     transform: translateY(-1px);
     border-color: color-mix(in srgb, var(--accent) 30%, var(--border-color));
-    box-shadow: 0 12px 24px -22px var(--accent);
+    box-shadow: 0 12px 24px -22px rgba(15, 23, 42, .38);
 }
 
 .qaIconWrap {
