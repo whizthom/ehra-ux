@@ -24,15 +24,52 @@ function Settings({ type, business, owner, onBack }) {
     enabled: true,
   });
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [saveError, setSaveError] = useState("");
   useEffect(() => {
     getWhatsAppSettings()
       .then((r) => setWa(r.data || wa))
       .catch(() => {});
   }, []);
+  const setField = (patch) => {
+    setWa((x) => ({ ...x, ...patch }));
+    setErrors({});
+    setSaveError("");
+  };
+  const validate = () => {
+    const next = {};
+    const digits = (wa.phoneNumber || "").replace(/\D/g, "");
+    if (wa.enabled !== false) {
+      if (!digits) {
+        next.phoneNumber = "Enter the WhatsApp number customers should reach.";
+      } else if (digits.length < 7) {
+        next.phoneNumber = "That number looks too short - check the digits.";
+      }
+      if (!(wa.countryCode || "").trim()) {
+        next.countryCode = "Enter the country code, e.g. 234.";
+      }
+    }
+    setErrors(next);
+    return next;
+  };
   const save = async () => {
-    await saveWhatsAppSettings(wa);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+    const found = validate();
+    if (Object.keys(found).length > 0) return;
+    setSaving(true);
+    setSaveError("");
+    try {
+      await saveWhatsAppSettings(wa);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (err) {
+      setSaveError(
+        err?.response?.data?.message ||
+          "Couldn't save WhatsApp settings - check your connection and try again.",
+      );
+    } finally {
+      setSaving(false);
+    }
   };
   return (
     <>
@@ -66,28 +103,31 @@ function Settings({ type, business, owner, onBack }) {
             <Field
               label="WhatsApp number"
               value={wa.phoneNumber || ""}
-              onChange={(e) => setWa({ ...wa, phoneNumber: e.target.value })}
+              onChange={(e) => setField({ phoneNumber: e.target.value })}
               placeholder="e.g. 2348012345678"
+              error={errors.phoneNumber}
             />
             <Field
               label="Country code"
               value={wa.countryCode || ""}
               onChange={(e) =>
-                setWa({ ...wa, countryCode: e.target.value.replace(/\D/g, "") })
+                setField({ countryCode: e.target.value.replace(/\D/g, "") })
               }
               placeholder="234"
+              error={errors.countryCode}
             />
           </div>
           <label className={s.toggle}>
             <input
               type="checkbox"
               checked={wa.enabled !== false}
-              onChange={(e) => setWa({ ...wa, enabled: e.target.checked })}
+              onChange={(e) => setField({ enabled: e.target.checked })}
             />
             <span>Enable WhatsApp links</span>
           </label>
-          <button className={s.primary} onClick={save}>
-            {saved ? "Saved" : "Save WhatsApp settings"}
+          {saveError && <p className={s.formErrorSummary}>{saveError}</p>}
+          <button className={s.primary} onClick={save} disabled={saving}>
+            {saving ? "Saving…" : saved ? "Saved" : "Save WhatsApp settings"}
           </button>
         </Panel>
       </div>

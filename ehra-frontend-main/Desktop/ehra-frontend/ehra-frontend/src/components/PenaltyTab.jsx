@@ -7,6 +7,7 @@ import {
   getFinalizedPeriods,
   finalizePayrollNow,
 } from "../api/penaltyApi";
+import RunPayrollConfirmModal from "./RunPayrollConfirmModal";
 import styles from "./PenaltyTab.module.css";
 
 function formatMoney(value) {
@@ -122,6 +123,7 @@ export default function PenaltyTab() {
   const [search, setSearch] = useState("");
   const [runningNow, setRunningNow] = useState(false);
   const [runMessage, setRunMessage] = useState("");
+  const [showRunConfirm, setShowRunConfirm] = useState(false);
 
   const fetchPeriods = useCallback(async () => {
     try {
@@ -167,6 +169,7 @@ export default function PenaltyTab() {
       );
     } finally {
       setRunningNow(false);
+      setShowRunConfirm(false);
     }
   };
 
@@ -459,7 +462,7 @@ export default function PenaltyTab() {
 
         <button
           className={styles.runBtn}
-          onClick={handleRunNow}
+          onClick={() => setShowRunConfirm(true)}
           disabled={runningNow}
           title="Finalize the current period now instead of waiting for the payout day"
         >
@@ -467,6 +470,13 @@ export default function PenaltyTab() {
           {runningNow ? "Running…" : "Run payroll now"}
         </button>
       </div>
+
+      <RunPayrollConfirmModal
+        open={showRunConfirm}
+        onCancel={() => setShowRunConfirm(false)}
+        onConfirm={handleRunNow}
+        loading={runningNow}
+      />
 
       {runMessage && <div className={styles.runMessage}>{runMessage}</div>}
 

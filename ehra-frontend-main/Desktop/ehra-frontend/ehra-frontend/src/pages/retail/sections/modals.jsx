@@ -72,7 +72,11 @@ function ProductModal({
     variants: initialVariants,
   });
   const [uploading, setUploading] = useState(false);
-  const set = (k, v) => setD((x) => ({ ...x, [k]: v }));
+  const [errors, setErrors] = useState({});
+  const set = (k, v) => {
+    setD((x) => ({ ...x, [k]: v }));
+    setErrors((e) => (e[k] ? { ...e, [k]: undefined } : e));
+  };
   const addVariant = () =>
     setD((x) => ({
       ...x,
@@ -132,6 +136,19 @@ function ProductModal({
       imageUrl: d.imageFiles?.[0] || d.imageUrl,
       variantsJson: JSON.stringify(d.variants || []),
     });
+  const validate = () => {
+    const next = {};
+    if (!d.name.trim()) next.name = "Product name is required.";
+    if (!d.price || Number(d.price) <= 0)
+      next.price = "Enter a selling price greater than 0.";
+    setErrors(next);
+    return next;
+  };
+  const handleSaveClick = () => {
+    const found = validate();
+    if (Object.keys(found).length > 0) return;
+    submit();
+  };
   return (
     <Modal
       title={item ? "Edit product" : "Add product"}
@@ -168,6 +185,7 @@ function ProductModal({
               value={d.name}
               onChange={(e) => set("name", e.target.value)}
               placeholder="e.g. Classic Cotton T-Shirt"
+              error={errors.name}
             />
             <CategorySelect
               label="Category"
@@ -292,6 +310,7 @@ function ProductModal({
               step="0.01"
               value={d.price}
               onChange={(e) => set("price", e.target.value)}
+              error={errors.price}
             />
             <Field
               label={`Cost price (${d.currency || currency})`}
@@ -458,13 +477,20 @@ function ProductModal({
         </div>
       </div>
       <div className={`${s.modalFoot} ${s.productModalFoot}`}>
+        {Object.values(errors).some(Boolean) && (
+          <p className={s.formErrorSummary}>
+            Please fix the highlighted field
+            {Object.values(errors).filter(Boolean).length > 1 ? "s" : ""} above
+            before saving.
+          </p>
+        )}
         <button className={s.outline} onClick={onClose}>
           Cancel
         </button>
         <button
           className={s.primary}
-          disabled={!d.name.trim() || !d.price || uploading}
-          onClick={submit}
+          disabled={uploading}
+          onClick={handleSaveClick}
         >
           {item ? "Save changes" : "Save product"}
         </button>

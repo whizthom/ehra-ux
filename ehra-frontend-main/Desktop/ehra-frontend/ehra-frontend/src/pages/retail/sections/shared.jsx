@@ -57,11 +57,12 @@ function Modal({ title, onClose, children, className = "" }) {
     </div>
   );
 }
-function Field({ label, ...p }) {
+function Field({ label, error, ...p }) {
   return (
-    <label className={s.field}>
+    <label className={`${s.field}${error ? ` ${s.fieldInvalid}` : ""}`}>
       <span>{label}</span>
       <input {...p} />
+      {error && <small className={s.fieldErrorMsg}>{error}</small>}
     </label>
   );
 }
