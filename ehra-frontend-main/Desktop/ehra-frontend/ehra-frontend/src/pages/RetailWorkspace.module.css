@@ -128,6 +128,7 @@
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border-color);
   padding: 13px 34px;
+  padding-top: calc(13px + env(safe-area-inset-top, 0px));
   display: flex;
   flex-direction: column;
   gap: 3px
@@ -1479,9 +1480,18 @@ td small {
   padding: 11px 0
 }
 
+.cartRow>span:first-child {
+  /* Grid items default to min-width: auto (content-sized), so a long
+     product name with no spaces to wrap at - a SKU-style name, say -
+     could otherwise force this column wider than the cart and push the
+     qty/remove controls out, on a narrow phone especially. */
+  min-width: 0;
+}
+
 .cartRow b,
 .cartRow small {
-  display: block
+  display: block;
+  overflow-wrap: break-word;
 }
 
 .cartRow small {
@@ -1544,6 +1554,38 @@ td small {
   margin-top: 20px;
   padding-top: 16px;
   border-top: 1px solid var(--border-color)
+}
+
+/* POS on phones: the two-column products/cart grid above (1.35fr .65fr)
+   was never given a mobile treatment, so below 900px it was squeezing a
+   4-column product picker and the whole cart into a sliver as narrow as
+   ~120-150px - unusable for a screen a cashier relies on all day. */
+@media(max-width:900px) {
+  .pos {
+    grid-template-columns: 1fr;
+  }
+
+  .productPicker {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    /* Letting the picker scroll the page itself, instead of scrolling
+       inside its own 540px box, avoids a nested scroll region fighting
+       the cart below it for touch/swipe gestures on a phone. */
+    max-height: none;
+    overflow: visible;
+  }
+
+  /* The +/- quantity buttons are tapped repeatedly during a live sale;
+     28px was below a comfortable phone touch target. */
+  .cartRow button {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+@media(max-width:600px) {
+  .productPicker {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .overlay {
@@ -2264,7 +2306,10 @@ td small {
   }
 
   .content {
-    padding-bottom: 112px
+    /* Clears the fixed .mobileNav below: 6px top pad + 58px item
+       min-height + 7px bottom pad (its own env(safe-area-inset-bottom)
+       is added separately, since it doesn't apply to this padding). */
+    padding-bottom: calc(71px + env(safe-area-inset-bottom, 0px))
   }
 
   .mobileNav {
@@ -2535,7 +2580,9 @@ td small {
   .content {
     padding-left: 12px;
     padding-right: 12px;
-    padding-bottom: 108px
+    /* Same .mobileNav clearance as the 900px breakpoint above - the nav
+       itself doesn't change size at this width, so this shouldn't either. */
+    padding-bottom: calc(71px + env(safe-area-inset-bottom, 0px))
   }
 
   .hero {
@@ -5138,6 +5185,12 @@ td small {
     inset: 0;
     z-index: 140;
     height: 100dvh;
+    /* --app-vh (see useVisualViewportHeight.js) tracks the on-screen
+       keyboard, which dvh alone doesn't reliably do on every device —
+       falls straight back to the 100dvh above on any browser that
+       doesn't support visualViewport. Without this the composer/header
+       here is the exact case that hook was written to fix. */
+    height: var(--app-vh, 100dvh);
     border-bottom: 0
   }
 }

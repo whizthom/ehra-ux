@@ -963,6 +963,20 @@
     }
 }
 
+@media (max-width: 899.98px) {
+
+    /* Below 900px .dock is a full-width bar (12px top pad + 52px button +
+       12px bottom pad; its own env(safe-area-inset-bottom) is added
+       separately here since it doesn't apply to this padding) rather than
+       the floating pill it becomes at 900px+, so the flat 110px above -
+       sized for the pill - left dead space under the content on phones
+       without a safe-area inset and could run tight on phones with a
+       taller one. */
+    .main {
+        padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+    }
+}
+
 @media (min-width: 640px) {
     .identity {
         flex-direction: row;

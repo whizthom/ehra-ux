@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
+import useVisualViewportHeight from "./hooks/useVisualViewportHeight";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -71,6 +72,12 @@ function RootEntry() {
 }
 
 function App() {
+  // Keeps --app-vh (consumed by the locked app-shell CSS across Dashboard,
+  // EmployeeDashboard, CustomerDashboard and RetailWorkspace) in sync with
+  // the real visible viewport, including when the on-screen keyboard opens.
+  // Mounted once at the app root so it's active on every route.
+  useVisualViewportHeight();
+
   return (
     <AuthProvider>
       <BrowserRouter>

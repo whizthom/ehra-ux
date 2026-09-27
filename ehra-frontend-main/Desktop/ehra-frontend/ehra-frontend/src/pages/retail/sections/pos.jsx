@@ -526,6 +526,7 @@ function POS({
                 </span>
                 <div>
                   <button
+                    aria-label={`Decrease quantity of ${i.name}`}
                     onClick={() =>
                       setCart((c) =>
                         c.map((x) =>
@@ -540,6 +541,7 @@ function POS({
                   </button>
                   <b>{i.quantity}</b>
                   <button
+                    aria-label={`Increase quantity of ${i.name}`}
                     onClick={() =>
                       setCart((c) =>
                         c.map((x) =>

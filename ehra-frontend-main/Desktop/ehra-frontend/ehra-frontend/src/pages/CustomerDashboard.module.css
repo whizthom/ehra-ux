@@ -251,13 +251,13 @@
 }
 
 .topbar {
-  height: 86px;
+  min-height: 86px;
   background: var(--bg-surface);
   backdrop-filter: blur(16px);
   border-bottom: 0.5px solid var(--border-color);
   display: flex;
   align-items: center;
-  padding: 0 clamp(20px, 4vw, 48px);
+  padding: env(safe-area-inset-top, 0px) clamp(20px, 4vw, 48px) 0;
   gap: 20px;
   position: sticky;
   top: 0;
@@ -5201,6 +5201,12 @@
     inset: 0;
     z-index: 300;
     height: 100dvh;
+    /* --app-vh (see useVisualViewportHeight.js) tracks the on-screen
+       keyboard, which dvh alone doesn't reliably do on every device —
+       falls straight back to the 100dvh above on any browser that
+       doesn't support visualViewport. Without this the composer/header
+       here is the exact case that hook was written to fix. */
+    height: var(--app-vh, 100dvh);
     background: var(--bg-page);
   }
 }
@@ -5219,6 +5225,11 @@
 .shell {
   height: 100vh;
   height: 100dvh;
+  /* --app-vh (see useVisualViewportHeight.js) tracks the on-screen
+     keyboard too, which dvh alone doesn't reliably do on every device —
+     falls straight back to the 100dvh above on any browser that doesn't
+     support visualViewport. */
+  height: var(--app-vh, 100dvh);
   min-height: 0;
   overflow: hidden;
 }

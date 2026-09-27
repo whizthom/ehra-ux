@@ -296,7 +296,12 @@
 .formBody {
     flex: 1;
     min-height: 0;
-    overflow: hidden;
+    /* Was overflow: hidden with no scroll fallback anywhere else in this
+       file - if the form's fields + validation errors ever ran taller
+       than the visible viewport (easy with the keyboard open), there
+       was no way to reach anything below the fold, on any device. */
+    overflow-y: auto;
+    overflow-x: hidden;
     padding: 24px 48px;
     display: flex;
     flex-direction: column;
@@ -574,6 +579,11 @@
         flex-direction: column;
         height: 100vh;
         height: 100dvh;
+        /* --app-vh (see useVisualViewportHeight.js) tracks the on-screen
+           keyboard too, which dvh alone doesn't reliably do on every
+           device — falls straight back to the 100dvh above on any
+           browser that doesn't support visualViewport. */
+        height: var(--app-vh, 100dvh);
         overflow: hidden;
     }
 
@@ -764,13 +774,13 @@
     transition: all 0.15s ease;
 }
 
-.termsCheck input:checked + .termsBox {
+.termsCheck input:checked+.termsBox {
     background: #0f6e56;
     border-color: #0f6e56;
     color: #fff;
 }
 
-.termsCheck input:focus-visible + .termsBox {
+.termsCheck input:focus-visible+.termsBox {
     outline: 3px solid rgba(15, 110, 86, 0.18);
     outline-offset: 2px;
 }
