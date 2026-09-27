@@ -2832,7 +2832,11 @@
 .missingClockOutPanel {
     border-radius: var(--emp-radius-lg);
     border: 1px solid var(--emp-line);
-    background: color-mix(in srgb, var(--bg-surface) 97%, var(--accent) 3%);
+    /* Plain surface, same as panels on every other page - no accent
+       tint. A 3% green mixed into every panel's own fill (not just its
+       shadow) is what was reading as a green cast on these specific
+       panels even once their shadows were neutral. */
+    background: var(--bg-surface);
     box-shadow: var(--emp-shadow-card);
 }
 
