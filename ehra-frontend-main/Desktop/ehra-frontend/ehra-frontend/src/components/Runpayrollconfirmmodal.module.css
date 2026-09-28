@@ -178,7 +178,6 @@
 }
 
 [data-theme="dark"] .cancelBtn {
-    color: var(--text-primary);
     background: color-mix(in srgb, var(--bg-surface) 76%, transparent);
     border-color: color-mix(in srgb, var(--cust-glow, var(--accent)) 18%, var(--border-color));
 }
