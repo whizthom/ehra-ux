@@ -1487,7 +1487,7 @@ td small {
 
 .cartRow {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr auto auto auto;
   gap: 8px;
   align-items: center;
   border-bottom: 1px solid var(--border-color);
@@ -1522,6 +1522,19 @@ td small {
   height: 28px;
   border-radius: 6px;
   cursor: pointer
+}
+
+.cartRow button.cartRemove {
+  color: #c0392b;
+  border-color: rgba(192, 57, 43, .35);
+  background: transparent;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0
+}
+
+.cartRow button.cartRemove:hover {
+  background: rgba(192, 57, 43, .1)
 }
 
 .checkout {
@@ -2257,7 +2270,7 @@ td small {
   }
 
   .cartRow {
-    grid-template-columns: 1fr auto auto
+    grid-template-columns: 1fr auto auto auto
   }
 
   .modal {

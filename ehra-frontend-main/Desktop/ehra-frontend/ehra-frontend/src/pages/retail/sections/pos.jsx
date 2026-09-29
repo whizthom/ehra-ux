@@ -562,6 +562,17 @@ function POS({
                   </button>
                 </div>
                 <strong>{money(i.price * i.quantity)}</strong>
+                <button
+                  type="button"
+                  className={s.cartRemove}
+                  aria-label={`Remove ${i.name} from the sale`}
+                  title="Remove from sale"
+                  onClick={() =>
+                    setCart((c) => c.filter((x) => x.productId !== i.productId))
+                  }
+                >
+                  ×
+                </button>
               </div>
             ))
           ) : (
