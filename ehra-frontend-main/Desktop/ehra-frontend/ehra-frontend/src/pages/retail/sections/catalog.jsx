@@ -14,23 +14,49 @@ import {
   today,
 } from "./shared";
 import { ConfirmModal } from "./modals";
+import ArchiveConfirmModal from "../../../components/ArchiveConfirmModal";
 function Products({
   items,
+  archivedItems = [],
   query,
   setQuery,
   onAdd,
   onEdit,
   onDelete,
+  onRestore,
   onActivate,
   money,
 }) {
   const [archiveTarget, setArchiveTarget] = useState(null);
+  const [archiving, setArchiving] = useState(false);
+  const [archiveError, setArchiveError] = useState("");
+  const [view, setView] = useState("active");
+  const [restoringId, setRestoringId] = useState(null);
+  const showingArchived = view === "archived";
+  const rows = showingArchived ? archivedItems : items;
   const archive = async () => {
-    if (!archiveTarget) return;
+    if (!archiveTarget || archiving) return;
+    setArchiving(true);
+    setArchiveError("");
     try {
       await onDelete(archiveTarget);
-    } finally {
       setArchiveTarget(null);
+    } catch (e) {
+      setArchiveError(
+        e?.response?.data?.message ||
+          "Couldn't archive this product. Please try again.",
+      );
+    } finally {
+      setArchiving(false);
+    }
+  };
+  const restore = async (p) => {
+    if (restoringId) return;
+    setRestoringId(p.id);
+    try {
+      await onRestore?.(p);
+    } finally {
+      setRestoringId(null);
     }
   };
   return (
@@ -64,9 +90,37 @@ function Products({
           </button>
         </div>
       </div>
+      <div className={s.catalogTabs} role="tablist" aria-label="Product view">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={!showingArchived}
+          className={!showingArchived ? s.catalogTabActive : ""}
+          onClick={() => setView("active")}
+        >
+          Active ({items.length})
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={showingArchived}
+          className={showingArchived ? s.catalogTabActive : ""}
+          onClick={() => setView("archived")}
+        >
+          Archived ({archivedItems.length})
+        </button>
+      </div>
       <Panel
-        title={`${items.length} products`}
-        sub="Selling prices are customer-facing. Cost information stays inside the business workspace."
+        title={
+          showingArchived
+            ? `${rows.length} archived product${rows.length === 1 ? "" : "s"}`
+            : `${rows.length} products`
+        }
+        sub={
+          showingArchived
+            ? "Archived products are hidden from the POS and your store. Restore one to sell it again."
+            : "Selling prices are customer-facing. Cost information stays inside the business workspace."
+        }
       >
         <div className={s.tableWrap}>
           <table>
@@ -82,7 +136,7 @@ function Products({
               </tr>
             </thead>
             <tbody>
-              {items.map((p) => (
+              {rows.map((p) => (
                 <tr key={p.id}>
                   <td>
                     <b>{p.name}</b>
@@ -97,7 +151,9 @@ function Products({
                       : "Not tracked"}
                   </td>
                   <td>
-                    <span className={s.badge}>{p.status}</span>
+                    <span className={s.badge}>
+                      {showingArchived ? "ARCHIVED" : p.status}
+                    </span>
                     {p.creditActive === false && (
                       <span
                         className={s.badge}
@@ -109,29 +165,50 @@ function Products({
                     )}
                   </td>
                   <td>
-                    <button className={s.textBtn} onClick={() => onEdit(p)}>
-                      Edit
-                    </button>
-                    {p.creditActive === false && (
+                    {showingArchived ? (
                       <button
                         className={s.textBtn}
-                        onClick={() => onActivate?.(p)}
+                        onClick={() => restore(p)}
+                        disabled={restoringId === p.id}
                       >
-                        Activate
+                        {restoringId === p.id ? "Restoring…" : "Restore"}
                       </button>
+                    ) : (
+                      <>
+                        <button className={s.textBtn} onClick={() => onEdit(p)}>
+                          Edit
+                        </button>
+                        {p.creditActive === false && (
+                          <button
+                            className={s.textBtn}
+                            onClick={() => onActivate?.(p)}
+                          >
+                            Activate
+                          </button>
+                        )}
+                        <button
+                          className={s.textDanger}
+                          onClick={() => {
+                            setArchiveError("");
+                            setArchiveTarget(p);
+                          }}
+                        >
+                          Archive
+                        </button>
+                      </>
                     )}
-                    <button
-                      className={s.textDanger}
-                      onClick={() => setArchiveTarget(p)}
-                    >
-                      Archive
-                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {!items.length && (
+          {showingArchived && !rows.length && (
+            <Empty
+              title="No archived products"
+              text="Products you archive will appear here so you can restore them."
+            />
+          )}
+          {!showingArchived && !items.length && (
             <Empty
               title="No products yet"
               text="Build your catalogue and start selling from the POS."
@@ -144,20 +221,16 @@ function Products({
           )}
         </div>
       </Panel>
-      {archiveTarget && (
-        <ConfirmModal
-          title="Archive product"
-          eyebrow="ARCHIVE PRODUCT"
-          confirmLabel="Archive product"
-          onClose={() => setArchiveTarget(null)}
-          onConfirm={archive}
-        >
-          <p>
-            Archive <strong>{archiveTarget.name}</strong>? The product will no
-            longer appear as an active product.
-          </p>
-        </ConfirmModal>
-      )}
+      <ArchiveConfirmModal
+        open={!!archiveTarget}
+        productName={archiveTarget?.name}
+        error={archiveError}
+        loading={archiving}
+        onCancel={() => {
+          if (!archiving) setArchiveTarget(null);
+        }}
+        onConfirm={archive}
+      />
     </>
   );
 }

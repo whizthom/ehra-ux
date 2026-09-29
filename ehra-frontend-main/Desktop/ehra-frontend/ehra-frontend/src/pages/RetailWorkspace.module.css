@@ -5228,3 +5228,31 @@ td small {
     border-bottom: 0
   }
 }
+
+/* Products: Active / Archived switch */
+.catalogTabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  margin: 0 0 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface)
+}
+
+.catalogTabs button {
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer
+}
+
+.catalogTabs button.catalogTabActive {
+  background: var(--accent);
+  color: #fff
+}

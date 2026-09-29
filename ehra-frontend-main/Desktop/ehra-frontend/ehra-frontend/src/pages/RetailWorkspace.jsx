@@ -27,6 +27,7 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
+  restoreProduct,
   activateProduct,
   getOrders,
   getCustomers,
@@ -304,6 +305,7 @@ export default function RetailWorkspace() {
     if (!allowed.has(tab)) setTab("Dashboard");
   }, [allowed, tab]);
   const active = data.products.filter((p) => p.status === "ACTIVE");
+  const archivedProducts = data.products.filter((p) => p.status !== "ACTIVE");
   const productCategories = useMemo(
     () => [
       ...new Set(
@@ -496,6 +498,12 @@ export default function RetailWorkspace() {
           {tab === "Products" && (
             <Products
               items={filtered(active, ["name", "sku", "category", "brand"])}
+              archivedItems={filtered(archivedProducts, [
+                "name",
+                "sku",
+                "category",
+                "brand",
+              ])}
               query={query}
               setQuery={setQuery}
               onAdd={() => {
@@ -509,6 +517,17 @@ export default function RetailWorkspace() {
               onDelete={async (p) => {
                 await deleteProduct(p.id);
                 runLoad();
+              }}
+              onRestore={async (p) => {
+                try {
+                  await restoreProduct(p.id);
+                  runLoad();
+                } catch (e) {
+                  alert(
+                    e?.response?.data?.message ||
+                      "Couldn't restore this product. Please try again.",
+                  );
+                }
               }}
               onActivate={async (p) => {
                 try {

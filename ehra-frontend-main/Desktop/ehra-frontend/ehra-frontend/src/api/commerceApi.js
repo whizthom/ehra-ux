@@ -12,6 +12,10 @@ export const updateProduct = (id, data) =>
 export const deleteProduct = (id) =>
   API.delete(`/products/${id}`);
 
+// Un-archives a product (archived products are INACTIVE).
+export const restoreProduct = (id) =>
+  API.post(`/products/${id}/restore`);
+
 // Retries the Ehral Credits PRODUCT_ACTIVATION charge for a product that
 // was saved without enough credit (or whose monthly renewal lapsed) — see
 // the creditActive flag on the product returned by getProducts/createProduct.
