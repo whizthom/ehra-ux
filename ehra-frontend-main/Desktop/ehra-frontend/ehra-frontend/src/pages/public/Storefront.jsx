@@ -229,6 +229,20 @@ function CustomerGate({ store, slug, gate, setGate, onComplete }) {
     setGate((g) => ({ ...g, open: false, pending: null, message: "" }));
   const setMessage = (message) => setGate((g) => ({ ...g, message }));
 
+  // Existing Ehral numbers (and freshly registered ones) go to the login
+  // page. `storeRedirect` tells Login where to land afterwards: straight
+  // into THIS business's internal customer store.
+  const goToLogin = (phone, message) => {
+    setGate((g) => ({ ...g, open: false, pending: null, message: "" }));
+    navigate("/login", {
+      state: {
+        phone,
+        message,
+        storeRedirect: { slug, businessId: store?.businessId },
+      },
+    });
+  };
+
   const submitPhone = async () => {
     const phone = gate.phone?.trim();
     if (!phone || !isValidPhoneNumber(phone)) {
@@ -245,16 +259,10 @@ function CustomerGate({ store, slug, gate, setGate, onComplete }) {
       }));
       const check = await checkPhoneBeforeOtp(phone);
       if (check?.exists) {
-        setGate((g) => ({
-          ...g,
-          phone: check.phoneNumber || phone,
-          step: "existingLogin",
-          pinId: "",
-          otp: "",
-          phoneVerificationToken: "",
-          message:
-            "This phone number already has an Ehral account. Please sign in instead, or use Forgot password if you need to reset it.",
-        }));
+        goToLogin(
+          check.phoneNumber || phone,
+          "This phone number already has an Ehral account. Sign in to continue to the store.",
+        );
         return;
       }
       setGate((g) => ({
@@ -275,15 +283,10 @@ function CustomerGate({ store, slug, gate, setGate, onComplete }) {
       }));
     } catch (e) {
       if (e?.response?.status === 409) {
-        setGate((g) => ({
-          ...g,
+        goToLogin(
           phone,
-          step: "existingLogin",
-          password: "",
-          message:
-            e?.response?.data?.message ||
-            "This phone number already has an Ehral account. Please sign in or use Forgot password.",
-        }));
+          "This phone number already has an Ehral account. Sign in to continue to the store.",
+        );
       } else {
         setGate((g) => ({
           ...g,
@@ -306,14 +309,19 @@ function CustomerGate({ store, slug, gate, setGate, onComplete }) {
       const v = await verifyOtp(gate.pinId, gate.otp);
       const phoneVerificationToken = v.phoneVerificationToken;
       const check = await checkPhone(phoneVerificationToken);
+      if (check.exists) {
+        goToLogin(
+          v.phoneNumber || gate.phone,
+          "This phone already has an Ehral account. Sign in to continue to the store.",
+        );
+        return;
+      }
       setGate((g) => ({
         ...g,
         phone: v.phoneNumber || g.phone,
         phoneVerificationToken,
-        step: check.exists ? "existingLogin" : "password",
-        message: check.exists
-          ? "This phone already has an Ehral account. Please sign in instead."
-          : "Phone number verified. Create your password to continue.",
+        step: "password",
+        message: "Phone number verified. Create your password to continue.",
       }));
     } catch (e) {
       setGate((g) => ({
@@ -370,6 +378,7 @@ function CustomerGate({ store, slug, gate, setGate, onComplete }) {
           phone: gate.phone,
           message:
             "Your Ehral customer account is ready. Sign in with your password to continue.",
+          storeRedirect: { slug, businessId: store?.businessId },
         },
       });
       setGate((g) => ({

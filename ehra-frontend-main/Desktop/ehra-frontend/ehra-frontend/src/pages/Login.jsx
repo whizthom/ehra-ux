@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import { useAuth } from "../context/AuthContext";
+import { getMyAccounts } from "../api/authApi";
+import { connectCustomerToBusiness } from "../api/commerceApi";
 import {
   sendPhoneOtp,
   confirmPhoneOtp,
@@ -69,7 +71,7 @@ function Ticker() {
 }
 
 export default function Login() {
-  const { login, refreshSession } = useAuth();
+  const { login, refreshSession, switchContext } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -111,7 +113,39 @@ export default function Login() {
   const handlePhoneChange = (value) =>
     setForm((p) => ({ ...p, phone: value || "" }));
 
-  const routeAfterLogin = (data) => {
+  // Set by the public storefront when a visitor had to sign in (or just
+  // registered) before acting: land them inside THAT business's internal
+  // customer store instead of a generic dashboard.
+  const storeRedirect = location.state?.storeRedirect || null;
+
+  const goToInternalStore = async () => {
+    const { slug, businessId } = storeRedirect;
+    const listOf = (r) =>
+      Array.isArray(r)
+        ? r
+        : Array.isArray(r?.data)
+          ? r.data
+          : Array.isArray(r?.data?.accounts)
+            ? r.data.accounts
+            : [];
+    const findMembership = (accounts) =>
+      accounts.find(
+        (a) =>
+          a?.type === "CUSTOMER" &&
+          String(a?.businessId) === String(businessId),
+      );
+    let membership = findMembership(listOf(await getMyAccounts()));
+    if (!membership?.membershipId) {
+      // Existing Ehral identity that isn't a customer of this business yet.
+      await connectCustomerToBusiness(slug);
+      membership = findMembership(listOf(await getMyAccounts()));
+    }
+    if (!membership?.membershipId) throw new Error("No customer membership");
+    await switchContext("CUSTOMER", membership.membershipId);
+    navigate(`/customer/business/${businessId}/store`, { replace: true });
+  };
+
+  const routeAfterLogin = async (data) => {
     // Someone else may have sent an invite link while this person was
     // logged out - InvitationLanding stashes the token here before
     // bouncing them to /login. Finish that trip now that they're signed
@@ -121,6 +155,15 @@ export default function Login() {
       sessionStorage.removeItem("ehra_pending_invite");
       navigate(`/invite/${pendingInvite}`);
       return;
+    }
+
+    if (storeRedirect?.slug && storeRedirect?.businessId) {
+      try {
+        await goToInternalStore();
+        return;
+      } catch {
+        /* fall through to the normal post-login routing below */
+      }
     }
 
     // An Identity holding more than one membership hasn't picked a
@@ -175,7 +218,7 @@ export default function Login() {
         return;
       }
 
-      routeAfterLogin(data);
+      await routeAfterLogin(data);
     } catch (err) {
       // describeApiError distinguishes offline / timeout / unreachable
       // server from an actual credentials error, and - for a real
@@ -240,7 +283,7 @@ export default function Login() {
         data = await verifyTwoFactorLogin(twoFactor.pendingToken, idToken);
       }
       await refreshSession?.();
-      routeAfterLogin(data);
+      await routeAfterLogin(data);
     } catch (err) {
       // Both branches can throw either an axios error (verifyEmailTwoFactorLogin /
       // verifyTwoFactorLogin) or, on the PHONE path, a Firebase SDK error
