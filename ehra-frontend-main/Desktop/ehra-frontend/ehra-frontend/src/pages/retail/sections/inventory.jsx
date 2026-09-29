@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import s from "../../RetailWorkspace.module.css";
 import { Field, Panel, Toolbar } from "./shared";
-import { ConfirmModal } from "./modals";
+import AdjustmentConfirmModal from "../../../components/AdjustmentConfirmModal";
 import { getMovementHistory } from "../../../api/retailApi";
 
 const MOVEMENT_TYPES = [
@@ -614,32 +614,19 @@ function Inventory({ data, products, onAdjust, money, onViewHistory }) {
           </table>
         </div>
       </Panel>
-      {confirmOpen && (
-        <ConfirmModal
-          title="Save adjustment"
-          eyebrow="CONFIRM ADJUSTMENT"
-          confirmLabel={saving ? "Saving…" : "Yes, save adjustment"}
-          danger={false}
-          onClose={() => {
-            if (!saving) setConfirmOpen(false);
-          }}
-          onConfirm={confirmSave}
-        >
-          <p>
-            Record <strong>{movementLabel}</strong> of <strong>{qty}</strong>{" "}
-            unit{Number(qty) === 1 ? "" : "s"} for <strong>{p?.name}</strong>?
-          </p>
-          {note && <p>Note: {note}</p>}
-          <p>
-            This will be saved as a stock movement and change the stock level.
-          </p>
-          {saveError && (
-            <p role="alert" style={{ color: "#c0392b" }}>
-              {saveError}
-            </p>
-          )}
-        </ConfirmModal>
-      )}
+      <AdjustmentConfirmModal
+        open={confirmOpen}
+        productName={p?.name}
+        movementLabel={movementLabel}
+        quantity={qty}
+        note={note}
+        error={saveError}
+        loading={saving}
+        onCancel={() => {
+          if (!saving) setConfirmOpen(false);
+        }}
+        onConfirm={confirmSave}
+      />
     </>
   );
 }
