@@ -1,0 +1,240 @@
+/* Customer sign up - only what Login.module.css doesn't already provide.
+   The shell, fields, buttons and error box come from Login.module.css so the
+   sign in / customer / business screens read as one family. Palette:
+   ink #0B1F1A, forest #0F6E56, mint #55E0AE, line #DBE6E2. */
+
+/* ── Left panel: what the account is for ── */
+.benefits {
+    list-style: none;
+    margin: 22px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.benefit {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.055);
+    border: 0.5px solid rgba(255, 255, 255, 0.09);
+    border-radius: 12px;
+}
+
+.benefitIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(85, 224, 174, 0.14);
+    color: #6be6bd;
+    font-size: 17px;
+}
+
+.benefitBody {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.benefitTitle {
+    color: #eef6f2;
+    font-size: 13.5px;
+    font-weight: 600;
+}
+
+.benefitText {
+    color: #8fa8a0;
+    font-size: 12.5px;
+    line-height: 1.45;
+}
+
+/* ── Step progress ── */
+.progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+}
+
+.progressBars {
+    display: flex;
+    flex: 1;
+    gap: 6px;
+}
+
+.progressBar {
+    flex: 1;
+    height: 3px;
+    border-radius: 2px;
+    background: #dbe6e2;
+    transition: background 0.3s ease;
+}
+
+.progressBarOn {
+    background: linear-gradient(90deg, #0f6e56, #55e0ae);
+}
+
+.progressCount {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 500;
+    color: #8a9791;
+}
+
+/* ── Notice ── */
+.infoBox {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding: 10px 14px;
+    background: #eaf6f1;
+    border: 0.5px solid #bfe4d5;
+    border-radius: 10px;
+}
+
+.infoBox i {
+    flex-shrink: 0;
+    margin-top: 1px;
+    font-size: 15px;
+    color: #0f6e56;
+}
+
+.infoBox p {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: #3d4a45;
+}
+
+/* ── Name fields sit side by side, then stack on the narrowest phones ── */
+.nameRow {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 10px;
+}
+
+/* No icon prefix on the name inputs, so drop the icon gutter. Doubled class
+   so it wins over .input's padding whichever stylesheet loads last. */
+.plainInput.plainInput {
+    padding: 0 12px;
+}
+
+@media (max-width: 340px) {
+    .nameRow {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* ── Password match ── */
+.matchOk,
+.matchBad {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 7px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.matchOk {
+    color: #0f6e56;
+}
+
+.matchBad {
+    color: #a32d2d;
+}
+
+/* ── Terms ── */
+.termsCheck {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 4px 0 14px;
+    padding: 12px;
+    background: #fff;
+    border: 0.5px solid #dbe6e2;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+}
+
+.termsCheck:hover {
+    border-color: #c4d3ce;
+}
+
+.termsCheck input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+
+.termsBox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    border: 1.5px solid #b9c9c3;
+    border-radius: 5px;
+    background: #fff;
+    color: #fff;
+    font-size: 12px;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.termsBox i {
+    opacity: 0;
+    transition: opacity 0.12s;
+}
+
+.termsCheck input:checked+.termsBox {
+    background: #0f6e56;
+    border-color: #0f6e56;
+}
+
+.termsCheck input:checked+.termsBox i {
+    opacity: 1;
+}
+
+.termsCheck input:focus-visible+.termsBox {
+    outline: 2px solid #0f6e56;
+    outline-offset: 2px;
+}
+
+.termsText {
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: #3d4a45;
+}
+
+.termsText a {
+    color: #0f6e56;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.termsText a:hover {
+    color: #085041;
+    text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .progressBar,
+    .termsBox,
+    .termsBox i {
+        transition: none;
+    }
+}

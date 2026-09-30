@@ -13,6 +13,8 @@ import styles from "./Register.module.css";
 import phoneStyles from "./PhoneAuth.module.css";
 import Logo from "../components/Logo";
 import AboutEhralLink from "../components/nav/AboutEhralLink";
+import AuthTabs from "../components/auth/AuthTabs";
+import { useAuth } from "../context/AuthContext";
 
 // Draft is kept in sessionStorage (not localStorage) so it survives a trip
 // between steps or an accidental refresh, but doesn't linger forever on a
@@ -48,6 +50,7 @@ const RESEND_COOLDOWN_SECONDS = 30;
 
 export default function Register() {
   const navigate = useNavigate();
+  const { refreshSession } = useAuth();
 
   // step: "phone" -> "otp" -> "business" -> "personal"
   const [step, setStep] = useState("phone");
@@ -186,7 +189,9 @@ export default function Register() {
   const handleCreateAccount = async () => {
     setError("");
     if (!termsAccepted) {
-      setError("Please agree to the Terms of Service and Privacy Policy before creating your account.");
+      setError(
+        "Please agree to the Terms of Service and Privacy Policy before creating your account.",
+      );
       return;
     }
     if (!firstName.trim() || !lastName.trim()) {
@@ -209,6 +214,9 @@ export default function Register() {
         email: email.trim().toLowerCase(),
       });
       clearDraft();
+      // registerWithPhone saved the session itself; tell AuthContext so the
+      // route guard sees the new user instead of bouncing to /login.
+      refreshSession();
       // STEP 9-10: auto-logged in - redirect exactly as a normal login
       // would, straight into the dashboard (never a needsContextSelection
       // case for a brand-new business, but handled the same way for
@@ -326,6 +334,15 @@ export default function Register() {
           <h1 className={styles.mobileHeadline}>Set up your workspace</h1>
         </div>
 
+        {/* Sign in / Customer sign up / Business sign up. Only offered on the
+            first step - once someone has started verifying a number, the
+            flow itself (with its own "Change number" link) takes over. */}
+        {step === "phone" && (
+          <div className={styles.tabsRow}>
+            <AuthTabs active="business" />
+          </div>
+        )}
+
         <div className={styles.rightHeader}>
           <div className={styles.progressBar}>
             <div
@@ -391,26 +408,6 @@ export default function Register() {
                 {loading ? "Sending code…" : "Send verification code"}
                 {!loading && <i className="ti ti-arrow-right" />}
               </button>
-              {/* Moved up from the page footer - users were missing the
-                  sign-in link buried at the very bottom of the page.
-                  Only shown on this first step: by the time someone's
-                  verified their phone (step 2+), handleVerifyOtp has
-                  already redirected any existing account straight to
-                  /login, so nobody past this point actually needs it. */}
-              <a
-                className={styles.signinPrompt}
-                onClick={() => navigate("/login")}
-              >
-                <span className={styles.signinPromptIcon}>
-                  <i className="ti ti-login-2" />
-                </span>
-                <span className={styles.signinPromptText}>
-                  Already have an account? <strong>Sign in instead</strong>
-                </span>
-                <i
-                  className={`ti ti-arrow-right ${styles.signinPromptArrow}`}
-                />
-              </a>
             </>
           )}
 
@@ -664,7 +661,15 @@ export default function Register() {
                   <i className="ti ti-check" />
                 </span>
                 <span className={styles.termsText}>
-                  I agree to Ehral's <a href="/terms" target="_blank" rel="noreferrer">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.
+                  I agree to Ehral's{" "}
+                  <a href="/terms" target="_blank" rel="noreferrer">
+                    Terms of Service
+                  </a>{" "}
+                  and{" "}
+                  <a href="/privacy" target="_blank" rel="noreferrer">
+                    Privacy Policy
+                  </a>
+                  .
                 </span>
               </label>
 

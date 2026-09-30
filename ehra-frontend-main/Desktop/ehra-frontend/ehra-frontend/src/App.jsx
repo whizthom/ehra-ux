@@ -22,6 +22,7 @@ import EmployerFloatingActions from "./components/EmployerFloatingActions";
 import Register from "./pages/Register";
 import CompleteSetup from "./pages/CompleteSetup";
 import Login from "./pages/Login";
+import CustomerSignup from "./pages/CustomerSignup";
 import ForgotPassword from "./pages/ForgotPassword";
 import VerifyEmail from "./pages/VerifyEmail";
 
@@ -96,6 +97,7 @@ function App() {
             <Route path="/complete-setup" element={<CompleteSetup />} />
 
             <Route path="/login" element={<Login />} />
+            <Route path="/signup/customer" element={<CustomerSignup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
 
             {/* Public "About Ehral" story page - linked to only from

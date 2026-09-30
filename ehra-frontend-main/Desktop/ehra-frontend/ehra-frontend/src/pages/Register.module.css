@@ -14,13 +14,13 @@
 /* ── Left ── */
 .left {
     position: relative;
-    width: 45%;
+    width: 50%;
     background: #0b1f1a;
     background-image: radial-gradient(circle at 12% 8%, rgba(85, 224, 174, 0.16), transparent 42%),
         radial-gradient(circle at 92% 88%, rgba(198, 161, 91, 0.14), transparent 45%);
     background-size: 160% 160%;
     animation: ehraBgDrift 22s ease-in-out infinite;
-    padding: 48px 44px;
+    padding: 44px 52px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -231,6 +231,20 @@
    right panel. !important removes the ordering dependency. */
 .mobileOnlyAboutLink {
     display: none !important;
+}
+
+/* Sign in / Customer sign up / Business sign up - pinned to the same spot
+   as on the sign-in screen so the switch feels like one control. */
+.tabsRow {
+    display: flex;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 40px 48px 4px;
+}
+
+.tabsRow>nav {
+    width: 100%;
+    max-width: 420px;
 }
 
 .rightHeader {
@@ -667,6 +681,10 @@
         margin-top: 1px;
     }
 
+    .tabsRow {
+        padding: 6px 22px 4px;
+    }
+
     .rightHeader {
         flex-shrink: 0;
         padding: 14px 22px 10px;
@@ -675,7 +693,10 @@
     .formBody {
         flex: 1;
         min-height: 0;
-        overflow: hidden;
+        /* auto (not hidden): the tab row above costs vertical space, and a
+           short phone must still be able to reach the submit button. */
+        overflow-y: auto;
+        overflow-x: hidden;
         padding: 12px 22px;
         display: flex;
         flex-direction: column;

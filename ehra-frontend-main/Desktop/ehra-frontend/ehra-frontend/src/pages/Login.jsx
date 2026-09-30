@@ -21,6 +21,7 @@ import styles from "./Login.module.css";
 import phoneStyles from "./PhoneAuth.module.css";
 import Logo from "../components/Logo";
 import AboutEhralLink from "../components/nav/AboutEhralLink";
+import AuthTabs from "../components/auth/AuthTabs";
 
 // A believable, static glimpse of what's happening inside a live workspace -
 // the same kind of event this app already surfaces as real notifications.
@@ -349,6 +350,11 @@ export default function Login() {
         >
           <Logo variant="horizontal" size={56} />
         </div>
+        {!twoFactor && (
+          <div className={styles.tabsRow}>
+            <AuthTabs active="signin" />
+          </div>
+        )}
         <div className={styles.card}>
           {!twoFactor ? (
             <>
@@ -451,13 +457,6 @@ export default function Login() {
                   </>
                 )}
               </button>
-
-              <p className={styles.registerLink}>
-                New to Ehra?{" "}
-                <a href="/" className={styles.registerLinkAnchor}>
-                  Create your workspace →
-                </a>
-              </p>
             </>
           ) : (
             <>
