@@ -162,7 +162,7 @@ export default function SecuritySettingsSection() {
           </div>
           <div>
             <h3>Verified phone number</h3>
-            <p>This is your Ehra identity and where 2FA codes are sent.</p>
+            <p>This is your Ehral identity and where 2FA codes are sent.</p>
           </div>
         </div>
         <div className={styles.phoneRow}>

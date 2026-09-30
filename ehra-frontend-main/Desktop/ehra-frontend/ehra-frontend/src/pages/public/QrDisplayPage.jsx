@@ -55,7 +55,10 @@ export default function QrDisplayPage() {
       setTotalSeconds(seconds);
 
       clearTimeout(refreshTimeoutRef.current);
-      refreshTimeoutRef.current = setTimeout(fetchAndRender, Math.max(1000, data.expiresInMs - 5000));
+      refreshTimeoutRef.current = setTimeout(
+        fetchAndRender,
+        Math.max(1000, data.expiresInMs - 5000),
+      );
     } catch (err) {
       // A revoked/unknown link comes back as a 4xx and will never start
       // working again on its own - the employer has to issue a new one.
@@ -139,7 +142,7 @@ export default function QrDisplayPage() {
             />
           </div>
           <p className={styles.hint}>
-            Refreshes every {totalSeconds ?? "-"} seconds · Open your Ehra app
+            Refreshes every {totalSeconds ?? "-"} seconds · Open your Ehral app
             camera to scan
           </p>
         </div>

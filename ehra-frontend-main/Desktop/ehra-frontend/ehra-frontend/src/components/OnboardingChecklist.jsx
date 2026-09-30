@@ -3,13 +3,13 @@ import { getEmailStatus } from "../api/phoneAuthApi";
 import styles from "./OnboardingChecklist.module.css";
 
 const DISMISS_KEY = (identityId) =>
-  `ehra:onboardingChecklist:hidden:${identityId}`;
+  `ehral:onboardingChecklist:hidden:${identityId}`;
 
 /**
  * "Complete your workspace" - persistent (not a one-time toast like
  * WelcomeCard) until every item is done, then it hides itself for good.
  * Phone verification, business creation, and registration itself are
- * always true by the time this can even render (Ehra's registration
+ * always true by the time this can even render (Ehral's registration
  * flow enforces all three before an Identity/Business exist at all) -
  * they're listed anyway so the person sees real, completed progress
  * immediately rather than starting from 0%.
@@ -80,7 +80,7 @@ export default function OnboardingChecklist({
     <div className={styles.card}>
       <div className={styles.header}>
         <div>
-          <h3 className={styles.title}>Welcome to Ehra!</h3>
+          <h3 className={styles.title}>Welcome to Ehral!</h3>
           <p className={styles.subtitle}>Complete your workspace</p>
         </div>
         <button

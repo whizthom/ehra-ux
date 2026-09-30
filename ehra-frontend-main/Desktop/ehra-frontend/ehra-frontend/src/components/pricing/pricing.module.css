@@ -575,14 +575,14 @@
 
     .swipeArrow {
         color: var(--accent);
-        animation: ehraSwipeNudge 1.6s ease-in-out infinite;
+        animation: ehralSwipeNudge 1.6s ease-in-out infinite;
     }
 
     .swipeArrow:last-child {
         animation-direction: reverse;
     }
 
-    @keyframes ehraSwipeNudge {
+    @keyframes ehralSwipeNudge {
 
         0%,
         100% {

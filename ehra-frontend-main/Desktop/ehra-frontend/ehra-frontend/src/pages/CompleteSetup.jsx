@@ -4,8 +4,8 @@ import { useAuth } from "../context/AuthContext";
 import styles from "./CompleteProfile.module.css";
 import Logo from "../components/Logo";
 
-const STEP1_DRAFT_KEY = "ehra_signup_step1_draft";
-const STEP2_DRAFT_KEY = "ehra_signup_step2_draft";
+const STEP1_DRAFT_KEY = "ehral_signup_step1_draft";
+const STEP2_DRAFT_KEY = "ehral_signup_step2_draft";
 
 function loadDraft() {
   try {
@@ -133,7 +133,7 @@ export default function CompleteProfile() {
             </div>
           </div>
         </div>
-        <p className={styles.leftFooter}>© 2025 Ehra. All rights reserved.</p>
+        <p className={styles.leftFooter}>© 2025 Ehral. All rights reserved.</p>
       </div>
 
       {/* ── Right ── */}

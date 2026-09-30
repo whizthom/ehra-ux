@@ -103,7 +103,7 @@ export default function ForgotPassword() {
       if (err?.response?.status === 404) {
         setError(
           err.response.data?.message ||
-            "No Ehra account was found for this phone number.",
+            "No Ehral account was found for this phone number.",
         );
       } else {
         setError(friendlyFirebaseError(err));
@@ -157,7 +157,7 @@ export default function ForgotPassword() {
             Verify your phone number and set a new password - no email required.
           </p>
         </div>
-        <p className={styles.leftFooter}>© 2026 Ehra. All rights reserved.</p>
+        <p className={styles.leftFooter}>© 2026 Ehral. All rights reserved.</p>
       </div>
 
       <div className={styles.right}>
@@ -363,7 +363,7 @@ export default function ForgotPassword() {
 
 function friendlyFirebaseError(err) {
   // Global Phone Number Authentication rebuild (Firebase → Termii):
-  // errors now come from Ehra's own backend via api/phoneAuthApi.js, not
+  // errors now come from Ehral's own backend via api/phoneAuthApi.js, not
   // the Firebase SDK, so the friendly message is whatever
   // PhoneVerificationException / OtpDeliveryException put in
   // ErrorResponseDTO.message (see GlobalExceptionHandler) - surfaced

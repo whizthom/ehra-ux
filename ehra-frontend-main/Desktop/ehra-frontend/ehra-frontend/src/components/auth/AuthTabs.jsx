@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import styles from "./AuthTabs.module.css";
 
-// The three ways into Ehra, shown as one segmented switch at the top of every
+// The three ways into Ehral, shown as one segmented switch at the top of every
 // pre-auth screen. Each tab is a real route, so the create-workspace flow and
 // the sign-in flow keep their own state machines untouched - this component
 // only decides which one you're looking at.
@@ -15,7 +15,7 @@ const TABS = [
 // Each tab is a separate page, so the sliding thumb would normally snap
 // instead of slide. Remembering where it was last lets the next page start
 // the thumb there and glide to the new tab.
-const PREV_KEY = "ehra_auth_tab_prev";
+const PREV_KEY = "ehral_auth_tab_prev";
 
 function readPrev(fallback) {
   try {

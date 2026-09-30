@@ -17,7 +17,7 @@
 // useConversationMessages.js) that reconciles and overwrites it - this is
 // a paint-time optimization, not a second source of truth.
 
-const DB_NAME = "ehra-messaging-cache";
+const DB_NAME = "ehral-messaging-cache";
 const DB_VERSION = 1;
 const STORE_CONVERSATIONS = "conversations";
 const STORE_MESSAGES = "messages";

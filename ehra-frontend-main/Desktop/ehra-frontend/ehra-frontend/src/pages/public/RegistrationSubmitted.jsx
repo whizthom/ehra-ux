@@ -61,7 +61,7 @@ export default function RegistrationSubmitted() {
           </div>
         </div>
 
-        <p className={styles.leftFooter}>© 2025 Ehra. All rights reserved.</p>
+        <p className={styles.leftFooter}>© 2025 Ehral. All rights reserved.</p>
       </div>
 
       {/* ── Right panel ── */}

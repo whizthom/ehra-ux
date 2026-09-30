@@ -19,7 +19,7 @@ import AboutEhralLink from "../../components/nav/AboutEhralLink";
 // trip to /login - reused here so "this phone already has an account"
 // lands the person right back at accepting THIS invite once they're
 // signed in, instead of a dead end.
-const PENDING_INVITE_KEY = "ehra_pending_invite";
+const PENDING_INVITE_KEY = "ehral_pending_invite";
 
 const RESEND_COOLDOWN_SECONDS = 30;
 
@@ -51,7 +51,7 @@ export default function CustomerInvitationRegistration() {
   // Scoped per invite link - same reasoning as EmployeeRegistration's
   // draftKey. Password fields are deliberately left out of what's saved;
   // the verified idToken is never persisted either.
-  const draftKey = `ehra_customer_reg_${token}`;
+  const draftKey = `ehral_customer_reg_${token}`;
 
   const loadDraft = () => {
     try {

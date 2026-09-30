@@ -537,7 +537,7 @@ export default function ScanAttendance() {
             <div className={dash.sbLogoIcon}>💼</div>
           )}
           <span className={dash.sbLogoText}>
-            {profile?.businessName || "Ehra"}
+            {profile?.businessName || "Ehral"}
           </span>
         </div>
 

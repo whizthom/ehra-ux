@@ -105,9 +105,9 @@ export default function QrDisplayLinkPanel() {
       </div>
       <p className={styles.desc}>
         Generate a link that shows this business's live QR code to anyone who
-        has it - no Ehra login needed. Useful for a reception tablet or a second
-        screen at the entrance, without giving that device access to your admin
-        account. Employees still scan and clock in/out exactly as normal.
+        has it - no Ehral login needed. Useful for a reception tablet or a
+        second screen at the entrance, without giving that device access to your
+        admin account. Employees still scan and clock in/out exactly as normal.
       </p>
 
       {loading ? (

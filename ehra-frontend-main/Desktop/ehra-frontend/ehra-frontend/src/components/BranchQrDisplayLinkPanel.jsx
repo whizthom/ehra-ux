@@ -94,7 +94,7 @@ export default function BranchQrDisplayLinkPanel({ branchId, branchStatus }) {
         Share this branch's live QR
       </div>
       <p className={styles.linkPanelDesc}>
-        Generate a link that shows only this branch's live QR - no Ehra login
+        Generate a link that shows only this branch's live QR - no Ehral login
         needed. Useful for a tablet or screen at this branch's own entrance.
       </p>
 

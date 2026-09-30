@@ -33,7 +33,7 @@ export const verifyOtp = (pinId, otp) =>
 
 // ── Registration (STEP 6-9) ─────────────────────────────────────────────
 
-// Checks whether a just-verified phone number already has an Ehra
+// Checks whether a just-verified phone number already has an Ehral
 // account. { exists: boolean, phoneNumber: string }
 export const checkPhone = (idToken) =>
   API.post("/auth/phone/check", { idToken }).then((r) => r.data);

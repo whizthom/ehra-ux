@@ -1,5 +1,5 @@
 /* ────────────────────────────────────────────────────────────────────────
-   Ehra - Sign in
+   Ehral - Sign in
    Tokens:
    ink      #0B1F1A  near-black forest - hero background
    forest   #0F6E56  brand primary (shared with the rest of the app)
@@ -29,7 +29,7 @@
     background-image: radial-gradient(circle at 12% 8%, rgba(85, 224, 174, 0.16), transparent 42%),
         radial-gradient(circle at 92% 88%, rgba(198, 161, 91, 0.14), transparent 45%);
     background-size: 160% 160%;
-    animation: ehraBgDrift 22s ease-in-out infinite;
+    animation: ehralBgDrift 22s ease-in-out infinite;
     padding: 44px 52px;
     display: flex;
     flex-direction: column;
@@ -42,12 +42,12 @@
     inset: 0;
     background-image: radial-gradient(rgba(255, 255, 255, 0.075) 1px, transparent 1px);
     background-size: 22px 22px;
-    animation: ehraDotDrift 60s linear infinite;
+    animation: ehralDotDrift 60s linear infinite;
     mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 78%, transparent);
     pointer-events: none;
 }
 
-@keyframes ehraBgDrift {
+@keyframes ehralBgDrift {
 
     0%,
     100% {
@@ -59,7 +59,7 @@
     }
 }
 
-@keyframes ehraDotDrift {
+@keyframes ehralDotDrift {
     from {
         background-position: 0 0;
     }

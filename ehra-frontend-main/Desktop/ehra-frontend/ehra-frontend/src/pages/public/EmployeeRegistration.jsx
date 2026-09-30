@@ -19,7 +19,7 @@ import AboutEhralLink from "../../components/nav/AboutEhralLink";
 // trip to /login - reused here so "this phone already has an account"
 // lands the person right back at accepting THIS invite once they're
 // signed in, instead of a dead end.
-const PENDING_INVITE_KEY = "ehra_pending_invite";
+const PENDING_INVITE_KEY = "ehral_pending_invite";
 
 const RESEND_COOLDOWN_SECONDS = 30;
 
@@ -57,7 +57,7 @@ export default function EmployeeRegistration() {
   // The verified Firebase idToken is NEVER persisted here either - it's
   // short-lived and tied to this browser session; a reload always starts
   // the phone-verification step over rather than trusting a stale one.
-  const draftKey = `ehra_employee_reg_${token}`;
+  const draftKey = `ehral_employee_reg_${token}`;
 
   const loadDraft = () => {
     try {
@@ -189,7 +189,7 @@ export default function EmployeeRegistration() {
         navigate("/login", {
           state: {
             message:
-              "This phone number already has an Ehra account. Please log in to accept this invitation.",
+              "This phone number already has an Ehral account. Please log in to accept this invitation.",
             phone,
           },
         });
@@ -326,7 +326,7 @@ export default function EmployeeRegistration() {
           </div>
         </div>
 
-        <p className={styles.leftFooter}>© 2026 Ehra. All rights reserved.</p>
+        <p className={styles.leftFooter}>© 2026 Ehral. All rights reserved.</p>
       </div>
 
       {/* ── Right panel ── */}
@@ -404,7 +404,7 @@ export default function EmployeeRegistration() {
                     />
                   </div>
                   <span className={phoneStyles.hint}>
-                    This becomes your permanent Ehra login identity.
+                    This becomes your permanent Ehral login identity.
                   </span>
                 </div>
                 <p className={styles.stepNote}>
@@ -584,7 +584,7 @@ export default function EmployeeRegistration() {
             {step === 6 && (
               <>
                 <p className={styles.stepNote}>
-                  Choose a strong password to secure your Ehra account.
+                  Choose a strong password to secure your Ehral account.
                 </p>
                 <div className={styles.grid1}>
                   <div className={styles.field}>
@@ -647,7 +647,15 @@ export default function EmployeeRegistration() {
                     <i className="ti ti-check" />
                   </span>
                   <span className={styles.termsText}>
-                    I agree to Ehral's <a href="/terms" target="_blank" rel="noreferrer">Terms of Service</a> and <a href="/privacy" target="_blank" rel="noreferrer">Privacy Policy</a>.
+                    I agree to Ehral's{" "}
+                    <a href="/terms" target="_blank" rel="noreferrer">
+                      Terms of Service
+                    </a>{" "}
+                    and{" "}
+                    <a href="/privacy" target="_blank" rel="noreferrer">
+                      Privacy Policy
+                    </a>
+                    .
                   </span>
                 </label>
               </>
@@ -703,7 +711,7 @@ export default function EmployeeRegistration() {
 
 function friendlyFirebaseError(err) {
   // Global Phone Number Authentication rebuild (Firebase → Termii):
-  // errors now come from Ehra's own backend via api/phoneAuthApi.js, not
+  // errors now come from Ehral's own backend via api/phoneAuthApi.js, not
   // the Firebase SDK, so the friendly message is whatever
   // PhoneVerificationException / OtpDeliveryException put in
   // ErrorResponseDTO.message (see GlobalExceptionHandler) - surfaced

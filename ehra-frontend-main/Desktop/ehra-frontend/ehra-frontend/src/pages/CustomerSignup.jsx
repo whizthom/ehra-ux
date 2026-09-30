@@ -43,7 +43,7 @@ const BENEFITS = [
 const STEP_NUMBER = { phone: 1, otp: 2, details: 3 };
 
 // Customer sign up - the second tab on the sign-in screen. A customer account
-// belongs to the person, not to a business: it's the same Ehra identity that
+// belongs to the person, not to a business: it's the same Ehral identity that
 // can later also own a workspace or join one as staff. So this flow only needs
 // a verified phone number, a few details and a password.
 export default function CustomerSignup() {
@@ -89,7 +89,7 @@ export default function CustomerSignup() {
     return () => clearInterval(t);
   }, [resendIn]);
 
-  // A phone that already has an Ehra account never continues into sign up -
+  // A phone that already has an Ehral account never continues into sign up -
   // it goes to sign in with the number filled in.
   const goToSignIn = (knownPhone, message) =>
     navigate("/login", {
@@ -98,7 +98,7 @@ export default function CustomerSignup() {
         phone: knownPhone,
         message:
           message ||
-          "This phone number already has an Ehra account. Please sign in.",
+          "This phone number already has an Ehral account. Please sign in.",
       },
     });
 
@@ -295,7 +295,7 @@ export default function CustomerSignup() {
           </ul>
         </div>
 
-        <p className={styles.leftFooter}>© 2026 Ehra. All rights reserved.</p>
+        <p className={styles.leftFooter}>© 2026 Ehral. All rights reserved.</p>
       </div>
 
       {/* ── Right panel - sign up ── */}
@@ -343,7 +343,7 @@ export default function CustomerSignup() {
             </h2>
             <p className={styles.subtitle}>
               {step === "phone" &&
-                "Start with your phone number. It becomes your Ehra login."}
+                "Start with your phone number. It becomes your Ehral login."}
               {step === "otp" && "Enter the 6-digit code we just texted you."}
               {step === "details" && "Add your details and choose a password."}
             </p>
@@ -630,7 +630,7 @@ export default function CustomerSignup() {
                   <i className="ti ti-check" />
                 </span>
                 <span className={extra.termsText}>
-                  I agree to Ehra's{" "}
+                  I agree to Ehral's{" "}
                   <a href="/terms" target="_blank" rel="noreferrer">
                     Terms of Service
                   </a>{" "}

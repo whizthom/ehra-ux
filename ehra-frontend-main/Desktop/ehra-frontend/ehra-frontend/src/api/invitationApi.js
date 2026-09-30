@@ -43,7 +43,7 @@ export const getInvitationBatch = (batchId) =>
   API.get(`/invitations/batch/${batchId}`).then((r) => r.data);
 
 // POST /api/invitations/register - public sign-up form for someone with
-// NO existing Ehra account. idToken is a phoneVerificationToken from the
+// NO existing Ehral account. idToken is a phoneVerificationToken from the
 // Termii OTP verification step (see EmployeeRegistration.jsx's phone/OTP
 // steps), re-verified server-side - never a plain client-supplied phone
 // field. Creates a
@@ -69,7 +69,7 @@ export const registerInvitedCustomer = async (payload) => {
 };
 
 // POST /api/invitations/{token}/accept - the "already logged in" path,
-// for an Identity that already has an Ehra account (an existing employer
+// for an Identity that already has an Ehral account (an existing employer
 // picking up part-time work elsewhere, or any existing employee/owner
 // invited to a second business) to attach a new PENDING_APPROVAL
 // EmployeeMembership to their EXISTING Identity. Requires auth; never

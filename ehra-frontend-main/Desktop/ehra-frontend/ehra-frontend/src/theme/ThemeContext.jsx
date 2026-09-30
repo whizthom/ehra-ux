@@ -7,7 +7,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 // via `[data-theme="dark"] { ... }` overrides. This file only adds new
 // behavior - it doesn't touch any existing app logic.
 
-const STORAGE_KEY = "ehra-theme";
+const STORAGE_KEY = "ehral-theme";
 
 const ThemeContext = createContext({
   theme: "light",

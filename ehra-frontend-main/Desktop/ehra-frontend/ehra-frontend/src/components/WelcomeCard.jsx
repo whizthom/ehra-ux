@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getEmailStatus, sendEmailVerification } from "../api/phoneAuthApi";
 import styles from "./WelcomeCard.module.css";
 
-const sessionKey = (identityId) => `ehra:welcomeCard:seen:${identityId}`;
+const sessionKey = (identityId) => `ehral:welcomeCard:seen:${identityId}`;
 
 /**
  * "First Login Experience" - shown once, directly on the Dashboard the
@@ -68,7 +68,7 @@ export default function WelcomeCard({
       <div className={styles.card} role="dialog" aria-modal="true">
         <div className={styles.emoji}>🎉</div>
         <h2 className={styles.title}>
-          Welcome to Ehra{firstName ? `, ${firstName}` : ""}!
+          Welcome to Ehral{firstName ? `, ${firstName}` : ""}!
         </h2>
         <p className={styles.desc}>
           Your workspace has been created successfully.
@@ -77,7 +77,7 @@ export default function WelcomeCard({
         {email && (
           <p className={styles.desc}>
             We've sent a verification email to <strong>{email}</strong>. You can
-            continue using Ehra while you verify your email.
+            continue using Ehral while you verify your email.
           </p>
         )}
 

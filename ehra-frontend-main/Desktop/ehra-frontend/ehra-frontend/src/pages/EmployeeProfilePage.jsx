@@ -274,7 +274,7 @@ export default function EmployeeProfilePage() {
       <aside className={shell.sidebar}>
         <div className={shell.sbLogo}>
           <div className={shell.sbLogoIcon}>💼</div>
-          <span className={shell.sbLogoText}>Ehra</span>
+          <span className={shell.sbLogoText}>Ehral</span>
         </div>
 
         <nav className={shell.sbNav}>

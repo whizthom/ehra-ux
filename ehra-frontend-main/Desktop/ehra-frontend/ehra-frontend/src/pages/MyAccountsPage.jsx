@@ -870,7 +870,7 @@ export default function MyAccountsPage() {
             <div className={dash.sbLogoIcon}>💼</div>
           )}
           <span className={dash.sbLogoText}>
-            {profile?.businessName || "Ehra"}
+            {profile?.businessName || "Ehral"}
           </span>
         </div>
 

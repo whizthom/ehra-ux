@@ -73,7 +73,7 @@ const DEPARTMENT_FILTERS = [
 // should never break the page.
 function dismissedStorageKey() {
   const { membershipId } = readSession() || {};
-  return `ehra:leave:dismissedOutcomes:${membershipId || "anon"}`;
+  return `ehral:leave:dismissedOutcomes:${membershipId || "anon"}`;
 }
 
 function loadDismissedIds() {

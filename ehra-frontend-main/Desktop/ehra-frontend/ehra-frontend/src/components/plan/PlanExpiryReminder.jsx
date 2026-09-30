@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styles from "./planExpiryReminder.module.css";
 import { urgencyTier, daysUntil } from "./planUrgency";
 
-const STORAGE_KEY = "ehra:planExpiryReminder:lastShown";
+const STORAGE_KEY = "ehral:planExpiryReminder:lastShown";
 
 // How long the toast stays visible before auto-dismissing.
 const AUTO_DISMISS_MS = 14_000;

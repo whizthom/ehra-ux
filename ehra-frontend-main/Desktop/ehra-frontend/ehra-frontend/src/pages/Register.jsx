@@ -19,7 +19,7 @@ import { useAuth } from "../context/AuthContext";
 // Draft is kept in sessionStorage (not localStorage) so it survives a trip
 // between steps or an accidental refresh, but doesn't linger forever on a
 // shared machine - it's cleared the moment registration fully completes.
-const DRAFT_KEY = "ehra_signup_phone_draft";
+const DRAFT_KEY = "ehral_signup_phone_draft";
 
 function loadDraft() {
   try {
@@ -149,7 +149,7 @@ export default function Register() {
         navigate("/login", {
           state: {
             message:
-              "This phone number already has an Ehra account. Please log in.",
+              "This phone number already has an Ehral account. Please log in.",
             phone,
           },
         });
@@ -274,8 +274,8 @@ export default function Register() {
           <span className={styles.eyebrow}>Get started</span>
           <h1 className={styles.headline}>Set up your workspace in minutes</h1>
           <p className={styles.desc}>
-            Your phone number is your Ehra identity - verify it once, and you're
-            in.
+            Your phone number is your Ehral identity - verify it once, and
+            you're in.
           </p>
 
           <div className={styles.steps}>
@@ -643,8 +643,8 @@ export default function Register() {
                   />
                 </div>
                 <span className={phoneStyles.hint}>
-                  We'll send a verification link here - you can start using Ehra
-                  right away and verify whenever suits you.
+                  We'll send a verification link here - you can start using
+                  Ehral right away and verify whenever suits you.
                 </span>
               </div>
 

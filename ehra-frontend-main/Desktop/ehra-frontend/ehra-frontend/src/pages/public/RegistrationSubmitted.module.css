@@ -14,7 +14,7 @@
     background-image: radial-gradient(circle at 12% 8%, rgba(85, 224, 174, 0.16), transparent 42%),
         radial-gradient(circle at 92% 88%, rgba(198, 161, 91, 0.14), transparent 45%);
     background-size: 160% 160%;
-    animation: ehraBgDrift 22s ease-in-out infinite;
+    animation: ehralBgDrift 22s ease-in-out infinite;
     padding: 48px 40px;
     display: flex;
     flex-direction: column;
@@ -22,7 +22,7 @@
     overflow: hidden;
 }
 
-@keyframes ehraBgDrift {
+@keyframes ehralBgDrift {
 
     0%,
     100% {
@@ -34,7 +34,7 @@
     }
 }
 
-@keyframes ehraDotDrift {
+@keyframes ehralDotDrift {
     from {
         background-position: 0 0;
     }
@@ -381,7 +381,7 @@
         background-image: radial-gradient(circle at 16% 18%, rgba(85, 224, 174, 0.2), transparent 46%),
             radial-gradient(circle at 88% 82%, rgba(198, 161, 91, 0.16), transparent 50%);
         background-size: 160% 160%;
-        animation: ehraBgDrift 22s ease-in-out infinite;
+        animation: ehralBgDrift 22s ease-in-out infinite;
         border-radius: 0 0 28px 28px;
         box-shadow: 0 20px 40px -22px rgba(11, 31, 26, 0.5);
         overflow: hidden;
@@ -392,7 +392,7 @@
         inset: 0;
         background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
         background-size: 18px 18px;
-        animation: ehraDotDrift 60s linear infinite;
+        animation: ehralDotDrift 60s linear infinite;
         mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 85%, transparent);
         pointer-events: none;
     }

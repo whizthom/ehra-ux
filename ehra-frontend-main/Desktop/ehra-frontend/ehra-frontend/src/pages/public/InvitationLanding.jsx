@@ -8,7 +8,7 @@ import Logo from "../../components/Logo";
 // Key used to remember an invite token across a trip to /login, so
 // someone who gets an invite link while logged out lands right back here
 // - with their session now attached - instead of losing the invite.
-const PENDING_INVITE_KEY = "ehra_pending_invite";
+const PENDING_INVITE_KEY = "ehral_pending_invite";
 
 export default function InvitationLanding() {
   const { token } = useParams();
@@ -34,7 +34,7 @@ export default function InvitationLanding() {
   const [loadError, setLoadError] = useState(false);
 
   // Authenticated-accept flow state (existing Identity - a business owner
-  // picking up part-time work, or anyone already on Ehra being invited to
+  // picking up part-time work, or anyone already on Ehral being invited to
   // a second business). Kept separate from the anonymous /register/:token
   // flow, which creates a brand-new Identity.
   const [accepting, setAccepting] = useState(false);
@@ -125,7 +125,7 @@ export default function InvitationLanding() {
   };
 
   // No session yet: remember the invite, then send them to log in with an
-  // existing Ehra account (Login.jsx checks for this key after a
+  // existing Ehral account (Login.jsx checks for this key after a
   // successful login and bounces straight back here).
   const handleLoginInstead = () => {
     sessionStorage.setItem(PENDING_INVITE_KEY, token);
@@ -154,7 +154,7 @@ export default function InvitationLanding() {
             <div className={styles.pill}>⏱ Takes less than 2 minutes</div>
           </div>
         </div>
-        <p className={styles.leftFooter}>© 2025 Ehra. All rights reserved.</p>
+        <p className={styles.leftFooter}>© 2025 Ehral. All rights reserved.</p>
       </div>
 
       {/* ── Right panel ── */}
@@ -254,7 +254,7 @@ export default function InvitationLanding() {
             <p className={styles.stateSub}>
               {isCustomer
                 ? `${businessName} has invited you to connect as a customer. You're already signed in to Ehral - accept below to link this business to your account.`
-                : `${businessName} has invited you to join as an employee. You're already signed in to Ehra - accept below to add this workspace to your account.`}
+                : `${businessName} has invited you to join as an employee. You're already signed in to Ehral - accept below to add this workspace to your account.`}
             </p>
 
             <div className={styles.orgCard}>
@@ -304,7 +304,7 @@ export default function InvitationLanding() {
             <p className={styles.stateSub}>
               {isCustomer
                 ? `${businessName || "A business"} has invited you to connect with them as a customer on Ehral.`
-                : "An organisation has invited you to join their Ehra workspace as an employee."}
+                : "An organisation has invited you to join their Ehral workspace as an employee."}
             </p>
 
             <div className={styles.orgCard}>
@@ -345,7 +345,7 @@ export default function InvitationLanding() {
               className={styles.secondaryBtn}
               onClick={handleLoginInstead}
             >
-              Already have an Ehra account? Log in instead
+              Already have an Ehral account? Log in instead
             </button>
           </div>
         )}

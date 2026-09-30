@@ -2,7 +2,7 @@ import { useId } from "react";
 import styles from "./Logo.module.css";
 
 /**
- * Ehra logo - mark + wordmark, transparent background.
+ * Ehral logo - mark + wordmark, transparent background.
  *
  * Paths below are traced directly from the source artwork (not
  * hand-approximated), so proportions match the original. Color is pulled
@@ -100,11 +100,11 @@ export default function Logo({
   size = 160,
   variant = "stacked", // "stacked" | "horizontal" | "icon"
   className = "",
-  title = "Ehra",
+  title = "Ehral",
   tone = "brand", // "brand" (default two-tone) | "sidebar" (flat --sidebar-text)
 }) {
   const reactId = useId();
-  const gradientId = `ehraLogoMarkGradient-${reactId.replace(/:/g, "")}`;
+  const gradientId = `ehralLogoMarkGradient-${reactId.replace(/:/g, "")}`;
 
   if (variant === "icon") {
     return (

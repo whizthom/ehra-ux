@@ -151,9 +151,9 @@ export default function Login() {
     // logged out - InvitationLanding stashes the token here before
     // bouncing them to /login. Finish that trip now that they're signed
     // in, instead of dropping them on a generic dashboard.
-    const pendingInvite = sessionStorage.getItem("ehra_pending_invite");
+    const pendingInvite = sessionStorage.getItem("ehral_pending_invite");
     if (pendingInvite) {
-      sessionStorage.removeItem("ehra_pending_invite");
+      sessionStorage.removeItem("ehral_pending_invite");
       navigate(`/invite/${pendingInvite}`);
       return;
     }
@@ -332,13 +332,13 @@ export default function Login() {
 
           <div className={styles.tickerBlock}>
             <span className={styles.tickerCaption}>
-              A normal Tuesday inside Ehra
+              A normal Tuesday inside Ehral
             </span>
             <Ticker />
           </div>
         </div>
 
-        <p className={styles.leftFooter}>© 2026 Ehra. All rights reserved.</p>
+        <p className={styles.leftFooter}>© 2026 Ehral. All rights reserved.</p>
       </div>
 
       {/* ── Right panel - sign in ── */}

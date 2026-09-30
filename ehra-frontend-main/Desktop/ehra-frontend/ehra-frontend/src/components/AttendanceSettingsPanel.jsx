@@ -206,13 +206,13 @@ export default function AttendanceSettingsPanel() {
 
     doc.setFontSize(13);
     doc.setTextColor(20, 20, 20);
-    doc.text("Scan this QR with the Ehra app to check in.", centerX, 172, {
+    doc.text("Scan this QR with the Ehral app to check in.", centerX, 172, {
       align: "center",
     });
 
     doc.setFontSize(9);
     doc.setTextColor(150, 150, 150);
-    doc.text("Powered by Ehra", centerX, 285, { align: "center" });
+    doc.text("Powered by Ehral", centerX, 285, { align: "center" });
 
     doc.save(
       `${(business?.name || "attendance").replace(/\s+/g, "-").toLowerCase()}-qr-code.pdf`,
@@ -449,9 +449,9 @@ export default function AttendanceSettingsPanel() {
           <div>
             <h3>Offline attendance</h3>
             <p>
-              Let employees on a device Ehral already recognizes clock in or
-              out without an internet connection. Verified automatically the
-              next time they're back online.
+              Let employees on a device Ehral already recognizes clock in or out
+              without an internet connection. Verified automatically the next
+              time they're back online.
             </p>
           </div>
           <button
@@ -468,7 +468,9 @@ export default function AttendanceSettingsPanel() {
         {offlineEnabled && (
           <div className={styles.zoneCard}>
             <div className={styles.subToggleRow}>
-              <span className={styles.subToggleLabel}>Allow offline clock-in</span>
+              <span className={styles.subToggleLabel}>
+                Allow offline clock-in
+              </span>
               <button
                 type="button"
                 role="switch"
@@ -480,7 +482,9 @@ export default function AttendanceSettingsPanel() {
               </button>
             </div>
             <div className={styles.subToggleRow}>
-              <span className={styles.subToggleLabel}>Allow offline clock-out</span>
+              <span className={styles.subToggleLabel}>
+                Allow offline clock-out
+              </span>
               <button
                 type="button"
                 role="switch"
@@ -511,12 +515,12 @@ export default function AttendanceSettingsPanel() {
               Online attendance
             </h4>
             <p>
-              Employees can record attendance while connected to the
-              internet. Ehral verifies attendance with the server in real
-              time. Recognized devices work normally. A new device can be
-              verified online and may be registered as an additional device
-              according to your business's attendance security policy. New
-              or suspicious device activity may generate a security alert.
+              Employees can record attendance while connected to the internet.
+              Ehral verifies attendance with the server in real time. Recognized
+              devices work normally. A new device can be verified online and may
+              be registered as an additional device according to your business's
+              attendance security policy. New or suspicious device activity may
+              generate a security alert.
             </p>
           </div>
 
@@ -526,13 +530,12 @@ export default function AttendanceSettingsPanel() {
               Offline attendance
             </h4>
             <p>
-              Offline attendance is restricted to devices Ehral has
-              previously recognized and authorized - a new or unrecognized
-              device can't record attendance while offline, no matter how
-              the settings above are configured. Authorization is also tied
-              to the specific employee it was issued to, so handing an
-              authorized phone to a coworker doesn't let them clock offline
-              on it.
+              Offline attendance is restricted to devices Ehral has previously
+              recognized and authorized - a new or unrecognized device can't
+              record attendance while offline, no matter how the settings above
+              are configured. Authorization is also tied to the specific
+              employee it was issued to, so handing an authorized phone to a
+              coworker doesn't let them clock offline on it.
             </p>
           </div>
 
@@ -542,12 +545,12 @@ export default function AttendanceSettingsPanel() {
               Browser storage
             </h4>
             <p>
-              Ehral keeps employee-device relationships on the server.
-              Clearing browser storage or site data does not remove a
-              device from Ehral's records. However, it may remove the
-              security credential stored in the browser. If that credential
-              is lost, the device can't be used for offline attendance
-              until it reconnects to the internet and is verified again.
+              Ehral keeps employee-device relationships on the server. Clearing
+              browser storage or site data does not remove a device from Ehral's
+              records. However, it may remove the security credential stored in
+              the browser. If that credential is lost, the device can't be used
+              for offline attendance until it reconnects to the internet and is
+              verified again.
             </p>
           </div>
 
@@ -559,8 +562,8 @@ export default function AttendanceSettingsPanel() {
             <p>
               Offline attendance can't communicate with Ehral in real time.
               Restricting it to previously authorized devices helps prevent
-              employees from bypassing device security by switching devices
-              or clearing browser storage while disconnected.
+              employees from bypassing device security by switching devices or
+              clearing browser storage while disconnected.
             </p>
           </div>
         </div>
