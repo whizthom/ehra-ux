@@ -117,6 +117,76 @@ function initials(first, last) {
   return result || "?";
 }
 
+// ── Processing screen ─────────────────────────────────────────────────
+// Shown inside the scanner frame between "QR decoded" and "server
+// answered". The steps advance on a timer purely to show progress; the last
+// one stays active until the real response arrives, so it never claims
+// something finished before it actually did.
+const PROCESSING_STEPS = [
+  "QR code detected",
+  "Verifying your device",
+  "Checking attendance zone",
+  "Recording your attendance",
+];
+
+function ProcessingPanel() {
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setStep((s) => Math.min(s + 1, PROCESSING_STEPS.length - 1));
+    }, 1200);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <div
+      className={styles.processing}
+      role="status"
+      aria-live="polite"
+      aria-label="Processing your attendance"
+    >
+      <div className={styles.procOrb} aria-hidden="true">
+        <span className={styles.procRing} />
+        <span className={`${styles.procRing} ${styles.procRingDelay}`} />
+        <span className={styles.procSweep} />
+        <div className={styles.procCore}>
+          <i className="ti ti-shield-check" />
+        </div>
+      </div>
+
+      <h3 className={styles.procTitle}>Processing your attendance</h3>
+      <p className={styles.procSub}>
+        Securely verifying with Ehral. Please keep this screen open.
+      </p>
+
+      <ul className={styles.procSteps}>
+        {PROCESSING_STEPS.map((label, i) => {
+          const done = i < step;
+          const active = i === step;
+          return (
+            <li
+              key={label}
+              className={`${styles.procStep} ${done ? styles.procDone : ""} ${
+                active ? styles.procActive : ""
+              }`}
+            >
+              <span className={styles.procDot}>
+                {done ? (
+                  <i className="ti ti-check" aria-hidden="true" />
+                ) : active ? (
+                  <span className={styles.procSpin} />
+                ) : null}
+              </span>
+              {label}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 export default function ScanAttendance() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -132,6 +202,10 @@ export default function ScanAttendance() {
   const [result, setResult] = useState(null); // { ok, message, action, status, offlinePending }
   const [cooldownRemaining, setCooldownRemaining] = useState(0);
   const [scanning, setScanning] = useState(true);
+  // True from the moment a QR code is decoded until the server answers, so
+  // the scanner frame shows a "verifying" screen instead of a blank black
+  // box while the request is in flight.
+  const [processing, setProcessing] = useState(false);
   const [profile, setProfile] = useState(null);
 
   // ── Offline attendance state ──────────────────────────────────────────
@@ -268,6 +342,7 @@ export default function ScanAttendance() {
       if (scanLockRef.current || cooldownRemaining > 0) return;
       scanLockRef.current = true;
       setScanning(false);
+      setProcessing(true);
       stopCamera();
 
       try {
@@ -349,6 +424,8 @@ export default function ScanAttendance() {
           ok: false,
           message: typeof msg === "string" ? msg : "Scan failed.",
         });
+      } finally {
+        setProcessing(false);
       }
     },
     [stopCamera, getCoords, cooldownRemaining],
@@ -777,6 +854,8 @@ export default function ScanAttendance() {
                   )}
                 </div>
               )}
+
+              {processing && !result && <ProcessingPanel />}
 
               {result && (
                 <div
