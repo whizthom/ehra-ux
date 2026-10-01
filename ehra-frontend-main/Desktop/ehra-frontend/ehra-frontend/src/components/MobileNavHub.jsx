@@ -65,30 +65,6 @@ const employerOperations = [
     icon: "ti-qrcode",
     description: "Attendance QR tools.",
   },
-  {
-    key: "Products",
-    label: "Products",
-    icon: "ti-package",
-    description: "Manage your product catalog.",
-  },
-  {
-    key: "Orders",
-    label: "Orders",
-    icon: "ti-shopping-cart",
-    description: "Review storefront orders.",
-  },
-  {
-    key: "Customers",
-    label: "Customers",
-    icon: "ti-users-group",
-    description: "Customer relationships.",
-  },
-  {
-    key: "Storefront",
-    label: "Storefront",
-    icon: "ti-world",
-    description: "Publish your public store.",
-  },
 ];
 
 const employeePeople = [
@@ -319,10 +295,6 @@ function getPrimary(activeNav, role) {
         "Penalty",
         "Reports",
         "QR Code",
-        "Products",
-        "Orders",
-        "Customers",
-        "Storefront",
       ].includes(activeNav)
     )
       return "Operations";

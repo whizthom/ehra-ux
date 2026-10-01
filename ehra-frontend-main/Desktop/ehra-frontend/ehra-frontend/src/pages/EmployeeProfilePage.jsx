@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getEmployeeProfile, sendAnnouncement } from "../api/workforceApi";
@@ -9,6 +9,8 @@ import LocationsTab from "../components/LocationsTab";
 import PayrollTab from "../components/PayrollTab";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
 import LogoutConfirmModal from "../components/LogoutConfirmModal";
+import MobileNavHub from "../components/MobileNavHub";
+import { getRetailContext } from "../api/retailApi";
 // Reuses the exact sidebar/topbar/bottom-nav classes both dashboards are
 // built on (they already share this one file) so the shell around a
 // profile looks and behaves identically to the dashboard it was opened
@@ -64,40 +66,6 @@ const EMPLOYEE_NAV = [
     isFullPage: true,
   },
 ];
-
-// Drives the bottom-nav's scroll-position indicator on mobile - copied
-// from Dashboard.jsx/EmployeeDashboard.jsx (same small, self-contained
-// helper, no shared-hooks module exists for it yet).
-function useScrollThumb(ref) {
-  const [thumb, setThumb] = useState({ left: 0, width: 100 });
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return undefined;
-
-    const update = () => {
-      const { scrollWidth, clientWidth, scrollLeft } = el;
-      if (scrollWidth <= clientWidth + 1) {
-        setThumb({ left: 0, width: 100 });
-        return;
-      }
-      const width = Math.max((clientWidth / scrollWidth) * 100, 15);
-      const maxScroll = scrollWidth - clientWidth;
-      const left = maxScroll > 0 ? (scrollLeft / maxScroll) * (100 - width) : 0;
-      setThumb({ left, width });
-    };
-
-    update();
-    el.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    return () => {
-      el.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-    };
-  }, [ref]);
-
-  return thumb;
-}
 
 const STATUS_COLOR = {
   ACTIVE: { bg: "var(--bg-soft-accent)", color: "var(--accent-hover)" },
@@ -183,8 +151,15 @@ export default function EmployeeProfilePage() {
     }
   };
 
-  const bottomNavScrollRef = useRef(null);
-  const bottomNavThumb = useScrollThumb(bottomNavScrollRef);
+  // Retail Workspace entry in the employee mobile nav - same gate the
+  // employee dashboard uses (membership canWorkspace).
+  const [canRetailWorkspace, setCanRetailWorkspace] = useState(false);
+  useEffect(() => {
+    if (isAdmin) return;
+    getRetailContext()
+      .then(({ data }) => setCanRetailWorkspace(Boolean(data?.canWorkspace)))
+      .catch(() => setCanRetailWorkspace(false));
+  }, [isAdmin]);
 
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -855,44 +830,24 @@ export default function EmployeeProfilePage() {
         </div>
       </div>
 
-      {/* ── Mobile bottom navigation ── */}
-      <nav className={shell.bottomNav} aria-label="Primary">
-        <div className={shell.bottomNavScroll} ref={bottomNavScrollRef}>
-          {visibleNav.map((n) => (
-            <button
-              key={n.label}
-              type="button"
-              className={shell.bottomNavItem}
-              onClick={() => goToNav(n)}
-            >
-              <div className={shell.bottomNavIconWrap}>
-                <i className={`ti ${n.icon}`} aria-hidden="true" />
-              </div>
-              <span>{n.label}</span>
-            </button>
-          ))}
-
-          <button
-            type="button"
-            className={shell.bottomNavItem}
-            onClick={() => setShowLogoutConfirm(true)}
-          >
-            <div className={shell.bottomNavIconWrap}>
-              <i className="ti ti-logout" aria-hidden="true" />
-            </div>
-            <span>Log out</span>
-          </button>
-        </div>
-        <div className={shell.bottomNavScrollTrack} aria-hidden="true">
-          <div
-            className={shell.bottomNavScrollThumb}
-            style={{
-              width: `${bottomNavThumb.width}%`,
-              left: `${bottomNavThumb.left}%`,
-            }}
-          />
-        </div>
-      </nav>
+      {/* ── Mobile bottom navigation ──
+          Same MobileNavHub (Home / People / Operations / Messages / More)
+          the dashboards use, instead of the old scrolling strip. Picking
+          a destination routes back to the dashboard with activeNav set. */}
+      <MobileNavHub
+        employeePremium={!isAdmin}
+        role={isAdmin ? "employer" : "employee"}
+        activeNav={undefined}
+        setActiveNav={(label) => goToNav({ label })}
+        navigate={navigate}
+        isHod={isHod}
+        canRetailWorkspace={canRetailWorkspace}
+        badges={{
+          Messages: unreadMessagesCount,
+          Notifications: unreadNotifCount,
+        }}
+        onLogout={() => setShowLogoutConfirm(true)}
+      />
 
       <LogoutConfirmModal
         open={showLogoutConfirm}
