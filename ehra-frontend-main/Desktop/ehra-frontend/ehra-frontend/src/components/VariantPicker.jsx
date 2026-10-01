@@ -18,6 +18,16 @@ export default function VariantPicker({
       ([n]) => n.trim().toLowerCase() === group.name.trim().toLowerCase(),
     )?.[1];
 
+  const details = groups.flatMap((group) => {
+    const current = chosen(group);
+    const opt =
+      current &&
+      group.options.find(
+        (o) => o.value.trim().toLowerCase() === current.trim().toLowerCase(),
+      );
+    return opt ? [{ group: group.name, ...opt }] : [];
+  });
+
   return (
     <div className={`${styles.picker} ${className}`}>
       {groups.map((group) => {
@@ -40,10 +50,13 @@ export default function VariantPicker({
                   current &&
                   current.trim().toLowerCase() ===
                     opt.value.trim().toLowerCase();
+                const groupVaries =
+                  new Set(group.options.map((o) => o.price)).size > 1;
                 const differs =
                   opt.price > 0 &&
-                  basePrice != null &&
-                  Math.abs(opt.price - basePrice) >= 0.005;
+                  (groupVaries ||
+                    (basePrice != null &&
+                      Math.abs(opt.price - basePrice) >= 0.005));
                 return (
                   <button
                     key={opt.value}
@@ -74,6 +87,36 @@ export default function VariantPicker({
           </div>
         );
       })}
+
+      {details.length > 0 && (
+        <ul className={styles.details} aria-label="Selected option details">
+          {details.map((d) => (
+            <li className={styles.detail} key={d.group}>
+              {d.image ? (
+                <img
+                  className={styles.detailImg}
+                  src={d.image}
+                  alt={`${d.group}: ${d.value}`}
+                  loading="lazy"
+                />
+              ) : (
+                <span className={styles.detailDot} aria-hidden="true" />
+              )}
+              <div className={styles.detailBody}>
+                <strong>
+                  {d.group}: {d.value}
+                </strong>
+                <span className={styles.detailMeta}>
+                  {d.price > 0 && formatPrice && (
+                    <span>{formatPrice(d.price)}</span>
+                  )}
+                  {d.sku && <span>SKU {d.sku}</span>}
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
