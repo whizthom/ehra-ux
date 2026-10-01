@@ -6,6 +6,7 @@
   --accent: #111214;
   --max: 1280px;
   min-height: 100vh;
+  min-height: 100dvh;
   background: #fff;
   color: var(--ink);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -53,6 +54,7 @@
   gap: 22px;
   background: rgba(255, 255, 255, .94);
   border-bottom: 1px solid rgba(0, 0, 0, .07);
+  -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px)
 }
 
@@ -401,6 +403,7 @@
   border: 1px solid rgba(255, 255, 255, .26);
   background: rgba(255, 255, 255, .08);
   color: #fff;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px)
 }
 
@@ -459,6 +462,7 @@
   padding: 9px;
   border: 1px solid rgba(255, 255, 255, .17);
   background: rgba(20, 20, 20, .58);
+  -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
   border-radius: 17px;
   color: #fff;
@@ -1252,6 +1256,7 @@
   inset: 0;
   z-index: 120;
   background: rgba(12, 12, 12, .5);
+  -webkit-backdrop-filter: blur(7px);
   backdrop-filter: blur(7px);
   display: grid;
   place-items: center;
@@ -1447,6 +1452,7 @@
   position: relative;
   width: min(900px, 100%);
   max-height: min(720px, calc(100vh - 40px));
+  max-height: min(720px, calc(100dvh - 40px));
   overflow: auto;
   background: #fff;
   border-radius: 20px;
@@ -1565,6 +1571,7 @@
   position: relative;
   width: min(520px, 100%);
   max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
   overflow: auto;
   background: #fff;
   border-radius: 20px;
@@ -1803,6 +1810,7 @@
 
 .center {
   min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   place-items: center;
   background: #fff
@@ -2207,6 +2215,7 @@
     grid-template-columns: repeat(4, 1fr);
     background: rgba(255, 255, 255, .96);
     border-top: 1px solid var(--line);
+    -webkit-backdrop-filter: blur(16px);
     backdrop-filter: blur(16px);
     padding-bottom: env(safe-area-inset-bottom)
   }
@@ -2237,6 +2246,7 @@
   .productModal {
     grid-template-columns: 1fr;
     max-height: calc(100vh - 20px);
+    max-height: calc(100dvh - 20px);
     border-radius: 16px
   }
 
@@ -2363,7 +2373,8 @@
 .page {
   background: #f7f7f5;
   color: #151515;
-  min-height: 100vh
+  min-height: 100vh;
+  min-height: 100dvh
 }
 
 .productVisual {
@@ -2412,6 +2423,7 @@
   padding: 7px 10px;
   border-radius: 999px;
   background: rgba(255, 255, 255, .9);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   font-size: 11px;
   font-weight: 700;
@@ -2567,6 +2579,7 @@
   z-index: 1000;
   inset: 0;
   background: rgba(10, 10, 10, .58);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
@@ -2579,6 +2592,7 @@
   position: relative;
   width: min(1040px, 100%);
   max-height: min(760px, calc(100vh - 56px));
+  max-height: min(760px, calc(100dvh - 56px));
   overflow: auto;
   background: #fff;
   border-radius: 28px;
@@ -2598,6 +2612,7 @@
   border: 1px solid rgba(0, 0, 0, .08);
   border-radius: 50%;
   background: rgba(255, 255, 255, .88);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   font-size: 19px;
   cursor: pointer;
@@ -2630,6 +2645,7 @@
   padding: 9px 12px;
   border-radius: 999px;
   background: rgba(255, 255, 255, .92);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   font-size: 12px;
   font-weight: 700;

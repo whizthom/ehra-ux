@@ -7,6 +7,64 @@
   box-sizing: border-box;
 }
 
+/* ── iPhone / iOS Safari polish ───────────────────────────────────────── */
+
+/* Stop iOS inflating text after rotating to landscape. */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* No grey flash on tap, and no double-tap-to-zoom delay on controls. */
+a,
+button,
+[role="button"],
+label,
+select,
+summary,
+input[type="checkbox"],
+input[type="radio"] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* iOS Safari zooms the whole page when a field with text smaller than 16px
+   is focused, and doesn't zoom back out. Force 16px on iOS only (the
+   -webkit-touch-callout feature query is true only on iOS), so desktop and
+   Android keep their designed sizes. Zoom stays enabled for accessibility. */
+@supports (-webkit-touch-callout: none) {
+
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* iOS draws its own inner shadow / rounded chrome on text fields and makes
+   date/time inputs a different height from other fields. */
+input:not([type="checkbox"]):not([type="radio"]),
+textarea {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"] {
+  min-height: 1.5em;
+  -webkit-min-logical-width: calc(100% - 16px);
+}
+
+/* Landscape on a notched iPhone: keep content out from under the notch and
+   Dynamic Island (viewport-fit=cover draws edge to edge). Zero in portrait
+   and on every non-notched device. */
+body {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
 /* App-shell pages (Dashboard, EmployeeDashboard, etc.) toggle a
    `app-shell-lock` class on <body> while mounted (see their useEffect) so
    the page itself can't rubber-band/scroll past the shell on mobile and
@@ -44,6 +102,7 @@ body.app-shell-lock {
 ========================= */
 .page {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   justify-content: center;
   align-items: center;

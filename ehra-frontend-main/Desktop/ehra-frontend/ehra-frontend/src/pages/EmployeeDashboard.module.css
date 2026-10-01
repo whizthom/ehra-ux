@@ -2622,6 +2622,7 @@
     padding: 16px 30px;
     background: color-mix(in srgb, var(--bg-page) 91%, transparent);
     border-bottom: 1px solid color-mix(in srgb, var(--border-color) 72%, transparent);
+    -webkit-backdrop-filter: blur(18px);
     backdrop-filter: blur(18px);
 }
 
