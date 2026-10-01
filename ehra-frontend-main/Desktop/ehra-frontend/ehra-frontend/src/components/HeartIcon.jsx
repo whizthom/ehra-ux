@@ -11,9 +11,12 @@ export default function HeartIcon({ filled = false, className = "", style }) {
   return (
     <svg
       className={className}
+      // Size comes from the width/height ATTRIBUTES (1em), not inline style,
+      // so a parent's CSS (e.g. the mobile nav's 23px icon rule) can still
+      // override it. Inline width/height would beat any stylesheet.
+      width="1em"
+      height="1em"
       style={{
-        width: "1em",
-        height: "1em",
         flexShrink: 0,
         verticalAlign: "-0.125em",
         color: filled ? "#e24b4a" : undefined,
