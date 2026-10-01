@@ -41,6 +41,7 @@ import {
   variantImage,
 } from "../../utils/productVariants";
 import styles from "./Storefront.module.css";
+import HeartIcon from "../../components/HeartIcon";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const isValidEmail = (value) => EMAIL_PATTERN.test(String(value || "").trim());
@@ -168,7 +169,7 @@ function ProductCard({
             className={`${styles.heart} ${wished ? styles.wished : ""}`}
             onClick={() => onWishlist(product)}
           >
-            <i className={wished ? "ti ti-heart-filled" : "ti ti-heart"} />
+            <HeartIcon filled={Boolean(wished)} />
           </button>
         </div>
         <button
@@ -2144,12 +2145,10 @@ export default function Storefront() {
                       className={`${styles.detailHeart} ${wishlist.has(String(selectedProduct.id)) ? styles.wished : ""}`}
                       onClick={() => toggleWishlist(selectedProduct)}
                     >
-                      <i
-                        className={
-                          wishlist.has(String(selectedProduct.id))
-                            ? "ti ti-heart-filled"
-                            : "ti ti-heart"
-                        }
+                      <HeartIcon
+                        filled={Boolean(
+                          wishlist.has(String(selectedProduct.id)),
+                        )}
                       />
                     </button>
                   </div>

@@ -51,6 +51,7 @@ import {
   variantBasePrice,
 } from "../utils/productVariants";
 import styles from "./CustomerStore.module.css";
+import HeartIcon from "../components/HeartIcon";
 
 // The business's store, inside My Ehral. Same brand, same navigation model
 // as the rest of the customer app (top bar, bottom tab bar on phones,
@@ -264,10 +265,7 @@ export function ProductCard({
           aria-label={wished ? "Remove from saved" : "Save for later"}
           aria-pressed={wished}
         >
-          <i
-            className={wished ? "ti ti-heart-filled" : "ti ti-heart"}
-            aria-hidden="true"
-          />
+          <HeartIcon filled={Boolean(wished)} />
         </button>
       </div>
       <div className={styles.cardBody}>
@@ -1066,10 +1064,7 @@ export default function CustomerStore() {
             aria-pressed={showSaved}
             data-desktop-only="true"
           >
-            <i
-              className={wishlist.size ? "ti ti-heart-filled" : "ti ti-heart"}
-              aria-hidden="true"
-            />
+            <HeartIcon filled={Boolean(wishlist.size)} />
             {wishlist.size > 0 && <b>{wishlist.size}</b>}
           </button>
           <button
@@ -1405,10 +1400,7 @@ export default function CustomerStore() {
           className={showSaved ? styles.tabOn : ""}
           onClick={() => setShowSaved((v) => !v)}
         >
-          <i
-            className={wishlist.size ? "ti ti-heart-filled" : "ti ti-heart"}
-            aria-hidden="true"
-          />
+          <HeartIcon filled={Boolean(wishlist.size)} />
           <span>Saved</span>
           {wishlist.size > 0 && <b>{wishlist.size}</b>}
         </button>
@@ -1710,13 +1702,8 @@ export default function CustomerStore() {
               </div>
               <div className={styles.productLinks}>
                 <button onClick={() => toggleWish(selected)}>
-                  <i
-                    className={
-                      wishlist.has(String(selected.id))
-                        ? "ti ti-heart-filled"
-                        : "ti ti-heart"
-                    }
-                    aria-hidden="true"
+                  <HeartIcon
+                    filled={Boolean(wishlist.has(String(selected.id)))}
                   />
                   {wishlist.has(String(selected.id))
                     ? "Saved"

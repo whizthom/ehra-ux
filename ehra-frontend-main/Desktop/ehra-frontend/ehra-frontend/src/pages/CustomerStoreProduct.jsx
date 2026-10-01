@@ -37,6 +37,7 @@ import {
 import { ProductCard, Stepper } from "./CustomerStore";
 import storeStyles from "./CustomerStore.module.css";
 import styles from "./CustomerStoreProduct.module.css";
+import HeartIcon from "../components/HeartIcon";
 
 // The dedicated, full-page view of a single product - reached from the
 // "View full page" glow button in the product sheet on CustomerStore. Same
@@ -439,10 +440,7 @@ export default function CustomerStoreProduct() {
             aria-label={wished ? "Remove from saved" : "Save for later"}
             aria-pressed={wished}
           >
-            <i
-              className={wished ? "ti ti-heart-filled" : "ti ti-heart"}
-              aria-hidden="true"
-            />
+            <HeartIcon filled={Boolean(wished)} />
           </button>
           <button
             className={storeStyles.bagBtn}
@@ -624,10 +622,7 @@ export default function CustomerStoreProduct() {
 
             <div className={storeStyles.productLinks}>
               <button onClick={() => toggleWish(product)}>
-                <i
-                  className={wished ? "ti ti-heart-filled" : "ti ti-heart"}
-                  aria-hidden="true"
-                />
+                <HeartIcon filled={Boolean(wished)} />
                 {wished ? "Saved" : "Save for later"}
               </button>
               <button onClick={askAbout}>
