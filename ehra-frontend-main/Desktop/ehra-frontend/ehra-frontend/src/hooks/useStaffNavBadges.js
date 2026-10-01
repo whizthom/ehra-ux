@@ -20,6 +20,7 @@ import { getPendingProfileEdits } from "../api/profileEditApi";
 // tab regains focus, so they don't sit stale while the person is away.
 
 const EMPTY = {};
+const MIN_GAP_MS = 5000;
 
 const safely = async (fn) => {
   try {
@@ -69,9 +70,24 @@ export default function useStaffNavBadges(role) {
   useEffect(() => {
     if (!role) return undefined;
     let dead = false;
+    let inFlight = false;
+    let lastStart = 0;
+    // Returning to a tab fires BOTH window "focus" and "visibilitychange"
+    // within milliseconds of each other, which used to run the whole
+    // badge load (several requests, including full notification lists)
+    // twice. Skip a refresh that starts while one is running or within
+    // MIN_GAP_MS of the last one; a genuine later return still refreshes.
     const refresh = async () => {
-      const next = await loadBadges(role);
-      if (!dead) setBadges(next);
+      const startedAt = Date.now();
+      if (inFlight || startedAt - lastStart < MIN_GAP_MS) return;
+      inFlight = true;
+      lastStart = startedAt;
+      try {
+        const next = await loadBadges(role);
+        if (!dead) setBadges(next);
+      } finally {
+        inFlight = false;
+      }
     };
     const onVisible = () => {
       if (document.visibilityState === "visible") refresh();

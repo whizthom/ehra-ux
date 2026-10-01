@@ -4,6 +4,7 @@ import ScheduleSettings from "./ScheduleSettings";
 import { getTodayAttendance, getAttendanceHistory } from "../api/attendanceApi";
 import styles from "./AttendanceSection.module.css";
 import AttendanceSecurityPanel from "./AttendanceSecurityPanel";
+import useVisibleInterval from "../hooks/useVisibleInterval";
 
 const TABS = [
   { key: "today", label: "Today" },
@@ -66,10 +67,11 @@ export default function AttendanceSection() {
 
   useEffect(() => {
     fetchToday();
-    // Refresh today's view every 30s so admin sees new scans without manual reload
-    const interval = setInterval(fetchToday, 30000);
-    return () => clearInterval(interval);
   }, [fetchToday]);
+
+  // Refresh today's view every 30s so admin sees new scans without manual
+  // reload - paused while the tab is hidden (see useVisibleInterval).
+  useVisibleInterval(fetchToday, 30000);
 
   useEffect(() => {
     if (tab === "history") fetchHistory();

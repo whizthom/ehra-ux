@@ -66,6 +66,7 @@ import {
 } from "../api/businessApi";
 import { getMyProfile } from "../api/employeeApi";
 import { getMySubscription } from "../api/subscriptionApi";
+import useVisibleInterval from "../hooks/useVisibleInterval";
 
 // ── Sidebar nav ────────────────────────────────────────────────────────────
 // "My Accounts" is handled specially — clicking it navigates to the
@@ -733,12 +734,9 @@ export default function Dashboard() {
   // Keeps the mobile "Today's Pulse" widget's "live" badge honest — it
   // isn't just decorative, today's attendance really does get re-polled
   // periodically while the dashboard is open.
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchLatestAttendance();
-    }, 45000);
-    return () => clearInterval(interval);
-  }, [fetchLatestAttendance]);
+  // Same 45s period, but paused while the tab is hidden (see
+  // useVisibleInterval) so a background dashboard stops querying.
+  useVisibleInterval(fetchLatestAttendance, 45000);
 
   // Pending approvals / pending leave requests stay collapsed by default —
   // opening automatically only once there's actually something to review.
@@ -788,11 +786,10 @@ export default function Dashboard() {
   // focus (the most likely moment to actually notice a change — e.g.
   // coming back from paying on the Pricing page in another tab, or the
   // scheduled expiry job having run while this tab sat idle overnight).
+  useVisibleInterval(fetchSubscription, 5 * 60 * 1000);
   useEffect(() => {
-    const intervalId = window.setInterval(fetchSubscription, 5 * 60 * 1000);
     window.addEventListener("focus", fetchSubscription);
     return () => {
-      window.clearInterval(intervalId);
       window.removeEventListener("focus", fetchSubscription);
     };
   }, [fetchSubscription]);
@@ -1198,10 +1195,7 @@ export default function Dashboard() {
     fetchMissingClockOuts();
   }, [fetchMissingClockOuts]);
 
-  useEffect(() => {
-    const interval = setInterval(fetchMissingClockOuts, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, [fetchMissingClockOuts]);
+  useVisibleInterval(fetchMissingClockOuts, 5 * 60 * 1000);
 
   // ── Derived ───────────────────────────────────────────────────────────
 
