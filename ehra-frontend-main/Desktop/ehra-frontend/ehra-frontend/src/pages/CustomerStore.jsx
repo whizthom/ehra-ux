@@ -37,6 +37,19 @@ import {
   wishlistKey,
   writeJson,
 } from "../utils/storeHelpers";
+import VariantPicker from "../components/VariantPicker";
+import {
+  allVariantImages,
+  buildCartLines,
+  firstMissingGroup,
+  groupVariants,
+  hasVariants,
+  isSelectionComplete,
+  lineKey,
+  parseVariants,
+  selectionPayload,
+  variantBasePrice,
+} from "../utils/productVariants";
 import styles from "./CustomerStore.module.css";
 
 // The business's store, inside My Ehral. Same brand, same navigation model
@@ -284,8 +297,15 @@ export function ProductCard({
               type="button"
               className={styles.addBtn}
               disabled={!inStock}
-              onClick={() => onAdd(product)}
-              aria-label={`Add ${product.name} to bag`}
+              onClick={() =>
+                hasVariants(product) ? onOpen(product) : onAdd(product)
+              }
+              aria-label={
+                hasVariants(product)
+                  ? `Choose options for ${product.name}`
+                  : `Add ${product.name} to bag`
+              }
+              title={hasVariants(product) ? "Choose options" : undefined}
             >
               <i className="ti ti-plus" aria-hidden="true" />
             </button>
@@ -358,6 +378,7 @@ export default function CustomerStore() {
   const [selected, setSelected] = useState(null);
   const [selQty, setSelQty] = useState(1);
   const [selImage, setSelImage] = useState(0);
+  const [selVariants, setSelVariants] = useState({});
   const galleryRef = useRef(null);
   const [bagOpen, setBagOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
@@ -546,25 +567,16 @@ export default function CustomerStore() {
     [categories, products],
   );
 
-  const cartItems = useMemo(
-    () =>
-      products
-        .filter((p) => Number(cart[p.id]) > 0)
-        .map((p) => {
-          const stock = stockOf(p);
-          const limit = stock !== null ? Math.floor(stock) : 1000;
-          const quantity = Math.min(limit, Math.max(1, Number(cart[p.id])));
-          return {
-            ...p,
-            quantity,
-            limit,
-            lineTotal: effectivePrice(p) * quantity,
-            lineTax: Number(p.tax || 0) * quantity,
-          };
-        })
-        .filter((p) => p.limit > 0),
-    [products, cart],
-  );
+  const cartItems = useMemo(() => {
+    const stockLimit = (p) =>
+      stockOf(p) !== null ? Math.floor(stockOf(p)) : 1000;
+    return buildCartLines(cart, products, {
+      priceOf: (p, base) => effectivePrice({ ...p, price: base }),
+      limitOf: stockLimit,
+    })
+      .map((line) => ({ ...line, limit: stockLimit(line) }))
+      .filter((line) => line.limit > 0);
+  }, [products, cart]);
   const subtotal = cartItems.reduce((n, x) => n + x.lineTotal, 0);
   const taxTotal = cartItems.reduce((n, x) => n + x.lineTax, 0);
   const total = subtotal + taxTotal;
@@ -577,24 +589,26 @@ export default function CustomerStore() {
   // ── Cart / wishlist ──────────────────────────────────────────────────
   const limitOf = (p) => (stockOf(p) !== null ? Math.floor(stockOf(p)) : 1000);
 
-  const step = useCallback((product, delta) => {
+  const step = useCallback((product, delta, selection) => {
     setCart((c) => {
-      const current = Number(c[product.id]) || 0;
+      const key = lineKey(product.id, selection);
+      const current = Number(c[key]) || 0;
       const next = Math.min(limitOf(product), Math.max(0, current + delta));
       const copy = { ...c };
-      if (next <= 0) delete copy[product.id];
-      else copy[product.id] = next;
+      if (next <= 0) delete copy[key];
+      else copy[key] = next;
       return copy;
     });
   }, []);
 
-  const add = useCallback((product, quantity = 1) => {
+  const add = useCallback((product, quantity = 1, selection) => {
     if (!isInStock(product)) return;
     setCart((c) => {
-      const current = Number(c[product.id]) || 0;
+      const key = lineKey(product.id, selection);
+      const current = Number(c[key]) || 0;
       const next = Math.min(limitOf(product), current + quantity);
       if (next === current) return c;
-      return { ...c, [product.id]: next };
+      return { ...c, [key]: next };
     });
     setToast(`${product.name} added to your bag`);
   }, []);
@@ -613,6 +627,7 @@ export default function CustomerStore() {
     setSelected(product);
     setSelQty(1);
     setSelImage(0);
+    setSelVariants({});
   }, []);
 
   const handlers = {
@@ -719,6 +734,9 @@ export default function CustomerStore() {
         items: cartItems.map((i) => ({
           productId: i.id,
           quantity: i.quantity,
+          ...(i.variantLabel
+            ? { variants: selectionPayload(i.selection) }
+            : {}),
         })),
       });
       setPlaced(r.data);
@@ -939,10 +957,26 @@ export default function CustomerStore() {
     storefront.pickupEnabled && "Pickup",
     storefront.deliveryEnabled && "Delivery",
   ].filter(Boolean);
-  const selGallery = selected ? imagesOf(selected) : [];
+  const selGallery = selected
+    ? [
+        ...imagesOf(selected),
+        ...allVariantImages(selected).filter(
+          (u) => !imagesOf(selected).includes(u),
+        ),
+      ]
+    : [];
+  const selGroups = selected ? groupVariants(parseVariants(selected)) : [];
+  const selReady = isSelectionComplete(selGroups, selVariants);
+  const selMissing = firstMissingGroup(selGroups, selVariants);
+  const selBase = selected ? variantBasePrice(selected, selVariants) : 0;
+  const selPrice = selected
+    ? effectivePrice({ ...selected, price: selBase })
+    : 0;
   const selStock = selected ? stockState(selected) : null;
   const selLimit = selected ? limitOf(selected) : 1;
-  const selPercent = selected ? discountPercent(selected) : 0;
+  const selPercent = selected
+    ? discountPercent({ ...selected, price: selBase })
+    : 0;
   const selMeter =
     selected && stockOf(selected) !== null
       ? Math.min(
@@ -1423,23 +1457,28 @@ export default function CustomerStore() {
               <>
                 <ul className={styles.bagList}>
                   {cartItems.map((i) => (
-                    <li key={i.id}>
+                    <li key={i.lineKey}>
                       <span className={styles.bagThumb}>
-                        {imagesOf(i)[0] ? (
-                          <img src={imagesOf(i)[0]} alt="" />
+                        {i.variantImage || imagesOf(i)[0] ? (
+                          <img src={i.variantImage || imagesOf(i)[0]} alt="" />
                         ) : (
                           <i className="ti ti-package" aria-hidden="true" />
                         )}
                       </span>
                       <div className={styles.bagInfo}>
                         <strong>{i.name}</strong>
-                        <span>{money(i.currency, effectivePrice(i))}</span>
+                        {i.variantLabel && (
+                          <em className={styles.variantLine}>
+                            {i.variantLabel}
+                          </em>
+                        )}
+                        <span>{money(i.currency, i.unitPrice)}</span>
                         <Stepper
                           size="sm"
                           value={i.quantity}
                           max={i.limit}
-                          onMinus={() => step(i, -1)}
-                          onPlus={() => step(i, 1)}
+                          onMinus={() => step(i, -1, i.selection)}
+                          onPlus={() => step(i, 1, i.selection)}
                         />
                       </div>
                       <b className={styles.bagLine}>
@@ -1602,11 +1641,9 @@ export default function CustomerStore() {
                 <span className={styles.brandLine}>by {selected.brand}</span>
               )}
               <div className={styles.productPrice}>
-                <strong>
-                  {money(selected.currency, effectivePrice(selected))}
-                </strong>
+                <strong>{money(selected.currency, selPrice)}</strong>
                 {selPercent > 0 && (
-                  <del>{money(selected.currency, selected.price)}</del>
+                  <del>{money(selected.currency, selBase)}</del>
                 )}
               </div>
               <div
@@ -1624,6 +1661,31 @@ export default function CustomerStore() {
               {selected.description && (
                 <p className={styles.productDesc}>{selected.description}</p>
               )}
+              <VariantPicker
+                groups={selGroups}
+                selection={selVariants}
+                basePrice={Number(selected.price || 0)}
+                formatPrice={(v) => money(selected.currency, v)}
+                onChange={(name, value) => {
+                  setSelVariants((cur) => {
+                    const next = { ...cur };
+                    if (value) next[name] = value;
+                    else delete next[name];
+                    return next;
+                  });
+                  const photo = selGroups
+                    .find((g) => g.name === name)
+                    ?.options.find((o) => o.value === value)?.image;
+                  const at = photo ? selGallery.indexOf(photo) : -1;
+                  if (at >= 0) {
+                    setSelImage(at);
+                    galleryRef.current?.scrollTo({
+                      left: at * (galleryRef.current?.clientWidth || 0),
+                      behavior: "smooth",
+                    });
+                  }
+                }}
+              />
               <div className={styles.productActions}>
                 <Stepper
                   value={selQty}
@@ -1633,15 +1695,17 @@ export default function CustomerStore() {
                 />
                 <button
                   className={styles.primary}
-                  disabled={!isInStock(selected)}
+                  disabled={!isInStock(selected) || !selReady}
                   onClick={() => {
-                    add(selected, selQty);
+                    add(selected, selQty, selVariants);
                     setSelected(null);
                   }}
                 >
-                  {isInStock(selected)
-                    ? `Add to bag · ${money(selected.currency, effectivePrice(selected) * selQty)}`
-                    : "Sold out"}
+                  {!isInStock(selected)
+                    ? "Sold out"
+                    : !selReady
+                      ? `Select ${selMissing.toLowerCase()}`
+                      : `Add to bag · ${money(selected.currency, selPrice * selQty)}`}
                 </button>
               </div>
               <div className={styles.productLinks}>
@@ -1748,9 +1812,11 @@ export default function CustomerStore() {
 
             <div className={styles.summary}>
               {cartItems.map((i) => (
-                <div key={i.id}>
+                <div key={i.lineKey}>
                   <span>
-                    {i.name} <em>× {i.quantity}</em>
+                    {i.name}
+                    {i.variantLabel ? ` (${i.variantLabel})` : ""}{" "}
+                    <em>× {i.quantity}</em>
                   </span>
                   <b>{money(i.currency, i.lineTotal)}</b>
                 </div>

@@ -27,6 +27,19 @@ import { createCustomerBusinessConversation } from "../../api/messagingApi";
 import { payForOrderOnline } from "../../api/orderPaymentApi";
 import { useAuth } from "../../context/AuthContext";
 import Logo from "../../components/Logo";
+import VariantPicker from "../../components/VariantPicker";
+import {
+  buildCartLines,
+  firstMissingGroup,
+  groupVariants,
+  hasVariants,
+  isSelectionComplete,
+  lineKey,
+  parseVariants,
+  selectionPayload,
+  variantBasePrice,
+  variantImage,
+} from "../../utils/productVariants";
 import styles from "./Storefront.module.css";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -176,7 +189,15 @@ function ProductCard({
           <button
             className={styles.addButton}
             disabled={!isInStock(product)}
-            onClick={() => onAdd(product)}
+            onClick={() =>
+              hasVariants(product) ? onOpen(product) : onAdd(product)
+            }
+            aria-label={
+              hasVariants(product)
+                ? `Choose options for ${product.name}`
+                : `Add ${product.name} to bag`
+            }
+            title={hasVariants(product) ? "Choose options" : "Add to bag"}
           >
             <i className="ti ti-plus" />
           </button>
@@ -872,6 +893,8 @@ export default function Storefront() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [productQty, setProductQty] = useState(1);
   const [productImageIndex, setProductImageIndex] = useState(0);
+  const [variantSel, setVariantSel] = useState({});
+  const [showVariantPhoto, setShowVariantPhoto] = useState(false);
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [category, setCategory] = useState("All");
@@ -1046,17 +1069,10 @@ export default function Storefront() {
   }, [products, search]);
   const cartItems = useMemo(
     () =>
-      products
-        .filter((p) => Number(cart[p.id]) > 0)
-        .map((p) => ({
-          ...p,
-          quantity: Math.min(
-            stockOf(p) !== null ? Math.floor(stockOf(p)) : 1000,
-            Math.max(1, Number(cart[p.id])),
-          ),
-          lineTotal: effectivePrice(p) * Number(cart[p.id]),
-          lineTax: Number(p.tax || 0) * Number(cart[p.id]),
-        })),
+      buildCartLines(cart, products, {
+        priceOf: (p, base) => effectivePrice({ ...p, price: base }),
+        limitOf: (p) => (stockOf(p) !== null ? Math.floor(stockOf(p)) : 1000),
+      }),
     [products, cart],
   );
   const subtotal = cartItems.reduce((n, x) => n + x.lineTotal, 0);
@@ -1110,27 +1126,31 @@ export default function Storefront() {
       setSelectedProduct(product);
       setProductQty(1);
       setProductImageIndex(0);
+      setVariantSel({});
+      setShowVariantPhoto(false);
       setSearchOpen(false);
     },
     [rememberProduct],
   );
   const add = useCallback(
-    (product) =>
+    (product, selection) =>
       setCart((c) => {
-        const current = Number(c[product.id]) || 0;
+        const key = lineKey(product.id, selection);
+        const current = Number(c[key]) || 0;
         const stock = stockOf(product);
         const limit = stock !== null ? Math.floor(stock) : 1000;
         if (limit <= 0 || current >= limit) return c;
-        return { ...c, [product.id]: Math.min(current + 1, limit) };
+        return { ...c, [key]: Math.min(current + 1, limit) };
       }),
     [],
   );
   const remove = useCallback(
-    (product) =>
+    (product, selection) =>
       setCart((c) => {
+        const key = lineKey(product.id, selection);
         const next = { ...c };
-        if ((Number(next[product.id]) || 0) <= 1) delete next[product.id];
-        else next[product.id] = Number(next[product.id]) - 1;
+        if ((Number(next[key]) || 0) <= 1) delete next[key];
+        else next[key] = Number(next[key]) - 1;
         return next;
       }),
     [],
@@ -1290,6 +1310,9 @@ export default function Storefront() {
         items: cartItems.map((i) => ({
           productId: i.id,
           quantity: i.quantity,
+          ...(i.variantLabel
+            ? { variants: selectionPayload(i.selection) }
+            : {}),
         })),
       });
       setPlaced(response.data);
@@ -1947,9 +1970,9 @@ export default function Storefront() {
               <>
                 <div className={styles.cartList}>
                   {cartItems.map((i) => (
-                    <div className={styles.cartItem} key={i.id}>
-                      {imagesOf(i)[0] ? (
-                        <img src={imagesOf(i)[0]} alt="" />
+                    <div className={styles.cartItem} key={i.lineKey}>
+                      {i.variantImage || imagesOf(i)[0] ? (
+                        <img src={i.variantImage || imagesOf(i)[0]} alt="" />
                       ) : (
                         <div className={styles.cartThumb}>
                           <i className="ti ti-package" />
@@ -1957,11 +1980,14 @@ export default function Storefront() {
                       )}
                       <div className={styles.cartInfo}>
                         <strong>{i.name}</strong>
-                        <span>{money(i.currency, effectivePrice(i))}</span>
+                        {i.variantLabel && <small>{i.variantLabel}</small>}
+                        <span>{money(i.currency, i.unitPrice)}</span>
                         <div className={styles.qty}>
-                          <button onClick={() => remove(i)}>−</button>
+                          <button onClick={() => remove(i, i.selection)}>
+                            −
+                          </button>
                           <b>{i.quantity}</b>
-                          <button onClick={() => add(i)}>+</button>
+                          <button onClick={() => add(i, i.selection)}>+</button>
                         </div>
                       </div>
                       <b className={styles.lineTotal}>
@@ -2011,6 +2037,17 @@ export default function Storefront() {
           const gallery = imagesOf(selectedProduct);
           const stock = stockOf(selectedProduct);
           const state = stockState(selectedProduct);
+          const variantGroups = groupVariants(parseVariants(selectedProduct));
+          const variantReady = isSelectionComplete(variantGroups, variantSel);
+          const missingGroup = firstMissingGroup(variantGroups, variantSel);
+          const shownBase = variantBasePrice(selectedProduct, variantSel);
+          const shownPrice = effectivePrice({
+            ...selectedProduct,
+            price: shownBase,
+          });
+          const variantPhoto = showVariantPhoto
+            ? variantImage(selectedProduct, variantSel)
+            : "";
           const maxQty =
             stock !== null
               ? Math.max(1, Math.floor(stock))
@@ -2054,9 +2091,10 @@ export default function Storefront() {
                 </button>
                 <div className={styles.productMedia}>
                   <div className={styles.mainProductImage}>
-                    {gallery.length ? (
+                    {gallery.length || variantPhoto ? (
                       <img
                         src={
+                          variantPhoto ||
                           gallery[
                             Math.min(productImageIndex, gallery.length - 1)
                           ]
@@ -2084,7 +2122,10 @@ export default function Storefront() {
                           className={
                             i === productImageIndex ? styles.thumbActive : ""
                           }
-                          onClick={() => setProductImageIndex(i)}
+                          onClick={() => {
+                            setProductImageIndex(i);
+                            setShowVariantPhoto(false);
+                          }}
                         >
                           <img src={u} alt="" />
                         </button>
@@ -2115,19 +2156,11 @@ export default function Storefront() {
                   <h2>{selectedProduct.name}</h2>
                   <div className={styles.detailPriceRow}>
                     <strong>
-                      {money(
-                        selectedProduct.currency,
-                        effectivePrice(selectedProduct),
-                      )}
+                      {money(selectedProduct.currency, shownPrice)}
                     </strong>
                     {Number(selectedProduct.discount || 0) > 0 && (
                       <>
-                        <del>
-                          {money(
-                            selectedProduct.currency,
-                            selectedProduct.price,
-                          )}
-                        </del>
+                        <del>{money(selectedProduct.currency, shownBase)}</del>
                         <span>
                           Save{" "}
                           {money(
@@ -2142,6 +2175,21 @@ export default function Storefront() {
                     {selectedProduct.description ||
                       "A carefully selected product from this store."}
                   </p>
+                  <VariantPicker
+                    groups={variantGroups}
+                    selection={variantSel}
+                    basePrice={Number(selectedProduct.price || 0)}
+                    formatPrice={(v) => money(selectedProduct.currency, v)}
+                    onChange={(name, value) => {
+                      setVariantSel((cur) => {
+                        const next = { ...cur };
+                        if (value) next[name] = value;
+                        else delete next[name];
+                        return next;
+                      });
+                      setShowVariantPhoto(true);
+                    }}
+                  />
                   <div className={styles.stockPanel}>
                     <div className={styles.stockPanelTop}>
                       <span>Current availability</span>
@@ -2206,17 +2254,28 @@ export default function Storefront() {
                     </div>
                     <button
                       className={styles.primaryPurchase}
-                      disabled={!isInStock(selectedProduct) || maxQty === 0}
+                      disabled={
+                        !isInStock(selectedProduct) ||
+                        maxQty === 0 ||
+                        !variantReady
+                      }
                       onClick={() =>
                         requireCustomer(() => {
                           for (let i = 0; i < productQty; i++)
-                            add(selectedProduct);
+                            add(selectedProduct, variantSel);
                           setSelectedProduct(null);
                           setCartOpen(true);
                         })
                       }
                     >
-                      Add {productQty > 1 ? `${productQty} items` : "to bag"}
+                      {variantReady ? (
+                        <>
+                          Add{" "}
+                          {productQty > 1 ? `${productQty} items` : "to bag"}
+                        </>
+                      ) : (
+                        <>Select {missingGroup.toLowerCase()}</>
+                      )}
                       <i className="ti ti-arrow-right" />
                     </button>
                   </div>

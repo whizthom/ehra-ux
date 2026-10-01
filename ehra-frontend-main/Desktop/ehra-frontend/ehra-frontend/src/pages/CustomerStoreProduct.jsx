@@ -24,6 +24,16 @@ import {
   wishlistKey,
   writeJson,
 } from "../utils/storeHelpers";
+import VariantPicker from "../components/VariantPicker";
+import {
+  allVariantImages,
+  firstMissingGroup,
+  groupVariants,
+  isSelectionComplete,
+  lineKey,
+  parseVariants,
+  variantBasePrice,
+} from "../utils/productVariants";
 import { ProductCard, Stepper } from "./CustomerStore";
 import storeStyles from "./CustomerStore.module.css";
 import styles from "./CustomerStoreProduct.module.css";
@@ -57,6 +67,7 @@ export default function CustomerStoreProduct() {
   const [hydratedSlug, setHydratedSlug] = useState("");
 
   const [qty, setQty] = useState(1);
+  const [variantSel, setVariantSel] = useState({});
   const [activeImage, setActiveImage] = useState(0);
   const [lightbox, setLightbox] = useState(false);
   const galleryRef = useRef(null);
@@ -113,6 +124,7 @@ export default function CustomerStoreProduct() {
   // Landing on a different product (via a related-item tap) starts fresh.
   useEffect(() => {
     setQty(1);
+    setVariantSel({});
     setActiveImage(0);
     setLightbox(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -128,7 +140,14 @@ export default function CustomerStoreProduct() {
   // Hoisted above the early returns below (rather than sitting alongside the
   // other derived product fields) because the keyboard-nav effect closes
   // over it and effects can't come after a conditional return.
-  const gallery = useMemo(() => (product ? imagesOf(product) : []), [product]);
+  const gallery = useMemo(() => {
+    if (!product) return [];
+    const base = imagesOf(product);
+    return [
+      ...base,
+      ...allVariantImages(product).filter((u) => !base.includes(u)),
+    ];
+  }, [product]);
 
   const limitOf = useCallback(
     (p) => (stockOf(p) !== null ? Math.floor(stockOf(p)) : 1000),
@@ -137,13 +156,14 @@ export default function CustomerStoreProduct() {
 
   // ── Cart / wishlist (shared behaviour with the store & related cards) ─
   const add = useCallback(
-    (p, quantity = 1) => {
+    (p, quantity = 1, selection) => {
       if (!isInStock(p)) return;
       setCart((c) => {
-        const current = Number(c[p.id]) || 0;
+        const key = lineKey(p.id, selection);
+        const current = Number(c[key]) || 0;
         const next = Math.min(limitOf(p), current + quantity);
         if (next === current) return c;
-        return { ...c, [p.id]: next };
+        return { ...c, [key]: next };
       });
       setToast(`${p.name} added to your bag`);
     },
@@ -151,13 +171,14 @@ export default function CustomerStoreProduct() {
   );
 
   const step = useCallback(
-    (p, delta) => {
+    (p, delta, selection) => {
       setCart((c) => {
-        const current = Number(c[p.id]) || 0;
+        const key = lineKey(p.id, selection);
+        const current = Number(c[key]) || 0;
         const next = Math.min(limitOf(p), Math.max(0, current + delta));
         const copy = { ...c };
-        if (next <= 0) delete copy[p.id];
-        else copy[p.id] = next;
+        if (next <= 0) delete copy[key];
+        else copy[key] = next;
         return copy;
       });
     },
@@ -337,7 +358,12 @@ export default function CustomerStoreProduct() {
 
   const stock = stockState(product);
   const limit = limitOf(product);
-  const percent = discountPercent(product);
+  const variantGroups = groupVariants(parseVariants(product));
+  const variantReady = isSelectionComplete(variantGroups, variantSel);
+  const variantMissing = firstMissingGroup(variantGroups, variantSel);
+  const shownBase = variantBasePrice(product, variantSel);
+  const shownPrice = effectivePrice({ ...product, price: shownBase });
+  const percent = discountPercent({ ...product, price: shownBase });
   const meter =
     stockOf(product) !== null
       ? Math.min(
@@ -528,12 +554,8 @@ export default function CustomerStoreProduct() {
             )}
 
             <div className={styles.priceRow}>
-              <strong>
-                {money(product.currency, effectivePrice(product))}
-              </strong>
-              {percent > 0 && (
-                <del>{money(product.currency, product.price)}</del>
-              )}
+              <strong>{money(product.currency, shownPrice)}</strong>
+              {percent > 0 && <del>{money(product.currency, shownBase)}</del>}
               {percent > 0 && (
                 <span className={styles.saveTag}>Save {percent}%</span>
               )}
@@ -554,6 +576,32 @@ export default function CustomerStoreProduct() {
               <p className={styles.desc}>{product.description}</p>
             )}
 
+            <VariantPicker
+              groups={variantGroups}
+              selection={variantSel}
+              basePrice={Number(product.price || 0)}
+              formatPrice={(v) => money(product.currency, v)}
+              onChange={(name, value) => {
+                setVariantSel((cur) => {
+                  const next = { ...cur };
+                  if (value) next[name] = value;
+                  else delete next[name];
+                  return next;
+                });
+                const photo = variantGroups
+                  .find((g) => g.name === name)
+                  ?.options.find((o) => o.value === value)?.image;
+                const at = photo ? gallery.indexOf(photo) : -1;
+                if (at >= 0) {
+                  setActiveImage(at);
+                  galleryRef.current?.scrollTo({
+                    left: at * (galleryRef.current?.clientWidth || 0),
+                    behavior: "smooth",
+                  });
+                }
+              }}
+            />
+
             <div className={styles.actions}>
               <Stepper
                 value={qty}
@@ -563,12 +611,14 @@ export default function CustomerStoreProduct() {
               />
               <button
                 className={storeStyles.primary}
-                disabled={!isInStock(product)}
-                onClick={() => add(product, qty)}
+                disabled={!isInStock(product) || !variantReady}
+                onClick={() => add(product, qty, variantSel)}
               >
-                {isInStock(product)
-                  ? `Add to bag · ${money(product.currency, effectivePrice(product) * qty)}`
-                  : "Sold out"}
+                {!isInStock(product)
+                  ? "Sold out"
+                  : !variantReady
+                    ? `Select ${variantMissing.toLowerCase()}`
+                    : `Add to bag · ${money(product.currency, shownPrice * qty)}`}
               </button>
             </div>
 
