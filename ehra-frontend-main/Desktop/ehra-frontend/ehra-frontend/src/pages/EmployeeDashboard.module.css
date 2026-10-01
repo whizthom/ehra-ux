@@ -3156,3 +3156,20 @@
         border-radius: 9px;
     }
 }
+
+/* ── iPhone safe-area fix for the mobile header ──────────────────────────
+   The app runs edge-to-edge on iPhone (viewport-fit=cover plus the
+   black-translucent status bar in index.html), so the header must leave
+   room for the status bar / notch / Dynamic Island. An earlier mobile rule
+   did that with padding-top: calc(10px + env(safe-area-inset-top)), but
+   later `padding: ...` shorthands in this file reset it, which put the
+   bell and the three-dots button underneath the iOS status bar, where taps
+   are taken by the system (tap-to-scroll-top) and never reach the buttons.
+   This block is deliberately LAST in the file and uses longhand so nothing
+   can override it; padding-left/right/bottom set above are untouched. */
+@media (max-width: 900px) {
+    .topbar {
+        padding-top: calc(8px + env(safe-area-inset-top, 0px));
+        min-height: calc(54px + env(safe-area-inset-top, 0px));
+    }
+}

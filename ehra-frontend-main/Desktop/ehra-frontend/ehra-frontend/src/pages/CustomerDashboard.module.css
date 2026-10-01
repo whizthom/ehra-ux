@@ -7124,3 +7124,24 @@
     min-height: 40px
   }
 }
+
+/* ── iPhone safe-area fix for the customer header ────────────────────────
+   The app runs edge-to-edge on iPhone (viewport-fit=cover + translucent
+   status bar), so the header must clear the status bar / notch / Dynamic
+   Island. The base .topbar rule did that, but the later `height` +
+   `padding: 0 …` rules above reset it, which put the bell and the
+   three-dots button under the iOS status bar, where the system takes the
+   tap. This block is last in the file, uses longhand, and swaps the fixed
+   height for a min-height that includes the inset. Zero effect on
+   desktop, where the inset is 0. */
+.shell .topbar {
+  height: auto;
+  min-height: calc(72px + env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+@media (max-width: 760px) {
+  .shell .topbar {
+    min-height: calc(64px + env(safe-area-inset-top, 0px));
+  }
+}
