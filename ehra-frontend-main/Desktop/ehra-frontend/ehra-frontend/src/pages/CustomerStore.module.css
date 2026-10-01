@@ -1162,6 +1162,13 @@
     font-size: 23px;
 }
 
+/* HeartIcon is an inline SVG sized in em, so give it the same 23px box the
+   font icons get from the rule above. */
+.tabs button svg {
+    width: 23px;
+    height: 23px;
+}
+
 .tabs button.tabOn {
     color: var(--st-accent);
 }
