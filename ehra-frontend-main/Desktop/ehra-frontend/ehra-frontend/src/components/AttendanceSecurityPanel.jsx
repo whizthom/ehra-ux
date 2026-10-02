@@ -6,6 +6,8 @@ import {
   revokeBusinessAttendanceDevice,
 } from "../api/attendanceDeviceApi";
 import styles from "./AttendanceSecurityPanel.module.css";
+import useCacheWrite from "../hooks/useCacheWrite";
+import { hasCached, seedFromCache } from "../utils/viewCache";
 
 const EVENT_LABELS = {
   UNRECOGNIZED_DEVICE: "Unrecognized device",
@@ -30,16 +32,27 @@ function errorMessage(err, fallback) {
 
 export default function AttendanceSecurityPanel() {
   const [tab, setTab] = useState("devices");
-  const [devices, setDevices] = useState([]);
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Seeded from the in-memory view cache so coming back to this tab paints
+  // instantly; load() below still runs on every visit and replaces it
+  // (see utils/viewCache.js).
+  const [devices, setDevices] = useState(() => seedFromCache("attendance:security:devices", []));
+  useCacheWrite("attendance:security:devices", devices);
+  const [events, setEvents] = useState(() => seedFromCache("attendance:security:events", []));
+  useCacheWrite("attendance:security:events", events);
+  const [loading, setLoading] = useState(
+    () => !(hasCached("attendance:security:devices") && hasCached("attendance:security:events")),
+  );
   const [busyId, setBusyId] = useState(null);
   const [error, setError] = useState("");
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [resolutionNote, setResolutionNote] = useState("");
 
   const load = useCallback(async () => {
-    setLoading(true);
+    // Spinner only when there is nothing on screen yet; otherwise refresh
+    // in place (this also runs after resolving an event / revoking a device).
+    if (!(hasCached("attendance:security:devices") && hasCached("attendance:security:events"))) {
+      setLoading(true);
+    }
     setError("");
     try {
       const [deviceResponse, eventResponse] = await Promise.all([

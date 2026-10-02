@@ -6,9 +6,10 @@ import styles from "./AttendanceSection.module.css";
 import AttendanceSecurityPanel from "./AttendanceSecurityPanel";
 import useVisibleInterval from "../hooks/useVisibleInterval";
 import useCacheWrite from "../hooks/useCacheWrite";
-import { hasFreshCache, seedFromCache } from "../utils/viewCache";
+import { hasCached, hasFreshCache, peekCache, putCache, seedFromCache } from "../utils/viewCache";
 
 const TODAY_CACHE_MAX_AGE_MS = 2 * 60 * 1000;
+const HISTORY_ALL_KEY = "attendance:history:all";
 
 const TABS = [
   { key: "today", label: "Today" },
@@ -33,7 +34,11 @@ export default function AttendanceSection() {
   // place instead of blanking it behind a spinner every 30 seconds.
   const todayLoadedRef = useRef(false);
 
-  const [historyRecords, setHistoryRecords] = useState([]);
+  // Only the UNFILTERED history is cached (it is what the tab opens on). A
+  // date range the admin applied is an explicit request and loads normally.
+  const [historyRecords, setHistoryRecords] = useState(() =>
+    seedFromCache(HISTORY_ALL_KEY, []),
+  );
   const [loadingHistory, setLoadingHistory] = useState(false);
   // Empty by default so History loads every attendance record for every
   // employee, past to present - same "show everything unless narrowed"
@@ -60,7 +65,18 @@ export default function AttendanceSection() {
 
   const fetchHistory = useCallback(async () => {
     try {
-      setLoadingHistory(true);
+      // Block with the spinner only when there is nothing to show for this
+      // view: the unfiltered view already holds rows (cached or loaded
+      // earlier) and is simply refreshed in place.
+      const unfiltered = !fromDate && !toDate;
+      if (unfiltered && hasCached(HISTORY_ALL_KEY)) {
+        // Showing the unfiltered view: make sure what is on screen is the
+        // unfiltered copy (not leftover rows from a date range that was
+        // just cleared) while the refresh runs.
+        setHistoryRecords(peekCache(HISTORY_ALL_KEY));
+      } else {
+        setLoadingHistory(true);
+      }
       // Only pass a date range once both ends are set; otherwise fetch
       // the business's full, unbounded history (past to present) for
       // every employee.
@@ -69,6 +85,9 @@ export default function AttendanceSection() {
         toDate || undefined,
       );
       setHistoryRecords(data);
+      // Written explicitly (not mirrored from state) so a date-filtered
+      // result can never end up stored as the unfiltered history.
+      if (unfiltered) putCache(HISTORY_ALL_KEY, data);
     } catch (err) {
       console.error("Failed to load attendance history:", err);
     } finally {

@@ -7,6 +7,8 @@ import {
   deleteHoliday,
 } from "../api/attendanceApi";
 import styles from "./ScheduleSettings.module.css";
+import useCacheWrite from "../hooks/useCacheWrite";
+import { hasCached, seedFromCache } from "../utils/viewCache";
 
 const DAY_LABELS = {
   MONDAY: "Monday",
@@ -29,18 +31,25 @@ const DAY_ORDER = [
 ];
 
 export default function ScheduleSettings() {
-  const [schedule, setSchedule] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Seeded from the in-memory view cache so coming back to this tab paints
+  // instantly; fetchAll below still runs on every visit and replaces it
+  // (see utils/viewCache.js).
+  const [schedule, setSchedule] = useState(() => seedFromCache("attendance:schedule:weekly", []));
+  useCacheWrite("attendance:schedule:weekly", schedule);
+  const [loading, setLoading] = useState(() => !hasCached("attendance:schedule:weekly"));
   const [error, setError] = useState("");
   const [savingDay, setSavingDay] = useState(null);
 
-  const [holidays, setHolidays] = useState([]);
+  const [holidays, setHolidays] = useState(() => seedFromCache("attendance:schedule:holidays", []));
+  useCacheWrite("attendance:schedule:holidays", holidays);
   const [newHolidayDate, setNewHolidayDate] = useState("");
   const [newHolidayLabel, setNewHolidayLabel] = useState("");
   const [addingHoliday, setAddingHoliday] = useState(false);
 
   const fetchAll = useCallback(async () => {
-    setLoading(true);
+    // Spinner only when there is nothing on screen yet; otherwise refresh
+    // in place (this also runs after saving, where blanking was jarring).
+    if (!hasCached("attendance:schedule:weekly")) setLoading(true);
     setError("");
 
     // Fetched independently (not Promise.all) so that one endpoint
