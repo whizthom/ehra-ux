@@ -5,11 +5,15 @@ import {
   verifyCreditPurchase,
   acceptCreditAgreement,
 } from "../api/creditsApi";
-import { payWithPaystack } from "../api/subscriptionApi";
+import { payWithPaystack } from "../api/paystackInline";
 import EhralCreditsUsage from "./EhralCreditsUsage";
 import styles from "./EhralCredits.module.css";
+import AgreementCard from "../components/credits/AgreementCard";
+import { SERVICE_COPY, BUSINESS_OPS_NOTE, hasBundledServices } from "../components/credits/serviceCopy";
 
-const AMOUNTS = [1000, 2500, 5000, 10000];
+// Presets are presentation only; the backend enforces the minimum, allowed amounts and promotion.
+const AMOUNTS = [2500, 5000, 10000, 25000, 50000, 100000];
+const DEFAULT_MIN_PURCHASE = 2500;
 
 // Keep in sync with CURRENT_AGREEMENT_VERSION in CreditServiceImpl.java.
 // When the terms change, bump both values and update the text below —
@@ -43,6 +47,9 @@ const SERVICE_BILLING_NOTE = {
 
 const serviceBillingText = (s) =>
   SERVICE_BILLING_NOTE[s.serviceCode]?.(s) ??
+  (SERVICE_COPY[s.serviceCode]?.unit
+    ? `${money(s.amount).replace(".00", "")} ${SERVICE_COPY[s.serviceCode].unit}`
+    : null) ??
   `${label(s.billingModel)} · ${money(s.amount)} ${s.currency === "NGN" ? "credits" : s.currency}`;
 
 // Each known Ehral service gets an icon that actually represents what it
@@ -55,7 +62,8 @@ const SERVICE_ICONS = {
   WHATSAPP_CLICK: "ti-brand-whatsapp",
 };
 const DEFAULT_SERVICE_ICON = "ti-apps";
-const serviceIcon = (code = "") => SERVICE_ICONS[code] || DEFAULT_SERVICE_ICON;
+const serviceIcon = (code = "") => SERVICE_COPY[code]?.icon || SERVICE_ICONS[code] || DEFAULT_SERVICE_ICON;
+const serviceTitle = (code = "") => SERVICE_COPY[code]?.title || label(code);
 
 export default function EhralCredits() {
   const [view, setView] = useState("dashboard"); // "dashboard" | "usage"
@@ -89,9 +97,14 @@ export default function EhralCredits() {
   }, [load]);
 
   const amount = Number(custom || selected);
-  const promo = data?.firstPurchasePromotionEligible
+  const minPurchase = Number(data?.minPurchase || DEFAULT_MIN_PURCHASE);
+  const belowMin = amount > 0 && amount < minPurchase;
+  // Display estimate only - the server recomputes the real promotion (including the cap) at verification.
+  const rawPromo = data?.firstPurchasePromotionEligible
     ? amount * Number(data?.firstPurchasePromotionMultiplier || 0)
     : 0;
+  const promoCap = data?.firstPurchasePromotionCap != null ? Number(data.firstPurchasePromotionCap) : Infinity;
+  const promo = belowMin ? 0 : Math.min(rawPromo, promoCap);
   const services = data?.services || [];
 
   const usageText = useMemo(() => {
@@ -111,8 +124,8 @@ export default function EhralCredits() {
       setAgreementOpen(true);
       return;
     }
-    if (!amount || amount < 1) {
-      setMessage("Enter a valid amount.");
+    if (!amount || amount < minPurchase) {
+      setMessage(`The minimum purchase is ${money(minPurchase).replace(".00", "")}.`);
       return;
     }
     setProcessing(true);
@@ -198,6 +211,8 @@ export default function EhralCredits() {
           </button>
         </div>
       )}
+
+      <AgreementCard agreement={data?.agreement} commercialStatus={data?.commercialStatus} onChanged={load} />
 
       <section className={styles.hero}>
         <div className={styles.heroGlow} />
@@ -297,7 +312,7 @@ export default function EhralCredits() {
                 <i className={`ti ${serviceIcon(s.serviceCode)}`} />
               </div>
               <div className={styles.serviceMain}>
-                <h3>{label(s.serviceCode)}</h3>
+                <h3>{serviceTitle(s.serviceCode)}</h3>
                 <p>{serviceBillingText(s)}</p>
               </div>
               <span className={styles.serviceArrow}>
@@ -306,6 +321,11 @@ export default function EhralCredits() {
             </article>
           ))}
         </div>
+        {hasBundledServices(services) && (
+          <p className={styles.sectionHint} role="note" style={{ marginTop: 12 }}>
+            {BUSINESS_OPS_NOTE}
+          </p>
+        )}
       </section>
 
       <section className={styles.section} id="creditActivity">
@@ -410,7 +430,7 @@ export default function EhralCredits() {
                   onChange={(e) =>
                     setCustom(e.target.value.replace(/[^0-9.]/g, ""))
                   }
-                  placeholder="Enter amount"
+                  placeholder={`Min ${minPurchase.toLocaleString("en-NG")}`}
                 />
               </div>
             </div>
@@ -419,6 +439,11 @@ export default function EhralCredits() {
                 <span>Purchased credits</span>
                 <strong>{money(amount)}</strong>
               </div>
+              {belowMin && (
+                <p role="alert" className={styles.sheetSub}>
+                  Minimum purchase is {money(minPurchase).replace(".00", "")}.
+                </p>
+              )}
               <div>
                 <span>Promotional credits</span>
                 <strong>+{money(promo)}</strong>
@@ -432,7 +457,7 @@ export default function EhralCredits() {
             </div>
             <button
               className={styles.payButton}
-              disabled={processing || !amount}
+              disabled={processing || !amount || belowMin}
               onClick={purchase}
             >
               {processing ? (

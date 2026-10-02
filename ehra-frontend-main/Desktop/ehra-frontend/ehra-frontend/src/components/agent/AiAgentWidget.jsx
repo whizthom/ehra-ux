@@ -224,7 +224,7 @@ function describeError(err) {
   if (status === 402) {
     return {
       message:
-        "You've exhausted your daily token. Upgrade your plan to get more access token.",
+        "You've reached your AI limit. Add Ehral Credits to keep using Ehral Intelligence.",
       isQuotaExceeded: true,
     };
   }
@@ -233,7 +233,7 @@ function describeError(err) {
       message: "Too many requests. Please wait a moment and try again.",
     };
   if (status === 403)
-    return { message: detail || "This isn't available on your current plan." };
+    return { message: detail || "This isn't available for your account." };
   if (!err?.response)
     return {
       message:
@@ -698,9 +698,9 @@ function AgentWorkspace({ onClose }) {
                         <button
                           type="button"
                           className={styles.quotaUpgradeButton}
-                          onClick={() => navigate("/pricing")}
+                          onClick={() => navigate("/credits")}
                         >
-                          Upgrade your plan
+                          Buy Credits
                           <i className="ti ti-arrow-right" aria-hidden="true" />
                         </button>
                       )}

@@ -1,0 +1,6 @@
+.badge{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;border-radius:999px;border:1px solid var(--border-color);background:var(--bg-surface-alt);color:var(--text-primary);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background-color .2s,border-color .2s,color .2s}
+.badge:hover{border-color:var(--text-secondary)}
+.healthy{color:var(--text-primary)}
+.low{color:#b45309;border-color:#f59e0b}
+.critical,.exhausted{color:#b91c1c;border-color:#ef4444}
+.skeleton{display:inline-block;width:84px;height:34px;border-radius:999px;background:var(--bg-surface-alt);border:1px solid var(--border-color);opacity:.6}

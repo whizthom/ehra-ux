@@ -32,6 +32,7 @@ import CustomerInvitationRegistration from "./pages/public/CustomerInvitationReg
 import RegistrationSubmitted from "./pages/public/RegistrationSubmitted";
 import QrDisplayPage from "./pages/public/QrDisplayPage";
 import Pricing from "./pages/public/Pricing";
+import CreditsPage from "./pages/CreditsPage";
 import About from "./pages/public/About";
 import Terms from "./pages/public/Terms";
 import Privacy from "./pages/public/Privacy";
@@ -170,13 +171,27 @@ function App() {
             <Route path="/qr-display/:token" element={<QrDisplayPage />} />
 
             {/* PRICING - public, reachable signed-in or signed-out (see
-                Pricing.jsx's docstring for the signed-in-admin checkout
-                path vs. the signed-out "go sign up first" path). */}
+                Pricing.jsx: it now explains Credits and Business Agreements only; the old
+                subscription plans are archived under src/legacy/). */}
             <Route
               path="/pricing"
               element={
                 <ProtectedRoute>
                   <Pricing />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Legacy subscription URLs: never expose old plans or checkout; send to the current model. */}
+            <Route path="/subscription" element={<Navigate to="/pricing" replace />} />
+            <Route path="/checkout" element={<Navigate to="/pricing" replace />} />
+
+            {/* Ehral Credits for business owners outside the Retail workspace. */}
+            <Route
+              path="/credits"
+              element={
+                <ProtectedRoute roles={["ROLE_ADMIN"]}>
+                  <CreditsPage />
                 </ProtectedRoute>
               }
             />

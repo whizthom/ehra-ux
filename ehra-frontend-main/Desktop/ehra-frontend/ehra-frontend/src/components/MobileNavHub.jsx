@@ -122,10 +122,10 @@ const employerMore = [
         description: "Business details and settings.",
       },
       {
-        route: "/pricing",
-        label: "Plans & Subscription",
-        icon: "ti-credit-card",
-        description: "Manage your Ehral plan.",
+        route: "/credits",
+        label: "Ehral Credits",
+        icon: "ti-coin",
+        description: "Balance, purchases and usage.",
       },
     ],
   },
@@ -343,8 +343,8 @@ export default function MobileNavHub({
   // this mobile bottom-nav/"More" sheet had no equivalent entry at all - an
   // employee on mobile had no way to reach /retail regardless of what the
   // employer had granted them. Mirror the same gate here, as a plain
-  // full-page `route` item (same pattern as employerMore's "Plans &
-  // Subscription" / "My Accounts" entries).
+  // full-page `route` item (same pattern as employerMore's "Ehral Credits" /
+  // "My Accounts" entries).
   const operations = useMemo(() => {
     const base =
       role === "employer"

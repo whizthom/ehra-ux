@@ -48,8 +48,7 @@ import ReportsTab from "../components/ReportsTab";
 import TodaysPulse from "../components/TodaysPulse";
 import Logo from "../components/Logo";
 import MobileNavHub from "../components/MobileNavHub";
-import PlanBadge from "../components/plan/PlanBadge";
-import PlanExpiryReminder from "../components/plan/PlanExpiryReminder";
+import CreditsBadge from "../components/credits/CreditsBadge";
 import WelcomeCard from "../components/WelcomeCard";
 import OnboardingChecklist from "../components/OnboardingChecklist";
 import InviteEmployeeModal from "../components/InviteEmployeeModal";
@@ -65,7 +64,7 @@ import {
   updateAttendanceProfileSetting,
 } from "../api/businessApi";
 import { getMyProfile } from "../api/employeeApi";
-import { getMySubscription } from "../api/subscriptionApi";
+import { getCreditsDashboard } from "../api/creditsApi";
 import useVisibleInterval from "../hooks/useVisibleInterval";
 
 // ── Sidebar nav ────────────────────────────────────────────────────────────
@@ -95,11 +94,11 @@ const NAV = [
     route: "/my-accounts",
   },
   {
-    icon: "ti-credit-card",
-    label: "Plans",
+    icon: "ti-coin",
+    label: "Ehral Credits",
     section: "account",
     isFullPage: true,
-    route: "/pricing",
+    route: "/credits",
   },
   {
     icon: "ti-headset",
@@ -497,12 +496,10 @@ export default function Dashboard() {
   const [businessProfile, setBusinessProfile] = useState(null);
   const [loadingBusinessProfile, setLoadingBusinessProfile] = useState(true);
 
-  // Current plan — powers the topbar PlanBadge and the periodic
-  // PlanExpiryReminder toast. Owned once here (not inside those
-  // components) so both read the exact same fetch instead of doubling
-  // up requests.
-  const [subscription, setSubscription] = useState(null);
-  const [loadingSubscription, setLoadingSubscription] = useState(true);
+  // Ehral Credits balance — powers the topbar CreditsBadge and the
+  // account menu. Owned once here so both read the same single fetch.
+  const [credits, setCredits] = useState(null);
+  const [loadingCredits, setLoadingCredits] = useState(true);
 
   // Personal attendance profile — Settings tab. Off by default; toggling
   // this changes whether the employer counts as staff and is subject to
@@ -647,18 +644,17 @@ export default function Dashboard() {
     }
   }, []);
 
-  // Current subscription/plan — deliberately swallows errors the same
-  // way the other summary widgets do (log and move on) rather than
-  // surfacing a dashboard-wide failure state just because the plan pill
-  // couldn't load.
-  const fetchSubscription = useCallback(async () => {
+  // Ehral Credits balance for the topbar badge. Loaded once on mount and when the tab regains
+  // focus (e.g. returning from a purchase); there is deliberately no polling timer. Errors are
+  // swallowed like the other summary widgets so the badge never blocks the dashboard.
+  const fetchCredits = useCallback(async () => {
     try {
-      const data = await getMySubscription();
-      setSubscription(data);
+      const data = await getCreditsDashboard();
+      setCredits(data);
     } catch (err) {
-      console.error("Failed to load subscription:", err);
+      console.error("Failed to load Ehral Credits:", err);
     } finally {
-      setLoadingSubscription(false);
+      setLoadingCredits(false);
     }
   }, []);
 
@@ -763,7 +759,7 @@ export default function Dashboard() {
     fetchBusinessProfile();
     fetchAttendanceProfile();
     fetchMyProfile();
-    fetchSubscription();
+    fetchCredits();
   }, [
     fetchSummary,
     fetchNotifs,
@@ -778,21 +774,15 @@ export default function Dashboard() {
     fetchBusinessProfile,
     fetchAttendanceProfile,
     fetchMyProfile,
-    fetchSubscription,
+    fetchCredits,
   ]);
 
-  // Keep the plan pill/expiry reminder current without needing a full
-  // page reload: re-check periodically, and whenever the tab regains
-  // focus (the most likely moment to actually notice a change — e.g.
-  // coming back from paying on the Pricing page in another tab, or the
-  // scheduled expiry job having run while this tab sat idle overnight).
-  useVisibleInterval(fetchSubscription, 5 * 60 * 1000);
   useEffect(() => {
-    window.addEventListener("focus", fetchSubscription);
+    window.addEventListener("focus", fetchCredits);
     return () => {
-      window.removeEventListener("focus", fetchSubscription);
+      window.removeEventListener("focus", fetchCredits);
     };
-  }, [fetchSubscription]);
+  }, [fetchCredits]);
 
   // ── Real-time: prepend new notifications without reloading ─────────────
   useMessageStream({
@@ -1419,14 +1409,10 @@ export default function Dashboard() {
                 (see ThemeToggleMenu below) rather than crowding this
                 already-tight icon row. ── */}
             <div className={styles.planBadgeSlot}>
-              <PlanBadge
-                subscription={subscription}
-                loading={loadingSubscription}
-                onClick={() =>
-                  navigate("/pricing", {
-                    state: { returnPath: "/dashboard", activeNav },
-                  })
-                }
+              <CreditsBadge
+                credits={credits}
+                loading={loadingCredits}
+                onClick={() => navigate("/credits")}
               />
             </div>
 
@@ -1617,13 +1603,9 @@ export default function Dashboard() {
                 (current plan + Plans link) on mobile/tablet; see
                 ThemeToggleMenu.jsx. ── */}
             <ThemeToggleMenu
-              subscription={subscription}
-              loadingSubscription={loadingSubscription}
-              onViewPlans={() =>
-                navigate("/pricing", {
-                  state: { returnPath: "/dashboard", activeNav },
-                })
-              }
+              credits={credits}
+              loadingCredits={loadingCredits}
+              onViewPlans={() => navigate("/credits")}
             />
 
             <button
@@ -2784,7 +2766,6 @@ export default function Dashboard() {
         loading={loggingOut}
       />
 
-      <PlanExpiryReminder subscription={subscription} />
 
       <WelcomeCard
         identityId={user?.identityId}

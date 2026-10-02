@@ -4,7 +4,6 @@ import { useAuth } from "../context/AuthContext";
 import { getMyAccounts } from "../api/authApi";
 import { getMyProfile } from "../api/employeeApi";
 import { getCustomerOverview } from "../api/commerceApi";
-import { getMySubscription } from "../api/subscriptionApi";
 import ThemeToggleMenu from "../theme/ThemeToggleMenu";
 import LogoutConfirmModal from "../components/LogoutConfirmModal";
 import CustomerShell from "../components/CustomerShell";
@@ -167,7 +166,9 @@ export default function MyAccountsPage() {
 
   const [profile, setProfile] = useState(null);
   const [customerProfile, setCustomerProfile] = useState(null);
-  const [subscription, setSubscription] = useState(null);
+  // Plan-based business caps belonged to the archived subscription system, so there is no plan limit to read
+  // here any more (maxBusinesses = 0 means "no limit"). The server remains the authority.
+  const subscription = null;
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
@@ -208,19 +209,6 @@ export default function MyAccountsPage() {
         })
         .catch(() => {});
     }
-    return () => {
-      cancelled = true;
-    };
-  }, [isCustomer]);
-
-  useEffect(() => {
-    if (isCustomer) return undefined;
-    let cancelled = false;
-    getMySubscription()
-      .then((data) => {
-        if (!cancelled) setSubscription(data);
-      })
-      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -683,9 +671,9 @@ export default function MyAccountsPage() {
                     <button
                       type="button"
                       className={styles.tileBtn}
-                      onClick={() => navigate("/pricing")}
+                      onClick={() => navigate("/credits")}
                     >
-                      View plans
+                      Ehral Credits
                     </button>
                   </div>
                 ))}

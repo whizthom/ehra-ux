@@ -1,283 +1,69 @@
-import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { BUSINESS_OPS_NOTE, SERVICE_COPY } from "../../components/credits/serviceCopy";
+import styles from "./Pricing.module.css";
 
-import { useAuth } from "../../context/AuthContext";
-import Logo from "../../components/Logo";
-import BillingToggle from "../../components/pricing/BillingToggle";
-import PricingCard from "../../components/pricing/PricingCard";
-import ComparisonTable from "../../components/pricing/ComparisonTable";
-import TrustBadges from "../../components/pricing/TrustBadges";
-import FAQAccordion from "../../components/pricing/FAQAccordion";
-import styles from "../../components/pricing/pricing.module.css";
+// Current commercial model: free core platform + prepaid Ehral Credits + negotiated Business Agreements.
+// The prices below are a public explanation; the billing engine reads the authoritative rules from the backend.
+const OPS = [
+  "DEPARTMENT_MANAGEMENT",
+  "LEAVE_MANAGEMENT",
+  "EMPLOYEE_MESSAGING",
+  "PROFILE_EDIT_APPROVAL",
+  "PENALTY_MANAGEMENT",
+  "PAYROLL_CALCULATION",
+];
 
-import { PLANS, BILLING_CYCLES, PLAN_IDS } from "../../data/pricingPlans";
-import {
-  initializeCheckout,
-  verifyCheckout,
-  payWithPaystack,
-} from "../../api/subscriptionApi";
-import VerifyEmailToUpgradeModal from "../../components/VerifyEmailToUpgradeModal";
-
-/**
- * /pricing - reachable only when signed in (see the ProtectedRoute wrapper
- * around this route in App.jsx). Any authenticated Identity can view it;
- * only an Employer/admin context can actually check out (enforced both
- * here and, for real, by the backend's /api/subscription/** being
- * admin-only - see SecurityConfig).
- *
- * Checkout flow:
- *   1. Starter's "Start Free" - there's nothing to pay for, so this just
- *      returns them to the dashboard rather than sending them anywhere
- *      signup-shaped (they already have an account, that's how they got
- *      here).
- *   2. Custom's "Contact Sales" (cta.action === "contact") - also nothing
- *      to check out; sends them to /support instead, regardless of
- *      admin/employee context.
- *   3. Any other paid plan (Pro/Business/Elite), signed in but NOT in an
- *      admin/employer context (e.g. viewing as an employee): nothing to
- *      check out from here either - sends them back to the dashboard
- *      rather than attempting a request the backend would reject anyway.
- *   4. Any other paid plan, signed in as an admin: initialize a checkout
- *      on the backend. If the backend blocks it with 403 (business email
- *      not verified - see EmailVerificationService
- *      #requireVerifiedEmailForSecurity), show VerifyEmailToUpgradeModal
- *      instead of the Paystack popup; once verified (auto-detected via
- *      polling, or a manual "I've verified" click), the SAME checkout
- *      attempt resumes automatically. Otherwise, open the real Paystack
- *      popup directly, then verify the transaction server-side before
- *      treating it as paid. Never trusts the popup's own success
- *      callback alone.
- */
 export default function Pricing() {
-  const [cycle, setCycle] = useState(BILLING_CYCLES.MONTHLY);
-  const [checkoutState, setCheckoutState] = useState({
-    planId: null,
-    loading: false,
-    error: null,
-  });
-
-  const { user } = useAuth();
   const navigate = useNavigate();
-  const isSignedInAdmin = user?.role === "ROLE_ADMIN";
-
-  // Shown INSTEAD OF the Paystack popup when checkout/initialize comes
-  // back 403 - i.e. the email-verification gate
-  // (EmailVerificationService#requireVerifiedEmailForSecurity) blocked
-  // it. Remembers which plan/cycle was being attempted so verifying
-  // successfully can resume the EXACT same checkout automatically,
-  // straight into the Paystack popup, with no re-click needed.
-  const [verifyPrompt, setVerifyPrompt] = useState(null); // { plan } | null
-
-  // ── Mobile card carousel ──────────────────────────────────────────────
-  // Below 640px, .cardsGrid becomes a horizontal snap-scroller (see
-  // pricing.module.css). The scrolling itself is pure CSS; this just
-  // tracks which card is centered so the dots below can reflect and
-  // control it - a small enhancement, not something the carousel depends
-  // on to function. Defaults to Pro (index 1) since that's the card
-  // worth landing on first.
-  const trackRef = useRef(null);
-  const cardRefs = useRef([]);
-  const [activeCardIndex, setActiveCardIndex] = useState(
-    Math.max(
-      PLANS.findIndex((p) => p.highlight),
-      0,
-    ),
-  );
-
-  useEffect(() => {
-    const track = trackRef.current;
-    const cards = cardRefs.current.filter(Boolean);
-    if (!track || !cards.length) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const mostVisible = entries.reduce(
-          (best, entry) =>
-            entry.intersectionRatio > (best?.intersectionRatio ?? 0)
-              ? entry
-              : best,
-          null,
-        );
-        if (mostVisible && mostVisible.intersectionRatio > 0.5) {
-          const index = cards.indexOf(mostVisible.target);
-          if (index !== -1) setActiveCardIndex(index);
-        }
-      },
-      { root: track, threshold: [0.5, 0.75, 1] },
-    );
-
-    cards.forEach((card) => observer.observe(card));
-    return () => observer.disconnect();
-  }, []);
-
-  function scrollToCard(index) {
-    cardRefs.current[index]?.scrollIntoView({
-      behavior: "smooth",
-      inline: "center",
-      block: "nearest",
-    });
-  }
-
-  async function launchPaystackForPlan(plan) {
-    setCheckoutState({ planId: plan.id, loading: true, error: null });
-    try {
-      const { reference, amount, email, publicKey } = await initializeCheckout(
-        plan.id,
-        cycle,
-      );
-
-      await payWithPaystack({
-        email,
-        amountNaira: amount ?? plan.price[cycle],
-        reference,
-        publicKey,
-        onSuccess: async (confirmedReference) => {
-          try {
-            await verifyCheckout(confirmedReference);
-            setCheckoutState({ planId: null, loading: false, error: null });
-            navigate("/dashboard?upgraded=" + plan.id);
-          } catch {
-            setCheckoutState({
-              planId: plan.id,
-              loading: false,
-              error:
-                "Payment received but we couldn't confirm it automatically. Contact support and we'll sort it out.",
-            });
-          }
-        },
-        onClose: () => {
-          setCheckoutState({ planId: null, loading: false, error: null });
-        },
-      });
-    } catch (err) {
-      // 403 here can ONLY mean the email-verification gate - a non-admin
-      // never reaches this call at all (isSignedInAdmin is checked
-      // before initializeCheckout is ever attempted, and /api/subscription/**
-      // is admin-only at the route level regardless - see SecurityConfig).
-      if (err?.response?.status === 403) {
-        setCheckoutState({ planId: null, loading: false, error: null });
-        setVerifyPrompt({ plan });
-        return;
-      }
-      setCheckoutState({
-        planId: plan.id,
-        loading: false,
-        error: "Checkout isn't available yet - please try again shortly.",
-      });
-    }
-  }
-
-  async function handleSelectPlan(plan) {
-    setCheckoutState({ planId: plan.id, loading: false, error: null });
-
-    if (plan.id === PLAN_IDS.STARTER) {
-      navigate("/dashboard");
-      return;
-    }
-
-    // Custom plan has nothing to check out - every authenticated Identity
-    // (admin or employee) can reach /support, so this doesn't need the
-    // isSignedInAdmin gate below.
-    if (plan.cta.action === "contact") {
-      navigate("/support");
-      return;
-    }
-
-    if (!isSignedInAdmin) {
-      navigate("/dashboard");
-      return;
-    }
-
-    await launchPaystackForPlan(plan);
-  }
-
   return (
-    <div className={styles.page}>
-      <div className={styles.topbar}>
-        <Logo size={40} variant="horizontal" />
-        <a href="/dashboard" className={styles.topbarLink}>
-          Dashboard
-        </a>
-      </div>
-
-      <header className={styles.header}>
-        <span className={styles.eyebrow}>Pricing</span>
-        <h1 className={styles.title}>
-          Choose the plan that fits your business
-        </h1>
-        <p className={styles.subtitle}>
-          Start free today. Upgrade only when your business grows.
-        </p>
+    <main className={styles.page}>
+      <header className={styles.hero}>
+        <h1>Simple, prepaid pricing</h1>
+        <p>Ehral Core Platform has no mandatory monthly subscription. Add Ehral Credits and pay only for what you use.</p>
+        <button type="button" className={styles.cta} onClick={() => navigate("/credits")}>Buy Credits</button>
       </header>
 
-      <BillingToggle cycle={cycle} onChange={setCycle} />
+      <section className={styles.card}>
+        <h2>Ehral Credits</h2>
+        <p><strong>1 Credit = ₦1.</strong> Purchased Credits do not expire, cannot be withdrawn or transferred, and are used for eligible Ehral services. Promotional Credits are separate, may expire, and are used first.</p>
+        <p>Minimum purchase ₦2,500. New businesses receive ₦500 in promotional Credits, and your first purchase is matched 100% up to ₦5,000.</p>
+      </section>
 
-      <p className={styles.swipeHint} aria-hidden="true">
-        <span className={styles.swipeArrow}>←</span>
-        Swipe to compare plans
-        <span className={styles.swipeArrow}>→</span>
-      </p>
+      <section className={styles.card}>
+        <h2>Attendance</h2>
+        <ul className={styles.list}>
+          <li><span>Clock-in</span><b>₦25 / event</b></li>
+          <li><span>Clock-out</span><b>₦25 / event</b></li>
+        </ul>
+      </section>
 
-      <div className={styles.cardsGrid} ref={trackRef}>
-        {PLANS.map((plan, index) => (
-          <div
-            key={plan.id}
-            className={styles.cardSlide}
-            ref={(el) => {
-              cardRefs.current[index] = el;
-            }}
-          >
-            <PricingCard
-              plan={plan}
-              cycle={cycle}
-              loading={
-                checkoutState.planId === plan.id && checkoutState.loading
-              }
-              error={
-                checkoutState.planId === plan.id ? checkoutState.error : null
-              }
-              onSelect={handleSelectPlan}
-            />
-          </div>
-        ))}
-      </div>
+      <section className={styles.card}>
+        <h2>Business Operations</h2>
+        <p><b>₦75 / business / day maximum</b>, shared by all of these services:</p>
+        <ul className={styles.list}>
+          {OPS.map((c) => (
+            <li key={c}><span><i className={`ti ${SERVICE_COPY[c].icon}`} aria-hidden="true" /> {SERVICE_COPY[c].title}</span><b>Same ₦75/day</b></li>
+          ))}
+        </ul>
+        <p className={styles.note}>{BUSINESS_OPS_NOTE}</p>
+      </section>
 
-      <div
-        className={styles.cardDots}
-        role="tablist"
-        aria-label="Choose a plan to view"
-      >
-        {PLANS.map((plan, index) => (
-          <button
-            key={plan.id}
-            type="button"
-            role="tab"
-            className={styles.cardDot}
-            data-active={index === activeCardIndex}
-            aria-selected={index === activeCardIndex}
-            aria-label={`Show ${plan.name} plan`}
-            onClick={() => scrollToCard(index)}
-          />
-        ))}
-      </div>
+      <section className={styles.card}>
+        <h2>AI</h2>
+        <ul className={styles.list}><li><span>Standard AI</span><b>₦100 / business / day</b></li></ul>
+        <p className={styles.note}>Multiple standard AI interactions during the same business day are covered by the same daily charge.</p>
+      </section>
 
-      <ComparisonTable />
-      <TrustBadges />
-      <FAQAccordion />
+      <section className={styles.card}>
+        <h2>Advanced and specialized services</h2>
+        <p>Priced in Credits and configured per service. You always see the price before you use it.</p>
+      </section>
 
-      {verifyPrompt && (
-        <VerifyEmailToUpgradeModal
-          onClose={() => setVerifyPrompt(null)}
-          onVerified={() => {
-            const { plan } = verifyPrompt;
-            setVerifyPrompt(null);
-            // Straight into Paystack - no re-click needed, exactly like
-            // the "if verified, leads them straight to processing"
-            // requirement.
-            launchPaystackForPlan(plan);
-          }}
-        />
-      )}
-    </div>
+      <section className={styles.card}>
+        <h2>Large organizations</h2>
+        <p>Need more locations, employees, integrations or support? Ask about a negotiated Business Agreement with a fixed commercial price and the services you need.</p>
+        <button type="button" className={styles.secondary} onClick={() => navigate("/support")}>Talk to us</button>
+      </section>
+    </main>
   );
 }

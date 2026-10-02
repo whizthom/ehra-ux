@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getMyAccounts } from "../api/authApi";
-import { getMySubscription } from "../api/subscriptionApi";
 import styles from "./MyAccountsPanel.module.css";
 
 function initials(name) {
@@ -51,7 +50,9 @@ export default function MyAccountsPanel({ open, onClose }) {
   const navigate = useNavigate();
 
   const [accounts, setAccounts] = useState([]);
-  const [subscription, setSubscription] = useState(null);
+  // Plan-based business caps belonged to the archived subscription system, so there is no plan limit to read
+  // here any more (maxBusinesses = 0 means "no limit"). The server remains the authority.
+  const subscription = null;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [switchingId, setSwitchingId] = useState(null);
@@ -65,10 +66,9 @@ export default function MyAccountsPanel({ open, onClose }) {
     if (!open) return;
     setLoading(true);
     setError("");
-    Promise.all([getMyAccounts(), getMySubscription().catch(() => null)])
-      .then(([accountRows, subscriptionData]) => {
+    getMyAccounts()
+      .then((accountRows) => {
         setAccounts(accountRows);
-        setSubscription(subscriptionData);
       })
       .catch(() => setError("Couldn't load your accounts. Please try again."))
       .finally(() => setLoading(false));
@@ -290,10 +290,10 @@ export default function MyAccountsPanel({ open, onClose }) {
                     type="button"
                     onClick={() => {
                       onClose();
-                      navigate("/pricing");
+                      navigate("/credits");
                     }}
                   >
-                    View plans
+                    Ehral Credits
                   </button>
                 </div>
               )}

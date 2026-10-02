@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getEmailStatus, sendEmailVerification } from "../api/phoneAuthApi";
+import { getEmailStatus, sendEmailVerification } from "../../../api/phoneAuthApi";
 import styles from "./VerifyEmailToUpgradeModal.module.css";
 
 // Shown INSTEAD OF the Paystack popup whenever checkout/initialize comes

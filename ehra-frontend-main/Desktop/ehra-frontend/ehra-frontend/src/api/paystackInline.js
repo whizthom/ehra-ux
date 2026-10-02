@@ -1,39 +1,5 @@
-import API from "./authApi";
-
-// ── Subscription / billing service methods ──────────────────────────────────
-//
-// These call backend endpoints that don't exist yet (the backend pass for
-// this feature is next). They're written against the API shape the backend
-// should expose, so wiring them up later is a matter of implementing the
-// controller - nothing here should need to change.
-//
-// Expected backend contract:
-//   POST /subscription/checkout/initialize { planId, billingCycle }
-//     -> { reference, amount, email, publicKey }
-//   POST /subscription/checkout/verify { reference }
-//     -> { status: "SUCCESS" | "FAILED" | "PENDING", plan, expiresAt }
-//   GET  /subscription/me
-//     -> { plan, billingCycle, status, expiresAt, ... }
-//   POST /subscription/cancel
-//     -> { status }
-//
-// Until the backend exists, calls below reject with a normal axios error
-// (404/network error) - callers surface that as "checkout isn't available
-// yet" rather than silently pretending a payment succeeded.
-
-export const getMySubscription = () => API.get("/subscription/me").then((r) => r.data);
-
-export const initializeCheckout = (planId, billingCycle) =>
-  API.post("/subscription/checkout/initialize", { planId, billingCycle }).then(
-    (r) => r.data
-  );
-
-export const verifyCheckout = (reference) =>
-  API.post("/subscription/checkout/verify", { reference }).then((r) => r.data);
-
-export const cancelSubscription = () =>
-  API.post("/subscription/cancel").then((r) => r.data);
-
+// Paystack Inline helper used by Ehral Credit purchases.
+// (Extracted from the legacy subscriptionApi so the active purchase flow no longer depends on legacy code.)
 // ── Paystack Inline JS ───────────────────────────────────────────────────────
 //
 // Loaded lazily (not in index.html) so the ~40KB script only ever downloads

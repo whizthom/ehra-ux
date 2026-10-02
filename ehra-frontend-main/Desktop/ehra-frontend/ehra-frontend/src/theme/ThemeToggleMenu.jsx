@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTheme } from "./ThemeContext";
 import styles from "./ThemeToggleMenu.module.css";
-import planStyles from "../components/plan/planBadge.module.css";
-import { urgencyTier, daysUntil } from "../components/plan/planUrgency";
+import { creditTier, formatCredits } from "../components/credits/creditsFormat";
 
 // Must match the CSS transition duration on .panel/.scrim below - the
 // panel stays mounted for exactly this long after closing so it can
@@ -10,23 +9,20 @@ import { urgencyTier, daysUntil } from "../components/plan/planUrgency";
 // vanishing.
 const CLOSE_DURATION = 260;
 
-// PREMIUM is the backend's enum value for the plan now displayed on
-// /pricing as "Business" - see the note at the top of data/pricingPlans.js.
-const PLAN_LABEL = { STARTER: "Starter", PRO: "Pro", PREMIUM: "Business" };
 
 // ── Settings icon + dropdown ─────────────────────────────────────────────
 // Self-contained: drop <ThemeToggleMenu /> into any topbar and it Just
 // Works with only the "Settings" category (theme toggle). Pages that also
 // want the "My account" category (current plan + a link to Plans) pass
-// `subscription`/`loadingSubscription`/`onViewPlans` - currently just
+// `credits`/`loadingCredits`/`onViewPlans` - currently just
 // Dashboard.jsx, since that's the only place plan info is meaningful. The
 // account category only ever renders on mobile/tablet (see
 // .accountSection's media query below); on desktop the same information
 // already lives directly in that page's topbar via PlanBadge, so showing
 // it twice would be redundant.
 export default function ThemeToggleMenu({
-  subscription,
-  loadingSubscription,
+  credits,
+  loadingCredits,
   onViewPlans,
 }) {
   const { theme, toggleTheme } = useTheme();
@@ -70,20 +66,7 @@ export default function ThemeToggleMenu({
 
   useEffect(() => () => clearTimeout(closeTimerRef.current), []);
 
-  const tier = hasAccountSection ? urgencyTier(subscription) : null;
-  const days = tier ? daysUntil(subscription.expiryDate) : null;
-  const planMeta = subscription ? PLAN_LABEL[subscription.plan] : null;
-  const planColorClass = subscription
-    ? (planStyles[subscription.plan?.toLowerCase()] ?? planStyles.starter)
-    : "";
-  const tierClass =
-    tier === "upcoming"
-      ? planStyles.tierUpcoming
-      : tier === "soon"
-        ? planStyles.tierSoon
-        : tier === "urgent"
-          ? planStyles.tierUrgent
-          : "";
+  const tier = hasAccountSection ? creditTier(credits) : null;
 
   return (
     <div className={styles.wrapper} ref={wrapperRef}>
@@ -131,26 +114,19 @@ export default function ThemeToggleMenu({
               <div className={styles.accountSection}>
                 <div className={styles.sectionLabel}>My account</div>
 
-                {loadingSubscription || !subscription ? (
+                {loadingCredits || !credits ? (
                   <div className={styles.row}>
                     <span className={styles.planSkeleton} aria-hidden="true" />
                   </div>
                 ) : (
                   <div className={styles.row}>
                     <span className={styles.rowLabelGroup}>
-                      <span
-                        className={`${planStyles.dot} ${planColorClass} ${styles.planDot}`}
-                        aria-hidden="true"
-                      />
-                      <span className={styles.rowLabel}>{planMeta} plan</span>
+                      <span className={styles.rowLabel}>Ehral Credits</span>
                     </span>
-                    {tier && tier !== "safe" && (
-                      <span
-                        className={`${planStyles.daysLeft} ${tierClass} ${styles.planDaysChip}`}
-                      >
-                        {Math.max(days, 0)}d left
-                      </span>
-                    )}
+                    <span className={styles.planDaysChip}>
+                      {formatCredits(credits.availableCredits)}
+                      {tier && tier !== "healthy" && tier !== "unknown" ? " · low" : ""}
+                    </span>
                   </div>
                 )}
 
@@ -163,7 +139,7 @@ export default function ThemeToggleMenu({
                   }}
                 >
                   <i className="ti ti-credit-card" aria-hidden="true" />
-                  <span>Plans</span>
+                  <span>Buy Credits</span>
                   <i
                     className="ti ti-chevron-right"
                     aria-hidden="true"
