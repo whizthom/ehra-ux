@@ -15,6 +15,8 @@ import SalaryCell from "./SalaryCell";
 import RemoveEmployeeModal from "./RemoveEmployeeModal";
 import QuickSendMessageModal from "./QuickSendMessageModal";
 import styles from "./WorkforceTab.module.css";
+import useCacheWrite from "../hooks/useCacheWrite";
+import { hasCached, seedFromCache } from "../utils/viewCache";
 
 function initials(first, last) {
   return `${first?.[0] || ""}${last?.[0] || ""}`.toUpperCase() || "?";
@@ -30,9 +32,16 @@ const STATUS_STYLE = {
 export default function WorkforceTab({ departments, branches = [] }) {
   const navigate = useNavigate();
 
-  const [employees, setEmployees] = useState([]);
-  const [trashed, setTrashed] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Seeded from the in-memory view cache so coming back to this section
+  // paints instantly; fetchAll below still runs on every mount and
+  // replaces it (see utils/viewCache.js).
+  const [employees, setEmployees] = useState(() => seedFromCache("employees:directory:active", []));
+  useCacheWrite("employees:directory:active", employees);
+  const [trashed, setTrashed] = useState(() => seedFromCache("employees:trashed", []));
+  useCacheWrite("employees:trashed", trashed);
+  // The main list only needs the directory to paint; the trash list is
+  // only looked at after opening the trash view, by which time it has loaded.
+  const [loading, setLoading] = useState(() => !hasCached("employees:directory:active"));
   const [search, setSearch] = useState("");
   const [showTrash, setShowTrash] = useState(false);
   const [confirm, setConfirm] = useState(null); // { emp, action }
@@ -41,7 +50,9 @@ export default function WorkforceTab({ departments, branches = [] }) {
 
   const fetchAll = useCallback(async () => {
     try {
-      setLoading(true);
+      // Only show the blocking spinner when there is nothing to show yet;
+      // a refresh over data already on screen swaps in place instead.
+      if (!hasCached("employees:directory:active")) setLoading(true);
       const [dirRes, trashRes] = await Promise.all([
         API.get("/employees/directory"),
         getTrashedEmployees(),

@@ -20,6 +20,8 @@ import {
   initials,
 } from "../utils/leaveHelpers";
 import styles from "./LeavesTab.module.css";
+import useCacheWrite from "../hooks/useCacheWrite";
+import { hasCached, seedFromCache } from "../utils/viewCache";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -426,12 +428,13 @@ function PolicyEditor() {
 // ─── On Leave panel (employer) ────────────────────────────────────────────────
 
 function OnLeavePanel() {
-  const [onLeave, setOnLeave] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [onLeave, setOnLeave] = useState(() => seedFromCache("leave:on-leave-now", []));
+  useCacheWrite("leave:on-leave-now", onLeave);
+  const [loading, setLoading] = useState(() => !hasCached("leave:on-leave-now"));
 
   const fetch = useCallback(async () => {
     try {
-      setLoading(true);
+      if (!hasCached("leave:on-leave-now")) setLoading(true);
       const { data } = await getCurrentlyOnLeaveForBusiness();
       setOnLeave(data);
     } catch (err) {
@@ -580,8 +583,10 @@ function OnLeavePanel() {
 
 function BalancesPanel() {
   const year = new Date().getFullYear();
-  const [balances, setBalances] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const balancesKey = `leave:balances:${year}`;
+  const [balances, setBalances] = useState(() => seedFromCache(balancesKey, []));
+  useCacheWrite(balancesKey, balances);
+  const [loading, setLoading] = useState(() => !hasCached(balancesKey));
 
   // Card list (mobile) starts fully collapsed - a business with any real
   // headcount turns into a long scroll of chip grids otherwise. Nothing
@@ -861,8 +866,9 @@ export default function LeavesTab({ onSectionChange } = {}) {
   }, []);
 
   // ── Requests state ────────────────────────────────────────────────────
-  const [leaves, setLeaves] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [leaves, setLeaves] = useState(() => seedFromCache("leave:business-requests", []));
+  useCacheWrite("leave:business-requests", leaves);
+  const [loading, setLoading] = useState(() => !hasCached("leave:business-requests"));
   const [activeTab, setActiveTab] = useState("PENDING");
   const [selected, setSelected] = useState(null);
   const [actioning, setActioning] = useState(null);
@@ -913,7 +919,7 @@ export default function LeavesTab({ onSectionChange } = {}) {
 
   const fetchAll = useCallback(async () => {
     try {
-      setLoading(true);
+      if (!hasCached("leave:business-requests")) setLoading(true);
       const { data } = await getBusinessLeaves();
       setLeaves(data);
     } catch (err) {

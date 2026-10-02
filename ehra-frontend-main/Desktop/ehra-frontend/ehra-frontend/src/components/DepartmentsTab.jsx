@@ -8,6 +8,8 @@ import {
 } from "../api/departmentApi";
 import { getAccessToken } from "../api/authApi";
 import styles from "./DepartmentsTab.module.css";
+import useCacheWrite from "../hooks/useCacheWrite";
+import { hasCached, seedFromCache } from "../utils/viewCache";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -570,9 +572,16 @@ export default function DepartmentsTab() {
   const navigate = useNavigate();
   const { toasts, push: toast } = useToast();
 
-  const [departments, setDepartments] = useState([]);
-  const [employees, setEmployees] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Seeded from the in-memory view cache so coming back to this section
+  // paints instantly; fetchAll below still runs on every mount and
+  // replaces it (see utils/viewCache.js).
+  const [departments, setDepartments] = useState(() => seedFromCache("departments:list", []));
+  useCacheWrite("departments:list", departments);
+  const [employees, setEmployees] = useState(() => seedFromCache("employees:directory:active", []));
+  useCacheWrite("employees:directory:active", employees);
+  const [loading, setLoading] = useState(
+    () => !(hasCached("departments:list") && hasCached("employees:directory:active")),
+  );
   const [search, setSearch] = useState("");
   const [collapsedDepts, setCollapsedDepts] = useState({});
   const [pulseId, setPulseId] = useState(null);

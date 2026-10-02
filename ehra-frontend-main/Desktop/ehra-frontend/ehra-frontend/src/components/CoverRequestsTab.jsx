@@ -11,6 +11,8 @@ import {
   initials,
 } from "../utils/leaveHelpers";
 import styles from "./CoverRequestsTab.module.css";
+import useCacheWrite from "../hooks/useCacheWrite";
+import { hasCached, seedFromCache } from "../utils/viewCache";
 
 // Statuses that mean "still waiting on my response".
 const PENDING_STATUS = "PENDING_COVER";
@@ -187,15 +189,16 @@ function CoverCard({ leave, onRespond, responding }) {
 // gated behind isHod like Workforce/Departments).
 export default function CoverRequestsTab() {
   const { user } = useAuth();
-  const [leaves, setLeaves] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [leaves, setLeaves] = useState(() => seedFromCache("leave:cover-requests:mine", []));
+  useCacheWrite("leave:cover-requests:mine", leaves);
+  const [loading, setLoading] = useState(() => !hasCached("leave:cover-requests:mine"));
   const [tab, setTab] = useState("pending");
   const [responding, setResponding] = useState(null);
   const [actionError, setActionError] = useState("");
 
   const fetchMine = useCallback(async () => {
     try {
-      setLoading(true);
+      if (!hasCached("leave:cover-requests:mine")) setLoading(true);
       const { data } = await getMyCoverRequests();
       setLeaves(data);
     } catch (err) {

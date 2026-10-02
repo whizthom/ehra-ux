@@ -42,6 +42,8 @@ import { getRetailContext } from "../api/retailApi";
 import { getMessagingUnreadCount } from "../api/messagingApi";
 import useMessagingBadgeSync from "../hooks/useMessagingBadgeSync";
 import useMessagingConnection from "../hooks/useMessagingConnection";
+import useCacheWrite from "../hooks/useCacheWrite";
+import { hasCached, seedFromCache } from "../utils/viewCache";
 
 // ── Sidebar nav ────────────────────────────────────────────────────────────
 // "My Accounts" navigates to the full-page identity-level workspace
@@ -328,7 +330,10 @@ export default function Dashboard() {
   const [loadingSummary, setLoadingSummary] = useState(true);
 
   // Notifications
-  const [notifs, setNotifs] = useState([]);
+  // Seeded from the view cache; fetchNotifs only shows the blocking spinner
+  // when there is nothing to display yet (see utils/viewCache.js).
+  const [notifs, setNotifs] = useState(() => seedFromCache("employee:notifications", []));
+  useCacheWrite("employee:notifications", notifs);
   const [loadingNotifs, setLoadingNotifs] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [actioningNotif, setActioningNotif] = useState(null); // id being actioned
@@ -399,7 +404,7 @@ export default function Dashboard() {
 
   const fetchNotifs = useCallback(async () => {
     try {
-      setLoadingNotifs(true);
+      if (!hasCached("employee:notifications")) setLoadingNotifs(true);
       // Employee/HOD-scoped feed - NOT the business-wide admin endpoint.
       // The admin endpoint returns every notification ever raised for the
       // whole business, so using it here was letting employees (including

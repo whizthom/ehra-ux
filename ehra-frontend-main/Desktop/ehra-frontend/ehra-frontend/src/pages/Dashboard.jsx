@@ -66,6 +66,8 @@ import {
 import { getMyProfile } from "../api/employeeApi";
 import { getCreditsDashboard } from "../api/creditsApi";
 import useVisibleInterval from "../hooks/useVisibleInterval";
+import { putCache, hasCached, seedFromCache } from "../utils/viewCache";
+import useCacheWrite from "../hooks/useCacheWrite";
 
 // ── Sidebar nav ────────────────────────────────────────────────────────────
 // "My Accounts" is handled specially — clicking it navigates to the
@@ -430,11 +432,20 @@ export default function Dashboard() {
   const [removingId, setRemovingId] = useState(null);
 
   // Summary
-  const [summary, setSummary] = useState(null);
-  const [loadingSummary, setLoadingSummary] = useState(true);
+  // Data below is seeded from the in-memory view cache (utils/viewCache.js)
+  // so returning here - e.g. back from an employee's profile page - paints
+  // immediately instead of starting every widget on a spinner. Every
+  // fetcher still runs on mount and replaces the cached copy.
+  const [summary, setSummary] = useState(() => seedFromCache("dashboard:summary", null));
+  useCacheWrite("dashboard:summary", summary);
+  const [loadingSummary, setLoadingSummary] = useState(() => !hasCached("dashboard:summary"));
 
   // Notifications
-  const [notifs, setNotifs] = useState([]);
+  // Seeded from the view cache; fetchNotifs only shows the blocking spinner
+  // when there is nothing to display yet, so opening the bell or the
+  // Notifications page (both re-run fetchNotifs) swaps the list in place.
+  const [notifs, setNotifs] = useState(() => seedFromCache("dashboard:notifications", []));
+  useCacheWrite("dashboard:notifications", notifs);
   const [loadingNotifs, setLoadingNotifs] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [actioningNotif, setActioningNotif] = useState(null); // id being actioned
@@ -457,17 +468,20 @@ export default function Dashboard() {
   const qaThumb = useScrollThumb(qaScrollRef);
 
   // the table itself now lives in the Workforce tab, not the dashboard)
-  const [employees, setEmployees] = useState([]);
-  const [loadingDir, setLoadingDir] = useState(true);
+  const [employees, setEmployees] = useState(() => seedFromCache("dashboard:employees:raw", []));
+  useCacheWrite("dashboard:employees:raw", employees);
+  const [loadingDir, setLoadingDir] = useState(() => !hasCached("dashboard:employees:raw"));
 
   // Pending approvals (table on main page)
-  const [pending, setPending] = useState([]);
-  const [loadingPending, setLoadingPending] = useState(true);
+  const [pending, setPending] = useState(() => seedFromCache("dashboard:pending-approvals", []));
+  useCacheWrite("dashboard:pending-approvals", pending);
+  const [loadingPending, setLoadingPending] = useState(() => !hasCached("dashboard:pending-approvals"));
   const [actioningId, setActioningId] = useState(null);
 
   // Pending leave requests (table on main page)
-  const [pendingLeaves, setPendingLeaves] = useState([]);
-  const [loadingPendingLeaves, setLoadingPendingLeaves] = useState(true);
+  const [pendingLeaves, setPendingLeaves] = useState(() => seedFromCache("dashboard:pending-leaves", []));
+  useCacheWrite("dashboard:pending-leaves", pendingLeaves);
+  const [loadingPendingLeaves, setLoadingPendingLeaves] = useState(() => !hasCached("dashboard:pending-leaves"));
   const [actioningLeaveId, setActioningLeaveId] = useState(null);
 
   // Invite link
@@ -476,9 +490,11 @@ export default function Dashboard() {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
   // Departments
-  const [departments, setDepartments] = useState([]);
-  const [loadingDepts, setLoadingDepts] = useState(true);
-  const [branches, setBranches] = useState([]);
+  const [departments, setDepartments] = useState(() => seedFromCache("departments:list", []));
+  useCacheWrite("departments:list", departments);
+  const [loadingDepts, setLoadingDepts] = useState(() => !hasCached("departments:list"));
+  const [branches, setBranches] = useState(() => seedFromCache("branches:list", []));
+  useCacheWrite("branches:list", branches);
   const [addDeptOpen, setAddDeptOpen] = useState(false);
   const [sendMsgOpen, setSendMsgOpen] = useState(false);
   const [reportSummaryOpen, setReportSummaryOpen] = useState(false);
@@ -488,13 +504,18 @@ export default function Dashboard() {
 
   // Profile edit requests — employer approval queue (final sign-off after
   // the HOD, or first stop if the employee has no HOD).
-  const [profileEdits, setProfileEdits] = useState([]);
-  const [pendingProfileEdits, setPendingProfileEdits] = useState([]);
-  const [loadingProfileEdits, setLoadingProfileEdits] = useState(true);
+  const [profileEdits, setProfileEdits] = useState(() => seedFromCache("dashboard:profile-edits:all", []));
+  useCacheWrite("dashboard:profile-edits:all", profileEdits);
+  const [pendingProfileEdits, setPendingProfileEdits] = useState(() => seedFromCache("dashboard:profile-edits:pending", []));
+  useCacheWrite("dashboard:profile-edits:pending", pendingProfileEdits);
+  const [loadingProfileEdits, setLoadingProfileEdits] = useState(
+    () => !(hasCached("dashboard:profile-edits:all") && hasCached("dashboard:profile-edits:pending")),
+  );
 
   // Business (company) profile — Settings tab
-  const [businessProfile, setBusinessProfile] = useState(null);
-  const [loadingBusinessProfile, setLoadingBusinessProfile] = useState(true);
+  const [businessProfile, setBusinessProfile] = useState(() => seedFromCache("dashboard:business-profile", null));
+  useCacheWrite("dashboard:business-profile", businessProfile);
+  const [loadingBusinessProfile, setLoadingBusinessProfile] = useState(() => !hasCached("dashboard:business-profile"));
 
   // Ehral Credits balance — powers the topbar CreditsBadge and the
   // account menu. Owned once here so both read the same single fetch.
@@ -519,7 +540,7 @@ export default function Dashboard() {
 
   const fetchSummary = useCallback(async () => {
     try {
-      setLoadingSummary(true);
+      if (!hasCached("dashboard:summary")) setLoadingSummary(true);
       setSummaryError(false);
       const { data } = await API.get("/business/dashboard-summary");
       setSummary(data);
@@ -533,7 +554,7 @@ export default function Dashboard() {
 
   const fetchNotifs = useCallback(async () => {
     try {
-      setLoadingNotifs(true);
+      if (!hasCached("dashboard:notifications")) setLoadingNotifs(true);
       const { data } = await API.get("/notifications");
       // ADMIN_MESSAGE is handled exclusively in the Messages tab
       setNotifs(data.filter((n) => n.type !== "ADMIN_MESSAGE"));
@@ -555,9 +576,12 @@ export default function Dashboard() {
 
   const fetchDirectory = useCallback(async () => {
     try {
-      setLoadingDir(true);
+      if (!hasCached("dashboard:employees:raw")) setLoadingDir(true);
       const { data } = await API.get("/employees/directory");
       setEmployees(data);
+      // Same list (minus removed staff) that Departments / Branches /
+      // Workforce show - hand it to them so their first open is instant.
+      putCache("employees:directory:active", data.filter((e) => !e.deletedAt));
     } catch (err) {
       console.error("Failed to load employee directory:", err);
     } finally {
@@ -567,7 +591,7 @@ export default function Dashboard() {
 
   const fetchPending = useCallback(async () => {
     try {
-      setLoadingPending(true);
+      if (!hasCached("dashboard:pending-approvals")) setLoadingPending(true);
       const { data } = await API.get("/employees/pending");
       setPending(data);
     } catch (err) {
@@ -579,9 +603,10 @@ export default function Dashboard() {
 
   const fetchDepartments = useCallback(async () => {
     try {
-      setLoadingDepts(true);
+      if (!hasCached("departments:list")) setLoadingDepts(true);
       const { data } = await getDepartments();
       setDepartments(data);
+      putCache("departments:list", data);
     } catch (err) {
       console.error("Failed to load departments:", err);
     } finally {
@@ -596,6 +621,7 @@ export default function Dashboard() {
     try {
       const { data } = await getBranches();
       setBranches(data);
+      putCache("branches:list", data);
     } catch (err) {
       console.error("Failed to load branches:", err);
     }
@@ -603,7 +629,7 @@ export default function Dashboard() {
 
   const fetchPendingLeaves = useCallback(async () => {
     try {
-      setLoadingPendingLeaves(true);
+      if (!hasCached("dashboard:pending-leaves")) setLoadingPendingLeaves(true);
       const { data } = await getPendingEmployerDecisions();
       setPendingLeaves(data);
     } catch (err) {
@@ -617,7 +643,7 @@ export default function Dashboard() {
   // the "All requests" view in the panel).
   const fetchProfileEdits = useCallback(async () => {
     try {
-      setLoadingProfileEdits(true);
+      if (!hasCached("dashboard:profile-edits:all")) setLoadingProfileEdits(true);
       const [allRes, pendingRes] = await Promise.all([
         getAllProfileEdits(),
         getPendingProfileEdits(),
@@ -634,7 +660,7 @@ export default function Dashboard() {
   // Business (company) profile
   const fetchBusinessProfile = useCallback(async () => {
     try {
-      setLoadingBusinessProfile(true);
+      if (!hasCached("dashboard:business-profile")) setLoadingBusinessProfile(true);
       const { data } = await getMyBusinessProfile();
       setBusinessProfile(data);
     } catch (err) {
@@ -692,6 +718,9 @@ export default function Dashboard() {
       setLoadingLatestAttendance(true);
       const { data } = await getTodayAttendance();
       setLatestAttendance(data);
+      // Same payload the Attendance section's "Today" view shows; keeps its
+      // first open instant while this dashboard keeps it fresh.
+      putCache("attendance:today", data);
     } catch (err) {
       console.error("Failed to load today's attendance:", err);
     } finally {

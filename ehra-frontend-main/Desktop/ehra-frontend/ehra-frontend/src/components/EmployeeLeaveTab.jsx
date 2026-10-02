@@ -24,6 +24,8 @@ import {
   initials,
 } from "../utils/leaveHelpers";
 import styles from "./EmployeeLeaveTab.module.css";
+import useCacheWrite from "../hooks/useCacheWrite";
+import { hasCached, seedFromCache } from "../utils/viewCache";
 
 const LEAVE_TYPES = [
   "ANNUAL",
@@ -489,9 +491,13 @@ const HOD_DEPARTMENT_TAB = {
 // happened to my past requests" each get a dedicated, uncluttered view
 // instead of one long scroll.
 export default function EmployeeLeaveTab({ isHod }) {
-  const [myLeaves, setMyLeaves] = useState([]);
-  const [balances, setBalances] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [myLeaves, setMyLeaves] = useState(() => seedFromCache("leave:mine", []));
+  useCacheWrite("leave:mine", myLeaves);
+  const [balances, setBalances] = useState(() => seedFromCache("leave:balances:mine", []));
+  useCacheWrite("leave:balances:mine", balances);
+  const [loading, setLoading] = useState(
+    () => !(hasCached("leave:mine") && hasCached("leave:balances:mine")),
+  );
   const [cancellingId, setCancellingId] = useState(null);
 
   const [tab, setTab] = useState("request");
@@ -509,13 +515,17 @@ export default function EmployeeLeaveTab({ isHod }) {
   const [formError, setFormError] = useState("");
   const [justSubmitted, setJustSubmitted] = useState(false);
 
-  const [hodQueue, setHodQueue] = useState([]);
-  const [loadingHod, setLoadingHod] = useState(isHod);
+  const [hodQueue, setHodQueue] = useState(() => seedFromCache("leave:hod-queue", []));
+  useCacheWrite("leave:hod-queue", hodQueue);
+  const [loadingHod, setLoadingHod] = useState(() => isHod && !hasCached("leave:hod-queue"));
   const [decidingId, setDecidingId] = useState(null);
   const [hodError, setHodError] = useState("");
 
-  const [departmentLeaves, setDepartmentLeaves] = useState([]);
-  const [loadingDepartment, setLoadingDepartment] = useState(isHod);
+  const [departmentLeaves, setDepartmentLeaves] = useState(() => seedFromCache("leave:department", []));
+  useCacheWrite("leave:department", departmentLeaves);
+  const [loadingDepartment, setLoadingDepartment] = useState(
+    () => isHod && !hasCached("leave:department"),
+  );
   const [departmentFilter, setDepartmentFilter] = useState("ALL");
   const [dismissedIds, setDismissedIds] = useState(() =>
     isHod ? loadDismissedIds() : new Set(),
@@ -547,7 +557,7 @@ export default function EmployeeLeaveTab({ isHod }) {
 
   const fetchMine = useCallback(async () => {
     try {
-      setLoading(true);
+      if (!(hasCached("leave:mine") && hasCached("leave:balances:mine"))) setLoading(true);
       const [leavesRes, balancesRes] = await Promise.all([
         getMyLeaves(),
         getMyBalances(),
@@ -564,7 +574,7 @@ export default function EmployeeLeaveTab({ isHod }) {
   const fetchHodQueue = useCallback(async () => {
     if (!isHod) return;
     try {
-      setLoadingHod(true);
+      if (!hasCached("leave:hod-queue")) setLoadingHod(true);
       const { data } = await getPendingHodDecisions();
       setHodQueue(data);
     } catch (err) {
@@ -580,7 +590,7 @@ export default function EmployeeLeaveTab({ isHod }) {
   const fetchDepartment = useCallback(async () => {
     if (!isHod) return;
     try {
-      setLoadingDepartment(true);
+      if (!hasCached("leave:department")) setLoadingDepartment(true);
       const { data } = await getDepartmentLeaves();
       setDepartmentLeaves(data);
     } catch (err) {

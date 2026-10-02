@@ -11,6 +11,8 @@ import CustomSelect from "./CustomSelect";
 import BranchDetail from "./BranchDetail";
 import BusinessBranchDashboard from "./BusinessBranchDashboard";
 import styles from "./BranchesTab.module.css";
+import useCacheWrite from "../hooks/useCacheWrite";
+import { hasCached, seedFromCache } from "../utils/viewCache";
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -677,9 +679,16 @@ export default function BranchesTab() {
 
   const [view, setView] = useState({ mode: "list" }); // { mode: "list" } | { mode: "add" } | { mode: "edit", branch } | { mode: "detail", branch }
 
-  const [branches, setBranches] = useState([]);
-  const [employees, setEmployees] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Seeded from the in-memory view cache so coming back to this section
+  // paints instantly; fetchAll below still runs on every mount and
+  // replaces it (see utils/viewCache.js).
+  const [branches, setBranches] = useState(() => seedFromCache("branches:list", []));
+  useCacheWrite("branches:list", branches);
+  const [employees, setEmployees] = useState(() => seedFromCache("employees:directory:active", []));
+  useCacheWrite("employees:directory:active", employees);
+  const [loading, setLoading] = useState(
+    () => !(hasCached("branches:list") && hasCached("employees:directory:active")),
+  );
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [pulseId, setPulseId] = useState(null);

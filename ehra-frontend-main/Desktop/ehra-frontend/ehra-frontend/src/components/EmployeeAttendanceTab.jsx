@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { getMyAttendance } from "../api/attendanceApi";
 import AttendanceTable from "./AttendanceTable";
 import styles from "./EmployeeAttendanceTab.module.css";
+import useCacheWrite from "../hooks/useCacheWrite";
+import { hasCached, seedFromCache } from "../utils/viewCache";
 
 // The employer's `AttendanceSection` pulls the company-wide "who clocked
 // in today" view via GET /attendance/today (ADMIN only). An employee
@@ -10,13 +12,14 @@ import styles from "./EmployeeAttendanceTab.module.css";
 // to the signed-in employee's own record via GET /attendance/me.
 export default function EmployeeAttendanceTab() {
   const navigate = useNavigate();
-  const [records, setRecords] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [records, setRecords] = useState(() => seedFromCache("attendance:mine", []));
+  useCacheWrite("attendance:mine", records);
+  const [loading, setLoading] = useState(() => !hasCached("attendance:mine"));
   const [error, setError] = useState("");
 
   const fetchHistory = useCallback(async () => {
     try {
-      setLoading(true);
+      if (!hasCached("attendance:mine")) setLoading(true);
       setError("");
       const { data } = await getMyAttendance();
       setRecords(data);

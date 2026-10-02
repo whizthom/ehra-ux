@@ -1,5 +1,6 @@
 import axios from "axios";
 import { clearApiCache } from "../pwa/clearApiCache";
+import { clearViewCache } from "../utils/viewCache";
 
 // In dev, "/api" is handled by the Vite proxy (see vite.config.js), which
 // forwards to http://localhost:8080. In a production deploy (e.g. Render),
@@ -133,6 +134,10 @@ export const clearTokens = () => {
   // interceptor) that don't expect a promise back, and there's nothing
   // useful to do if this fails other than proceed with the logout.
   clearApiCache();
+  // In-memory display cache of screen data (utils/viewCache.js): wiped on
+  // every logout / forced sign-out so the next person on this device can
+  // never see the previous session's lists.
+  clearViewCache();
 };
 
 // Cross-tab sync: the `storage` event fires in every OTHER tab (never the

@@ -5,6 +5,10 @@ import { getTodayAttendance, getAttendanceHistory } from "../api/attendanceApi";
 import styles from "./AttendanceSection.module.css";
 import AttendanceSecurityPanel from "./AttendanceSecurityPanel";
 import useVisibleInterval from "../hooks/useVisibleInterval";
+import useCacheWrite from "../hooks/useCacheWrite";
+import { hasFreshCache, seedFromCache } from "../utils/viewCache";
+
+const TODAY_CACHE_MAX_AGE_MS = 2 * 60 * 1000;
 
 const TABS = [
   { key: "today", label: "Today" },
@@ -17,8 +21,17 @@ export default function AttendanceSection() {
   const [tab, setTab] = useState("today");
   const rootRef = useRef(null);
 
-  const [todayRecords, setTodayRecords] = useState([]);
-  const [loadingToday, setLoadingToday] = useState(true);
+  // "Today" is live data, so it only paints from the view cache when the
+  // cached copy is recent (the Dashboard keeps it fresh while open).
+  // fetchToday still runs on every mount and every poll.
+  const [todayRecords, setTodayRecords] = useState(() => seedFromCache("attendance:today", [], TODAY_CACHE_MAX_AGE_MS));
+  useCacheWrite("attendance:today", todayRecords);
+  const [loadingToday, setLoadingToday] = useState(
+    () => !hasFreshCache("attendance:today", TODAY_CACHE_MAX_AGE_MS),
+  );
+  // Once today's list has loaded in this view, later polls refresh it in
+  // place instead of blanking it behind a spinner every 30 seconds.
+  const todayLoadedRef = useRef(false);
 
   const [historyRecords, setHistoryRecords] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -32,9 +45,12 @@ export default function AttendanceSection() {
 
   const fetchToday = useCallback(async () => {
     try {
-      setLoadingToday(true);
+      if (!todayLoadedRef.current && !hasFreshCache("attendance:today", TODAY_CACHE_MAX_AGE_MS)) {
+        setLoadingToday(true);
+      }
       const { data } = await getTodayAttendance();
       setTodayRecords(data);
+      todayLoadedRef.current = true;
     } catch (err) {
       console.error("Failed to load today's attendance:", err);
     } finally {
