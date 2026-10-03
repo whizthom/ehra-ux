@@ -16,7 +16,7 @@ import RemoveEmployeeModal from "./RemoveEmployeeModal";
 import QuickSendMessageModal from "./QuickSendMessageModal";
 import styles from "./WorkforceTab.module.css";
 import useCacheWrite from "../hooks/useCacheWrite";
-import { hasCached, seedFromCache } from "../utils/viewCache";
+import { canSkipFetch, hasCached, seedFromCache } from "../utils/viewCache";
 
 function initials(first, last) {
   return `${first?.[0] || ""}${last?.[0] || ""}`.toUpperCase() || "?";
@@ -67,6 +67,9 @@ export default function WorkforceTab({ departments, branches = [] }) {
   }, []);
 
   useEffect(() => {
+    // Same structural data was fetched seconds ago and nothing has been
+    // changed since (see canSkipFetch): no need to ask the server again.
+    if (canSkipFetch(["employees:directory:active", "employees:trashed"])) return;
     fetchAll();
   }, [fetchAll]);
 

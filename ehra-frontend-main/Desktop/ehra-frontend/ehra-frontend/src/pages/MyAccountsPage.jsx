@@ -12,6 +12,8 @@ import useCustomerInboxBadge from "../hooks/useCustomerInboxBadge";
 import useStaffNavBadges from "../hooks/useStaffNavBadges";
 import dash from "./Dashboard.module.css";
 import styles from "./MyAccountsPage.module.css";
+import useCacheWrite from "../hooks/useCacheWrite";
+import { hasCached, seedFromCache } from "../utils/viewCache";
 
 // This page wears the SAME chrome as the dashboard the person came from, so
 // they can navigate anywhere else without being stranded on a bare page:
@@ -243,8 +245,11 @@ export default function MyAccountsPage() {
     navigate(dashboardPath, { state: { activeNav: n.label } });
   };
 
-  const [accounts, setAccounts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Seeded from the in-memory view cache; getMyAccounts() below still runs
+  // on every visit and replaces it (see utils/viewCache.js).
+  const [accounts, setAccounts] = useState(() => seedFromCache("identity:accounts", []));
+  useCacheWrite("identity:accounts", accounts);
+  const [loading, setLoading] = useState(() => !hasCached("identity:accounts"));
   const [error, setError] = useState("");
   const [switchingId, setSwitchingId] = useState(null);
 

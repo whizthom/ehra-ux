@@ -9,6 +9,7 @@ import {
   getAttendanceDeviceContext,
 } from "../utils/attendanceDeviceCrypto";
 import styles from "./AttendanceDevicePanel.module.css";
+import { canSkipFetch, peekCache, putCache } from "../utils/viewCache";
 
 function formatDate(value) {
   if (!value) return "Not available";
@@ -22,18 +23,28 @@ function friendlyError(err, fallback) {
   return err?.response?.data?.message || fallback;
 }
 
+const DEVICE_CACHE_KEY = "attendance:device:mine";
+
 export default function AttendanceDevicePanel() {
-  const [device, setDevice] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // Paint from the in-memory view cache only when nothing has been written
+  // since it was fetched (e.g. clocking in can register a device), so this
+  // can never show an out-of-date trust state. load() below still runs on
+  // every mount. Stored explicitly so "no device registered" is cached too.
+  const seeded = canSkipFetch([DEVICE_CACHE_KEY], Infinity);
+  const [device, setDevice] = useState(() =>
+    canSkipFetch([DEVICE_CACHE_KEY], Infinity) ? peekCache(DEVICE_CACHE_KEY) ?? null : null,
+  );
+  const [loading, setLoading] = useState(() => !seeded);
   const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState(null);
 
   const load = useCallback(async () => {
-    setLoading(true);
+    if (!canSkipFetch([DEVICE_CACHE_KEY], Infinity)) setLoading(true);
     setMessage(null);
     try {
       const { data } = await getMyAttendanceDevice();
       setDevice(data || null);
+      putCache(DEVICE_CACHE_KEY, data || null);
     } catch (err) {
       setMessage({
         type: "error",
@@ -62,6 +73,7 @@ export default function AttendanceDevicePanel() {
       const session = readSession();
       await clearAttendanceDevice(getAttendanceDeviceContext(session));
       setDevice(null);
+      putCache(DEVICE_CACHE_KEY, null);
       setMessage({
         type: "success",
         text: "Your attendance device has been revoked. Register this device again when you are ready.",

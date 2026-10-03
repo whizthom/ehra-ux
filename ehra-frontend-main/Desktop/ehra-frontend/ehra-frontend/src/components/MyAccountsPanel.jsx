@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getMyAccounts } from "../api/authApi";
 import styles from "./MyAccountsPanel.module.css";
+import useCacheWrite from "../hooks/useCacheWrite";
+import { hasCached, seedFromCache } from "../utils/viewCache";
 
 function initials(name) {
   return (
@@ -49,11 +51,14 @@ export default function MyAccountsPanel({ open, onClose }) {
   const { switchContext, addBusiness } = useAuth();
   const navigate = useNavigate();
 
-  const [accounts, setAccounts] = useState([]);
+  // Seeded from the in-memory view cache; the fetch below still runs every
+  // time the panel opens and replaces it (see utils/viewCache.js).
+  const [accounts, setAccounts] = useState(() => seedFromCache("identity:accounts", []));
+  useCacheWrite("identity:accounts", accounts);
   // Plan-based business caps belonged to the archived subscription system, so there is no plan limit to read
   // here any more (maxBusinesses = 0 means "no limit"). The server remains the authority.
   const subscription = null;
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !hasCached("identity:accounts"));
   const [error, setError] = useState("");
   const [switchingId, setSwitchingId] = useState(null);
 
@@ -64,7 +69,8 @@ export default function MyAccountsPanel({ open, onClose }) {
 
   useEffect(() => {
     if (!open) return;
-    setLoading(true);
+    // Spinner only when there is nothing to show yet.
+    if (!hasCached("identity:accounts")) setLoading(true);
     setError("");
     getMyAccounts()
       .then((accountRows) => {

@@ -72,6 +72,8 @@ import {
   getRetailUnreadCount,
   markAllRetailRead,
 } from "../api/notificationApi";
+import useCacheWrite from "../hooks/useCacheWrite";
+import { hasCached, seedFromCache, putCache, invalidateCache } from "../utils/viewCache";
 
 const today = () => new Date().toISOString().slice(0, 10);
 const NAV = [
@@ -152,6 +154,37 @@ const MOBILE_MORE_DESCRIPTIONS = {
   Settings: "Business and staff settings.",
 };
 
+const EMPTY_RETAIL_DATA = {
+  products: [],
+  orders: [],
+  customers: [],
+  expenses: [],
+  suppliers: [],
+  movements: [],
+  sales: [],
+  purchases: [],
+};
+
+// The context type saved by the login/switch flow (api/authApi.js). Only
+// used as a hint to start owner lookups early, never to authorise anything.
+function readSessionContextType() {
+  try {
+    return localStorage.getItem("contextType");
+  } catch {
+    return null;
+  }
+}
+
+// Returns `prev` when `next` is deeply identical, so React state (and any
+// effect keyed on it) is left untouched by a re-fetch that changed nothing.
+function keepIfSame(prev, next) {
+  try {
+    return prev && JSON.stringify(prev) === JSON.stringify(next) ? prev : next;
+  } catch {
+    return next;
+  }
+}
+
 export default function RetailWorkspace() {
   const nav = useNavigate();
   // The live WebSocket connection (presence, real-time messages, badges) is
@@ -161,20 +194,21 @@ export default function RetailWorkspace() {
   const [tab, setTab] = useState("Dashboard");
   const [inventoryHistory, setInventoryHistory] = useState(false);
   const [viewingCustomerId, setViewingCustomerId] = useState(null);
-  const [business, setBusiness] = useState(null),
-    [type, setType] = useState(null),
-    [context, setContext] = useState(null),
-    [businessCurrency, setBusinessCurrency] = useState("NGN");
-  const [data, setData] = useState({
-    products: [],
-    orders: [],
-    customers: [],
-    expenses: [],
-    suppliers: [],
-    movements: [],
-    sales: [],
-    purchases: [],
-  });
+  // Entering the workspace used to start from nothing every time: a full
+  // page loader while the context (and, for owners, the business profile)
+  // loaded, then zeroed dashboard cards while the data loaded. These are now
+  // seeded from the in-memory view cache (utils/viewCache.js) so a return
+  // visit opens immediately; everything is still re-fetched on every visit
+  // and replaces the cached copy. An access-denied result is never cached,
+  // and the server still authorises every request.
+  const [business, setBusiness] = useState(() => seedFromCache("retail:business", null)),
+    [type, setType] = useState(() => seedFromCache("retail:type", null)),
+    [context, setContext] = useState(() => seedFromCache("retail:context", null)),
+    [businessCurrency, setBusinessCurrency] = useState(() =>
+      seedFromCache("retail:currency", "NGN"),
+    );
+  const [data, setData] = useState(() => seedFromCache("retail:data", EMPTY_RETAIL_DATA));
+  useCacheWrite("retail:data", data);
   // Available Ehral Credits balance - loaded alongside the rest of the
   // workspace data so it can ride along as a chip on the dashboard's hero
   // panel and as a live balance in the mobile "More" sheet, instead of
@@ -183,7 +217,11 @@ export default function RetailWorkspace() {
   const [credits, setCredits] = useState(null);
   const [report, setReport] = useState(null),
     [store, setStore] = useState(null),
-    [loading, setLoading] = useState(true),
+    [loading, setLoading] = useState(() => !hasCached("retail:context")),
+    // False until the workspace data has loaded at least once in a session
+    // that has nothing cached. Without this the dashboard painted zeros
+    // (sales, products, orders) for a moment before the real numbers.
+    [dataReady, setDataReady] = useState(() => hasCached("retail:data")),
     [modal, setModal] = useState(null),
     [editing, setEditing] = useState(null),
     [query, setQuery] = useState(""),
@@ -222,6 +260,7 @@ export default function RetailWorkspace() {
   }, [context]);
   const goBack = () => nav(context?.owner ? "/dashboard" : "/my-dashboard");
   const load = async () => {
+    try {
     const jobs = [
       ["products", getProducts(true)],
       ["orders", getOrders()],
@@ -258,30 +297,56 @@ export default function RetailWorkspace() {
       }
     });
     setData(next);
+    } finally {
+      setDataReady(true);
+    }
   };
   useEffect(() => {
     let dead = false;
     (async () => {
       try {
+        // The owner-only lookups (business type + profile) do not depend on
+        // the context response, and the employer dashboard already calls
+        // them for every employer session. For an employer session start
+        // them now, in parallel, instead of waiting a whole round trip for
+        // the context first. If they fail, awaiting this same promise below
+        // rethrows exactly as the sequential version did.
+        let ownerLookups = null;
+        if (readSessionContextType() === "EMPLOYER") {
+          ownerLookups = Promise.all([getBusinessType(), getMyBusinessProfile()]);
+          ownerLookups.catch(() => {}); // avoid an unhandled rejection if never awaited
+        }
         const { data: c } = await getRetailContext();
         if (dead) return;
-        setContext(c);
-        setType({ businessType: c.businessType, businessName: c.businessName });
-        setBusiness({ id: c.businessId, name: c.businessName });
+        // Keep the SAME object when nothing changed. The data load below is
+        // keyed on `context`, so swapping in an identical copy of a seeded
+        // context would load the whole workspace twice.
+        setContext((prev) => keepIfSame(prev, c));
+        putCache("retail:context", c);
+        const basicType = { businessType: c.businessType, businessName: c.businessName };
+        const basicBusiness = { id: c.businessId, name: c.businessName };
+        if (!hasCached("retail:type")) setType(basicType);
+        if (!hasCached("retail:business")) setBusiness(basicBusiness);
         if (c.owner) {
-          const [t, b] = await Promise.all([
-            getBusinessType(),
-            getMyBusinessProfile(),
-          ]);
+          const [t, b] = await (ownerLookups ||
+            Promise.all([getBusinessType(), getMyBusinessProfile()]));
           if (!dead) {
-            setType(t.data);
-            setBusiness(b.data);
-            setBusinessCurrency(
-              b.data?.currency || c.businessCurrency || "NGN",
-            );
+            const currency = b.data?.currency || c.businessCurrency || "NGN";
+            setType((prev) => keepIfSame(prev, t.data));
+            setBusiness((prev) => keepIfSame(prev, b.data));
+            setBusinessCurrency(currency);
+            putCache("retail:type", t.data);
+            putCache("retail:business", b.data);
+            putCache("retail:currency", currency);
           }
+        } else {
+          putCache("retail:type", basicType);
+          putCache("retail:business", basicBusiness);
         }
       } catch (e) {
+        // Access lost (or the request failed): drop everything cached for
+        // this workspace so a stale copy can never be shown again.
+        invalidateCache("retail:");
         if (!dead)
           setContext({
             denied: true,
@@ -298,8 +363,11 @@ export default function RetailWorkspace() {
     };
   }, []);
   useEffect(() => {
-    if (context?.owner || context?.canWorkspace)
-      load(); /* permission-aware load */ // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!context) return;
+    if (context.owner || context.canWorkspace)
+      load(); /* permission-aware load; releases the loader when it finishes */
+    else setDataReady(true); // denied / no workspace access: nothing to load
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [context]);
   useEffect(() => {
     if (!allowed.has(tab)) setTab("Dashboard");
@@ -347,7 +415,7 @@ export default function RetailWorkspace() {
       ),
     );
   const runLoad = () => load();
-  if (loading)
+  if (loading || (context && !dataReady))
     return (
       <div className={s.loading}>
         <div className={s.spinner} />

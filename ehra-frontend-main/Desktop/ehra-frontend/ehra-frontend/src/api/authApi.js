@@ -1,6 +1,6 @@
 import axios from "axios";
 import { clearApiCache } from "../pwa/clearApiCache";
-import { clearViewCache } from "../utils/viewCache";
+import { clearViewCache, markMutated, peekCache, putCache } from "../utils/viewCache";
 
 // In dev, "/api" is handled by the Vite proxy (see vite.config.js), which
 // forwards to http://localhost:8080. In a production deploy (e.g. Render),
@@ -262,7 +262,15 @@ function isPublicAuthEndpoint(url) {
 }
 
 API.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Any successful write means cached screen data may now be out of date:
+    // screens must re-fetch rather than skip (see utils/viewCache.js).
+    const method = String(response?.config?.method || "get").toLowerCase();
+    if (method !== "get" && method !== "head" && method !== "options") {
+      markMutated();
+    }
+    return response;
+  },
   async (error) => {
     const original = error.config;
 
@@ -446,6 +454,19 @@ export const login = async (identifier, password) => {
 export const switchContext = async (type, membershipId) => {
   const { data } = await API.post("/auth/context", { type, membershipId });
   saveSession(data);
+  // The cached "my accounts" list (utils/viewCache.js) marks one entry
+  // active. Move that marker now so the account screens never flash the
+  // previous workspace as current while they re-fetch.
+  const cachedAccounts = peekCache("identity:accounts");
+  if (Array.isArray(cachedAccounts)) {
+    putCache(
+      "identity:accounts",
+      cachedAccounts.map((a) => ({
+        ...a,
+        active: a.type === type && (a.membershipId ?? null) === (membershipId ?? null),
+      })),
+    );
+  }
   return data;
 };
 

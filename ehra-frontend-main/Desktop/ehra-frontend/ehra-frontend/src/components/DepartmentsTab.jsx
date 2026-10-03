@@ -6,10 +6,9 @@ import {
   assignEmployeeDepartment,
   deleteDepartment,
 } from "../api/departmentApi";
-import { getAccessToken } from "../api/authApi";
 import styles from "./DepartmentsTab.module.css";
 import useCacheWrite from "../hooks/useCacheWrite";
-import { hasCached, seedFromCache } from "../utils/viewCache";
+import { canSkipFetch, hasCached, seedFromCache } from "../utils/viewCache";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -609,63 +608,19 @@ export default function DepartmentsTab() {
   }, []);
 
   useEffect(() => {
+    // Same structural data was fetched seconds ago and nothing has been
+    // changed since (see canSkipFetch): no need to ask the server again.
+    if (canSkipFetch(["departments:list", "employees:directory:active"])) return;
     fetchAll();
   }, [fetchAll]);
 
-  // ── Real-time SSE ─────────────────────────────────────────────────────────
+  // (Removed: a per-section EventSource to /api/notifications/stream
+  // listening for "department_update" / "employee_update". The backend has
+  // no such endpoint and never emits those events, so it only produced a
+  // failed request each time this section opened. If those events are added
+  // server-side, subscribe through the shared stream in
+  // services/notificationStream.js rather than opening one per section.)
 
-  useEffect(() => {
-    const token = getAccessToken();
-    if (!token) return;
-
-    const url = `/api/notifications/stream?token=${encodeURIComponent(token)}`;
-    const es = new EventSource(url);
-
-    const handleDeptUpdate = (e) => {
-      try {
-        const payload = JSON.parse(e.data);
-        if (payload.type === "CREATED") {
-          setDepartments((prev) => [...prev, payload.department]);
-          setPulseId(payload.department?.id);
-          setTimeout(() => setPulseId(null), 2000);
-        } else if (payload.type === "UPDATED") {
-          setDepartments((prev) =>
-            prev.map((d) =>
-              d.id === payload.department?.id ? payload.department : d,
-            ),
-          );
-          setPulseId(payload.department?.id);
-          setTimeout(() => setPulseId(null), 2000);
-        } else if (payload.type === "DELETED") {
-          setDepartments((prev) =>
-            prev.filter((d) => d.id !== payload.departmentId),
-          );
-        }
-      } catch {
-        /* ignore */
-      }
-    };
-
-    const handleEmployeeUpdate = (e) => {
-      try {
-        const payload = JSON.parse(e.data);
-        setEmployees((prev) =>
-          prev.map((emp) =>
-            emp.id === payload.id ? { ...emp, ...payload } : emp,
-          ),
-        );
-      } catch {
-        /* ignore */
-      }
-    };
-
-    es.addEventListener("department_update", handleDeptUpdate);
-    es.addEventListener("employee_update", handleEmployeeUpdate);
-    es.onerror = () =>
-      console.debug("[SSE] DepartmentsTab stream error, reconnecting…");
-
-    return () => es.close();
-  }, []);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 

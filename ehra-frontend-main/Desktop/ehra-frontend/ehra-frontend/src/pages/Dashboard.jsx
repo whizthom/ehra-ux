@@ -66,7 +66,7 @@ import {
 import { getMyProfile } from "../api/employeeApi";
 import { getCreditsDashboard } from "../api/creditsApi";
 import useVisibleInterval from "../hooks/useVisibleInterval";
-import { putCache, hasCached, seedFromCache } from "../utils/viewCache";
+import { putCache, hasCached, seedFromCache, canSkipFetch } from "../utils/viewCache";
 import useCacheWrite from "../hooks/useCacheWrite";
 
 // ── Sidebar nav ────────────────────────────────────────────────────────────
@@ -778,10 +778,13 @@ export default function Dashboard() {
     fetchSummary();
     fetchNotifs();
     fetchMessagesUnread();
-    fetchDirectory();
+    // Structural lists: skip when fetched seconds ago and nothing has been
+    // changed since (see canSkipFetch). Live data (summary, attendance,
+    // approvals, notifications) is always re-fetched.
+    if (!canSkipFetch(["dashboard:employees:raw"])) fetchDirectory();
     fetchPending();
-    fetchDepartments();
-    fetchBranches();
+    if (!canSkipFetch(["departments:list"])) fetchDepartments();
+    if (!canSkipFetch(["branches:list"])) fetchBranches();
     fetchPendingLeaves();
     fetchLatestAttendance();
     fetchProfileEdits();

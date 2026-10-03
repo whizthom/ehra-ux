@@ -7,37 +7,72 @@ import {
 } from "../api/attendanceSettingsApi";
 import { getMyBusinessProfile } from "../api/businessApi";
 import styles from "./AttendanceSettingsPanel.module.css";
+import { canSkipFetch, peekCache, putCache } from "../utils/viewCache";
 
 const RADIUS_OPTIONS = [30, 50, 100, 200];
 
+const SETTINGS_CACHE_KEY = "attendance:settings:business";
+
+// Maps the settings response onto the panel's fields (used for both the
+// cached first paint and, field by field, the live load below).
+function settingsToState(settings, biz) {
+  return {
+    method: settings.attendanceMethod || "DYNAMIC_QR",
+    zoneEnabled: !!settings.attendanceZoneEnabled,
+    lat: settings.attendanceLatitude ?? null,
+    lng: settings.attendanceLongitude ?? null,
+    radius: settings.attendanceRadiusMeters || 50,
+    offlineEnabled: settings.offlineAttendanceEnabled ?? true,
+    offlineAllowClockIn: settings.offlineAllowClockIn ?? true,
+    offlineAllowClockOut: settings.offlineAllowClockOut ?? true,
+    business: biz,
+  };
+}
+
 export default function AttendanceSettingsPanel() {
-  const [loading, setLoading] = useState(true);
+  // Paint from the in-memory view cache when we have a copy of these
+  // settings that nothing has been saved since (utils/viewCache.js).
+  // Never for a Static-QR setup: that token must always come from the
+  // server, so a regenerated code can't be shown stale. load() below still
+  // runs on every mount; Save stays disabled until it has finished.
+  const [seed] = useState(() => {
+    if (!canSkipFetch([SETTINGS_CACHE_KEY], Infinity)) return null;
+    const hit = peekCache(SETTINGS_CACHE_KEY);
+    return hit && hit.settings?.attendanceMethod !== "STATIC_QR" ? hit : null;
+  });
+  const init = seed ? settingsToState(seed.settings, seed.biz) : null;
+  const seededRef = useRef(init !== null);
+  const [loading, setLoading] = useState(init === null);
+  const [revalidating, setRevalidating] = useState(init !== null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState(null); // { type: "ok"|"error", text }
 
   // Working copy of settings - only written back to the server on Save,
   // so switching cards/toggles around never partially-saves anything.
-  const [method, setMethod] = useState("DYNAMIC_QR");
+  const [method, setMethod] = useState(init ? init.method : "DYNAMIC_QR");
   const [staticToken, setStaticToken] = useState(null);
-  const [zoneEnabled, setZoneEnabled] = useState(false);
-  const [lat, setLat] = useState(null);
-  const [lng, setLng] = useState(null);
-  const [radius, setRadius] = useState(50);
+  const [zoneEnabled, setZoneEnabled] = useState(init ? init.zoneEnabled : false);
+  const [lat, setLat] = useState(init ? init.lat : null);
+  const [lng, setLng] = useState(init ? init.lng : null);
+  const [radius, setRadius] = useState(init ? init.radius : 50);
   const [locating, setLocating] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
-  const [business, setBusiness] = useState(null);
+  const [business, setBusiness] = useState(init ? init.business : null);
 
   // ── Offline attendance policy (spec §33) ──────────────────────────────
-  const [offlineEnabled, setOfflineEnabled] = useState(true);
-  const [offlineAllowClockIn, setOfflineAllowClockIn] = useState(true);
-  const [offlineAllowClockOut, setOfflineAllowClockOut] = useState(true);
+  const [offlineEnabled, setOfflineEnabled] = useState(init ? init.offlineEnabled : true);
+  const [offlineAllowClockIn, setOfflineAllowClockIn] = useState(init ? init.offlineAllowClockIn : true);
+  const [offlineAllowClockOut, setOfflineAllowClockOut] = useState(init ? init.offlineAllowClockOut : true);
 
   const staticCanvasRef = useRef(null);
 
   const load = useCallback(async () => {
     try {
-      setLoading(true);
+      // Blocking spinner unless we are already showing a cached copy (first
+      // load after mount only; later loads, e.g. after saving, behave as before).
+      if (!seededRef.current) setLoading(true);
+      seededRef.current = false;
       setError("");
       const [{ data: settings }, { data: biz }] = await Promise.all([
         getAttendanceSettings(),
@@ -53,11 +88,14 @@ export default function AttendanceSettingsPanel() {
       setOfflineAllowClockIn(settings.offlineAllowClockIn ?? true);
       setOfflineAllowClockOut(settings.offlineAllowClockOut ?? true);
       setBusiness(biz);
+      // Cached WITHOUT the static QR token (see the seed above).
+      putCache(SETTINGS_CACHE_KEY, { settings: { ...settings, staticQrToken: null }, biz });
     } catch (err) {
       console.error("Failed to load attendance settings:", err);
       setError("Couldn't load attendance settings. Please try again.");
     } finally {
       setLoading(false);
+      setRevalidating(false);
     }
   }, []);
 
@@ -574,7 +612,7 @@ export default function AttendanceSettingsPanel() {
           type="button"
           className={styles.saveBtn}
           onClick={handleSave}
-          disabled={saving || regenerating}
+          disabled={saving || regenerating || revalidating}
         >
           {saving ? "Saving…" : "Save changes"}
         </button>

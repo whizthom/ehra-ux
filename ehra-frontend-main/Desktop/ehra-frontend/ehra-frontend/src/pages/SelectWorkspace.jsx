@@ -5,6 +5,8 @@ import { getMyAccounts } from "../api/authApi";
 import { logout as apiLogout } from "../api/authApi";
 import styles from "./SelectWorkspace.module.css";
 import Logo from "../components/Logo";
+import useCacheWrite from "../hooks/useCacheWrite";
+import { hasCached, seedFromCache } from "../utils/viewCache";
 
 function initials(name) {
   return (
@@ -52,8 +54,12 @@ export default function SelectWorkspace() {
   const { switchContext } = useAuth();
   const navigate = useNavigate();
 
-  const [accounts, setAccounts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Seeded from the in-memory view cache so this page paints instantly;
+  // getMyAccounts() below still runs on every visit and replaces it
+  // (see utils/viewCache.js).
+  const [accounts, setAccounts] = useState(() => seedFromCache("identity:accounts", []));
+  useCacheWrite("identity:accounts", accounts);
+  const [loading, setLoading] = useState(() => !hasCached("identity:accounts"));
   const [error, setError] = useState("");
   const [switching, setSwitching] = useState(null);
 

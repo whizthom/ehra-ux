@@ -12,7 +12,7 @@ import BranchDetail from "./BranchDetail";
 import BusinessBranchDashboard from "./BusinessBranchDashboard";
 import styles from "./BranchesTab.module.css";
 import useCacheWrite from "../hooks/useCacheWrite";
-import { hasCached, seedFromCache } from "../utils/viewCache";
+import { canSkipFetch, hasCached, seedFromCache } from "../utils/viewCache";
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -711,6 +711,9 @@ export default function BranchesTab() {
   }, [toast]);
 
   useEffect(() => {
+    // Same structural data was fetched seconds ago and nothing has been
+    // changed since (see canSkipFetch): no need to ask the server again.
+    if (canSkipFetch(["branches:list", "employees:directory:active"])) return;
     fetchAll();
   }, [fetchAll]);
 

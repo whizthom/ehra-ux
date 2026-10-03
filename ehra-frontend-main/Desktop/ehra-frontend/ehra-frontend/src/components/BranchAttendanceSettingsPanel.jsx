@@ -1,10 +1,11 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import {
   getBranchAttendanceSettings,
   updateBranchAttendanceSettings,
 } from "../api/branchApi";
 import CustomSelect from "./CustomSelect";
 import styles from "./BranchAttendanceSettingsPanel.module.css";
+import { canSkipFetch, peekCache, putCache } from "../utils/viewCache";
 
 const RADIUS_OPTIONS = [30, 50, 100, 200];
 
@@ -12,6 +13,25 @@ const MODE_OPTIONS = [
   { value: "inherit", label: "Inherit business default", icon: "ti-link" },
   { value: "custom", label: "Custom for this branch", icon: "ti-map-pin" },
 ];
+
+// Maps the branch-settings response onto the panel's fields (used for both
+// the cached first paint and the live load).
+function branchSettingsToState(data) {
+  const hasOverride = data.zoneEnabled !== null && data.zoneEnabled !== undefined;
+  return {
+    mode: hasOverride ? "custom" : "inherit",
+    customEnabled: hasOverride ? data.zoneEnabled : true,
+    lat: data.latitude ?? null,
+    lng: data.longitude ?? null,
+    radius: data.radiusMeters || 50,
+    businessDefaults: {
+      enabled: data.businessZoneEnabled,
+      lat: data.businessLatitude,
+      lng: data.businessLongitude,
+      radius: data.businessRadiusMeters,
+    },
+  };
+}
 
 /**
  * Branch-level attendance-zone override - mirrors the business-wide
@@ -25,41 +45,51 @@ const MODE_OPTIONS = [
  * admin setting a branch override can see what they're diverging from.
  */
 export default function BranchAttendanceSettingsPanel({ branchId }) {
-  const [loading, setLoading] = useState(true);
+  // Paint from the in-memory view cache when we have a copy of this
+  // branch's settings that nothing has been saved since
+  // (utils/viewCache.js). load() below still runs on every mount and Save
+  // stays disabled until it has finished.
+  const cacheKey = `attendance:branch-settings:${branchId}`;
+  const [seed] = useState(() =>
+    canSkipFetch([cacheKey], Infinity) ? peekCache(cacheKey) ?? null : null,
+  );
+  const init = seed ? branchSettingsToState(seed) : null;
+  const seededRef = useRef(init !== null);
+  const [loading, setLoading] = useState(init === null);
+  const [revalidating, setRevalidating] = useState(init !== null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState(null);
 
-  const [mode, setMode] = useState("inherit"); // "inherit" | "custom"
-  const [customEnabled, setCustomEnabled] = useState(true);
-  const [lat, setLat] = useState(null);
-  const [lng, setLng] = useState(null);
-  const [radius, setRadius] = useState(50);
+  const [mode, setMode] = useState(init ? init.mode : "inherit"); // "inherit" | "custom"
+  const [customEnabled, setCustomEnabled] = useState(init ? init.customEnabled : true);
+  const [lat, setLat] = useState(init ? init.lat : null);
+  const [lng, setLng] = useState(init ? init.lng : null);
+  const [radius, setRadius] = useState(init ? init.radius : 50);
   const [locating, setLocating] = useState(false);
-  const [businessDefaults, setBusinessDefaults] = useState(null);
+  const [businessDefaults, setBusinessDefaults] = useState(init ? init.businessDefaults : null);
 
   const load = useCallback(async () => {
     try {
-      setLoading(true);
+      // Blocking spinner unless we are already showing a cached copy (first
+      // load after mount only; later loads, e.g. after saving, behave as before).
+      if (!seededRef.current) setLoading(true);
+      seededRef.current = false;
       setError("");
       const { data } = await getBranchAttendanceSettings(branchId);
-      const hasOverride =
-        data.zoneEnabled !== null && data.zoneEnabled !== undefined;
-      setMode(hasOverride ? "custom" : "inherit");
-      setCustomEnabled(hasOverride ? data.zoneEnabled : true);
-      setLat(data.latitude ?? null);
-      setLng(data.longitude ?? null);
-      setRadius(data.radiusMeters || 50);
-      setBusinessDefaults({
-        enabled: data.businessZoneEnabled,
-        lat: data.businessLatitude,
-        lng: data.businessLongitude,
-        radius: data.businessRadiusMeters,
-      });
+      const s = branchSettingsToState(data);
+      setMode(s.mode);
+      setCustomEnabled(s.customEnabled);
+      setLat(s.lat);
+      setLng(s.lng);
+      setRadius(s.radius);
+      setBusinessDefaults(s.businessDefaults);
+      putCache(`attendance:branch-settings:${branchId}`, data);
     } catch {
       setError("Couldn't load this branch's attendance settings.");
     } finally {
       setLoading(false);
+      setRevalidating(false);
     }
   }, [branchId]);
 
@@ -254,7 +284,7 @@ export default function BranchAttendanceSettingsPanel({ branchId }) {
         type="button"
         className={styles.saveBtn}
         onClick={handleSave}
-        disabled={saving}
+        disabled={saving || revalidating}
       >
         {saving ? "Saving…" : "Save settings"}
       </button>

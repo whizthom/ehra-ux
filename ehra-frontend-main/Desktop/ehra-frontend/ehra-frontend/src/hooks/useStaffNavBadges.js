@@ -33,30 +33,47 @@ const safely = async (fn) => {
 const unreadNotifications = (data) =>
   Array.isArray(data) ? data.filter((n) => n?.type !== "ADMIN_MESSAGE" && !n?.isRead).length : 0;
 
+// Unread-notification badge. Asks the server for just the number
+// (/badge-count applies the same filtering as the list: same feed, admin-only
+// ADMIN_MESSAGE excluded, only unread counted) instead of downloading the
+// whole notification list on every tab focus only to count it. If the
+// endpoint is not there (older backend) or the request fails, fall back to
+// the original download-and-count so the badge still works.
+async function notificationBadge(role) {
+  const countPath = role === "employer" ? "/notifications/badge-count" : "/notifications/me/badge-count";
+  const listPath = role === "employer" ? "/notifications" : "/notifications/me";
+  const fast = await safely(() => API.get(countPath));
+  if (fast && typeof fast.data === "number" && Number.isFinite(fast.data)) {
+    return fast.data;
+  }
+  const list = await safely(() => API.get(listPath));
+  return unreadNotifications(list?.data);
+}
+
 async function loadBadges(role) {
   const messages = safely(() => getMessagingUnreadCount());
   if (role === "employer") {
     const [msg, notifs, leaves, edits] = await Promise.all([
       messages,
-      safely(() => API.get("/notifications")),
+      notificationBadge(role),
       safely(() => getPendingEmployerDecisions()),
       safely(() => getPendingProfileEdits()),
     ]);
     return {
       Messages: Number(msg?.data?.count) || 0,
-      Notifications: unreadNotifications(notifs?.data),
+      Notifications: notifs,
       Leave: Array.isArray(leaves?.data) ? leaves.data.length : 0,
       "Profile Edits": Array.isArray(edits?.data) ? edits.data.length : 0,
     };
   }
   const [msg, notifs, cover] = await Promise.all([
     messages,
-    safely(() => API.get("/notifications/me")),
+    notificationBadge(role),
     safely(() => getMyCoverRequests()),
   ]);
   return {
     Messages: Number(msg?.data?.count) || 0,
-    Notifications: unreadNotifications(notifs?.data),
+    Notifications: notifs,
     "Cover Requests": Array.isArray(cover?.data)
       ? cover.data.filter((l) => l?.status === "PENDING_COVER").length
       : 0,
